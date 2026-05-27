@@ -6,6 +6,12 @@ export function resolveConsequenceTool(params: RawConsequenceInput): ToolResult 
   const result = resolveConsequence(assertConsequenceInput(params));
   const text = [
     "后果已结算：",
+    ...result.effects.map(
+      (effect) =>
+        `- ${effect.reason}: ${String(effect.before)} → ${String(effect.after)}${formatDelta(effect.delta)}｜${effect.narrativeHint}`,
+    ),
+    "",
+    "状态摘要：",
     `⏱️ 时间: ${result.before.当前时间} → ${result.after.当前时间}（+${result.delta.经过分钟} 分钟）`,
     `💪 身体: ${formatChange(result.before.身体状态, result.after.身体状态)}`,
     `💤 疲劳: ${formatChange(result.before.疲劳, result.after.疲劳)}`,
@@ -26,6 +32,13 @@ export function resolveConsequenceTool(params: RawConsequenceInput): ToolResult 
 
 function formatChange(before: number, after: number): string {
   const delta = after - before;
+  return `${before} → ${after}${formatDelta(delta)}`;
+}
+
+function formatDelta(delta: number | undefined): string {
+  if (delta === undefined) {
+    return "";
+  }
   const sign = delta >= 0 ? "+" : "";
-  return `${before} → ${after} (${sign}${delta})`;
+  return ` (${sign}${delta})`;
 }

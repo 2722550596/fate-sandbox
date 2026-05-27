@@ -1,3 +1,15 @@
+import {
+  adjustBody,
+  adjustEnemyAlert,
+  adjustFatigue,
+  adjustManaStrain,
+  adjustMysteryExposure,
+  adjustSocialExposure,
+  advanceTime,
+  pressureThresholdHints,
+  setDangerLevel,
+  type StatEffect,
+} from "./pressure";
 import { cloneState, patchState, type PatchOp, type State } from "./state";
 
 export type ConsequenceAction =
@@ -45,26 +57,44 @@ export interface ConsequenceResult {
   before: State;
   after: State;
   delta: ConsequenceDelta;
+  effects: StatEffect[];
   narrativeConstraints: string[];
 }
 
-const MAX_PERCENT = 100;
-const MIN_PERCENT = 0;
-const MAX_DANGER_LEVEL = 5;
-const MIN_DANGER_LEVEL = 0;
+interface RiskProfile {
+  fatigue: number;
+  manaStrain: number;
+  danger: number;
+  mysteryExposure: number;
+  socialExposure: number;
+  enemyAlert: number;
+}
+
+interface ActionProfile {
+  fatigue: number;
+  manaStrain: number;
+  danger: number;
+  mysteryExposure: number;
+  socialExposure: number;
+  enemyAlert: number;
+}
+
 const MAX_ACTION_MINUTES = 1440;
 
 export function resolveConsequence(input: ConsequenceInput): ConsequenceResult {
   const before = cloneState();
-  const delta = calculateDelta(input);
-  const after = applyConsequenceDelta(before, delta);
+  const after = cloneState();
+  const effects = isRecoveryAction(input.行动类型)
+    ? applyRecovery(after, input)
+    : applyPressure(after, input);
   patchState(toPatchOps(after));
 
   return {
     before,
     after,
     delta: calculateActualDelta(before, after),
-    narrativeConstraints: buildNarrativeConstraints(input, before, after),
+    effects,
+    narrativeConstraints: buildNarrativeConstraints(input, before, after, effects),
   };
 }
 
@@ -78,105 +108,180 @@ export function assertConsequenceInput(raw: RawConsequenceInput): ConsequenceInp
   };
 }
 
-function calculateDelta(input: ConsequenceInput): ConsequenceDelta {
-  if (isRecoveryAction(input.行动类型)) {
-    return recoveryDelta(input);
-  }
+function applyPressure(state: State, input: ConsequenceInput): StatEffect[] {
+  const action = actionProfile(assertPressureAction(input.行动类型));
+  const risk = riskProfile(input.风险等级);
+  const durationFatigue = Math.floor(input.预计耗时分钟 / 60);
+  const durationAlert = Math.floor(input.预计耗时分钟 / 120);
+  const publicExposure = input.是否公开 ? 6 : 0;
+  const mysteryExposure = input.是否涉及神秘 ? 12 : 0;
+  const mysteryAlert = input.是否涉及神秘 ? 4 : 0;
 
-  const base = baseDelta(input.行动类型);
-  const risk = riskDelta(input.风险等级);
-  const publicDelta = input.是否公开 ? 8 : 0;
-  const mysteryDelta = input.是否涉及神秘 ? 16 : 0;
-  const durationFatigue = Math.floor(input.预计耗时分钟 / 45);
-  const durationAlert = Math.floor(input.预计耗时分钟 / 90);
-
-  return {
-    经过分钟: input.预计耗时分钟,
-    身体状态: 0,
-    疲劳: base.疲劳 + risk.疲劳 + durationFatigue,
-    魔力负担: base.魔力负担 + (input.是否涉及神秘 ? risk.魔力负担 : 0),
-    危险度: Math.max(base.危险度, risk.危险度),
-    神秘暴露: base.神秘暴露 + mysteryDelta + (input.是否涉及神秘 ? risk.神秘暴露 : 0),
-    社会暴露: base.社会暴露 + publicDelta + (input.是否公开 ? risk.社会暴露 : 0),
-    敌方警觉: base.敌方警觉 + risk.敌方警觉 + durationAlert + (input.是否涉及神秘 ? 6 : 0),
-  };
+  return compactEffects([
+    advanceTime(state, input.预计耗时分钟, "行动耗时"),
+    adjustFatigue(state, action.fatigue + risk.fatigue + durationFatigue, "行动负荷"),
+    adjustManaStrain(
+      state,
+      action.manaStrain + (input.是否涉及神秘 ? risk.manaStrain : 0),
+      "魔力/神秘负担",
+    ),
+    setDangerLevel(state, Math.max(action.danger, risk.danger), "当前场景危险度"),
+    adjustMysteryExposure(
+      state,
+      action.mysteryExposure + mysteryExposure + (input.是否涉及神秘 ? risk.mysteryExposure : 0),
+      "神秘痕迹",
+    ),
+    adjustSocialExposure(
+      state,
+      action.socialExposure + publicExposure + (input.是否公开 ? risk.socialExposure : 0),
+      "普通社会痕迹",
+    ),
+    adjustEnemyAlert(
+      state,
+      action.enemyAlert + risk.enemyAlert + durationAlert + mysteryAlert,
+      "敌方注意推进",
+    ),
+  ]);
 }
 
-function recoveryDelta(input: ConsequenceInput): ConsequenceDelta {
-  const risk = riskDelta(input.风险等级);
+function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
+  const risk = riskProfile(input.风险等级);
   const hours = Math.floor(input.预计耗时分钟 / 60);
-  const alertFromTime = Math.floor(input.预计耗时分钟 / 120);
-  const unsafeAlert = Math.ceil(risk.敌方警觉 / 2);
+  const timeAlert = Math.floor(input.预计耗时分钟 / 150);
+  const unsafeAlert = Math.ceil(risk.enemyAlert / 3);
 
   switch (input.行动类型) {
     case "休息":
-      return createDelta({
-        经过分钟: input.预计耗时分钟,
-        身体状态: input.预计耗时分钟 >= 360 ? 4 : input.预计耗时分钟 >= 90 ? 1 : 0,
-        疲劳: -Math.min(35, 8 + Math.floor(input.预计耗时分钟 / 30) * 4),
-        魔力负担: -Math.min(18, 4 + hours * 3),
-        危险度: risk.危险度,
-        敌方警觉: 2 + alertFromTime + unsafeAlert,
-      });
+      return compactEffects([
+        advanceTime(state, input.预计耗时分钟, "休息耗时"),
+        adjustBody(
+          state,
+          input.预计耗时分钟 >= 360 ? 4 : input.预计耗时分钟 >= 90 ? 1 : 0,
+          "自然恢复",
+        ),
+        adjustFatigue(
+          state,
+          -Math.min(30, 6 + Math.floor(input.预计耗时分钟 / 45) * 4),
+          "休息恢复疲劳",
+        ),
+        adjustManaStrain(state, -Math.min(16, 3 + hours * 2), "呼吸与回路稳定"),
+        setDangerLevel(state, risk.danger, "休息地点安全度"),
+        adjustEnemyAlert(state, 2 + timeAlert + unsafeAlert, "休息期间敌方仍在行动"),
+      ]);
     case "医疗":
-      return createDelta({
-        经过分钟: input.预计耗时分钟,
-        身体状态: Math.min(28, 6 + hours * 4),
-        疲劳: -Math.min(18, 4 + hours * 2),
-        危险度: risk.危险度,
-        社会暴露: 8 + (input.是否公开 ? 12 : 3) + risk.社会暴露,
-        敌方警觉: 3 + alertFromTime + unsafeAlert,
-      });
+      return compactEffects([
+        advanceTime(state, input.预计耗时分钟, "医疗耗时"),
+        adjustBody(state, Math.min(24, 6 + hours * 3), "医疗处理伤势"),
+        adjustFatigue(state, -Math.min(14, 3 + hours * 2), "医疗休整"),
+        setDangerLevel(state, risk.danger, "医疗环境安全度"),
+        adjustSocialExposure(
+          state,
+          8 + (input.是否公开 ? 10 : 3) + risk.socialExposure,
+          "医疗记录/目击风险",
+        ),
+        adjustEnemyAlert(state, 3 + timeAlert + unsafeAlert, "治疗期间敌方推进"),
+      ]);
     case "魔术治疗":
-      return createDelta({
-        经过分钟: input.预计耗时分钟,
-        身体状态: Math.min(24, 5 + hours * 4),
-        疲劳: -Math.min(12, 3 + hours),
-        魔力负担: 12 + risk.魔力负担,
-        危险度: Math.max(2, risk.危险度),
-        神秘暴露: 14 + risk.神秘暴露 + (input.是否公开 ? 6 : 0),
-        敌方警觉: 6 + alertFromTime + unsafeAlert,
-      });
+      return compactEffects([
+        advanceTime(state, input.预计耗时分钟, "魔术治疗耗时"),
+        adjustBody(state, Math.min(22, 5 + hours * 3), "魔术治疗伤势"),
+        adjustFatigue(state, -Math.min(10, 2 + hours), "短暂缓解身体负担"),
+        adjustManaStrain(state, 10 + risk.manaStrain, "治疗术式反噬/供魔压力"),
+        setDangerLevel(state, Math.max(2, risk.danger), "术式环境风险"),
+        adjustMysteryExposure(
+          state,
+          12 + risk.mysteryExposure + (input.是否公开 ? 5 : 0),
+          "治疗术式痕迹",
+        ),
+        adjustEnemyAlert(state, 5 + timeAlert + unsafeAlert, "神秘波动引发注意"),
+      ]);
     case "安全屋整备":
-      return createDelta({
-        经过分钟: input.预计耗时分钟,
-        身体状态: input.预计耗时分钟 >= 360 ? 6 : 2,
-        疲劳: -Math.min(45, 12 + Math.floor(input.预计耗时分钟 / 30) * 4),
-        魔力负担: -Math.min(30, 8 + hours * 4),
-        危险度: risk.危险度,
-        神秘暴露: -Math.min(8, 2 + hours),
-        社会暴露: -Math.min(8, 2 + hours),
-        敌方警觉: 4 + alertFromTime + unsafeAlert,
-      });
+      return compactEffects([
+        advanceTime(state, input.预计耗时分钟, "安全屋整备耗时"),
+        adjustBody(state, input.预计耗时分钟 >= 360 ? 6 : 2, "安全环境处理伤势"),
+        adjustFatigue(
+          state,
+          -Math.min(40, 10 + Math.floor(input.预计耗时分钟 / 45) * 4),
+          "安全屋休整",
+        ),
+        adjustManaStrain(state, -Math.min(28, 6 + hours * 3), "安全屋稳定魔术回路"),
+        setDangerLevel(state, risk.danger, "安全屋当前风险"),
+        adjustMysteryExposure(state, -Math.min(8, 2 + hours), "遮蔽神秘痕迹"),
+        adjustSocialExposure(state, -Math.min(8, 2 + hours), "处理普通社会痕迹"),
+        adjustEnemyAlert(state, 4 + timeAlert + unsafeAlert, "整备期间敌方推进"),
+      ]);
   }
+
   throw new Error(`未处理的恢复行动类型: ${input.行动类型}`);
 }
 
-function baseDelta(
+function actionProfile(
   action: Exclude<ConsequenceAction, "休息" | "医疗" | "魔术治疗" | "安全屋整备">,
-): ConsequenceDelta {
+): ActionProfile {
   switch (action) {
     case "移动":
-      return createDelta({ 疲劳: 3, 危险度: 1, 社会暴露: 2 });
+      return {
+        fatigue: 3,
+        manaStrain: 0,
+        danger: 1,
+        mysteryExposure: 0,
+        socialExposure: 2,
+        enemyAlert: 1,
+      };
     case "调查":
-      return createDelta({ 疲劳: 5, 危险度: 2, 社会暴露: 4, 敌方警觉: 3 });
+      return {
+        fatigue: 5,
+        manaStrain: 0,
+        danger: 2,
+        mysteryExposure: 0,
+        socialExposure: 4,
+        enemyAlert: 3,
+      };
     case "社交":
-      return createDelta({ 疲劳: 2, 危险度: 1, 社会暴露: 5, 敌方警觉: 2 });
+      return {
+        fatigue: 2,
+        manaStrain: 0,
+        danger: 1,
+        mysteryExposure: 0,
+        socialExposure: 5,
+        enemyAlert: 2,
+      };
     case "潜入":
-      return createDelta({ 疲劳: 8, 危险度: 3, 社会暴露: 6, 敌方警觉: 8 });
+      return {
+        fatigue: 8,
+        manaStrain: 0,
+        danger: 3,
+        mysteryExposure: 0,
+        socialExposure: 5,
+        enemyAlert: 7,
+      };
     case "战斗":
-      return createDelta({
-        疲劳: 15,
-        魔力负担: 8,
-        危险度: 4,
-        神秘暴露: 8,
-        社会暴露: 10,
-        敌方警觉: 18,
-      });
+      return {
+        fatigue: 14,
+        manaStrain: 7,
+        danger: 4,
+        mysteryExposure: 7,
+        socialExposure: 8,
+        enemyAlert: 14,
+      };
     case "魔术":
-      return createDelta({ 疲劳: 6, 魔力负担: 15, 危险度: 3, 神秘暴露: 18, 敌方警觉: 10 });
+      return {
+        fatigue: 5,
+        manaStrain: 13,
+        danger: 3,
+        mysteryExposure: 14,
+        socialExposure: 0,
+        enemyAlert: 8,
+      };
     case "逃跑":
-      return createDelta({ 疲劳: 12, 危险度: 3, 社会暴露: 8, 敌方警觉: 8 });
+      return {
+        fatigue: 11,
+        manaStrain: 0,
+        danger: 3,
+        mysteryExposure: 0,
+        socialExposure: 7,
+        enemyAlert: 7,
+      };
     default: {
       const exhaustive: never = action;
       throw new Error(`未处理的行动类型: ${String(exhaustive)}`);
@@ -184,37 +289,44 @@ function baseDelta(
   }
 }
 
-function riskDelta(risk: ConsequenceRisk): ConsequenceDelta {
+function riskProfile(risk: ConsequenceRisk): RiskProfile {
   switch (risk) {
     case "低":
-      return createDelta({ 疲劳: 1, 危险度: 1, 敌方警觉: 1 });
+      return {
+        fatigue: 1,
+        manaStrain: 0,
+        danger: 1,
+        mysteryExposure: 0,
+        socialExposure: 0,
+        enemyAlert: 1,
+      };
     case "中":
-      return createDelta({
-        疲劳: 3,
-        魔力负担: 2,
-        危险度: 2,
-        神秘暴露: 3,
-        社会暴露: 3,
-        敌方警觉: 5,
-      });
+      return {
+        fatigue: 2,
+        manaStrain: 2,
+        danger: 2,
+        mysteryExposure: 2,
+        socialExposure: 2,
+        enemyAlert: 4,
+      };
     case "高":
-      return createDelta({
-        疲劳: 6,
-        魔力负担: 5,
-        危险度: 4,
-        神秘暴露: 8,
-        社会暴露: 8,
-        敌方警觉: 12,
-      });
+      return {
+        fatigue: 5,
+        manaStrain: 4,
+        danger: 4,
+        mysteryExposure: 6,
+        socialExposure: 6,
+        enemyAlert: 9,
+      };
     case "致命":
-      return createDelta({
-        疲劳: 12,
-        魔力负担: 10,
-        危险度: 5,
-        神秘暴露: 15,
-        社会暴露: 12,
-        敌方警觉: 22,
-      });
+      return {
+        fatigue: 10,
+        manaStrain: 8,
+        danger: 5,
+        mysteryExposure: 12,
+        socialExposure: 10,
+        enemyAlert: 16,
+      };
     default: {
       const exhaustive: never = risk;
       throw new Error(`未处理的风险等级: ${String(exhaustive)}`);
@@ -222,34 +334,8 @@ function riskDelta(risk: ConsequenceRisk): ConsequenceDelta {
   }
 }
 
-function createDelta(overrides: Partial<ConsequenceDelta>): ConsequenceDelta {
-  return {
-    经过分钟: 0,
-    身体状态: 0,
-    疲劳: 0,
-    魔力负担: 0,
-    危险度: 0,
-    神秘暴露: 0,
-    社会暴露: 0,
-    敌方警觉: 0,
-    ...overrides,
-  };
-}
-
-function applyConsequenceDelta(state: State, delta: ConsequenceDelta): State {
-  const elapsedMinutes = state.经过分钟 + delta.经过分钟;
-  return {
-    ...state,
-    当前时间: advanceIsoTime(state.当前时间, delta.经过分钟),
-    经过分钟: elapsedMinutes,
-    身体状态: clampPercent(state.身体状态 + delta.身体状态),
-    疲劳: clampPercent(state.疲劳 + delta.疲劳),
-    魔力负担: clampPercent(state.魔力负担 + delta.魔力负担),
-    危险度: clampDanger(delta.危险度),
-    神秘暴露: clampPercent(state.神秘暴露 + delta.神秘暴露),
-    社会暴露: clampPercent(state.社会暴露 + delta.社会暴露),
-    敌方警觉: clampPercent(state.敌方警觉 + delta.敌方警觉),
-  };
+function compactEffects(effects: StatEffect[]): StatEffect[] {
+  return effects.filter((effect) => effect.before !== effect.after);
 }
 
 function calculateActualDelta(before: State, after: State): ConsequenceDelta {
@@ -279,34 +365,20 @@ function toPatchOps(state: State): PatchOp[] {
   ];
 }
 
-function buildNarrativeConstraints(input: ConsequenceInput, before: State, after: State): string[] {
+function buildNarrativeConstraints(
+  input: ConsequenceInput,
+  before: State,
+  after: State,
+  effects: StatEffect[],
+): string[] {
   const constraints = [
     `必须表现时间流逝：${before.当前时间} → ${after.当前时间}`,
-    "必须描写至少一个具体代价，禁止写成毫无后果。",
+    ...effects.map((effect) => `${effect.reason}: ${effect.narrativeHint}`),
+    ...pressureThresholdHints(after),
   ];
 
-  if (after.身体状态 > before.身体状态) {
-    constraints.push("身体状态有所恢复，但不能写成立刻完全无伤；恢复需要过程和残留不适。");
-  }
   if (after.疲劳 < before.疲劳 || after.魔力负担 < before.魔力负担) {
     constraints.push("恢复降低了压力，但时间已经流逝；NPC 和敌对势力不会因此暂停行动。 ");
-  }
-  if (after.疲劳 > before.疲劳) {
-    constraints.push("必须体现疲劳、迟滞、疼痛或注意力下降。只有休息或治疗才能抹平。");
-  }
-  if (after.魔力负担 > before.魔力负担) {
-    constraints.push("必须体现魔力负担；禁止把魔术/供魔写成免费资源。");
-  }
-  if (after.神秘暴露 > before.神秘暴露) {
-    constraints.push(
-      "必须暗示神秘侧可能留下痕迹；禁止断言绝对没人察觉。触及具体预设势力前先 lookup。 ",
-    );
-  }
-  if (after.社会暴露 > before.社会暴露) {
-    constraints.push("必须体现普通社会层面的目击、记录、传闻或善后压力。 ");
-  }
-  if (after.敌方警觉 > before.敌方警觉) {
-    constraints.push("敌方警觉已上升；NPC/敌对势力会在自己的时间线里行动，不能写成完全安全。 ");
   }
   if (input.行动类型 === "医疗") {
     constraints.push(
@@ -329,20 +401,13 @@ function isRecoveryAction(
   return action === "休息" || action === "医疗" || action === "魔术治疗" || action === "安全屋整备";
 }
 
-function advanceIsoTime(isoTime: string, minutes: number): string {
-  const timestamp = Date.parse(isoTime);
-  if (Number.isNaN(timestamp)) {
-    throw new Error(`无法推进非法时间: ${isoTime}`);
+function assertPressureAction(
+  action: ConsequenceAction,
+): Exclude<ConsequenceAction, "休息" | "医疗" | "魔术治疗" | "安全屋整备"> {
+  if (isRecoveryAction(action)) {
+    throw new Error(`恢复行动不能按压力行动处理: ${action}`);
   }
-  return new Date(timestamp + minutes * 60_000).toISOString();
-}
-
-function clampPercent(value: number): number {
-  return Math.min(MAX_PERCENT, Math.max(MIN_PERCENT, value));
-}
-
-function clampDanger(value: number): number {
-  return Math.min(MAX_DANGER_LEVEL, Math.max(MIN_DANGER_LEVEL, value));
+  return action;
 }
 
 function assertAction(value: unknown): ConsequenceAction {
