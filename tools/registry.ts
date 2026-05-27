@@ -13,9 +13,6 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-import { readFileSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { Type } from "typebox";
 
 import {
@@ -26,8 +23,7 @@ import {
   cloneState,
   type PatchOp,
 } from "../engine/core/state";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { lookupWorldData } from "../engine/world-data/lookup";
 
 // --- Types ---
 
@@ -35,43 +31,6 @@ type ToolResult = {
   content: Array<{ type: "text"; text: string }>;
   details: Record<string, unknown>;
 };
-
-// --- Data caches ---
-
-let _characters: Record<string, unknown> | null = null;
-let _world: Record<string, unknown> | null = null;
-let _timelines: Record<string, unknown> | null = null;
-
-function getCharacters(): Record<string, unknown> {
-  if (!_characters) {
-    // safe: reading our own generated data file
-    const raw = JSON.parse(readFileSync(join(__dirname, "..", "data", "characters.json"), "utf-8"));
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse returns any
-    _characters = raw as Record<string, unknown>;
-  }
-  return _characters;
-}
-
-function getWorld(): Record<string, unknown> {
-  if (!_world) {
-    // safe: reading our own generated data file
-    const raw2 = JSON.parse(readFileSync(join(__dirname, "..", "data", "world.json"), "utf-8"));
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse returns any
-    _world = raw2 as Record<string, unknown>;
-  }
-  return _world;
-}
-
-function getTimelines(): Record<string, unknown> {
-  if (!_timelines) {
-    // safe: reading our own generated data file
-    const raw3 = JSON.parse(readFileSync(join(__dirname, "..", "data", "timelines.json"), "utf-8"));
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse returns any
-    _timelines = raw3 as Record<string, unknown>;
-  }
-  return _timelines;
-}
-
 // --- Tool implementations ---
 
 function toolGetStatus(): ToolResult {
@@ -105,81 +64,8 @@ function toolPatchState(params: { ops: ReadonlyArray<PatchOp> }): ToolResult {
 }
 
 function toolLookup(params: { 查询: string; 类型?: string }): ToolResult {
-  const query = params.查询.trim();
-  const type = params.类型;
-
-  // 1. Characters
-  if (!type || type === "角色" || type === "从者" || type === "人物" || type === "英灵") {
-    const chars = getCharacters();
-    const matches = Object.entries(chars).filter(
-      ([key]) => key.includes(query) || key.toLowerCase().includes(query.toLowerCase()),
-    );
-    if (matches.length > 0) {
-      const results = matches.slice(0, 3).map(([key, val]) => {
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Object.entries from typed cache
-        const v = val as Record<string, unknown>;
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- characters.json schema
-        const content = v["原文"] as string;
-        const preview = content.length > 600 ? content.slice(0, 600) + "…" : content;
-        return `### ${key}\n${preview}`;
-      });
-      const hint =
-        matches.length > 3 ? `\n\n（另有 ${matches.length - 3} 条匹配结果，请缩小查询范围）` : "";
-      return {
-        content: [{ type: "text", text: results.join("\n\n---\n\n") + hint }],
-        details: {},
-      };
-    }
-  }
-
-  // 2. World locations
-  if (!type || type === "地点" || type === "位置") {
-    const world = getWorld();
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- world.json schema
-    const locations = world["地点"] as Record<string, string> | undefined;
-    if (locations) {
-      const matches = Object.entries(locations).filter(([key]) => key.includes(query));
-      if (matches.length > 0) {
-        const results = matches.map(([key, val]) => `### ${key}\n${val}`).join("\n\n");
-        return { content: [{ type: "text", text: results }], details: {} };
-      }
-    }
-  }
-
-  // 3. Core concepts
-  if (!type || type === "设定" || type === "规则" || type === "概念") {
-    const world = getWorld();
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- world.json schema
-    const concepts = world["核心设定"] as Record<string, string> | undefined;
-    if (concepts) {
-      const matches = Object.entries(concepts).filter(([key]) => key.includes(query));
-      if (matches.length > 0) {
-        const results = matches.map(([key, val]) => `### ${key}\n${val}`).join("\n\n");
-        return { content: [{ type: "text", text: results }], details: {} };
-      }
-    }
-  }
-
-  // 4. Timelines
-  if (!type || type === "时间线" || type === "历史") {
-    const timelines = getTimelines();
-    const matches = Object.entries(timelines).filter(([key]) => key.includes(query));
-    if (matches.length > 0) {
-      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- timeline values are strings
-      const results = matches.map(([key, val]) => `### ${key}\n${val as string}`).join("\n\n");
-      return { content: [{ type: "text", text: results }], details: {} };
-    }
-  }
-
-  return {
-    content: [
-      {
-        type: "text",
-        text: `未找到 "${query}" 的相关信息。可用查询类型: 角色/从者/地点/设定/时间线。`,
-      },
-    ],
-    details: {},
-  };
+  const result = lookupWorldData(params);
+  return { content: [{ type: "text", text: result.text }], details: {} };
 }
 
 // --- Debug tools ---
