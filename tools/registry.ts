@@ -7,6 +7,7 @@ import { switchToolsetTool } from "./debug/switch-toolset";
 import { lookupTool } from "./lookup/lookup";
 import { getStatusTool } from "./state/get-status";
 import { patchStateTool } from "./state/patch-state";
+import { resolveCheckTool } from "./state/resolve-check";
 import { resolveConsequenceTool } from "./state/resolve-consequence";
 
 export function registerAllTools(pi: ExtensionAPI): void {
@@ -109,6 +110,71 @@ export function registerAllTools(pi: ExtensionAPI): void {
       是否涉及神秘: Type.Boolean({ description: "是否涉及魔术、从者、宝具、结界、异常现象等神秘" }),
     }),
     execute: async (_toolCallId, params) => resolveConsequenceTool(params),
+  });
+
+  pi.registerTool({
+    label,
+    name: "resolve_check",
+    description:
+      "用 d20 结算不确定行动，并把失败/代价接入压力数值系统。骰子不能覆盖型月硬规则；不成立的行动直接判不成立，不掷骰。\n\n" +
+      "【必须调用的场景】\n" +
+      "- 玩家行动结果不确定，且失败会产生代价\n" +
+      "- 潜入、追踪、逃脱、调查关键线索、说服敌对 NPC、高风险魔术、战斗关键动作\n" +
+      "- 玩家试图用一句话绕过危机，且不是世界规则直接禁止的情况\n" +
+      "- GM 不确定该让玩家成功、代价成功还是失败时\n\n" +
+      "【严禁的行为】\n" +
+      "- 对必然成功或必然失败的事情掷骰\n" +
+      "- 掷骰后无视结果，或把失败写成温柔成功\n" +
+      "- 用骰子覆盖神秘度压制、魔力守恒、宝具真名等硬规则",
+    parameters: Type.Object({
+      判定类型: Type.Union(
+        [
+          Type.Literal("体能"),
+          Type.Literal("隐匿"),
+          Type.Literal("调查"),
+          Type.Literal("社交"),
+          Type.Literal("魔术"),
+          Type.Literal("战斗"),
+        ],
+        { description: "判定领域" },
+      ),
+      难度: Type.Union(
+        [
+          Type.Literal("简单"),
+          Type.Literal("普通"),
+          Type.Literal("困难"),
+          Type.Literal("极难"),
+          Type.Literal("不可能"),
+        ],
+        {
+          description: "目标难度：简单 DC8 / 普通 DC12 / 困难 DC16 / 极难 DC20 / 不可能 DC25",
+        },
+      ),
+      优势: Type.Union([Type.Literal("劣势"), Type.Literal("正常"), Type.Literal("优势")], {
+        description: "优势掷 2 取高，劣势掷 2 取低，正常掷 1d20",
+      }),
+      风险等级: Type.Union(
+        [Type.Literal("低"), Type.Literal("中"), Type.Literal("高"), Type.Literal("致命")],
+        {
+          description: "失败/代价的压力等级",
+        },
+      ),
+      失败后果: Type.Union(
+        [
+          Type.Literal("疲劳"),
+          Type.Literal("受伤"),
+          Type.Literal("魔力负担"),
+          Type.Literal("神秘暴露"),
+          Type.Literal("社会暴露"),
+          Type.Literal("敌方警觉"),
+        ],
+        { description: "失败或代价成功时优先增加的压力项" },
+      ),
+      预计耗时分钟: Type.Union([Type.Integer(), Type.String()], {
+        description: "判定行动耗时，0-720 分钟；可传整数或整数字符串",
+      }),
+    }),
+    execute: async (_toolCallId, params) => resolveCheckTool(params),
   });
 
   pi.registerTool({
