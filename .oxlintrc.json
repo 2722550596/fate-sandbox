@@ -14,7 +14,17 @@
     "no-underscore-dangle": [
       "error",
       {
-        "allow": ["__dirname", "__idol_master_state_store__"]
+        "allow": [
+          "__dirname",
+          "__fsn_state_store__",
+          "_characters",
+          "_world",
+          "_timelines",
+          "_userProfile",
+          "_pi",
+          "_event",
+          "_toolCallId"
+        ]
       }
     ],
     "unicorn/consistent-function-scoping": "error",
