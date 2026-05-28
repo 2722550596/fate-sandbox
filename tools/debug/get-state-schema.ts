@@ -13,12 +13,9 @@ export function getStateSchemaTool(): ToolResult {
       疲劳: "number — 0-100, 行动负荷与注意力下降",
       魔力负担: "number — 0-100, 魔术/供魔/神秘接触成本",
       危险度: "number — 0-5, 当前场景危险等级",
-      神秘暴露: "number — 0-100, 魔术侧痕迹和关注风险",
-      社会暴露: "number — 0-100, 普通社会目击/记录/善后压力",
-      敌方警觉: "number — 0-100, 圣杯战争敌对势力注意程度",
     },
     受保护路径: allowedPatchPaths(),
-    仅允许: "patch_state 只能修改受保护路径；风险/耗时/暴露/疲劳/魔力负担优先用 resolve_consequence 结算",
+    仅允许: "patch_state 只能修改受保护路径；风险/耗时/疲劳/魔力负担优先用 resolve_consequence 结算",
   };
   return textResult(JSON.stringify(schema, null, 2));
 }

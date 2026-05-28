@@ -20,9 +20,6 @@ export interface State {
   疲劳: number;
   魔力负担: number;
   危险度: number;
-  神秘暴露: number;
-  社会暴露: number;
-  敌方警觉: number;
 }
 
 export interface StateMetadata {
@@ -39,10 +36,7 @@ export type StatePatchPath =
   | "/经过分钟"
   | "/疲劳"
   | "/魔力负担"
-  | "/危险度"
-  | "/神秘暴露"
-  | "/社会暴露"
-  | "/敌方警觉";
+  | "/危险度";
 
 export interface PatchOp {
   op: "replace";
@@ -52,7 +46,7 @@ export interface PatchOp {
 
 // --- Constants ---
 
-export const CURRENT_STATE_SCHEMA_VERSION = 2;
+export const CURRENT_STATE_SCHEMA_VERSION = 3;
 
 const SESSION_KEY = "fsn-state";
 const DEBUG_STATE_PATH = join("state", "state.json");
@@ -75,9 +69,6 @@ const ALLOWED_PATCH_PATHS: readonly StatePatchPath[] = [
   "/疲劳",
   "/魔力负担",
   "/危险度",
-  "/神秘暴露",
-  "/社会暴露",
-  "/敌方警觉",
 ];
 
 // --- Global store (jiti/tsx multi-instance safe) ---
@@ -179,9 +170,6 @@ function createInitialState(): State {
     疲劳: 0,
     魔力负担: 0,
     危险度: 1,
-    神秘暴露: 0,
-    社会暴露: 0,
-    敌方警觉: 0,
   };
 }
 
@@ -212,15 +200,6 @@ function applyValidatedPatchOp(state: State, op: PatchOp): void {
       break;
     case "/危险度":
       state.危险度 = assertDangerLevel(op.value);
-      break;
-    case "/神秘暴露":
-      state.神秘暴露 = assertPercent(op.value, "神秘暴露");
-      break;
-    case "/社会暴露":
-      state.社会暴露 = assertPercent(op.value, "社会暴露");
-      break;
-    case "/敌方警觉":
-      state.敌方警觉 = assertPercent(op.value, "敌方警觉");
       break;
     default:
       throw new Error(`禁止的路径: "${op.path}"。仅允许修改: ${ALLOWED_PATCH_PATHS.join(", ")}`);
@@ -267,48 +246,72 @@ function assertNonNegativeInteger(value: unknown, fieldName: string): number {
 function assertPercent(value: unknown, fieldName: string): number {
   const percent = coerceInteger(value, fieldName);
   if (percent < MIN_PERCENT || percent > MAX_PERCENT) {
-    throw new Error(
-      `非法${fieldName}值: ${percent}。${fieldName}必须在 ${MIN_PERCENT}-${MAX_PERCENT} 之间。`,
-    );
+    throw new Error(`非法${fieldName}值: ${percent}。${fieldName}必须在 0-100 之间。`);
   }
   return percent;
 }
 
 function assertDangerLevel(value: unknown): number {
-  const dangerLevel = coerceInteger(value, "危险度");
-  if (dangerLevel < MIN_DANGER_LEVEL || dangerLevel > MAX_DANGER_LEVEL) {
+  const level = coerceInteger(value, "危险度");
+  if (level < MIN_DANGER_LEVEL || level > MAX_DANGER_LEVEL) {
     throw new Error(
-      `非法危险度值: ${dangerLevel}。危险度必须在 ${MIN_DANGER_LEVEL}-${MAX_DANGER_LEVEL} 之间。`,
+      `非法危险度: ${level}。危险度必须在 ${MIN_DANGER_LEVEL}-${MAX_DANGER_LEVEL} 之间。`,
     );
   }
-  return dangerLevel;
+  return level;
+}
+
+function assertIsoDateString(value: unknown, fieldName: string): string {
+  if (typeof value !== "string") {
+    throw new Error(
+      `非法${fieldName}: ${formatUnknown(value)}。${fieldName}必须是 ISO 时间字符串。`,
+    );
+  }
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) {
+    throw new Error(`非法${fieldName}: ${value}。${fieldName}必须能被 Date.parse 解析。`);
+  }
+  return new Date(timestamp).toISOString();
 }
 
 function coerceInteger(value: unknown, fieldName: string): number {
-  if (typeof value === "number" && Number.isInteger(value)) {
+  if (typeof value === "number") {
+    if (!Number.isInteger(value)) {
+      throw new Error(`非法${fieldName}值: ${value}。${fieldName}必须是整数。`);
+    }
     return value;
   }
   if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (/^-?\d+$/.test(trimmed)) {
-      return Number(trimmed);
+    const normalized = value.trim();
+    if (!/^-?\d+$/.test(normalized)) {
+      throw new Error(`非法${fieldName}值: ${value}。${fieldName}字符串必须是整数。`);
     }
+    return Number(normalized);
   }
-  throw new Error(
-    `非法${fieldName}值: ${formatUnknown(value)}。${fieldName}必须是整数或整数字符串。`,
-  );
+  throw new Error(`非法${fieldName}值: ${formatUnknown(value)}。${fieldName}必须是整数。`);
 }
 
-// --- Runtime schema guard ---
+// --- Schema validation / migration ---
 
 function assertState(raw: unknown): State {
   if (!isRecord(raw)) {
-    throw new Error("State hydration failed: state must be an object.");
+    throw new Error(`非法状态: ${formatUnknown(raw)}。状态必须是对象。`);
   }
+  const stateRaw = isRecord(raw["state"]) ? raw["state"] : raw;
+  if (!isRecord(stateRaw)) {
+    throw new Error(`非法状态: ${formatUnknown(raw)}。state 必须是对象。`);
+  }
+  return assertStateV3(stateRaw);
+}
 
+function assertStateV3(raw: Record<string, unknown>): State {
   const metadata = assertMetadata(raw["元数据"]);
-  const state: State = {
-    元数据: metadata,
+  return {
+    元数据: {
+      ...metadata,
+      schemaVersion: CURRENT_STATE_SCHEMA_VERSION,
+      updatedAt: new Date().toISOString(),
+    },
     金钱: assertMoney(raw["金钱"]),
     当前位置: assertLocation(raw["当前位置"]),
     身体状态: assertBodyStatus(raw["身体状态"]),
@@ -317,45 +320,18 @@ function assertState(raw: unknown): State {
     疲劳: assertPercent(raw["疲劳"], "疲劳"),
     魔力负担: assertPercent(raw["魔力负担"], "魔力负担"),
     危险度: assertDangerLevel(raw["危险度"]),
-    神秘暴露: assertPercent(raw["神秘暴露"], "神秘暴露"),
-    社会暴露: assertPercent(raw["社会暴露"], "社会暴露"),
-    敌方警觉: assertPercent(raw["敌方警觉"], "敌方警觉"),
   };
-
-  if (metadata.updatedAt < metadata.createdAt) {
-    throw new Error("State hydration failed: updatedAt cannot be earlier than createdAt.");
-  }
-
-  return state;
 }
 
 function assertMetadata(raw: unknown): StateMetadata {
   if (!isRecord(raw)) {
-    throw new Error("State hydration failed: metadata must be an object.");
+    throw new Error(`非法元数据: ${formatUnknown(raw)}。元数据必须是对象。`);
   }
-
-  const schemaVersion = raw["schemaVersion"];
-  if (schemaVersion !== CURRENT_STATE_SCHEMA_VERSION) {
-    throw new Error(
-      `State schema version mismatch: got ${formatUnknown(schemaVersion)}, need ${CURRENT_STATE_SCHEMA_VERSION}`,
-    );
-  }
-
-  const createdAt = assertIsoDateString(raw["createdAt"], "createdAt");
-  const updatedAt = assertIsoDateString(raw["updatedAt"], "updatedAt");
-
-  return { schemaVersion, createdAt, updatedAt };
-}
-
-function assertIsoDateString(value: unknown, fieldName: string): string {
-  if (typeof value !== "string") {
-    throw new Error(`State hydration failed: ${fieldName} must be an ISO date string.`);
-  }
-  const timestamp = Date.parse(value);
-  if (Number.isNaN(timestamp)) {
-    throw new Error(`State hydration failed: ${fieldName} is not a valid ISO date string.`);
-  }
-  return value;
+  return {
+    schemaVersion: CURRENT_STATE_SCHEMA_VERSION,
+    createdAt: assertIsoDateString(raw["createdAt"], "createdAt"),
+    updatedAt: assertIsoDateString(raw["updatedAt"], "updatedAt"),
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -363,14 +339,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function formatUnknown(value: unknown): string {
-  if (typeof value === "string") {
+  try {
     return JSON.stringify(value);
+  } catch (error) {
+    return `无法序列化的值 (${String(error)})`;
   }
-  if (typeof value === "number" || typeof value === "boolean" || value === null) {
-    return String(value);
-  }
-  if (value === undefined) {
-    return "undefined";
-  }
-  return Object.prototype.toString.call(value);
 }

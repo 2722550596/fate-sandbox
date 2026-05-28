@@ -1,10 +1,7 @@
 import {
   adjustBody,
-  adjustEnemyAlert,
   adjustFatigue,
   adjustManaStrain,
-  adjustMysteryExposure,
-  adjustSocialExposure,
   advanceTime,
   pressureThresholdHints,
   setDangerLevel,
@@ -23,9 +20,7 @@ export type ConsequenceAction =
   | "休息"
   | "医疗"
   | "魔术治疗"
-  | "安全屋整备"
-  | "善后"
-  | "反侦察";
+  | "安全屋整备";
 export type ConsequenceRisk = "低" | "中" | "高" | "致命";
 
 export interface ConsequenceInput {
@@ -50,9 +45,6 @@ export interface ConsequenceDelta {
   疲劳: number;
   魔力负担: number;
   危险度: number;
-  神秘暴露: number;
-  社会暴露: number;
-  敌方警觉: number;
 }
 
 export interface ConsequenceResult {
@@ -67,18 +59,12 @@ interface RiskProfile {
   fatigue: number;
   manaStrain: number;
   danger: number;
-  mysteryExposure: number;
-  socialExposure: number;
-  enemyAlert: number;
 }
 
 interface ActionProfile {
   fatigue: number;
   manaStrain: number;
   danger: number;
-  mysteryExposure: number;
-  socialExposure: number;
-  enemyAlert: number;
 }
 
 const MAX_ACTION_MINUTES = 1440;
@@ -114,10 +100,6 @@ function applyPressure(state: State, input: ConsequenceInput): StatEffect[] {
   const action = actionProfile(assertPressureAction(input.行动类型));
   const risk = riskProfile(input.风险等级);
   const durationFatigue = Math.floor(input.预计耗时分钟 / 60);
-  const durationAlert = Math.floor(input.预计耗时分钟 / 120);
-  const publicExposure = input.是否公开 ? 6 : 0;
-  const mysteryExposure = input.是否涉及神秘 ? 12 : 0;
-  const mysteryAlert = input.是否涉及神秘 ? 4 : 0;
 
   return compactEffects([
     advanceTime(state, input.预计耗时分钟, "行动耗时"),
@@ -128,29 +110,12 @@ function applyPressure(state: State, input: ConsequenceInput): StatEffect[] {
       "魔力/神秘负担",
     ),
     setDangerLevel(state, Math.max(action.danger, risk.danger), "当前场景危险度"),
-    adjustMysteryExposure(
-      state,
-      action.mysteryExposure + mysteryExposure + (input.是否涉及神秘 ? risk.mysteryExposure : 0),
-      "神秘痕迹",
-    ),
-    adjustSocialExposure(
-      state,
-      action.socialExposure + publicExposure + (input.是否公开 ? risk.socialExposure : 0),
-      "普通社会痕迹",
-    ),
-    adjustEnemyAlert(
-      state,
-      action.enemyAlert + risk.enemyAlert + durationAlert + mysteryAlert,
-      "敌方注意推进",
-    ),
   ]);
 }
 
 function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
   const risk = riskProfile(input.风险等级);
   const hours = Math.floor(input.预计耗时分钟 / 60);
-  const timeAlert = Math.floor(input.预计耗时分钟 / 150);
-  const unsafeAlert = Math.ceil(risk.enemyAlert / 3);
 
   switch (input.行动类型) {
     case "休息":
@@ -168,7 +133,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         ),
         adjustManaStrain(state, -Math.min(16, 3 + hours * 2), "呼吸与回路稳定"),
         setDangerLevel(state, risk.danger, "休息地点安全度"),
-        adjustEnemyAlert(state, 2 + timeAlert + unsafeAlert, "休息期间敌方仍在行动"),
       ]);
     case "医疗":
       return compactEffects([
@@ -176,12 +140,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         adjustBody(state, Math.min(24, 6 + hours * 3), "医疗处理伤势"),
         adjustFatigue(state, -Math.min(14, 3 + hours * 2), "医疗休整"),
         setDangerLevel(state, risk.danger, "医疗环境安全度"),
-        adjustSocialExposure(
-          state,
-          8 + (input.是否公开 ? 10 : 3) + risk.socialExposure,
-          "医疗记录/目击风险",
-        ),
-        adjustEnemyAlert(state, 3 + timeAlert + unsafeAlert, "治疗期间敌方推进"),
       ]);
     case "魔术治疗":
       return compactEffects([
@@ -190,12 +148,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         adjustFatigue(state, -Math.min(10, 2 + hours), "短暂缓解身体负担"),
         adjustManaStrain(state, 10 + risk.manaStrain, "治疗术式反噬/供魔压力"),
         setDangerLevel(state, Math.max(2, risk.danger), "术式环境风险"),
-        adjustMysteryExposure(
-          state,
-          12 + risk.mysteryExposure + (input.是否公开 ? 5 : 0),
-          "治疗术式痕迹",
-        ),
-        adjustEnemyAlert(state, 5 + timeAlert + unsafeAlert, "神秘波动引发注意"),
       ]);
     case "安全屋整备":
       return compactEffects([
@@ -208,31 +160,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         ),
         adjustManaStrain(state, -Math.min(28, 6 + hours * 3), "安全屋稳定魔术回路"),
         setDangerLevel(state, risk.danger, "安全屋当前风险"),
-        adjustMysteryExposure(state, -Math.min(8, 2 + hours), "遮蔽神秘痕迹"),
-        adjustSocialExposure(state, -Math.min(8, 2 + hours), "处理普通社会痕迹"),
-        adjustEnemyAlert(state, 4 + timeAlert + unsafeAlert, "整备期间敌方推进"),
-      ]);
-    case "善后":
-      return compactEffects([
-        advanceTime(state, input.预计耗时分钟, "善后耗时"),
-        adjustFatigue(state, 2 + Math.ceil(risk.fatigue / 2), "善后操作负荷"),
-        setDangerLevel(state, risk.danger, "善后现场风险"),
-        adjustMysteryExposure(state, -Math.min(10, 3 + hours * 2), "清理/遮蔽神秘痕迹"),
-        adjustSocialExposure(state, -Math.min(16, 5 + hours * 3), "清理普通社会痕迹"),
-        adjustEnemyAlert(state, 1 + timeAlert + unsafeAlert, "善后期间敌方推进"),
-      ]);
-    case "反侦察":
-      return compactEffects([
-        advanceTime(state, input.预计耗时分钟, "反侦察耗时"),
-        adjustFatigue(state, 4 + risk.fatigue, "反侦察行动负荷"),
-        adjustManaStrain(
-          state,
-          input.是否涉及神秘 ? 2 + risk.manaStrain : 0,
-          "遮蔽/误导的神秘成本",
-        ),
-        setDangerLevel(state, Math.max(1, risk.danger), "反侦察风险"),
-        adjustMysteryExposure(state, -Math.min(6, 2 + hours), "切断神秘追踪线索"),
-        adjustEnemyAlert(state, -Math.min(14, 4 + hours * 3), "误导敌方判断"),
       ]);
   }
 
@@ -240,75 +167,23 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
 }
 
 function actionProfile(
-  action: Exclude<
-    ConsequenceAction,
-    "休息" | "医疗" | "魔术治疗" | "安全屋整备" | "善后" | "反侦察"
-  >,
+  action: Exclude<ConsequenceAction, "休息" | "医疗" | "魔术治疗" | "安全屋整备">,
 ): ActionProfile {
   switch (action) {
     case "移动":
-      return {
-        fatigue: 3,
-        manaStrain: 0,
-        danger: 1,
-        mysteryExposure: 0,
-        socialExposure: 2,
-        enemyAlert: 1,
-      };
+      return { fatigue: 3, manaStrain: 0, danger: 1 };
     case "调查":
-      return {
-        fatigue: 5,
-        manaStrain: 0,
-        danger: 2,
-        mysteryExposure: 0,
-        socialExposure: 4,
-        enemyAlert: 3,
-      };
+      return { fatigue: 5, manaStrain: 0, danger: 2 };
     case "社交":
-      return {
-        fatigue: 2,
-        manaStrain: 0,
-        danger: 1,
-        mysteryExposure: 0,
-        socialExposure: 5,
-        enemyAlert: 2,
-      };
+      return { fatigue: 2, manaStrain: 0, danger: 1 };
     case "潜入":
-      return {
-        fatigue: 8,
-        manaStrain: 0,
-        danger: 3,
-        mysteryExposure: 0,
-        socialExposure: 5,
-        enemyAlert: 7,
-      };
+      return { fatigue: 8, manaStrain: 0, danger: 3 };
     case "战斗":
-      return {
-        fatigue: 14,
-        manaStrain: 7,
-        danger: 4,
-        mysteryExposure: 7,
-        socialExposure: 8,
-        enemyAlert: 14,
-      };
+      return { fatigue: 14, manaStrain: 7, danger: 4 };
     case "魔术":
-      return {
-        fatigue: 5,
-        manaStrain: 13,
-        danger: 3,
-        mysteryExposure: 14,
-        socialExposure: 0,
-        enemyAlert: 8,
-      };
+      return { fatigue: 5, manaStrain: 13, danger: 3 };
     case "逃跑":
-      return {
-        fatigue: 11,
-        manaStrain: 0,
-        danger: 3,
-        mysteryExposure: 0,
-        socialExposure: 7,
-        enemyAlert: 7,
-      };
+      return { fatigue: 11, manaStrain: 0, danger: 3 };
     default: {
       const exhaustive: never = action;
       throw new Error(`未处理的行动类型: ${String(exhaustive)}`);
@@ -319,41 +194,13 @@ function actionProfile(
 function riskProfile(risk: ConsequenceRisk): RiskProfile {
   switch (risk) {
     case "低":
-      return {
-        fatigue: 1,
-        manaStrain: 0,
-        danger: 1,
-        mysteryExposure: 0,
-        socialExposure: 0,
-        enemyAlert: 1,
-      };
+      return { fatigue: 1, manaStrain: 0, danger: 1 };
     case "中":
-      return {
-        fatigue: 2,
-        manaStrain: 2,
-        danger: 2,
-        mysteryExposure: 2,
-        socialExposure: 2,
-        enemyAlert: 4,
-      };
+      return { fatigue: 2, manaStrain: 2, danger: 2 };
     case "高":
-      return {
-        fatigue: 5,
-        manaStrain: 4,
-        danger: 4,
-        mysteryExposure: 6,
-        socialExposure: 6,
-        enemyAlert: 9,
-      };
+      return { fatigue: 5, manaStrain: 4, danger: 4 };
     case "致命":
-      return {
-        fatigue: 10,
-        manaStrain: 8,
-        danger: 5,
-        mysteryExposure: 12,
-        socialExposure: 10,
-        enemyAlert: 16,
-      };
+      return { fatigue: 10, manaStrain: 8, danger: 5 };
     default: {
       const exhaustive: never = risk;
       throw new Error(`未处理的风险等级: ${String(exhaustive)}`);
@@ -372,9 +219,6 @@ function calculateActualDelta(before: State, after: State): ConsequenceDelta {
     疲劳: after.疲劳 - before.疲劳,
     魔力负担: after.魔力负担 - before.魔力负担,
     危险度: after.危险度 - before.危险度,
-    神秘暴露: after.神秘暴露 - before.神秘暴露,
-    社会暴露: after.社会暴露 - before.社会暴露,
-    敌方警觉: after.敌方警觉 - before.敌方警觉,
   };
 }
 
@@ -386,9 +230,6 @@ function toPatchOps(state: State): PatchOp[] {
     { op: "replace", path: "/疲劳", value: state.疲劳 },
     { op: "replace", path: "/魔力负担", value: state.魔力负担 },
     { op: "replace", path: "/危险度", value: state.危险度 },
-    { op: "replace", path: "/神秘暴露", value: state.神秘暴露 },
-    { op: "replace", path: "/社会暴露", value: state.社会暴露 },
-    { op: "replace", path: "/敌方警觉", value: state.敌方警觉 },
   ];
 }
 
@@ -406,14 +247,6 @@ function buildNarrativeConstraints(input: ConsequenceInput, before: State, after
   if (input.行动类型 === "魔术治疗") {
     constraints.push("魔术治疗不是免费治愈；必须描写魔术回路负担或神秘痕迹。 ");
   }
-  if (input.行动类型 === "善后") {
-    constraints.push("善后只能逐步压低痕迹，不能把已发生的目击、记录或术式残留写成从未存在。 ");
-  }
-  if (input.行动类型 === "反侦察") {
-    constraints.push(
-      "反侦察是在误导敌方判断，不是让敌人失忆；高风险反侦察失败时应改用 resolve_check。 ",
-    );
-  }
   if (input.风险等级 === "高" || input.风险等级 === "致命") {
     constraints.push("高风险行动不能被一句话、善意或临场觉悟轻易化解。 ");
   }
@@ -423,20 +256,13 @@ function buildNarrativeConstraints(input: ConsequenceInput, before: State, after
 
 function isRecoveryAction(
   action: ConsequenceAction,
-): action is "休息" | "医疗" | "魔术治疗" | "安全屋整备" | "善后" | "反侦察" {
-  return (
-    action === "休息" ||
-    action === "医疗" ||
-    action === "魔术治疗" ||
-    action === "安全屋整备" ||
-    action === "善后" ||
-    action === "反侦察"
-  );
+): action is "休息" | "医疗" | "魔术治疗" | "安全屋整备" {
+  return action === "休息" || action === "医疗" || action === "魔术治疗" || action === "安全屋整备";
 }
 
 function assertPressureAction(
   action: ConsequenceAction,
-): Exclude<ConsequenceAction, "休息" | "医疗" | "魔术治疗" | "安全屋整备" | "善后" | "反侦察"> {
+): Exclude<ConsequenceAction, "休息" | "医疗" | "魔术治疗" | "安全屋整备"> {
   if (isRecoveryAction(action)) {
     throw new Error(`恢复行动不能按压力行动处理: ${action}`);
   }
@@ -455,14 +281,12 @@ function assertAction(value: unknown): ConsequenceAction {
     value === "休息" ||
     value === "医疗" ||
     value === "魔术治疗" ||
-    value === "安全屋整备" ||
-    value === "善后" ||
-    value === "反侦察"
+    value === "安全屋整备"
   ) {
     return value;
   }
   throw new Error(
-    `非法行动类型: ${formatUnknown(value)}。可选: 移动/调查/社交/潜入/战斗/魔术/逃跑/休息/医疗/魔术治疗/安全屋整备/善后/反侦察。`,
+    `非法行动类型: ${formatUnknown(value)}。可选: 移动/调查/社交/潜入/战斗/魔术/逃跑/休息/医疗/魔术治疗/安全屋整备。`,
   );
 }
 
@@ -483,33 +307,32 @@ function assertDuration(value: unknown): number {
 
 function assertBoolean(value: unknown, fieldName: string): boolean {
   if (typeof value !== "boolean") {
-    throw new Error(`非法${fieldName}: ${formatUnknown(value)}。必须是 boolean。`);
+    throw new Error(`非法${fieldName}: ${formatUnknown(value)}。${fieldName}必须是 boolean。`);
   }
   return value;
 }
 
 function coerceInteger(value: unknown, fieldName: string): number {
-  if (typeof value === "number" && Number.isInteger(value)) {
+  if (typeof value === "number") {
+    if (!Number.isInteger(value)) {
+      throw new Error(`非法${fieldName}: ${value}。${fieldName}必须是整数。`);
+    }
     return value;
   }
   if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (/^-?\d+$/.test(trimmed)) {
-      return Number(trimmed);
+    const normalized = value.trim();
+    if (!/^-?\d+$/.test(normalized)) {
+      throw new Error(`非法${fieldName}: ${value}。${fieldName}字符串必须是整数。`);
     }
+    return Number(normalized);
   }
-  throw new Error(`非法${fieldName}: ${formatUnknown(value)}。必须是整数或整数字符串。`);
+  throw new Error(`非法${fieldName}: ${formatUnknown(value)}。${fieldName}必须是整数。`);
 }
 
 function formatUnknown(value: unknown): string {
-  if (typeof value === "string") {
+  try {
     return JSON.stringify(value);
+  } catch (error) {
+    return `无法序列化的值 (${String(error)})`;
   }
-  if (typeof value === "number" || typeof value === "boolean" || value === null) {
-    return String(value);
-  }
-  if (value === undefined) {
-    return "undefined";
-  }
-  return Object.prototype.toString.call(value);
 }

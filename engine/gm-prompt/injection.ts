@@ -110,9 +110,6 @@ function buildStatePressureMessage(): TextMessage {
     `疲劳：${state.疲劳}%`,
     `魔力负担：${state.魔力负担}%`,
     `危险度：${state.危险度}/5`,
-    `神秘暴露：${state.神秘暴露}%`,
-    `社会暴露：${state.社会暴露}%`,
-    `敌方警觉：${state.敌方警觉}%`,
     "",
     "叙事压力：",
     ...buildPressureNotes(state).map((note) => `- ${note}`),
@@ -131,22 +128,11 @@ function buildPressureNotes(state: State): string[] {
   if (state.危险度 >= 3) {
     notes.push("危险度 ≥ 3：禁止写成完全安全，必须保留即时威胁或环境压力。");
   }
-  if (state.敌方警觉 >= 30) {
-    notes.push(
-      "敌方警觉 ≥ 30：敌对势力正在自己的时间线里行动，不能静止等待玩家。触及具体势力前先 lookup。",
-    );
-  }
   if (state.疲劳 >= 25) {
     notes.push("疲劳 ≥ 25：行动描写必须体现迟滞、疼痛、呼吸紊乱或注意力下降。");
   }
   if (state.魔力负担 >= 25) {
     notes.push("魔力负担 ≥ 25：魔术回路/供魔压力必须进入描写，禁止把神秘当免费资源。");
-  }
-  if (state.神秘暴露 >= 20) {
-    notes.push("神秘暴露 ≥ 20：魔术侧可能留下痕迹，禁止断言绝对没人察觉。");
-  }
-  if (state.社会暴露 >= 20) {
-    notes.push("社会暴露 ≥ 20：普通社会层面的目击、记录、传闻或善后压力必须存在。");
   }
   return notes;
 }

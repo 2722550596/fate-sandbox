@@ -13,9 +13,6 @@ export function formatPressureSummary(state: State): string {
     `疲劳 ${pressureBand(state.疲劳, "pressure")}`,
     `魔力 ${pressureBand(state.魔力负担, "pressure")}`,
     `危险 ${dangerBand(state.危险度)}`,
-    `神秘 ${pressureBand(state.神秘暴露, "pressure")}`,
-    `社会 ${pressureBand(state.社会暴露, "pressure")}`,
-    `敌警 ${pressureBand(state.敌方警觉, "pressure")}`,
   ].join("｜");
 }
 

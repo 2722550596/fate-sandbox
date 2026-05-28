@@ -18,10 +18,10 @@ export function registerAllTools(pi: ExtensionAPI): void {
     label,
     name: "get_status",
     description:
-      "查看玩家角色的当前状态（金钱、位置、身体、时间、疲劳、魔力负担、危险度、暴露、敌方警觉）。\n\n" +
+      "查看玩家角色的当前状态（金钱、位置、身体、时间、疲劳、魔力负担、危险度）。\n\n" +
       "【必须调用的场景】\n" +
       "- 需要确认玩家当前持有金钱、所在位置或身体状况时\n" +
-      "- 需要确认时间、疲劳、魔力负担、危险度、暴露或敌方警觉时\n" +
+      "- 需要确认时间、疲劳、魔力负担或危险度时\n" +
       "- 玩家询问「我现在有多少钱」「我在哪」「我身体怎么样」「现在几点」「危险吗」时\n\n" +
       "【严禁的行为】\n" +
       "- 凭记忆叙述任何状态数值——你的内部记忆不可靠\n" +
@@ -34,7 +34,7 @@ export function registerAllTools(pi: ExtensionAPI): void {
     label,
     name: "patch_state",
     description:
-      "修改玩家状态。用于确定性状态变化；风险/耗时/暴露/疲劳/魔力负担优先用 resolve_consequence 结算。\n\n" +
+      "修改玩家状态。用于确定性状态变化；风险/耗时/疲劳/魔力负担优先用 resolve_consequence 结算。\n\n" +
       "【必须调用的场景】\n" +
       "- 玩家获得/消费金钱时\n" +
       "- 玩家移动到新地点时\n" +
@@ -46,7 +46,7 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "- 用裸 patch 逃避风险/后果结算；高风险行动必须先 resolve_consequence\n\n" +
       "参数 ops 为 JSON Patch 数组，每个 op 包含:\n" +
       '- op: "replace"（通常用这个）\n' +
-      '- path: "/金钱" | "/当前位置" | "/身体状态" | "/当前时间" | "/经过分钟" | "/疲劳" | "/魔力负担" | "/危险度" | "/神秘暴露" | "/社会暴露" | "/敌方警觉"\n' +
+      '- path: "/金钱" | "/当前位置" | "/身体状态" | "/当前时间" | "/经过分钟" | "/疲劳" | "/魔力负担" | "/危险度"\n' +
       "- value: 新值",
     parameters: Type.Object({
       ops: Type.Array(
@@ -70,18 +70,17 @@ export function registerAllTools(pi: ExtensionAPI): void {
     label,
     name: "resolve_consequence",
     description:
-      "结算玩家行动造成的时间推进、疲劳、魔力负担、危险度、神秘暴露、社会暴露和敌方警觉。职责是防止高风险行动被写成免费、无痕、无代价。\n\n" +
+      "结算玩家行动造成的时间推进、疲劳、魔力负担和危险度。职责是防止高风险行动被写成免费、无代价。\n\n" +
       "【必须调用的场景】\n" +
-      "- 玩家采取可能产生风险、耗时、暴露、疲劳或魔力消耗的行动\n" +
+      "- 玩家采取可能产生风险、耗时、疲劳或魔力消耗的行动\n" +
       "- 战斗、潜入、调查、施法、逃跑、长距离移动、夜间行动\n" +
-      "- 休息、医疗、魔术治疗、安全屋整备等恢复行为；恢复也会推进时间和敌方行动\n" +
-      "- 善后、反侦察等压低神秘痕迹/社会痕迹/敌方警觉的行动\n" +
-      "- 任何你想写成「暂时安全」「没人发现」「没有代价」的场景，必须先调用本工具确认\n" +
+      "- 休息、医疗、魔术治疗、安全屋整备等恢复行为；恢复也会推进时间\n" +
+      "- 任何你想写成「暂时安全」「没有代价」的场景，必须先调用本工具确认\n" +
       "- 玩家试图用一句话、善意或临场觉悟化解危机时\n\n" +
       "【严禁的行为】\n" +
       "- 不调用本工具就叙述高风险行动无后果\n" +
-      "- 自行决定敌方没有注意到、魔术没有留下痕迹、行动没有疲劳/时间/暴露成本\n" +
-      "- 把治疗/休息写成免费瞬间满血，或让敌人在恢复期间静止等待\n" +
+      "- 自行决定行动没有疲劳/时间/魔力成本\n" +
+      "- 把治疗/休息写成免费瞬间满血\n" +
       "- 忽略工具返回的叙事约束",
     parameters: Type.Object({
       行动类型: Type.Union(
@@ -97,8 +96,6 @@ export function registerAllTools(pi: ExtensionAPI): void {
           Type.Literal("医疗"),
           Type.Literal("魔术治疗"),
           Type.Literal("安全屋整备"),
-          Type.Literal("善后"),
-          Type.Literal("反侦察"),
         ],
         { description: "本轮玩家行动类型" },
       ),
@@ -165,17 +162,9 @@ export function registerAllTools(pi: ExtensionAPI): void {
           description: "失败/代价的压力等级",
         },
       ),
-      失败后果: Type.Union(
-        [
-          Type.Literal("疲劳"),
-          Type.Literal("受伤"),
-          Type.Literal("魔力负担"),
-          Type.Literal("神秘暴露"),
-          Type.Literal("社会暴露"),
-          Type.Literal("敌方警觉"),
-        ],
-        { description: "失败或代价成功时优先增加的压力项" },
-      ),
+      失败后果: Type.Union([Type.Literal("疲劳"), Type.Literal("受伤"), Type.Literal("魔力负担")], {
+        description: "失败或代价成功时优先增加的压力项",
+      }),
       预计耗时分钟: Type.Union([Type.Integer(), Type.String()], {
         description: "判定行动耗时，0-720 分钟；可传整数或整数字符串",
       }),

@@ -114,60 +114,6 @@ export function setDangerLevel(state: State, level: number, reason: string): Sta
   );
 }
 
-export function adjustMysteryExposure(state: State, amount: number, reason: string): StatEffect {
-  const before = state.神秘暴露;
-  state.神秘暴露 = clampPercent(state.神秘暴露 + amount);
-  return createNumericEffect(
-    "/神秘暴露",
-    before,
-    state.神秘暴露,
-    reason,
-    amount >= 0
-      ? significant(amount, 15)
-        ? "神秘痕迹明显增加；必须暗示魔术侧可能察觉。"
-        : "神秘痕迹轻微增加，只需暗示残留，不要断言绝对没人察觉。"
-      : significant(amount, 10)
-        ? "神秘痕迹被压低，但不能写成从未存在。"
-        : "神秘痕迹轻微降低，可用遮蔽细节带过。",
-  );
-}
-
-export function adjustSocialExposure(state: State, amount: number, reason: string): StatEffect {
-  const before = state.社会暴露;
-  state.社会暴露 = clampPercent(state.社会暴露 + amount);
-  return createNumericEffect(
-    "/社会暴露",
-    before,
-    state.社会暴露,
-    reason,
-    amount >= 0
-      ? significant(amount, 10)
-        ? "社会痕迹明显增加；需要体现目击、记录、传闻或善后压力。"
-        : "社会痕迹轻微增加，可用路人视线、记录风险等细节暗示。"
-      : significant(amount, 10)
-        ? "普通社会痕迹被处理，但会消耗时间或资源。"
-        : "普通社会痕迹轻微降低，可低调处理。",
-  );
-}
-
-export function adjustEnemyAlert(state: State, amount: number, reason: string): StatEffect {
-  const before = state.敌方警觉;
-  state.敌方警觉 = clampPercent(state.敌方警觉 + amount);
-  return createNumericEffect(
-    "/敌方警觉",
-    before,
-    state.敌方警觉,
-    reason,
-    amount >= 0
-      ? significant(amount, 10)
-        ? "敌方警觉明显上升；敌对势力会在自己的时间线里行动。"
-        : "敌方警觉轻微上升，只需保留远处压力或潜在反应。"
-      : significant(amount, 8)
-        ? "敌方注意被误导或降温，但不会忘记已发生的异常。"
-        : "敌方注意轻微下降，可用误导生效的细节带过。",
-  );
-}
-
 export function pressureThresholdHints(state: State): string[] {
   const hints: string[] = [];
   pushThresholdHint(
@@ -187,33 +133,6 @@ export function pressureThresholdHints(state: State): string[] {
     "魔力负担",
     "魔术回路灼痛、精密操作困难",
     "继续施法可能烧毁回路或昏迷",
-  );
-  pushThresholdHint(
-    hints,
-    state.神秘暴露,
-    50,
-    80,
-    "神秘暴露",
-    "魔术侧可能注意到痕迹",
-    "敌对魔术师或监管势力可能主动介入",
-  );
-  pushThresholdHint(
-    hints,
-    state.社会暴露,
-    50,
-    80,
-    "社会暴露",
-    "普通社会开始留下记录/传闻",
-    "警察、学校、医院或媒体压力可能主动出现",
-  );
-  pushThresholdHint(
-    hints,
-    state.敌方警觉,
-    50,
-    80,
-    "敌方警觉",
-    "敌人开始主动调查",
-    "敌人可能设伏、追踪或抢先行动",
   );
   if (state.危险度 >= 4) {
     hints.push("危险度 ≥ 4：本场必须保留即时威胁，不能用安稳收束。 ");
