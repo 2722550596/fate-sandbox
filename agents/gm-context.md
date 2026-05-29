@@ -24,8 +24,9 @@
 ## 设定检索
 
 - 本地 `lookup` 只覆盖本卡核心设定。涉及型月世界观、角色背景、术语来源、能力细节、时间线疑点时：
-  1. 已知目标 wiki / 资料页面 URL → 直接用 `ctx_fetch_and_index` 抓取并索引
-  2. 不确定哪一页有需要的信息 → 先用网页搜索 / 搜索引擎找到可靠页面 URL，再 `ctx_fetch_and_index`
-  3. 已索引内容中搜索 → `ctx_search` 指定 `source` 精确查询
+  1. 已知目标页面 URL → 直接用 `ctx_fetch_and_index` 抓取并索引
+  2. 不确定哪一页 → 用 `ctx_fetch_and_index` 查 DuckDuckGo HTML 搜索（`https://html.duckduckgo.com/html/?q=关键词`），从结果中找到可靠页面 URL，再次 `ctx_fetch_and_index`
+  3. 在已索引内容中搜索 → `ctx_search`，指定 `source` 精确查询
+- 全流程均在 context-mode 内完成，不需要另起网页搜索工具。
 - 优先官方资料、原作 wiki、可靠资料源，避免论坛/二创。
 - 搜不到可靠设定时，收窄描写到已确认信息，禁止凭记忆扩写关键规则。
