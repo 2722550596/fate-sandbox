@@ -13,6 +13,12 @@ import { resolveCheckTool } from "./state/resolve-check";
 import { resolveConsequenceTool, type ConsequenceToolDetails } from "./state/resolve-consequence";
 import { resolveDailyTool } from "./state/resolve-daily";
 
+interface DailyToolDetails {
+  dailyActivity: string;
+  durationMinutes: number;
+  pressureSummary: string;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -25,6 +31,18 @@ function isConsequenceToolDetails(value: unknown): value is ConsequenceToolDetai
     "pressureSummary" in value &&
     typeof value["actionType"] === "string" &&
     typeof value["riskLevel"] === "string" &&
+    typeof value["pressureSummary"] === "string"
+  );
+}
+
+function isDailyToolDetails(value: unknown): value is DailyToolDetails {
+  if (typeof value !== "object" || value === null) return false;
+  return (
+    "dailyActivity" in value &&
+    "durationMinutes" in value &&
+    "pressureSummary" in value &&
+    typeof value["dailyActivity"] === "string" &&
+    typeof value["durationMinutes"] === "number" &&
     typeof value["pressureSummary"] === "string"
   );
 }
@@ -204,6 +222,42 @@ export function registerAllTools(pi: ExtensionAPI): void {
     }),
     execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
       resolveDailyTool(params, ctx.sessionManager),
+
+    renderCall(args: unknown, theme: Theme): Text {
+      const record = isRecord(args) ? args : {};
+      const activity = typeof record["activity"] === "string" ? record["activity"] : "?";
+      const minutes =
+        typeof record["durationMinutes"] === "string" ||
+        typeof record["durationMinutes"] === "number"
+          ? String(record["durationMinutes"])
+          : "?";
+      const text =
+        theme.fg("toolTitle", theme.bold("日常 ")) +
+        theme.fg("accent", activity) +
+        theme.fg("muted", " · ") +
+        theme.fg("dim", `${minutes}min`);
+      return new Text(text, 0, 0);
+    },
+
+    renderResult(result, { expanded }, theme, _context) {
+      const details = isDailyToolDetails(result.details) ? result.details : undefined;
+      const activity = details?.dailyActivity ?? "?";
+      const minutes = details?.durationMinutes ?? "?";
+      const pressureSummary = details?.pressureSummary ?? "?";
+
+      if (!expanded) {
+        const compact =
+          theme.fg("accent", activity) +
+          theme.fg("muted", " · ") +
+          theme.fg("dim", `${minutes}min`) +
+          theme.fg("muted", "  ") +
+          theme.fg("dim", pressureSummary);
+        return new Text(compact, 0, 0);
+      }
+
+      const text = result.content[0];
+      return new Text(text?.type === "text" ? text.text : "", 0, 0);
+    },
   });
 
   pi.registerTool({
