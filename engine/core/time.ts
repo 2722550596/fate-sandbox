@@ -21,7 +21,6 @@ export interface TimeState {
 export interface TimeSegmentInput {
   minutes: number;
   activityKind: TimeActivityKind;
-  involvesMystery: boolean;
 }
 
 export interface TimeSegmentResult {
@@ -29,18 +28,12 @@ export interface TimeSegmentResult {
   afterTime: string;
   elapsedMinutes: number;
   crossedMidnight: boolean;
-  nightMinutes: number;
 }
-
-const NIGHT_START_HOUR = 0;
-const NIGHT_END_HOUR = 5;
-const DAY_MINUTES = 1440;
 
 export function advanceTimeSegment(state: State, input: TimeSegmentInput): TimeSegmentResult {
   const beforeTime = state.时间.当前时间;
   const afterTime = advanceIsoTime(beforeTime, input.minutes);
   const crossedMidnight = crossesUtcMidnight(beforeTime, afterTime);
-  const nightMinutes = countNightMinutes(beforeTime, input.minutes);
 
   state.时间.当前时间 = afterTime;
   if (crossedMidnight) {
@@ -55,7 +48,6 @@ export function advanceTimeSegment(state: State, input: TimeSegmentInput): TimeS
     afterTime,
     elapsedMinutes: elapsedGameMinutes(state),
     crossedMidnight,
-    nightMinutes,
   };
 }
 
@@ -111,25 +103,4 @@ function crossesUtcMidnight(beforeIso: string, afterIso: string): boolean {
     before.getUTCMonth() !== after.getUTCMonth() ||
     before.getUTCDate() !== after.getUTCDate()
   );
-}
-
-function countNightMinutes(startIso: string, durationMinutes: number): number {
-  if (durationMinutes <= 0) {
-    return 0;
-  }
-
-  let count = 0;
-  const startTimestamp = Date.parse(startIso);
-  if (Number.isNaN(startTimestamp)) {
-    throw new Error(`无法统计非法时间段: ${startIso}`);
-  }
-
-  for (let offset = 0; offset < durationMinutes; offset++) {
-    const date = new Date(startTimestamp + offset * 60_000);
-    const hour = date.getUTCHours();
-    if (hour >= NIGHT_START_HOUR && hour < NIGHT_END_HOUR) {
-      count += 1;
-    }
-  }
-  return Math.min(DAY_MINUTES, count);
 }

@@ -112,7 +112,6 @@ function applyPressure(state: State, input: ConsequenceInput): StatEffect[] {
     advanceTime(state, {
       minutes: input.durationMinutes,
       activityKind,
-      involvesMystery: input.involvesMystery,
       reason: "行动耗时",
     }),
     adjustFatigue(state, action.fatigue + risk.fatigue + durationFatigue, "行动负荷"),
@@ -138,7 +137,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         advanceTime(state, {
           minutes: input.durationMinutes,
           activityKind: "休息",
-          involvesMystery: input.involvesMystery,
           reason: "休息耗时",
         }),
         adjustBody(
@@ -163,7 +161,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         advanceTime(state, {
           minutes: input.durationMinutes,
           activityKind: "睡眠",
-          involvesMystery: input.involvesMystery,
           reason: "睡眠耗时",
         }),
         adjustBody(state, sleepBodyRecovery(input.durationMinutes), "睡眠恢复身体"),
@@ -182,7 +179,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         advanceTime(state, {
           minutes: input.durationMinutes,
           activityKind: "治疗",
-          involvesMystery: input.involvesMystery,
           reason: "医疗耗时",
         }),
         adjustBody(state, Math.min(24, 6 + hours * 3), "医疗处理伤势"),
@@ -194,7 +190,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         advanceTime(state, {
           minutes: input.durationMinutes,
           activityKind: "魔术治疗",
-          involvesMystery: true,
           reason: "魔术治疗耗时",
         }),
         adjustBody(state, Math.min(22, 5 + hours * 3), "魔术治疗伤势"),
@@ -207,7 +202,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         advanceTime(state, {
           minutes: input.durationMinutes,
           activityKind: "补魔",
-          involvesMystery: true,
           reason: "补魔耗时",
         }),
         adjustBody(state, Math.min(12, 3 + hours * 2), "魔力供给辅助身体恢复"),
@@ -224,7 +218,6 @@ function applyRecovery(state: State, input: ConsequenceInput): StatEffect[] {
         advanceTime(state, {
           minutes: input.durationMinutes,
           activityKind: "安全屋整备",
-          involvesMystery: input.involvesMystery,
           reason: "安全屋整备耗时",
         }),
         adjustBody(state, input.durationMinutes >= 360 ? 6 : 2, "安全环境处理伤势"),

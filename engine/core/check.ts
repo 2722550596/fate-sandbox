@@ -103,7 +103,6 @@ function applyCheckEffects(state: State, input: CheckInput, outcome: CheckOutcom
     advanceTime(state, {
       minutes: input.durationMinutes,
       activityKind: checkActivityKind(input),
-      involvesMystery: input.checkType === "魔术" || input.consequence === "魔力负担",
       reason: "判定耗时",
     }),
   ];

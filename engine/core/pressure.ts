@@ -14,7 +14,6 @@ export interface StatEffect {
 export interface TimeEffectInput {
   minutes: number;
   activityKind: TimeActivityKind;
-  involvesMystery: boolean;
   reason: string;
 }
 
@@ -27,7 +26,6 @@ export function advanceTime(state: State, input: TimeEffectInput): StatEffect {
   const result = advanceTimeSegment(state, {
     minutes: input.minutes,
     activityKind: input.activityKind,
-    involvesMystery: input.involvesMystery,
   });
   return {
     path: "/时间/当前时间",
