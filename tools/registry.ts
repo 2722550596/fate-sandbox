@@ -4,6 +4,8 @@ import { Type } from "typebox";
 
 import { exportStateTool } from "./debug/export-state";
 import { getStateSchemaTool } from "./debug/get-state-schema";
+import { overrideLockedFactTool } from "./debug/override-locked-fact";
+import { resetStateTool } from "./debug/reset-state";
 import { switchToolsetTool } from "./debug/switch-toolset";
 import { lookupTool } from "./lookup/lookup";
 import { getStatusTool } from "./state/get-status";
@@ -311,6 +313,37 @@ export function registerAllTools(pi: ExtensionAPI): void {
     }),
     execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
       patchStateTool(params, ctx.sessionManager),
+  });
+
+  pi.registerTool({
+    label: toolLabel,
+    name: "override_locked_fact",
+    description:
+      "【调试工具】覆盖已锁定的从者职阶、真名或基础参数。仅用于开发修档，必须写明 reason。",
+    parameters: Type.Object({
+      kind: Type.Union([
+        Type.Literal("servant-class"),
+        Type.Literal("servant-true-name"),
+        Type.Literal("servant-base-params"),
+      ]),
+      actorId: Type.String(),
+      className: Type.Optional(Type.String()),
+      display: Type.Optional(Type.String()),
+      base: Type.Optional(Type.Unknown()),
+      reason: Type.String(),
+    }),
+    execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
+      overrideLockedFactTool(params, ctx.sessionManager),
+  });
+
+  pi.registerTool({
+    label: toolLabel,
+    name: "reset_state",
+    description:
+      "【调试工具】重置为新 Fate schema 初始状态；不做旧 schema migration。必须写明 reason。",
+    parameters: Type.Object({ reason: Type.String() }),
+    execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
+      resetStateTool(params, ctx.sessionManager),
   });
 
   pi.registerTool({
