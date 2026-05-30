@@ -422,7 +422,7 @@ Debug 工具：
 坏：
 
 ```ts
-update_protagonist({ protagonist: FullProtagonistState })
+update_protagonist({ protagonist: FullProtagonistState });
 ```
 
 好：

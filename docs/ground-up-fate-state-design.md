@@ -145,7 +145,14 @@ interface LocationState {
 
 type BoundaryKind = "normal" | "bounded-field" | "reality-marble" | "otherworld";
 
-type SituationKind = "daily" | "investigation" | "social" | "combat" | "ritual" | "escape" | "downtime";
+type SituationKind =
+  | "daily"
+  | "investigation"
+  | "social"
+  | "combat"
+  | "ritual"
+  | "escape"
+  | "downtime";
 ```
 
 地点必须精确到原卡状态栏要求的“地域·场所·具体位置”。固有结界、异界化空间、结界内状态显式表达。
@@ -691,11 +698,35 @@ type SceneEvent =
 
 ```ts
 type ActorConditionEvent =
-  | { kind: "add-wound"; actorId: ActorId; severity: WoundSeverity; text: string; source: string; recoverable: boolean }
-  | { kind: "add-affliction"; actorId: ActorId; text: string; source: string; expectedDuration: string | null }
-  | { kind: "add-permanent-effect"; actorId: ActorId; text: string; source: string; mechanicalEffect: string }
+  | {
+      kind: "add-wound";
+      actorId: ActorId;
+      severity: WoundSeverity;
+      text: string;
+      source: string;
+      recoverable: boolean;
+    }
+  | {
+      kind: "add-affliction";
+      actorId: ActorId;
+      text: string;
+      source: string;
+      expectedDuration: string | null;
+    }
+  | {
+      kind: "add-permanent-effect";
+      actorId: ActorId;
+      text: string;
+      source: string;
+      mechanicalEffect: string;
+    }
   | { kind: "change-outfit"; actorId: ActorId; outfit: OutfitState; reason: string }
-  | { kind: "transfer-tracked-item"; itemId: ItemId; holderActorId: ActorId | null; reason: string };
+  | {
+      kind: "transfer-tracked-item";
+      itemId: ItemId;
+      holderActorId: ActorId | null;
+      reason: string;
+    };
 ```
 
 ### `update_servant_form`
@@ -808,21 +839,21 @@ engine/core/economy.ts        # JPY transaction validation
 
 原卡条目去向：
 
-| 原卡条目 | 去向 |
-| --- | --- |
-| 记忆相关 | `CampaignMemory` + `record_memory` |
-| 玩家身世背景 | `protagonist.background` + `memory.protagonistBackground` |
-| 玩家身世(从者/外来) | `ServantProtagonist` 或 `OutsiderProtagonist` |
-| 时间线-* | `campaign.timeline` + `data/timelines.json` |
-| 战斗思维链 | `fate-rank.ts` + `gm-rules.md` |
-| 状态栏:默认 | `ProtagonistState` / `SceneState` / `EconomyState` |
-| 状态栏:从者 | `ServantCoreState` |
-| 世界观校验/过滤 | `campaign.worldviewFilters` + `gm-rules.md` |
-| 金钱 | `EconomyState` + transaction validation |
-| 核心设定 | `data/world.json` + lookup |
-| 角色 | `data/characters.json` + lookup + `KnownCharacterState` |
-| 英灵 | `data/servants.json` + lookup |
-| 地点 | `data/locations.json` + lookup |
+| 原卡条目            | 去向                                                      |
+| ------------------- | --------------------------------------------------------- |
+| 记忆相关            | `CampaignMemory` + `record_memory`                        |
+| 玩家身世背景        | `protagonist.background` + `memory.protagonistBackground` |
+| 玩家身世(从者/外来) | `ServantProtagonist` 或 `OutsiderProtagonist`             |
+| 时间线-\*           | `campaign.timeline` + `data/timelines.json`               |
+| 战斗思维链          | `fate-rank.ts` + `gm-rules.md`                            |
+| 状态栏:默认         | `ProtagonistState` / `SceneState` / `EconomyState`        |
+| 状态栏:从者         | `ServantCoreState`                                        |
+| 世界观校验/过滤     | `campaign.worldviewFilters` + `gm-rules.md`               |
+| 金钱                | `EconomyState` + transaction validation                   |
+| 核心设定            | `data/world.json` + lookup                                |
+| 角色                | `data/characters.json` + lookup + `KnownCharacterState`   |
+| 英灵                | `data/servants.json` + lookup                             |
+| 地点                | `data/locations.json` + lookup                            |
 
 ## Implementation plan
 

@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { exportState, type StateExport } from "../core/state";
+import { buildGmBrief } from "../core/gm-brief";
+import { getPublicState } from "../core/state";
 
 export interface TextMessage {
   role: "user";
@@ -98,33 +99,18 @@ function buildRulesMessage(): TextMessage {
 }
 
 function buildStatePressureMessage(): TextMessage {
-  const state = exportState();
   const text = [
-    "[当前机械状态快照 — 与 export_state / state/state.json 同源，只读参考，工具返回值优先]",
+    "[当前机械状态简报 — 由 public state 派生，只读参考，工具返回值优先]",
     "",
-    JSON.stringify(state, null, 2),
+    buildGmBrief(getPublicState()),
     "",
-    "叙事压力：",
-    ...buildPressureNotes(state).map((note) => `- ${note}`),
-    "",
-    "这份快照只用于压住叙事倾向，不能替代工具调用；本轮任何工具返回值都覆盖快照。",
+    "这份简报只用于压住叙事倾向，不能替代工具调用；本轮任何工具返回值都覆盖简报。",
   ].join("\n");
   return {
     role: "user",
     content: [{ type: "text", text }],
     timestamp: 0,
   };
-}
-
-function buildPressureNotes(state: StateExport): string[] {
-  const notes = ["玩家行动不会自动获得最佳结果；成功也必须留下合理代价。"];
-  if (state.危险度 >= 3) {
-    notes.push("危险度 ≥ 3：禁止写成完全安全，必须保留即时威胁或环境压力。");
-  }
-  if (state.魔力负担 >= 25) {
-    notes.push("魔力负担 ≥ 25：魔术回路/供魔压力必须进入描写，禁止把神秘当免费资源。");
-  }
-  return notes;
 }
 
 function loadUserProfile(): UserProfile {
