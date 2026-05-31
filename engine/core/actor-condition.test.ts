@@ -107,3 +107,80 @@ void test("updateActorCondition rejects missing tracked item transfer", () => {
     /tracked item 不存在/,
   );
 });
+
+void test("add-tracked-item creates item in trackedItems map", () => {
+  resetState();
+
+  upsertActor({
+    kind: "setup-protagonist",
+    actor: {
+      id: "protagonist",
+      kind: "human",
+      roles: [],
+      magecraft: null,
+      servantForm: null,
+      identity: {
+        publicIdentity: "测试",
+        background: "测试",
+        lockedFacts: [],
+      },
+      presentation: {
+        displayName: "测试",
+        apparentAge: "20",
+        outfit: { label: "测试", details: "测试" },
+        demeanor: "测试",
+      },
+      condition: { wounds: [], afflictions: [], permanentEffects: [] },
+      inventory: { ordinaryItems: [], heldTrackedItemIds: [] },
+      abilities: [],
+      relationshipToProtagonist: { stance: "self", summary: "测试" },
+    },
+    present: true,
+    ally: true,
+    reason: "测试 setup",
+  });
+
+  const result = updateActorCondition({
+    kind: "add-tracked-item",
+    label: "魔力遮蔽用玻璃珠",
+    itemKind: "mystic-code",
+    holderActorId: "protagonist",
+    ownerActorId: null,
+    condition: "intact",
+    visibility: "player-known",
+    notes: ["棕红发女性魔术师赠予", "内含蓝色符文碎片"],
+    reason: "测试物品追踪",
+  });
+
+  assert.match(result.message, /已记录到追踪列表/);
+
+  const state = getState();
+  const items = Object.values(state.public.trackedItems);
+  assert.equal(items.length, 1);
+  assert.equal(items[0]?.label, "魔力遮蔽用玻璃珠");
+  assert.equal(items[0]?.kind, "mystic-code");
+  assert.equal(items[0]?.holderActorId, "protagonist");
+  assert.equal(items[0]?.condition, "intact");
+  assert.equal(items[0]?.visibility, "player-known");
+  assert.equal(items[0]?.notes.length, 2);
+});
+
+void test("add-tracked-item rejects invalid holder actor", () => {
+  resetState();
+
+  assert.throws(
+    () =>
+      updateActorCondition({
+        kind: "add-tracked-item",
+        label: "测试物品",
+        itemKind: "key-item",
+        holderActorId: "missing-actor",
+        ownerActorId: null,
+        condition: "intact",
+        visibility: "player-known",
+        notes: [],
+        reason: "测试",
+      }),
+    /holder actor 不存在/,
+  );
+});

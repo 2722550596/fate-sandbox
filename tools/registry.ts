@@ -172,7 +172,8 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "- 伤势/异常状态已自然恢复或稳定，需要从当前状态中移除\n" +
       "- 更换外观/装备呈现\n" +
       "- 重要物品跨 actor 转移\n" +
-      "- 人类或其他非从者 actor 的魔术回路状态、Od、纪律或隶属需要更新\n\n" +
+      "- 人类或其他非从者 actor 的魔术回路状态、Od、纪律或隶属需要更新\n" +
+      "- 将新获得的关键物加入 trackedItems 追踪列表（跨场景持续影响选择的物品）\n\n" +
       "【严禁的行为】\n" +
       "- 改写锁定身份事实、真名或基础参数\n" +
       "- 用通用 HP 百分比替代离散伤势\n" +
@@ -186,6 +187,7 @@ export function registerAllTools(pi: ExtensionAPI): void {
         Type.Literal("resolve-condition"),
         Type.Literal("change-outfit"),
         Type.Literal("transfer-tracked-item"),
+        Type.Literal("add-tracked-item"),
       ]),
       actorId: Type.Optional(Type.String()),
       severity: Type.Optional(
@@ -224,6 +226,33 @@ export function registerAllTools(pi: ExtensionAPI): void {
       ),
       itemId: Type.Optional(Type.String()),
       holderActorId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+      ownerActorId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+      label: Type.Optional(
+        Type.String({ description: "add-tracked-item 必填：物品的玩家可见标签" }),
+      ),
+      itemKind: Type.Optional(
+        Type.Union([
+          Type.Literal("mundane"),
+          Type.Literal("weapon"),
+          Type.Literal("mystic-code"),
+          Type.Literal("document"),
+          Type.Literal("key-item"),
+          Type.Literal("other"),
+        ]),
+      ),
+      condition: Type.Optional(
+        Type.Union([
+          Type.Literal("intact"),
+          Type.Literal("damaged"),
+          Type.Literal("broken"),
+          Type.Literal("spent"),
+          Type.Literal("unknown"),
+        ]),
+      ),
+      visibility: Type.Optional(
+        Type.Union([Type.Literal("player-known"), Type.Literal("suspected")]),
+      ),
+      notes: Type.Optional(Type.Array(Type.String())),
       conditionKind: Type.Optional(Type.Union([Type.Literal("wound"), Type.Literal("affliction")])),
       conditionId: Type.Optional(Type.String()),
       outcome: Type.Optional(Type.Union([Type.Literal("recovered"), Type.Literal("stabilized")])),

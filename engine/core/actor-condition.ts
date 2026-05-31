@@ -52,6 +52,17 @@ export type ActorConditionEvent =
       itemId: ItemId;
       holderActorId: ActorId | null;
       reason: string;
+    }
+  | {
+      kind: "add-tracked-item";
+      label: string;
+      itemKind: "mundane" | "weapon" | "mystic-code" | "document" | "key-item" | "other";
+      holderActorId: ActorId | null;
+      ownerActorId: ActorId | null;
+      condition: "intact" | "damaged" | "broken" | "spent" | "unknown";
+      visibility: "player-known" | "suspected";
+      notes: string[];
+      reason: string;
     };
 
 export interface ActorConditionEventResult {
@@ -74,6 +85,8 @@ export function updateActorCondition(event: ActorConditionEvent): ActorCondition
       return changeOutfit(event);
     case "transfer-tracked-item":
       return transferTrackedItem(event);
+    case "add-tracked-item":
+      return addTrackedItem(event);
     default:
       throw new Error("unreachable actor condition event kind");
   }
@@ -229,4 +242,32 @@ function transferTrackedItem(
     item.location = null;
   });
   return { message: "重要物品持有者已更新。" };
+}
+
+function addTrackedItem(
+  event: Extract<ActorConditionEvent, { kind: "add-tracked-item" }>,
+): ActorConditionEventResult {
+  assertNonEmptyString(event.label, "label");
+  assertNonEmptyString(event.reason, "reason");
+  updateState((draft) => {
+    if (event.holderActorId !== null && draft.public.actors[event.holderActorId] === undefined) {
+      throw new Error(`holder actor 不存在: ${event.holderActorId}`);
+    }
+    if (event.ownerActorId !== null && draft.public.actors[event.ownerActorId] === undefined) {
+      throw new Error(`owner actor 不存在: ${event.ownerActorId}`);
+    }
+    const id = createId("item");
+    draft.public.trackedItems[id] = {
+      id,
+      label: event.label,
+      kind: event.itemKind,
+      ownerActorId: event.ownerActorId,
+      holderActorId: event.holderActorId,
+      location: null,
+      condition: event.condition,
+      visibility: event.visibility,
+      notes: event.notes,
+    };
+  });
+  return { message: "重要物品已记录到追踪列表。" };
 }
