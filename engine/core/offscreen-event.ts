@@ -1,9 +1,4 @@
-import type {
-  ActorId,
-  OffscreenEvent,
-  OffscreenEventSource,
-  OffscreenEventVisibility,
-} from "./state";
+import type { OffscreenEvent, OffscreenEventSource, OffscreenEventVisibility } from "./state";
 
 import { assertIsoDateString, assertNonEmptyString, createId, updateState } from "./state";
 
@@ -37,7 +32,6 @@ export function recordOffscreenEvent(input: RecordOffscreenEventInput): RecordOf
   const createdFrom = assertOffscreenEventSource(input.createdFrom);
 
   updateState((draft) => {
-    assertKnownActorIds(actorIds, draft.public.actors);
     draft.secrets.offscreenEventLog.push({
       id: eventId,
       lineId,
@@ -52,14 +46,6 @@ export function recordOffscreenEvent(input: RecordOffscreenEventInput): RecordOf
   });
 
   return { eventId };
-}
-
-function assertKnownActorIds(actorIds: readonly ActorId[], actors: Record<ActorId, unknown>): void {
-  for (const actorId of actorIds) {
-    if (actors[actorId] === undefined) {
-      throw new Error(`offscreen event 引用了不存在的 actor: ${actorId}`);
-    }
-  }
 }
 
 function assertOffscreenEventVisibility(value: unknown): OffscreenEventVisibility {
