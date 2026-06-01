@@ -413,9 +413,16 @@ export function registerAllTools(pi: ExtensionAPI): void {
         Type.Literal("add-debt"),
       ]),
       purseId: Type.Optional(
-        Type.String({ description: "资金账户 id；不确定时必须先调用 get_status 查看账户列表" }),
+        Type.String({
+          description:
+            "资金账户 id；可省略并提供 ownerActorId，让工具自动选择该 actor 唯一 held purse",
+        }),
       ),
-      ownerActorId: Type.Optional(Type.String()),
+      ownerActorId: Type.Optional(
+        Type.String({
+          description: "不确定 purseId 时填写 actorId；若该 actor 只有一个 held purse 会自动选择",
+        }),
+      ),
       debtorActorId: Type.Optional(Type.String()),
       creditor: Type.Optional(Type.String()),
       label: Type.Optional(Type.String()),

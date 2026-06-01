@@ -20,6 +20,22 @@ void test("updateEconomy spends money from a named purse", () => {
   assert.equal(purse?.amount, 48800);
 });
 
+void test("updateEconomy can spend from actor held purse", () => {
+  resetState();
+
+  updateEconomy({
+    kind: "spend-money",
+    ownerActorId: "protagonist",
+    amount: 4200,
+    reason: "采购医疗用品",
+  });
+
+  const purse = getState().public.economy.accessibleFunds.find(
+    (entry) => entry.id === "purse-protagonist-cash",
+  );
+  assert.equal(purse?.amount, 45800);
+});
+
 void test("updateEconomy rejects overspending", () => {
   resetState();
 
