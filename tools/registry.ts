@@ -15,6 +15,7 @@ import { privateResolveTool } from "./state/private-resolve";
 import { recordMemoryTool } from "./state/record-memory";
 import { recordOffscreenEventTool } from "./state/record-offscreen-event";
 import { revealSecretTool } from "./state/reveal-secret";
+import { sceneBeatTool } from "./state/scene-beat";
 import { updateActorConditionTool } from "./state/update-actor-condition";
 import { updateEconomyTool } from "./state/update-economy";
 import { updateSceneTool } from "./state/update-scene";
@@ -73,6 +74,46 @@ export function registerAllTools(pi: ExtensionAPI): void {
 
   pi.registerTool({
     label: toolLabel,
+    name: "scene_beat",
+    description:
+      "以剧情 beat 为单位管理 storyWindow、Scene Objective、即时威胁和在场 actor；避免用多个 update_scene 调用手动拼工作流。\n\n" +
+      "【必须调用的场景】\n" +
+      "- 复杂场景进入新 beat，需要同时建立剧情窗口和 1-5 个 Scene Objective\n" +
+      "- beat 完成，需要验证所有 Scene Objective 已解决后切换或清除窗口\n" +
+      "- 场景切换伴随在场 actor / 同行者变化\n\n" +
+      "【严禁的行为】\n" +
+      "- 用它记录长期目标；长期后果应写入 record_memory\n" +
+      "- 未解决当前目标就 transition-beat\n" +
+      "- 写入不存在的 actorId 或隐藏真相",
+    parameters: Type.Object({
+      kind: Type.Union([Type.Literal("begin-beat"), Type.Literal("transition-beat")]),
+      storyWindow: Type.Optional(storyWindowSchema()),
+      objectives: Type.Optional(
+        Type.Array(Type.String({ description: "begin-beat 必填，1-5 个" })),
+      ),
+      threats: Type.Optional(
+        Type.Array(
+          Type.Object({
+            summary: Type.String(),
+            severity: threatSeveritySchema(),
+          }),
+        ),
+      ),
+      presentActorIds: Type.Optional(Type.Array(Type.String())),
+      allyActorIds: Type.Optional(Type.Array(Type.String())),
+      situation: Type.Optional(situationSchema()),
+      completedBeatId: Type.Optional(Type.String()),
+      resolvedObjectiveIds: Type.Optional(Type.Array(Type.String())),
+      nextBeat: Type.Optional(Type.Union([Type.Unknown(), Type.Null()])),
+      memoryPrompt: Type.Optional(Type.String()),
+      reason: Type.String(),
+    }),
+    execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
+      sceneBeatTool(params, ctx.sessionManager),
+  });
+
+  pi.registerTool({
+    label: toolLabel,
     name: "update_scene",
     description:
       "按领域事件更新时间、地点、场景态势、剧情窗口、目标、威胁。\n\n" +
@@ -100,19 +141,7 @@ export function registerAllTools(pi: ExtensionAPI): void {
       location: Type.Optional(locationSchema()),
       elapsedMinutes: Type.Optional(Type.Union([Type.Integer(), Type.String()])),
       situation: Type.Optional(situationSchema()),
-      storyWindow: Type.Optional(
-        Type.Object({
-          currentArcId: Type.String({ description: "当前 arc id，如 B2" }),
-          currentBeatId: Type.String({ description: "当前 beat id，如 ryudou-scouting-wrapup" }),
-          title: Type.String({ description: "玩家可见剧情窗口标题" }),
-          allowedActions: Type.Array(Type.String({ description: "本 beat 允许推进的行动边界" })),
-          forbiddenEscalations: Type.Array(
-            Type.String({ description: "本 beat 禁止提前触发或公开的升级" }),
-          ),
-          completionCriteria: Type.Array(Type.String({ description: "本 beat 完成条件" })),
-          nextBeatHints: Type.Array(Type.String({ description: "不泄密的后续问题或钩子" })),
-        }),
-      ),
+      storyWindow: Type.Optional(storyWindowSchema()),
       summary: Type.Optional(
         Type.String({ description: "add-objective/add-threat 必填：目标或威胁的玩家可见摘要" }),
       ),
@@ -588,6 +617,20 @@ export function registerAllTools(pi: ExtensionAPI): void {
     description: "【调试工具】将当前内存状态导出到 state/state.json。严禁把 secrets 泄露给玩家。",
     parameters: Type.Object({}),
     execute: async () => exportStateTool(),
+  });
+}
+
+function storyWindowSchema(): ReturnType<typeof Type.Object> {
+  return Type.Object({
+    currentArcId: Type.String({ description: "当前 arc id，如 B2" }),
+    currentBeatId: Type.String({ description: "当前 beat id，如 ryudou-scouting-wrapup" }),
+    title: Type.String({ description: "玩家可见剧情窗口标题" }),
+    allowedActions: Type.Array(Type.String({ description: "本 beat 允许推进的行动边界" })),
+    forbiddenEscalations: Type.Array(
+      Type.String({ description: "本 beat 禁止提前触发或公开的升级" }),
+    ),
+    completionCriteria: Type.Array(Type.String({ description: "本 beat 完成条件" })),
+    nextBeatHints: Type.Array(Type.String({ description: "不泄密的后续问题或钩子" })),
   });
 }
 
