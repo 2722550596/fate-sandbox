@@ -368,9 +368,9 @@ export interface ResourceTrack {
 }
 
 export interface ServantContractState {
-  masterActorId: ActorId | null;
-  masterName: string | null;
-  status: "stable" | "weak" | "cut" | "masterless";
+  masterActorId: ActorId;
+  masterName: string;
+  status: "stable" | "weak";
   manaSupply: "sufficient" | "strained" | "starved";
 }
 
@@ -1407,14 +1407,8 @@ function assertServantContractState(raw: unknown): ServantContractState {
     throw new Error(`非法 contract: ${formatUnknown(raw)}。`);
   }
   return {
-    masterActorId:
-      raw["masterActorId"] === null
-        ? null
-        : assertNonEmptyString(raw["masterActorId"], "contract.masterActorId"),
-    masterName:
-      raw["masterName"] === null
-        ? null
-        : assertNonEmptyString(raw["masterName"], "contract.masterName"),
+    masterActorId: assertNonEmptyString(raw["masterActorId"], "contract.masterActorId"),
+    masterName: assertNonEmptyString(raw["masterName"], "contract.masterName"),
     status: assertOneOf(raw["status"], CONTRACT_STATUSES, "contract.status"),
     manaSupply: assertOneOf(raw["manaSupply"], MANA_SUPPLIES, "contract.manaSupply"),
   };
@@ -1919,7 +1913,7 @@ const SERVANT_CLASSES = [
   "Custom",
 ] as const;
 const TRUE_NAME_STATUSES = ["hidden", "suspected", "revealed"] as const;
-const CONTRACT_STATUSES = ["stable", "weak", "cut", "masterless"] as const;
+const CONTRACT_STATUSES = ["stable", "weak"] as const;
 const MANA_SUPPLIES = ["sufficient", "strained", "starved"] as const;
 const FATE_PARAM_KEYS = [
   "strength",
