@@ -34,3 +34,18 @@ void test("updateEconomy rejects overspending", () => {
     /资金不足/,
   );
 });
+
+void test("updateEconomy reports available purse ids for an unknown purse", () => {
+  resetState();
+
+  assert.throws(
+    () =>
+      updateEconomy({
+        kind: "spend-money",
+        purseId: "protagonist-cash",
+        amount: 100,
+        reason: "测试错误信息",
+      }),
+    /purse-protagonist-cash/,
+  );
+});

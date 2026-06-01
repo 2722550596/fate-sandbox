@@ -123,6 +123,80 @@ void test("commitTurn can move into a scene beat", () => {
   assert.equal(result.results.length, 1);
 });
 
+void test("commitTurn fills missing nested reasons from summary", () => {
+  resetState();
+
+  const result = commitTurn({
+    summary: "移动到新都并采购基础物资。",
+    events: [
+      {
+        kind: "scene",
+        event: {
+          kind: "move-location",
+          location: {
+            region: "冬木市",
+            site: "新都",
+            detail: "商业街",
+            boundary: "normal",
+          },
+          elapsedMinutes: 40,
+        },
+      },
+      {
+        kind: "economy",
+        event: {
+          kind: "spend-money",
+          purseId: "purse-protagonist-cash",
+          amount: 3800,
+        },
+      },
+    ],
+  });
+
+  const state = getState();
+  assert.equal(state.public.scene.location.detail, "商业街");
+  assert.equal(state.public.economy.accessibleFunds[0]?.amount, 46200);
+  assert.equal(result.results.length, 2);
+});
+
+void test("commitTurn accepts flat scene beat events from tool input", () => {
+  resetState();
+
+  const result = commitTurn({
+    summary: "进入新都调查 beat。",
+    events: [
+      {
+        kind: "scene-beat",
+        event: {
+          kind: "move-location",
+          storyWindow: {
+            currentArcId: "B1",
+            currentBeatId: "shinto-investigation",
+            title: "新都魔力痕迹调查",
+            allowedActions: ["调查"],
+            forbiddenEscalations: ["不得交战"],
+            completionCriteria: ["确认一处痕迹"],
+            nextBeatHints: [],
+          },
+          objectives: ["确认一处痕迹"],
+          location: {
+            region: "冬木市",
+            site: "新都",
+            detail: "商业街北侧小路",
+            boundary: "normal",
+          },
+          elapsedMinutes: 25,
+        },
+      },
+    ],
+  });
+
+  const state = getState();
+  assert.equal(state.public.scene.storyWindow?.currentBeatId, "shinto-investigation");
+  assert.equal(state.public.scene.location.detail, "商业街北侧小路");
+  assert.equal(result.results.length, 1);
+});
+
 void test("commitTurn can transition scene beat by objective summaries", () => {
   resetState();
 

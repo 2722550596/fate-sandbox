@@ -60,7 +60,10 @@ function changePurseAmount(
   updateState((draft) => {
     const purse = draft.public.economy.accessibleFunds.find((entry) => entry.id === purseId);
     if (purse === undefined) {
-      throw new Error(`资金账户不存在: ${purseId}`);
+      const available = draft.public.economy.accessibleFunds.map((entry) => entry.id).join(", ");
+      throw new Error(
+        `资金账户不存在: ${purseId}。当前可用: ${available.length === 0 ? "无" : available}。`,
+      );
     }
     const nextAmount = purse.amount + delta;
     if (nextAmount < 0) {
