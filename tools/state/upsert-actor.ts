@@ -1,4 +1,9 @@
-import type { ActorRegistryInput, PublicNpcInput, ServantInput } from "../../engine/core/actor";
+import type {
+  ActorRegistryInput,
+  PublicNpcInput,
+  PublicNpcSkeletonInput,
+  ServantInput,
+} from "../../engine/core/actor";
 
 import { upsertActor } from "../../engine/core/actor";
 import { persistCurrentState } from "../../engine/core/state-persistence";
@@ -29,6 +34,12 @@ function assertActorRegistryInput(params: unknown): ActorRegistryInput {
       return {
         kind,
         npc: assertRecord(params["npc"], "npc") as unknown as PublicNpcInput,
+        reason: assertString(params["reason"], "reason"),
+      };
+    case "ensure-public-npc":
+      return {
+        kind,
+        npc: assertRecord(params["npc"], "npc") as unknown as PublicNpcSkeletonInput,
         reason: assertString(params["reason"], "reason"),
       };
     case "upsert-servant":

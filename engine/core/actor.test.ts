@@ -41,6 +41,66 @@ void test("upsertActor adds an entered NPC from safe public projection", () => {
   assert.equal(publicState.scene.presentActorIds.includes("tohsaka-rin"), false);
 });
 
+void test("ensurePublicNpc creates a minimal public skeleton", () => {
+  resetState();
+
+  const result = upsertActor({
+    kind: "ensure-public-npc",
+    npc: {
+      actorId: "tohsaka-rin",
+      displayName: "远坂凛",
+      publicIdentity: "穗群原学园学生，当前与士郎同行调查的魔术师。",
+    },
+    reason: "确保同行 NPC 可被 scene presence 引用",
+  });
+
+  const publicState = getPublicState();
+  const actor = publicState.actors["tohsaka-rin"];
+  assert.equal(result.message, "public npc skeleton 已写入：tohsaka-rin。");
+  assert.equal(actor?.presentation.displayName, "远坂凛");
+  assert.equal(actor?.presentation.apparentAge, "玩家可见年龄未确认");
+  assert.deepEqual(actor?.inventory.ordinaryItems, []);
+  assert.equal(actor?.relationshipToProtagonist.stance, "neutral");
+  assert.equal(publicState.scene.presentActorIds.includes("tohsaka-rin"), false);
+});
+
+void test("ensurePublicNpc does not overwrite an existing actor", () => {
+  resetState();
+
+  upsertActor({
+    kind: "upsert-public-npc",
+    npc: {
+      id: "tohsaka-rin",
+      kind: "human",
+      displayName: "远坂凛",
+      publicIdentity: "穗群原学园二年A班学生，校内知名优等生。",
+      apparentAge: "十七岁左右",
+      outfit: { label: "穗群原学园制服", details: "红色外套与黑色长袜。" },
+      demeanor: "优等生式的从容。",
+      publicRoles: [{ kind: "social", label: "穗群原学园学生" }],
+      relationshipToProtagonist: { stance: "friendly", summary: "同校学生。" },
+      ordinaryItems: ["红色发带"],
+    },
+    reason: "NPC enters scene during smoke test",
+  });
+
+  const result = upsertActor({
+    kind: "ensure-public-npc",
+    npc: {
+      actorId: "tohsaka-rin",
+      displayName: "远坂",
+      publicIdentity: "不完整 skeleton 不应覆盖既有 actor。",
+    },
+    reason: "重复确保 actor 存在",
+  });
+
+  const actor = getPublicState().actors["tohsaka-rin"];
+  assert.equal(result.message, "actor 已存在：tohsaka-rin。");
+  assert.equal(actor?.presentation.displayName, "远坂凛");
+  assert.equal(actor?.presentation.outfit.label, "穗群原学园制服");
+  assert.deepEqual(actor?.inventory.ordinaryItems, ["红色发带"]);
+});
+
 void test("upsertActor rejects non-protagonist setup", () => {
   resetState();
 

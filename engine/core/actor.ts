@@ -1,5 +1,6 @@
 import type {
   ActorId,
+  ActorKind,
   ActorRole,
   FateParams,
   NoblePhantasm,
@@ -28,6 +29,19 @@ export interface PublicNpcInput {
   publicRoles: ActorRole[];
   relationshipToProtagonist: RelationshipState;
   ordinaryItems: string[];
+}
+
+export interface PublicNpcSkeletonInput {
+  actorId: ActorId;
+  npcKind?: ActorKind;
+  displayName: string;
+  publicIdentity: string;
+  apparentAge?: string;
+  outfit?: OutfitState;
+  demeanor?: string;
+  publicRoles?: ActorRole[];
+  relationshipToProtagonist?: RelationshipState;
+  ordinaryItems?: string[];
 }
 
 export interface ServantInput {
@@ -69,6 +83,11 @@ export type ActorRegistryInput =
       reason: string;
     }
   | {
+      kind: "ensure-public-npc";
+      npc: PublicNpcSkeletonInput;
+      reason: string;
+    }
+  | {
       kind: "upsert-servant";
       servant: ServantInput;
       reason: string;
@@ -105,6 +124,8 @@ export function upsertActor(input: ActorRegistryInput): UpsertActorResult {
       return upsertProtagonist(input);
     case "upsert-public-npc":
       return upsertPublicNpc(input);
+    case "ensure-public-npc":
+      return ensurePublicNpc(input);
     case "upsert-servant":
       return upsertServant(input);
     default:
@@ -130,6 +151,24 @@ function upsertPublicNpc(
   const actor = toSafePublicActor(input.npc);
   writeActor(actor);
   return { message: `public npc 已写入：${actor.id}。` };
+}
+
+function ensurePublicNpc(
+  input: Extract<ActorRegistryInput, { kind: "ensure-public-npc" }>,
+): UpsertActorResult {
+  assertNonEmptyString(input.reason, "reason");
+  const actor = toSafePublicActorFromSkeleton(input.npc);
+  let created = false;
+  updateState((draft) => {
+    if (draft.public.actors[actor.id] !== undefined) {
+      return;
+    }
+    draft.public.actors[actor.id] = actor;
+    created = true;
+  });
+  return {
+    message: created ? `public npc skeleton 已写入：${actor.id}。` : `actor 已存在：${actor.id}。`,
+  };
 }
 
 function upsertServant(
@@ -251,6 +290,27 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
     default:
       throw new Error("unreachable public npc kind");
   }
+}
+
+function toSafePublicActorFromSkeleton(npc: PublicNpcSkeletonInput): PublicActorState {
+  return toSafePublicActor({
+    id: npc.actorId,
+    kind: npc.npcKind ?? "human",
+    displayName: npc.displayName,
+    publicIdentity: npc.publicIdentity,
+    apparentAge: npc.apparentAge ?? "玩家可见年龄未确认",
+    outfit: npc.outfit ?? {
+      label: "玩家可见外观未确认",
+      details: "玩家可见外观未确认",
+    },
+    demeanor: npc.demeanor ?? "玩家可见举止未确认",
+    publicRoles: npc.publicRoles ?? [],
+    relationshipToProtagonist: npc.relationshipToProtagonist ?? {
+      stance: "neutral",
+      summary: "尚未建立关系。",
+    },
+    ordinaryItems: npc.ordinaryItems ?? [],
+  });
 }
 
 function assertKnownActors(

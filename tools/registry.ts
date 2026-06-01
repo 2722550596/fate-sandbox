@@ -377,9 +377,10 @@ export function registerAllTools(pi: ExtensionAPI): void {
     label: toolLabel,
     name: "upsert_actor",
     description:
-      "将 protagonist setup、玩家可见 NPC 摘要、或从者完整数据写入 public actor registry。\n\n" +
+      "将 protagonist setup、玩家可见 NPC 摘要、NPC 安全 skeleton、或从者完整数据写入 public actor registry。\n\n" +
       "【必须调用的场景】\n" +
-      "- 重要 NPC 正式入场：使用 kind=upsert-public-npc（仅公开身份/外观/关系）\n" +
+      "- 重要 NPC 正式入场且只需要可被 scene/presence 引用：使用 kind=ensure-public-npc（幂等，不覆盖已有 actor）\n" +
+      "- 重要 NPC 需要完整公开投影：使用 kind=upsert-public-npc（仅公开身份/外观/关系）\n" +
       "- 开局 setup 确认玩家角色身份后：使用 kind=setup-protagonist\n" +
       "- 从者入场（有完整职阶/参数/技能/宝具）：使用 kind=upsert-servant\n\n" +
       "【严禁的行为】\n" +
@@ -389,11 +390,12 @@ export function registerAllTools(pi: ExtensionAPI): void {
     parameters: Type.Object({
       kind: Type.Union([
         Type.Literal("setup-protagonist"),
+        Type.Literal("ensure-public-npc"),
         Type.Literal("upsert-public-npc"),
         Type.Literal("upsert-servant"),
       ]),
       actor: Type.Optional(publicActorSchema()),
-      npc: Type.Optional(publicNpcSchema()),
+      npc: Type.Optional(Type.Union([publicNpcSchema(), publicNpcSkeletonSchema()])),
       servant: Type.Optional(servantSchema()),
       reason: Type.String(),
     }),
@@ -719,6 +721,52 @@ function publicNpcSchema(): ReturnType<typeof Type.Object> {
       summary: Type.String(),
     }),
     ordinaryItems: Type.Array(Type.String()),
+  });
+}
+
+function publicNpcSkeletonSchema(): ReturnType<typeof Type.Object> {
+  return Type.Object({
+    actorId: Type.String({ description: "actor id，如 tohsaka-rin；已存在时不会覆盖 actor" }),
+    npcKind: Type.Optional(
+      Type.Union([
+        Type.Literal("human"),
+        Type.Literal("outsider"),
+        Type.Literal("spirit"),
+        Type.Literal("other"),
+      ]),
+    ),
+    displayName: Type.String({ description: "玩家可见称呼/姓名" }),
+    publicIdentity: Type.String({ description: "玩家当前可知身份摘要；不得写隐藏身份" }),
+    apparentAge: Type.Optional(Type.String()),
+    outfit: Type.Optional(Type.Object({ label: Type.String(), details: Type.String() })),
+    demeanor: Type.Optional(Type.String({ description: "玩家可见举止；不得写私密动机" })),
+    publicRoles: Type.Optional(
+      Type.Array(
+        Type.Union([
+          Type.Object({ kind: Type.Literal("social"), label: Type.String() }),
+          Type.Object({
+            kind: Type.Literal("faction"),
+            factionId: Type.String(),
+            label: Type.String(),
+          }),
+        ]),
+      ),
+    ),
+    relationshipToProtagonist: Type.Optional(
+      Type.Object({
+        stance: Type.Union([
+          Type.Literal("self"),
+          Type.Literal("ally"),
+          Type.Literal("friendly"),
+          Type.Literal("neutral"),
+          Type.Literal("wary"),
+          Type.Literal("hostile"),
+          Type.Literal("unknown"),
+        ]),
+        summary: Type.String(),
+      }),
+    ),
+    ordinaryItems: Type.Optional(Type.Array(Type.String())),
   });
 }
 

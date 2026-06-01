@@ -69,6 +69,30 @@ describe("Fate state tool-level smoke flow", () => {
     assert.deepEqual(hydrated.public, beforeHydration.public);
   });
 
+  it("accepts minimal NPC skeletons through upsert_actor tool", () => {
+    resetState();
+    const sessionManager = createMockSessionManager();
+
+    const result = upsertActorTool(
+      {
+        kind: "ensure-public-npc",
+        npc: {
+          actorId: "tohsaka-rin",
+          displayName: "远坂凛",
+          publicIdentity: "穗群原学园学生，当前与士郎同行调查的魔术师。",
+        },
+        reason: "tool smoke test ensures a known NPC skeleton",
+      },
+      sessionManager,
+    );
+
+    assert.match(textOf(result), /public npc skeleton 已写入：tohsaka-rin/);
+    const state = cloneState();
+    assert.equal(state.public.actors["tohsaka-rin"]?.presentation.displayName, "远坂凛");
+    assert.equal(state.public.scene.presentActorIds.includes("tohsaka-rin"), false);
+    assert.equal(sessionManager.entries.length, 1);
+  });
+
   it("accepts runtime servant setup through upsert_actor tool", () => {
     resetState();
     const sessionManager = createMockSessionManager();
