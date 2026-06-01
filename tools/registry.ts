@@ -266,20 +266,24 @@ export function registerAllTools(pi: ExtensionAPI): void {
     label: toolLabel,
     name: "upsert_actor",
     description:
-      "将 protagonist setup 或玩家可见 NPC 摘要写入 public actor registry；NPC 只能写玩家已知外观/身份/关系，不接受魔术、真名、宝具、私密动机等字段。\n\n" +
+      "将 protagonist setup、玩家可见 NPC 摘要、或从者完整数据写入 public actor registry。\n\n" +
       "【必须调用的场景】\n" +
-      "- 重要 NPC 正式入场，且后续需要被 scene、memory、private_resolve 或关系状态引用：使用 kind=upsert-public-npc\n" +
-      "- 开局 setup 已确认玩家角色身份/魔术回路/能力后，用 kind=setup-protagonist 覆盖初始占位 skeleton\n" +
-      "- 玩家与 NPC 建立同盟、敌对、契约、伤势、死亡、真名揭示等可追踪关系\n\n" +
+      "- 重要 NPC 正式入场：使用 kind=upsert-public-npc（仅公开身份/外观/关系）\n" +
+      "- 开局 setup 确认玩家角色身份后：使用 kind=setup-protagonist\n" +
+      "- 从者入场（有完整职阶/参数/技能/宝具）：使用 kind=upsert-servant\n\n" +
       "【严禁的行为】\n" +
-      "- 对 NPC 传完整 canonical actor；NPC 入场只传 npc 窄字段\n" +
-      "- 把世界角色数据库全量塞进 state；只写本局需要追踪的 actor\n" +
-      "- 写入玩家未知幕后真相；隐藏事实必须放 secrets/debug 路径\n" +
-      "- 在 public NPC 中写魔术、真名、宝具、隐藏身份、御主身份、幕后动机或秘密能力",
+      "- 对普通 NPC 使用 upsert-servant\n" +
+      "- 用 upsert-public-npc 写入魔术、真名、宝具、隐藏身份\n" +
+      "- 把世界角色数据库全量塞进 state；只写本局需要追踪的 actor",
     parameters: Type.Object({
-      kind: Type.Union([Type.Literal("setup-protagonist"), Type.Literal("upsert-public-npc")]),
+      kind: Type.Union([
+        Type.Literal("setup-protagonist"),
+        Type.Literal("upsert-public-npc"),
+        Type.Literal("upsert-servant"),
+      ]),
       actor: Type.Optional(publicActorSchema()),
       npc: Type.Optional(publicNpcSchema()),
+      servant: Type.Optional(servantSchema()),
       present: Type.Boolean({ description: "是否加入当前 scene.presentActorIds" }),
       ally: Type.Boolean({ description: "是否加入 allyActorIds" }),
       reason: Type.String(),
@@ -534,6 +538,107 @@ function publicNpcSchema(): ReturnType<typeof Type.Object> {
       summary: Type.String(),
     }),
     ordinaryItems: Type.Array(Type.String()),
+  });
+}
+
+function servantSchema(): ReturnType<typeof Type.Object> {
+  return Type.Object({
+    id: Type.String({ description: "从者 actor id，如 caster 或 assassin" }),
+    displayName: Type.String({ description: "玩家可见称呼，如 Caster 或 佐佐木小次郎" }),
+    publicIdentity: Type.String({ description: "玩家当前可知的公开身份摘要" }),
+    apparentAge: Type.String(),
+    outfit: Type.Object({ label: Type.String(), details: Type.String() }),
+    demeanor: Type.String(),
+    className: Type.Union([
+      Type.Literal("Saber"),
+      Type.Literal("Archer"),
+      Type.Literal("Lancer"),
+      Type.Literal("Rider"),
+      Type.Literal("Caster"),
+      Type.Literal("Assassin"),
+      Type.Literal("Berserker"),
+    ]),
+    trueNameDisplay: Type.String({ description: "真名显示文本；hidden 时填职阶名如 Caster" }),
+    trueNameStatus: Type.Union([
+      Type.Literal("hidden"),
+      Type.Literal("suspected"),
+      Type.Literal("revealed"),
+    ]),
+    parameters: Type.Object({
+      strength: Type.String({ description: "Fate rank，如 B 或 A+" }),
+      endurance: Type.String(),
+      agility: Type.String(),
+      mana: Type.String(),
+      luck: Type.String(),
+      noblePhantasm: Type.String(),
+    }),
+    classSkills: Type.Array(
+      Type.Object({
+        name: Type.String(),
+        rank: Type.String({ description: "Fate rank 或 none" }),
+        summary: Type.String(),
+      }),
+    ),
+    personalSkills: Type.Array(
+      Type.Object({
+        name: Type.String(),
+        rank: Type.String({ description: "Fate rank 或 none" }),
+        summary: Type.String(),
+      }),
+    ),
+    noblePhantasms: Type.Array(
+      Type.Object({
+        name: Type.String(),
+        rank: Type.String({ description: "Fate rank" }),
+        type: Type.String({ description: "宝具类型，如 对魔术宝具" }),
+        status: Type.Union([Type.Literal("hidden"), Type.Literal("revealed")]),
+        description: Type.String(),
+      }),
+    ),
+    spiritualCore: Type.Integer({ description: "0-100 灵核完整度" }),
+    mana: Type.Integer({ description: "0-100 从者魔力余量" }),
+    spiritualCondition: Type.String({ description: "灵核状态描述，如 完好" }),
+    masterActorId: Type.Union([Type.String(), Type.Null()]),
+    masterName: Type.Union([Type.String(), Type.Null()]),
+    contractStatus: Type.Union([
+      Type.Literal("stable"),
+      Type.Literal("weak"),
+      Type.Literal("cut"),
+      Type.Literal("masterless"),
+    ]),
+    manaSupply: Type.Union([
+      Type.Literal("sufficient"),
+      Type.Literal("strained"),
+      Type.Literal("starved"),
+    ]),
+    currentOrder: Type.String({ description: "当前御主命令或自主行动目标" }),
+    publicRoles: Type.Optional(
+      Type.Array(
+        Type.Union([
+          Type.Object({ kind: Type.Literal("social"), label: Type.String() }),
+          Type.Object({
+            kind: Type.Literal("faction"),
+            factionId: Type.String(),
+            label: Type.String(),
+          }),
+        ]),
+      ),
+    ),
+    relationshipToProtagonist: Type.Optional(
+      Type.Object({
+        stance: Type.Union([
+          Type.Literal("self"),
+          Type.Literal("ally"),
+          Type.Literal("friendly"),
+          Type.Literal("neutral"),
+          Type.Literal("wary"),
+          Type.Literal("hostile"),
+          Type.Literal("unknown"),
+        ]),
+        summary: Type.String(),
+      }),
+    ),
+    ordinaryItems: Type.Optional(Type.Array(Type.String())),
   });
 }
 

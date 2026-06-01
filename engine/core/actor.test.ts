@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { upsertActor } from "./actor";
 import { buildGmBrief } from "./gm-brief";
-import { getPublicState, resetState } from "./state";
+import { getPublicState, getState, resetState } from "./state";
 
 void test("upsertActor adds an entered NPC from safe public projection", () => {
   resetState();
@@ -115,4 +115,69 @@ void test("upsertActor can replace protagonist setup skeleton", () => {
   const publicState = getPublicState();
   assert.equal(publicState.actors.protagonist?.identity.publicIdentity, "卫宫士郎");
   assert.match(buildGmBrief(publicState), /玩家角色：卫宫士郎 \/ human \/ 卫宫士郎/);
+});
+
+void test("upsert-servant writes servant form with full parameter block", () => {
+  resetState();
+
+  upsertActor({
+    kind: "upsert-servant",
+    servant: {
+      id: "caster",
+      displayName: "Caster",
+      publicIdentity: "柳洞寺驻留的从者",
+      apparentAge: "不明",
+      outfit: { label: "深紫色长袍与兜帽", details: "遮住面容" },
+      demeanor: "谨慎、孤高",
+      className: "Caster",
+      trueNameDisplay: "Caster",
+      trueNameStatus: "hidden",
+      parameters: {
+        strength: "E",
+        endurance: "D",
+        agility: "C",
+        mana: "A+",
+        luck: "B",
+        noblePhantasm: "C",
+      },
+      classSkills: [{ name: "阵地作成", rank: "A", summary: "建造工房级别的魔术阵地" }],
+      personalSkills: [{ name: "高速神言", rank: "A", summary: "无需咏唱发动大魔术" }],
+      noblePhantasms: [
+        {
+          name: "Rule Breaker",
+          rank: "C",
+          kind: "对魔术宝具",
+          status: "hidden",
+          summary: "短剑形宝具，可强制解除魔力契约",
+        },
+      ],
+      spiritualCore: 100,
+      mana: 90,
+      spiritualCondition: "完好",
+      masterActorId: null,
+      masterName: "葛木宗一郎",
+      contractStatus: "masterless",
+      manaSupply: "sufficient",
+      currentOrder: "守卫柳洞寺山门",
+    },
+    present: false,
+    ally: false,
+    reason: "测试从者入场",
+  });
+
+  const state = getState();
+  const caster = state.public.actors["caster"];
+  assert.notEqual(caster, undefined);
+  assert.equal(caster?.kind, "spirit");
+  assert.notEqual(caster?.servantForm, null);
+  assert.equal(caster?.servantForm?.identity.className, "Caster");
+  assert.equal(caster?.servantForm?.identity.trueName.status, "hidden");
+  assert.equal(caster?.servantForm?.parameters.base.strength, "E");
+  assert.equal(caster?.servantForm?.parameters.base.mana, "A+");
+  assert.equal(caster?.servantForm?.skills.classSkills[0]?.name, "阵地作成");
+  assert.equal(caster?.servantForm?.noblePhantasms[0]?.name, "Rule Breaker");
+  assert.equal(caster?.servantForm?.noblePhantasms[0]?.status, "hidden");
+  assert.equal(caster?.servantForm?.contract.status, "masterless");
+  assert.equal(caster?.servantForm?.contract.masterName, "葛木宗一郎");
+  assert.equal(caster?.magecraft, null);
 });

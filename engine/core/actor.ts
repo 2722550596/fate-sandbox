@@ -1,4 +1,14 @@
-import type { ActorId, ActorRole, OutfitState, PublicActorState, RelationshipState } from "./state";
+import type {
+  ActorId,
+  ActorRole,
+  FateParams,
+  NoblePhantasm,
+  OutfitState,
+  PublicActorState,
+  RelationshipState,
+  ServantClass,
+  ServantSkill,
+} from "./state";
 
 import { assertNonEmptyString, updateState } from "./state";
 
@@ -22,6 +32,33 @@ export interface PublicNpcInput {
   ordinaryItems: string[];
 }
 
+export interface ServantInput {
+  id: ActorId;
+  displayName: string;
+  publicIdentity: string;
+  apparentAge: string;
+  outfit: OutfitState;
+  demeanor: string;
+  className: ServantClass;
+  trueNameDisplay: string;
+  trueNameStatus: "hidden" | "suspected" | "revealed";
+  parameters: FateParams;
+  classSkills: ServantSkill[];
+  personalSkills: ServantSkill[];
+  noblePhantasms: NoblePhantasm[];
+  spiritualCore: number;
+  mana: number;
+  spiritualCondition: string;
+  masterActorId: ActorId | null;
+  masterName: string | null;
+  contractStatus: "stable" | "weak" | "cut" | "masterless";
+  manaSupply: "sufficient" | "strained" | "starved";
+  currentOrder: string;
+  publicRoles?: ActorRole[];
+  relationshipToProtagonist?: RelationshipState;
+  ordinaryItems?: string[];
+}
+
 export type ActorRegistryInput =
   | {
       kind: "setup-protagonist";
@@ -33,6 +70,13 @@ export type ActorRegistryInput =
   | {
       kind: "upsert-public-npc";
       npc: PublicNpcInput;
+      present: boolean;
+      ally: boolean;
+      reason: string;
+    }
+  | {
+      kind: "upsert-servant";
+      servant: ServantInput;
       present: boolean;
       ally: boolean;
       reason: string;
@@ -48,6 +92,8 @@ export function upsertActor(input: ActorRegistryInput): UpsertActorResult {
       return upsertProtagonist(input);
     case "upsert-public-npc":
       return upsertPublicNpc(input);
+    case "upsert-servant":
+      return upsertServant(input);
     default:
       throw new Error("unreachable actor registry input kind");
   }
@@ -71,6 +117,78 @@ function upsertPublicNpc(
   const actor = toSafePublicActor(input.npc);
   writeActor(actor, input.present, input.ally);
   return { message: `public npc 已写入：${actor.id}。` };
+}
+
+function upsertServant(
+  input: Extract<ActorRegistryInput, { kind: "upsert-servant" }>,
+): UpsertActorResult {
+  assertNonEmptyString(input.reason, "reason");
+  const sv = input.servant;
+  assertNonEmptyString(sv.id, "servant.id");
+  assertNonEmptyString(sv.displayName, "servant.displayName");
+  assertNonEmptyString(sv.publicIdentity, "servant.publicIdentity");
+
+  const actor: PublicActorState = {
+    id: sv.id,
+    kind: "spirit",
+    origin: "圣杯召唤",
+    roles: sv.publicRoles ?? [],
+    magecraft: null,
+    servantForm: {
+      identity: {
+        className: sv.className,
+        trueName: {
+          status: sv.trueNameStatus,
+          display: sv.trueNameDisplay,
+        },
+        locked: true,
+      },
+      condition: {
+        spiritualCore: { value: sv.spiritualCore },
+        mana: { value: sv.mana },
+        spiritualCondition: sv.spiritualCondition,
+        permanentDefects: [],
+      },
+      contract: {
+        masterActorId: sv.masterActorId,
+        masterName: sv.masterName,
+        status: sv.contractStatus,
+        manaSupply: sv.manaSupply,
+      },
+      parameters: {
+        base: sv.parameters,
+        modifiers: [],
+        baseLocked: true,
+      },
+      skills: {
+        classSkills: sv.classSkills,
+        personalSkills: sv.personalSkills,
+      },
+      noblePhantasms: sv.noblePhantasms,
+      currentOrder: sv.currentOrder,
+    },
+    identity: {
+      publicIdentity: sv.publicIdentity,
+      background: sv.publicIdentity,
+      lockedFacts: [],
+    },
+    presentation: {
+      displayName: sv.displayName,
+      apparentAge: sv.apparentAge,
+      outfit: sv.outfit,
+      demeanor: sv.demeanor,
+    },
+    condition: { wounds: [], afflictions: [], permanentEffects: [] },
+    inventory: { ordinaryItems: sv.ordinaryItems ?? [], heldTrackedItemIds: [] },
+    abilities: [],
+    relationshipToProtagonist: sv.relationshipToProtagonist ?? {
+      stance: "neutral",
+      summary: "尚未建立关系。",
+    },
+  };
+
+  writeActor(actor, input.present, input.ally);
+  return { message: `从者已写入：${sv.id} (${sv.className})。` };
 }
 
 function writeActor(actor: PublicActorState, present: boolean, ally: boolean): void {
