@@ -9,6 +9,7 @@ import { resetStateTool } from "./debug/reset-state";
 import { switchToolsetTool } from "./debug/switch-toolset";
 import { lookupTool } from "./lookup/lookup";
 import { commitTurnTool } from "./state/commit-turn";
+import { finishCurrentBeatTool } from "./state/finish-current-beat";
 import { getStatusTool } from "./state/get-status";
 import { patchStateTool } from "./state/patch-state";
 import { privateResolveTool } from "./state/private-resolve";
@@ -67,6 +68,79 @@ export function registerAllTools(pi: ExtensionAPI): void {
       commitTurnTool(params, ctx.sessionManager),
   });
 
+  pi.registerTool({
+    label: toolLabel,
+    name: "finish_current_beat",
+    description:
+      "以当前 storyWindow 为上下文收口当前 Scene Beat；这是常用叙事 macro tool，避免手写 commit_turn 的 transition-beat/memory/presence 事务 AST。\n\n" +
+      "【必须调用的场景】\n" +
+      "- 当前 beat 的目标已经在叙事中全部满足，需要收口并进入短暂停顿或下一个 beat\n" +
+      "- 玩家完成调查/揭示/对峙/撤离后，需要同时 transition 当前 beat、可选记录 memory、可选更新在场角色\n" +
+      "- 你只知道“当前 beat 已完成”，不想手填 completedBeatId/objectiveIds/storyWindow.currentArcId\n\n" +
+      "【严禁的行为】\n" +
+      "- 当前没有 storyWindow 时调用；普通多事件状态变化用 commit_turn\n" +
+      "- 未满足当前 completionCriteria 就强行收口\n" +
+      "- 用 memory 写入未揭示 secret；公开记忆仍必须提供 claims 并遵守证据门禁",
+    parameters: Type.Object({
+      outcome: Type.String({ description: "当前 beat 收口结果摘要，也会作为事务 summary/reason" }),
+      memory: Type.Optional(
+        Type.Object({
+          title: Type.String(),
+          summary: Type.String(),
+          consequences: Type.Optional(Type.Array(Type.String())),
+          claims: Type.Array(
+            Type.Object({
+              kind: Type.Union([
+                Type.Literal("mundane"),
+                Type.Literal("identity"),
+                Type.Literal("location"),
+                Type.Literal("affiliation"),
+                Type.Literal("motive"),
+                Type.Literal("ability"),
+                Type.Literal("resource"),
+                Type.Literal("relationship"),
+                Type.Literal("event-cause"),
+                Type.Literal("world-fact"),
+              ]),
+              statement: Type.String(),
+              certainty: Type.Union([
+                Type.Literal("observed"),
+                Type.Literal("confirmed"),
+                Type.Literal("inferred"),
+                Type.Literal("rumor"),
+                Type.Literal("hypothesis"),
+              ]),
+              subjectId: Type.Optional(Type.String()),
+              relatedSecretSlotIds: Type.Optional(Type.Array(Type.String())),
+              evidence: Type.Optional(Type.String()),
+            }),
+          ),
+        }),
+      ),
+      nextBeat: Type.Optional(
+        Type.Union([
+          Type.Object({
+            title: Type.String(),
+            objectives: Type.Array(Type.String({ description: "下一 beat 的 1-5 个玩家可见目标" })),
+            beatId: Type.Optional(Type.String()),
+            allowedActions: Type.Optional(Type.Array(Type.String())),
+            forbiddenEscalations: Type.Optional(Type.Array(Type.String())),
+            completionCriteria: Type.Optional(Type.Array(Type.String())),
+            nextBeatHints: Type.Optional(Type.Array(Type.String())),
+            presentActorIds: Type.Optional(Type.Array(Type.String())),
+            allyActorIds: Type.Optional(Type.Array(Type.String())),
+            situation: Type.Optional(situationSchema()),
+          }),
+          Type.Null(),
+        ]),
+      ),
+      presentActorIds: Type.Optional(Type.Array(Type.String())),
+      allyActorIds: Type.Optional(Type.Array(Type.String())),
+      situation: Type.Optional(situationSchema()),
+    }),
+    execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
+      finishCurrentBeatTool(params, ctx.sessionManager),
+  });
   pi.registerTool({
     label: toolLabel,
     name: "get_status",
