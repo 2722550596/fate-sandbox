@@ -1,5 +1,4 @@
 import type { ScenePresenceInput } from "../../engine/core/actor";
-import type { ActorConditionEvent } from "../../engine/core/actor-condition";
 import type { EconomyEvent } from "../../engine/core/economy";
 import type { MemoryEvent } from "../../engine/core/memory";
 import type {
@@ -11,6 +10,8 @@ import type {
 } from "../../engine/core/scene";
 import type { ServantFormEvent } from "../../engine/core/servant";
 import type { TurnCommitEvent, TurnCommitInput } from "../../engine/core/turn-commit";
+
+import { normalizeActorConditionEvent } from "./actor-condition-normalizer";
 
 const DEFAULT_SUMMARY = "本轮状态变化。";
 
@@ -43,8 +44,9 @@ function normalizeTurnCommitEvent(value: unknown, summary: string): TurnCommitEv
     case "actor-condition":
       return {
         kind,
-        event: trustDomainEvent<ActorConditionEvent>(
+        event: normalizeActorConditionEvent(
           withReason(assertRecord(event["event"], "actor-condition.event"), summary),
+          summary,
         ),
       };
     case "servant-form":

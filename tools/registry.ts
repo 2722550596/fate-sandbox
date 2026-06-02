@@ -358,27 +358,20 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "- 玩家或已入场 actor 受伤、感染、诅咒、获得永久影响\n" +
       "- 伤势治疗状态发生变化，需要就地更新伤势描述/treatment\n" +
       "- 伤势/异常状态已自然恢复或稳定，需要从当前状态中移除\n" +
-      "- 更换外观/装备呈现\n" +
+      "- 更换外观/装备呈现；换衣、伪装、灵装显现/灵子化导致可见服装变化时使用 kind=change-outfit（也兼容 update-outfit/change-clothes）\n" +
       "- 重要物品跨 actor 转移、状态变化或消耗明细变化\n" +
       "- 人类或其他非从者 actor 的魔术回路状态、Od、纪律或隶属需要更新\n" +
       "- 将新获得的关键物加入 trackedItems 追踪列表（跨场景持续影响选择的物品）\n\n" +
       "【严禁的行为】\n" +
       "- 改写锁定身份事实、真名或基础参数\n" +
       "- 用通用 HP 百分比替代离散伤势\n" +
-      "- 叙事声称人类魔力/Od 已消耗或恢复，却不更新 actor.magecraft.circuits.od/status",
+      "- 叙事声称人类魔力/Od 已消耗或恢复，却不更新 actor.magecraft.circuits.od/status\n" +
+      "- 把换衣/伪装/灵装外观变化误写成 update-wound；update-wound 只能更新已有 wound conditionId",
     parameters: Type.Object({
-      kind: Type.Union([
-        Type.Literal("add-wound"),
-        Type.Literal("update-wound"),
-        Type.Literal("add-affliction"),
-        Type.Literal("add-permanent-effect"),
-        Type.Literal("update-magecraft-circuits"),
-        Type.Literal("resolve-condition"),
-        Type.Literal("change-outfit"),
-        Type.Literal("transfer-tracked-item"),
-        Type.Literal("update-tracked-item"),
-        Type.Literal("add-tracked-item"),
-      ]),
+      kind: Type.String({
+        description:
+          "允许: add-wound, update-wound, add-affliction, add-permanent-effect, update-magecraft-circuits, resolve-condition, change-outfit, update-outfit(别名), change-clothes(别名), transfer-tracked-item, update-tracked-item, add-tracked-item。更换服装只用 change-outfit/update-outfit，不要用 update-wound。",
+      }),
       actorId: Type.Optional(Type.String()),
       severity: Type.Optional(
         Type.Union([
