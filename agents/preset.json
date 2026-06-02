@@ -2,10 +2,18 @@
   "version": 1,
   "modules": [
     {
-      "id": "world-context",
+      "id": "creative-constitution",
       "enabled": true,
       "slot": "pre-history",
       "priority": 10,
+      "header": "creative_constitution",
+      "source": "agents/gm-creative-constitution.md"
+    },
+    {
+      "id": "world-context",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 20,
       "header": "world_context",
       "source": "agents/gm-context.md"
     },
@@ -13,15 +21,31 @@
       "id": "player-character",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 20,
+      "priority": 30,
       "header": "player_character",
       "source": "runtime:player-character"
+    },
+    {
+      "id": "input-guide",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 40,
+      "header": "input_guide",
+      "source": "agents/gm-input-guide.md"
+    },
+    {
+      "id": "social-guide",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 50,
+      "header": "social_guide",
+      "source": "agents/gm-social-guide.md"
     },
     {
       "id": "writing-guide",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 30,
+      "priority": 60,
       "header": "writing_guide",
       "source": "agents/gm-style.md"
     },
@@ -29,7 +53,7 @@
       "id": "render-protocol",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 40,
+      "priority": 70,
       "header": "render_protocol",
       "source": "agents/gm-render.md"
     },
@@ -42,10 +66,18 @@
       "source": "runtime:state-brief"
     },
     {
-      "id": "hard-rules",
+      "id": "tool-policy",
       "enabled": true,
       "slot": "pre-response",
       "priority": 20,
+      "header": "tool_policy",
+      "source": "agents/gm-tool-policy.md"
+    },
+    {
+      "id": "hard-rules",
+      "enabled": true,
+      "slot": "pre-response",
+      "priority": 30,
       "header": "hard_rules",
       "source": "agents/gm-rules.md"
     },
@@ -53,9 +85,9 @@
       "id": "story-driver",
       "enabled": true,
       "slot": "pre-response",
-      "priority": 30,
+      "priority": 40,
       "header": "story_driver",
-      "source": "agents/gm-think.md"
+      "source": "agents/gm-story-driver.md"
     },
     {
       "id": "output-contract",
