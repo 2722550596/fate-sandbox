@@ -1,7 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-import { Type } from "@sinclair/typebox";
-import { createRequire } from "node:module";
+import { Type } from "typebox";
 
 import { exportStateTool } from "./debug/export-state";
 import { getStateSchemaTool } from "./debug/get-state-schema";
@@ -25,7 +24,6 @@ import { updateServantFormTool } from "./state/update-servant-form";
 import { upsertActorTool } from "./state/upsert-actor";
 
 export function registerAllTools(pi: ExtensionAPI): void {
-  configureSchemaErrorMessages();
   const toolLabel = "FSN 沙盒";
 
   pi.registerTool({
@@ -502,7 +500,7 @@ export function registerAllTools(pi: ExtensionAPI): void {
         Type.Literal("upsert-servant"),
       ]),
       actor: Type.Optional(publicActorSchema()),
-      npc: Type.Optional(publicNpcRegistryInputSchema()),
+      npc: Type.Optional(Type.Union([publicNpcSchema(), publicNpcSkeletonSchema()])),
       servant: Type.Optional(servantSchema()),
       reason: Type.String(),
     }),
@@ -782,45 +780,6 @@ export function registerAllTools(pi: ExtensionAPI): void {
   });
 }
 
-const requireFromRegistry = createRequire(import.meta.url);
-
-type TypeBoxErrorParameter = { schema: Record<string, unknown> };
-
-interface TypeBoxErrorsModule {
-  DefaultErrorFunction: (parameter: TypeBoxErrorParameter) => string;
-  SetErrorFunction: (formatter: (parameter: TypeBoxErrorParameter) => string) => void;
-}
-
-function configureSchemaErrorMessages(): void {
-  const errorsModule = loadTypeBoxErrorsModule();
-  errorsModule.SetErrorFunction((parameter) => {
-    const customMessage = parameter.schema["errorMessage"];
-    return typeof customMessage === "string"
-      ? customMessage
-      : errorsModule.DefaultErrorFunction(parameter);
-  });
-}
-
-function loadTypeBoxErrorsModule(): TypeBoxErrorsModule {
-  const loaded: unknown = requireFromRegistry("@sinclair/typebox/errors");
-  if (!isRecord(loaded)) {
-    throw new Error("无法加载 @sinclair/typebox/errors：导出不是对象。");
-  }
-  const defaultErrorFunction = loaded["DefaultErrorFunction"];
-  const setErrorFunction = loaded["SetErrorFunction"];
-  if (typeof defaultErrorFunction !== "function" || typeof setErrorFunction !== "function") {
-    throw new Error("无法加载 @sinclair/typebox/errors：缺少错误格式化函数。");
-  }
-  return {
-    DefaultErrorFunction: (parameter) => String(defaultErrorFunction(parameter)),
-    SetErrorFunction: (formatter) => setErrorFunction(formatter),
-  };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 function storyWindowSchema(): ReturnType<typeof Type.Object> {
   return Type.Object({
     currentArcId: Type.String({ description: "当前 arc id，如 B2" }),
@@ -835,111 +794,90 @@ function storyWindowSchema(): ReturnType<typeof Type.Object> {
   });
 }
 
-function publicNpcRegistryInputSchema(): ReturnType<typeof Type.Union> {
-  return Type.Union(
-    [
-      Type.Object({
-        id: Type.String(),
-        kind: Type.Union([
-          Type.Literal("human"),
-          Type.Literal("outsider"),
-          Type.Literal("spirit"),
-          Type.Literal("other"),
-        ]),
-        displayName: Type.String({ description: "玩家可见称呼/姓名" }),
-        publicIdentity: Type.String({ description: "玩家当前可知身份摘要；不得写隐藏身份" }),
-        apparentAge: Type.String(),
-        outfit: Type.Object({ label: Type.String(), details: Type.String() }),
-        demeanor: Type.String({ description: "玩家可见举止；不得写私密动机" }),
-        publicRoles: Type.Array(publicActorRoleSchema()),
-        relationshipToProtagonist: Type.Object({
-          stance: Type.Union([
-            Type.Literal("self"),
-            Type.Literal("ally"),
-            Type.Literal("friendly"),
-            Type.Literal("neutral"),
-            Type.Literal("wary"),
-            Type.Literal("hostile"),
-            Type.Literal("unknown"),
-          ]),
-          summary: Type.String(),
+function publicNpcSchema(): ReturnType<typeof Type.Object> {
+  return Type.Object({
+    id: Type.String(),
+    kind: Type.Union([
+      Type.Literal("human"),
+      Type.Literal("outsider"),
+      Type.Literal("spirit"),
+      Type.Literal("other"),
+    ]),
+    displayName: Type.String({ description: "玩家可见称呼/姓名" }),
+    publicIdentity: Type.String({ description: "玩家当前可知身份摘要；不得写隐藏身份" }),
+    apparentAge: Type.String(),
+    outfit: Type.Object({ label: Type.String(), details: Type.String() }),
+    demeanor: Type.String({ description: "玩家可见举止；不得写私密动机" }),
+    publicRoles: Type.Array(
+      Type.Union([
+        Type.Object({ kind: Type.Literal("social"), label: Type.String() }),
+        Type.Object({
+          kind: Type.Literal("faction"),
+          factionId: Type.String(),
+          label: Type.String(),
         }),
-        ordinaryItems: Type.Array(Type.String()),
-      }),
-      Type.Object({
-        actorId: Type.String({ description: "actor id，如 tohsaka-rin；已存在时不会覆盖 actor" }),
-        npcKind: Type.Optional(
-          Type.Union([
-            Type.Literal("human"),
-            Type.Literal("outsider"),
-            Type.Literal("spirit"),
-            Type.Literal("other"),
-          ]),
-        ),
-        displayName: Type.String({ description: "玩家可见称呼/姓名" }),
-        publicIdentity: Type.String({ description: "玩家当前可知身份摘要；不得写隐藏身份" }),
-        apparentAge: Type.Optional(Type.String()),
-        outfit: Type.Optional(Type.Object({ label: Type.String(), details: Type.String() })),
-        demeanor: Type.Optional(Type.String({ description: "玩家可见举止；不得写私密动机" })),
-        publicRoles: Type.Optional(Type.Array(publicActorRoleSchema())),
-        relationshipToProtagonist: Type.Optional(
+      ]),
+    ),
+    relationshipToProtagonist: Type.Object({
+      stance: Type.Union([
+        Type.Literal("self"),
+        Type.Literal("ally"),
+        Type.Literal("friendly"),
+        Type.Literal("neutral"),
+        Type.Literal("wary"),
+        Type.Literal("hostile"),
+        Type.Literal("unknown"),
+      ]),
+      summary: Type.String(),
+    }),
+    ordinaryItems: Type.Array(Type.String()),
+  });
+}
+
+function publicNpcSkeletonSchema(): ReturnType<typeof Type.Object> {
+  return Type.Object({
+    actorId: Type.String({ description: "actor id，如 tohsaka-rin；已存在时不会覆盖 actor" }),
+    npcKind: Type.Optional(
+      Type.Union([
+        Type.Literal("human"),
+        Type.Literal("outsider"),
+        Type.Literal("spirit"),
+        Type.Literal("other"),
+      ]),
+    ),
+    displayName: Type.String({ description: "玩家可见称呼/姓名" }),
+    publicIdentity: Type.String({ description: "玩家当前可知身份摘要；不得写隐藏身份" }),
+    apparentAge: Type.Optional(Type.String()),
+    outfit: Type.Optional(Type.Object({ label: Type.String(), details: Type.String() })),
+    demeanor: Type.Optional(Type.String({ description: "玩家可见举止；不得写私密动机" })),
+    publicRoles: Type.Optional(
+      Type.Array(
+        Type.Union([
+          Type.Object({ kind: Type.Literal("social"), label: Type.String() }),
           Type.Object({
-            stance: Type.Union([
-              Type.Literal("self"),
-              Type.Literal("ally"),
-              Type.Literal("friendly"),
-              Type.Literal("neutral"),
-              Type.Literal("wary"),
-              Type.Literal("hostile"),
-              Type.Literal("unknown"),
-            ]),
-            summary: Type.String(),
+            kind: Type.Literal("faction"),
+            factionId: Type.String(),
+            label: Type.String(),
           }),
-        ),
-        ordinaryItems: Type.Optional(Type.Array(Type.String())),
-      }),
-    ],
-    {
-      errorMessage:
-        "npc 必须匹配二选一：完整 NPC 用 id+kind+必填 publicRoles/relationship/ordinaryItems；安全 skeleton 用 actorId+displayName+publicIdentity，其他字段可省略。",
-    },
-  );
-}
-
-function publicActorRoleSchema(): ReturnType<typeof Type.Union> {
-  return Type.Union(
-    [
-      Type.Object({ kind: Type.Literal("social"), label: Type.String() }),
+        ]),
+      ),
+    ),
+    relationshipToProtagonist: Type.Optional(
       Type.Object({
-        kind: Type.Literal("faction"),
-        factionId: Type.String(),
-        label: Type.String(),
+        stance: Type.Union([
+          Type.Literal("self"),
+          Type.Literal("ally"),
+          Type.Literal("friendly"),
+          Type.Literal("neutral"),
+          Type.Literal("wary"),
+          Type.Literal("hostile"),
+          Type.Literal("unknown"),
+        ]),
+        summary: Type.String(),
       }),
-      Type.Object({
-        kind: Type.Literal("master"),
-        commandSpells: Type.Object({ total: Type.Integer(), remaining: Type.Integer() }),
-        contractedServantIds: Type.Array(Type.String()),
-      }),
-    ],
-    {
-      errorMessage:
-        "publicRoles 每一项必须是 social{label}、faction{factionId,label} 或 master{commandSpells,contractedServantIds}。",
-    },
-  );
-}
-
-function servantContractStatusSchema(): ReturnType<typeof Type.Union> {
-  return Type.Union(
-    [Type.Literal("stable"), Type.Literal("weak"), Type.Literal("cut"), Type.Literal("masterless")],
-    { errorMessage: "contractStatus/status 必须是 stable、weak、cut 或 masterless。" },
-  );
-}
-
-function servantManaSupplySchema(): ReturnType<typeof Type.Union> {
-  return Type.Union(
-    [Type.Literal("sufficient"), Type.Literal("strained"), Type.Literal("starved")],
-    { errorMessage: "manaSupply 必须是 sufficient、strained 或 starved。" },
-  );
+    ),
+    ordinaryItems: Type.Optional(Type.Array(Type.String())),
+  });
 }
 
 function servantSchema(): ReturnType<typeof Type.Object> {
@@ -1015,8 +953,17 @@ function servantSchema(): ReturnType<typeof Type.Object> {
         Type.Null(),
       ]),
     ),
-    contractStatus: servantContractStatusSchema(),
-    manaSupply: servantManaSupplySchema(),
+    contractStatus: Type.Union([
+      Type.Literal("stable"),
+      Type.Literal("weak"),
+      Type.Literal("cut"),
+      Type.Literal("masterless"),
+    ]),
+    manaSupply: Type.Union([
+      Type.Literal("sufficient"),
+      Type.Literal("strained"),
+      Type.Literal("starved"),
+    ]),
     currentOrder: Type.String({ description: "当前御主命令或自主行动目标" }),
     publicRoles: Type.Optional(
       Type.Array(
@@ -1057,7 +1004,21 @@ function publicActorSchema(): ReturnType<typeof Type.Object> {
       Type.Literal("spirit"),
       Type.Literal("other"),
     ]),
-    roles: Type.Array(publicActorRoleSchema()),
+    roles: Type.Array(
+      Type.Union([
+        Type.Object({ kind: Type.Literal("social"), label: Type.String() }),
+        Type.Object({
+          kind: Type.Literal("faction"),
+          factionId: Type.String(),
+          label: Type.String(),
+        }),
+        Type.Object({
+          kind: Type.Literal("master"),
+          commandSpells: Type.Object({ total: Type.Integer(), remaining: Type.Integer() }),
+          contractedServantIds: Type.Array(Type.String()),
+        }),
+      ]),
+    ),
     magecraft: Type.Union([
       Type.Null(),
       Type.Object({
@@ -1195,8 +1156,17 @@ function servantContractSchema(): ReturnType<typeof Type.Object> {
         Type.Null(),
       ]),
     ),
-    status: servantContractStatusSchema(),
-    manaSupply: servantManaSupplySchema(),
+    status: Type.Union([
+      Type.Literal("stable"),
+      Type.Literal("weak"),
+      Type.Literal("cut"),
+      Type.Literal("masterless"),
+    ]),
+    manaSupply: Type.Union([
+      Type.Literal("sufficient"),
+      Type.Literal("strained"),
+      Type.Literal("starved"),
+    ]),
   });
 }
 

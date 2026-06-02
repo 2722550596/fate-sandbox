@@ -4,7 +4,6 @@
     "npm:@juicesharp/rpiv-ask-user-question",
     "npm:pi-claude-oauth-adapter",
     "npm:pi-smart-compact",
-    "npm:pi-subagents",
-    "npm:@sinclair/typebox"
+    "npm:pi-subagents"
   ]
 }

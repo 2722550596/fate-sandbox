@@ -22,7 +22,6 @@
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "^0.77.0",
     "@js-temporal/polyfill": "^0.5.1",
-    "@sinclair/typebox": "^0.34.49",
     "rfc6902": "^5.2.0",
     "typebox": "^1.1.38"
   },
