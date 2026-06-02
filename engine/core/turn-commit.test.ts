@@ -84,7 +84,7 @@ void test("commitTurn auto-closes a beat after resolving the last objective", ()
     ],
   });
 
-  assert.equal(getState().public.scene.objectives[0]?.status, "resolved");
+  assert.deepEqual(getState().public.scene.objectives, []);
   assert.equal(getState().public.scene.storyWindow, null);
   assert.equal(result.results.length, 2);
   const autoClose = result.results[1];

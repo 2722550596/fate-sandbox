@@ -330,6 +330,7 @@ void test("transitionSceneBeat can close current beat and open the next beat", (
       nextBeatHints: [],
     },
     objectives: ["记录"],
+    threats: [{ summary: "旧追兵压力", severity: "medium" }],
     reason: "设置当前 beat",
   });
 
@@ -353,6 +354,7 @@ void test("transitionSceneBeat can close current beat and open the next beat", (
   });
 
   assert.equal(getState().public.scene.storyWindow?.currentBeatId, "next-beat");
+  assert.deepEqual(getState().public.scene.threats, []);
 });
 
 void test("beginSceneBeat rejects beats without objectives", () => {

@@ -215,7 +215,7 @@ export function transitionSceneBeat(input: SceneBeatTransitionInput): SceneBeatT
     if (activeObjectives.length > 0) {
       throw new Error(formatUnresolvedObjectivesError(activeObjectives));
     }
-    draft.public.scene.storyWindow = null;
+    clearBeatScopedSceneState(draft);
   });
   if (input.nextBeat !== undefined && input.nextBeat !== null) {
     nextBeat = beginSceneBeat(input.nextBeat);
@@ -295,9 +295,15 @@ function setStoryWindow(
 
 function clearStoryWindow(): SceneEventResult {
   updateState((draft) => {
-    draft.public.scene.storyWindow = null;
+    clearBeatScopedSceneState(draft);
   });
   return { message: "剧情窗口已清除。" };
+}
+
+function clearBeatScopedSceneState(draft: State): void {
+  draft.public.scene.storyWindow = null;
+  draft.public.scene.objectives = [];
+  draft.public.scene.threats = [];
 }
 
 function addObjective(event: Extract<SceneEvent, { kind: "add-objective" }>): SceneEventResult {

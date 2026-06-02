@@ -18,9 +18,11 @@
 - 复杂场景、潜入、侦察、撤退、战斗准备、major beat 开始时，优先用 `start_scene_beat` 一次性锁定当前 beat 的 title、1-5 个 Scene Objective、即时威胁和在场 actor。
 - 当前回复不得越过 story window 的 forbiddenEscalations；要进入下一 beat，先满足 completionCriteria，再用 `finish_current_beat` 收口当前 storyWindow。
 - 当前 beat 收口优先调用 `finish_current_beat`；非常规多事件组合才使用 `commit_turn`。
+- `finish_current_beat.nextBeat` 必须换中心冲突：撤退完成后转为落脚、治疗、隐蔽、交涉、侦察或休整；禁止把“逃亡/追兵/撤退”换标题连续开成同质新 beat。旧追兵只能变成背景后果或明确升级成新类型风险，不能无限续写。
 - 简单移动、短时间推进、单个目标/威胁变化才使用 `update_scene`；复杂 beat 不要手动拼 `set-story-window` + 多个 `add-objective`，优先用 `start_scene_beat`。
 - 场景性质变化（侦察→日常、战斗→恢复、紧张→放松）时，必须同步更新 `situation` 字段。
 - `get_status` 的剧情窗口是玩家可见边界；不要把 secret、幕后真相、未来战斗底牌写进 title、allowedActions 或 nextBeatHints。
+- `allowedActions` / `nextBeatHints` 是 GM 内部边界，不是正文菜单；最终叙事不得把它们改写成“你可以 A，也可以 B”。
 
 ## 状态纪律
 

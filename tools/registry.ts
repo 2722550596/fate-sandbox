@@ -123,6 +123,7 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "【严禁的行为】\n" +
       "- 当前没有 storyWindow 时调用；普通多事件状态变化用 commit_turn\n" +
       "- 未满足当前 completionCriteria 就强行收口\n" +
+      "- nextBeat 继续复读同一中心冲突：撤退/逃亡完成后必须转为落脚、治疗、隐蔽、休整、交涉或新信息处理\n" +
       "- 用 memory 写入未揭示 secret；公开记忆仍必须提供 claims 并遵守证据门禁",
     parameters: Type.Object({
       outcome: Type.String({ description: "当前 beat 收口结果摘要，也会作为事务 summary/reason" }),
@@ -210,6 +211,7 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "- 进入复杂 beat 的同时发生移动或时间推进：同时提供 location 和 elapsedMinutes\n\n" +
       "【严禁的行为】\n" +
       "- 用它记录长期目标或幕后真相；长期后果写 memory，秘密走 reveal/private_resolve/offscreen\n" +
+      "- 旧 beat 刚收束后，用换皮标题继续开启同一种追逐/撤退/逃亡 beat\n" +
       "- 只有简单移动或几分钟日常过渡时调用；简单变化用 update_scene\n" +
       "- location 和 elapsedMinutes 只提供其一；同步移动必须两者都有",
     parameters: Type.Object({
