@@ -335,6 +335,67 @@ void test("commitTurn transition beat defaults to resolving all objectives", () 
   assert.equal(result.results.length, 2);
 });
 
+void test("commitTurn fills transition next beat reason from summary", () => {
+  resetState();
+
+  commitTurn({
+    summary: "开启揭示 beat。",
+    events: [
+      {
+        kind: "scene-beat",
+        event: {
+          kind: "begin-beat",
+          input: {
+            storyWindow: {
+              currentArcId: "B5",
+              currentBeatId: "reveal-wrapup",
+              title: "真名与宝具揭示收口",
+              allowedActions: ["整理线索"],
+              forbiddenEscalations: ["不得继续追击"],
+              completionCriteria: ["真名揭示成立", "宝具揭示成立"],
+              nextBeatHints: [],
+            },
+            objectives: ["真名揭示成立", "宝具揭示成立"],
+            reason: "设置揭示收口 beat",
+          },
+        },
+      },
+    ],
+  });
+
+  const result = commitTurn({
+    summary: "揭示成立并进入后续观察 beat。",
+    events: [
+      {
+        kind: "scene-beat",
+        event: {
+          kind: "transition-beat",
+          input: {
+            completedBeatId: "reveal-wrapup",
+            resolveAllObjectives: true,
+            nextBeat: {
+              storyWindow: {
+                currentArcId: "B5",
+                currentBeatId: "after-reveal-watch",
+                title: "揭示后的短暂停顿",
+                allowedActions: ["观察反应"],
+                forbiddenEscalations: ["不得跳过玩家回应"],
+                completionCriteria: ["确认下一步行动"],
+                nextBeatHints: [],
+              },
+              objectives: ["确认下一步行动"],
+            },
+          },
+        },
+      },
+    ],
+  });
+
+  const state = getState();
+  assert.equal(state.public.scene.storyWindow?.currentBeatId, "after-reveal-watch");
+  assert.equal(result.results.length, 1);
+});
+
 void test("commitTurn can transition scene beat by objective summaries", () => {
   resetState();
 

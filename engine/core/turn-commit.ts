@@ -26,12 +26,17 @@ type WithOptionalReason<T> = T extends { reason: string }
   ? Omit<T, "reason"> & { reason?: string }
   : T;
 
+type SceneBeatTransitionTurnInput = Omit<SceneBeatTransitionInput, "reason" | "nextBeat"> & {
+  reason?: string;
+  nextBeat?: WithOptionalReason<SceneBeatInput> | null;
+};
+
 export type SceneBeatTurnInputEvent =
   | { kind: "begin-beat"; input: WithOptionalReason<SceneBeatInput> }
-  | { kind: "transition-beat"; input: WithOptionalReason<SceneBeatTransitionInput> }
+  | { kind: "transition-beat"; input: SceneBeatTransitionTurnInput }
   | { kind: "move-location"; input: WithOptionalReason<SceneBeatMoveInput> }
   | (WithOptionalReason<SceneBeatInput> & { kind: "begin-beat" })
-  | (WithOptionalReason<SceneBeatTransitionInput> & { kind: "transition-beat" })
+  | (SceneBeatTransitionTurnInput & { kind: "transition-beat" })
   | (WithOptionalReason<SceneBeatMoveInput> & { kind: "move-location" });
 
 export type TurnCommitEvent =
@@ -135,7 +140,7 @@ function withSceneBeatDefaultReason(
     }
     case "transition-beat": {
       const input = "input" in event ? event.input : event;
-      return { kind: event.kind, input: withDefaultReason(input, summary) };
+      return { kind: event.kind, input: withTransitionBeatDefaultReason(input, summary) };
     }
     case "move-location": {
       const input = "input" in event ? event.input : event;
@@ -144,6 +149,20 @@ function withSceneBeatDefaultReason(
     default:
       throw new Error("unreachable scene beat event kind");
   }
+}
+
+function withTransitionBeatDefaultReason(
+  input: SceneBeatTransitionTurnInput,
+  summary: string,
+): SceneBeatTransitionInput {
+  const { nextBeat, ...transitionInput } = withDefaultReason(input, summary);
+  if (nextBeat === undefined || nextBeat === null) {
+    return { ...transitionInput, nextBeat };
+  }
+  return {
+    ...transitionInput,
+    nextBeat: withDefaultReason(nextBeat, transitionInput.reason),
+  };
 }
 
 function toScenePresenceInput(event: ScenePresenceSceneEvent): ScenePresenceInput {
