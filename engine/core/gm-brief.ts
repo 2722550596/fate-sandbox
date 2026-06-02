@@ -21,7 +21,7 @@ export function buildGmBrief(publicState: PublicGameState): string {
     `当前目标：${formatObjectives(publicState)}`,
     `当前威胁：${formatThreats(publicState)}`,
     `最近重大记忆：${formatRecentEvents(publicState)}`,
-    "本轮工具纪律：复杂 beat 开始用 scene_beat；多状态收口必须用 commit_turn（可包 scene-beat transition、移动、memory）；actor 入场/离场用 set_scene_presence。不要输出 JSON、数值表、schema 字段。",
+    "本轮工具纪律：复杂 beat 开始用 start_scene_beat；当前 beat 收口用 finish_current_beat；非常规多状态组合才用 commit_turn；actor 入场/离场用 set_scene_presence。不要输出 JSON、数值表、schema 字段。",
   ].join("\n");
 }
 
@@ -33,7 +33,7 @@ function formatLocation(location: PublicGameState["scene"]["location"]): string 
 function formatStoryWindow(publicState: PublicGameState): string {
   const window = publicState.scene.storyWindow;
   if (window === null) {
-    return "未设定；复杂场景应先用 scene_beat begin-beat 锁定 beat 边界";
+    return "未设定；复杂场景应先用 start_scene_beat 锁定 beat 边界";
   }
   const allowed = window.allowedActions.length === 0 ? "未列出" : window.allowedActions.join("、");
   const forbidden =

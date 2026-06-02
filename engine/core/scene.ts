@@ -444,7 +444,7 @@ function formatMissingObjectiveSelectorError(
 ): string {
   return [
     "resolve-objective 必须提供 objectiveId 或 objectiveSummary。",
-    "如果当前 beat 已全部完成，优先使用 scene_beat transition-beat 或 commit_turn scene-beat transition-beat，并设置 resolveAllObjectives=true。",
+    "如果当前 beat 已全部完成，优先使用 finish_current_beat；非常规组合才用 commit_turn 内部 scene-beat transition-beat。",
     "可用 objectiveId / objectiveSummary：",
     ...objectives.map((objective) => `- ${objective.id}: ${objective.summary}`),
   ].join("\n");

@@ -4,24 +4,23 @@
 
 ## 工具速查
 
-| 工具                     | 用途                                            | 何时调用                                                                        |
-| ------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------- |
-| `get_status`             | 玩家可见状态摘要 / GM brief                     | 需要确认时间、地点、资源、伤势、目标、威胁、记忆                                |
-| `commit_turn`            | 一轮内多个领域事件聚合提交                      | 同一回复同时改变 scene / condition / servant / economy / memory；复杂非常规组合 |
-| `finish_current_beat`    | 当前 beat 收口 macro tool                       | 当前 storyWindow 目标已满足，要收口、可选记录 memory、可选进入下一 beat         |
-| `start_scene_beat`       | 开启复杂 beat macro tool                        | 进入复杂调查/潜入/对峙/撤退/战斗准备；不手写 storyWindow id                     |
-| `scene_beat`             | 底层 beat 工具                                  | 特殊情况需要完整控制 storyWindow；单独完成/切换 beat 时可直接用                 |
-| `update_scene`           | 简单时间、地点、态势、单个目标/威胁变化         | 简单移动、时间推进、单个当前目标/威胁变化。**每次调用必须提供 `reason`**        |
-| `upsert_actor`           | Player-Safe Skeleton 写入 Public Actor Registry | 重要 NPC/从者首次需要跟踪；不表示在场或同行                                     |
-| `set_scene_presence`     | 当前 scene 在场 actor / 同行者                  | 已 materialized actor 入场、离场、同行者变化；复杂 beat 可直接交给 `scene_beat` |
-| `update_actor_condition` | 伤势、异常、长期影响、装备呈现、物品追踪        | actor 受伤、诅咒、换装、重要物品转移/创建追踪                                   |
-| `update_servant_form`    | 从者魔力、灵核、契约、参数修正                  | 供魔、灵核伤、契约变化、临时强化、永久缺损                                      |
-| `update_economy`         | JPY 资金、账户、债务                            | 消费、获得资金、食宿/装备/服务/情报交易                                         |
-| `record_memory`          | 长期事实、重大事件、日常摘要                    | 身世、契约、死亡/失踪/重伤、真名、宝具、阵营、跳时                              |
-| `reveal_secret`          | 玩家可见证据触发秘密揭示                        | 真名/宝具/隐藏身份从线索升级为公开事实                                          |
-| `private_resolve`        | 隐藏事实参与的窄口私密结算                      | NPC 隐藏反应、隐藏相性；只返回玩家安全约束                                      |
-| `record_offscreen_event` | 幕后事件 / 平行线结果落地                       | subagent 返回 offscreen 候选；只写 secret/foreshadowed                          |
-| `lookup`                 | 查询角色/地点/概念/时间线                       | 涉及任何预设设定时必须调用                                                      |
+| 工具                     | 用途                                            | 何时调用                                                                          |
+| ------------------------ | ----------------------------------------------- | --------------------------------------------------------------------------------- |
+| `get_status`             | 玩家可见状态摘要 / GM brief                     | 需要确认时间、地点、资源、伤势、目标、威胁、记忆                                  |
+| `commit_turn`            | 一轮内多个领域事件聚合提交                      | 同一回复同时改变 scene / condition / servant / economy / memory；复杂非常规组合   |
+| `finish_current_beat`    | 当前 beat 收口 macro tool                       | 当前 storyWindow 目标已满足，要收口、可选记录 memory、可选进入下一 beat           |
+| `start_scene_beat`       | 开启复杂 beat macro tool                        | 进入复杂调查/潜入/对峙/撤退/战斗准备；不手写 storyWindow id                       |
+| `update_scene`           | 简单时间、地点、态势、单个目标/威胁变化         | 简单移动、时间推进、单个当前目标/威胁变化。**每次调用必须提供 `reason`**          |
+| `upsert_actor`           | Player-Safe Skeleton 写入 Public Actor Registry | 重要 NPC/从者首次需要跟踪；不表示在场或同行                                       |
+| `set_scene_presence`     | 当前 scene 在场 actor / 同行者                  | 已 materialized actor 入场、离场、同行者变化；复杂 beat 可交给 `start_scene_beat` |
+| `update_actor_condition` | 伤势、异常、长期影响、装备呈现、物品追踪        | actor 受伤、诅咒、换装、重要物品转移/创建追踪                                     |
+| `update_servant_form`    | 从者魔力、灵核、契约、参数修正                  | 供魔、灵核伤、契约变化、临时强化、永久缺损                                        |
+| `update_economy`         | JPY 资金、账户、债务                            | 消费、获得资金、食宿/装备/服务/情报交易                                           |
+| `record_memory`          | 长期事实、重大事件、日常摘要                    | 身世、契约、死亡/失踪/重伤、真名、宝具、阵营、跳时                                |
+| `reveal_secret`          | 玩家可见证据触发秘密揭示                        | 真名/宝具/隐藏身份从线索升级为公开事实                                            |
+| `private_resolve`        | 隐藏事实参与的窄口私密结算                      | NPC 隐藏反应、隐藏相性；只返回玩家安全约束                                        |
+| `record_offscreen_event` | 幕后事件 / 平行线结果落地                       | subagent 返回 offscreen 候选；只写 secret/foreshadowed                            |
+| `lookup`                 | 查询角色/地点/概念/时间线                       | 涉及任何预设设定时必须调用                                                        |
 
 Debug-only：`patch_state` 已禁用常规裸 patch；`get_state_schema`、`export_state`、`override_locked_fact`、`reset_state` 只用于开发/修档。
 
@@ -43,33 +42,26 @@ Debug-only：`patch_state` 已禁用常规裸 patch；`get_state_schema`、`expo
 
 进入复杂 beat 时优先用 `start_scene_beat`，只写叙事层字段：title、objectives、purpose、可选 threats / presence / situation；同步移动时再加 location + elapsedMinutes。它会自动生成 currentBeatId、继承 currentArcId，并建立剧情窗口。
 
-特殊情况下需要完全控制 storyWindow 时，才用底层 `scene_beat begin-beat`：
-
 ```txt
-scene_beat begin-beat:
-currentArcId: B2
-currentBeatId: ryudou-scouting-wrapup
+start_scene_beat:
 title: 柳洞寺侦察收尾
-allowedActions:
-- 完成北侧断崖结界确认
-- 发送撤退信号
-- 与另一队汇合
-- 安全撤回卫宫宅
-forbiddenEscalations:
-- 不得触发佐佐木小次郎正面战
-- 不得公开美狄亚全部底牌
-completionCriteria:
-- 四人安全撤回
-- 结界结构被玩家侧记录
+purpose: 进入柳洞寺北侧断崖侦察收尾 beat
 objectives:
 - 确认北侧断崖结界
 - 发送撤退信号
 - 与另一队汇合
+forbiddenEscalations:
+- 不得触发佐佐木小次郎正面战
+- 不得公开美狄亚全部底牌
+threats:
+- summary: 结界边缘仍有从者级反应
+  severity: medium
 presentActorIds:
 - protagonist
+situation: investigation
 ```
 
-beat 完成且只有目标状态变化时，可直接用 `scene_beat transition-beat`。如果当前 storyWindow 的目标已在叙事中满足，需要收口、可选记录长期后果、可选进入下一 beat，优先用 `finish_current_beat`，不要手写 `completedBeatId/objectiveIds/storyWindow.currentArcId`。只有非常规复杂组合（例如同时撤回移动、推进时间、资源消耗、伤势结算）才用 `commit_turn` 包住 `scene-beat transition-beat`、`scene move-location`、`memory record-major-event` 等事件。长期后果写入 `record_memory`，不要留在 scene。
+beat 完成且只有目标状态变化时，可用 `finish_current_beat` 并把 `nextBeat` 设为 null。当前 storyWindow 的目标已在叙事中满足，需要收口、可选记录长期后果、可选进入下一 beat 时，优先用 `finish_current_beat`，不要手写 `completedBeatId/objectiveIds/storyWindow.currentArcId`。只有非常规复杂组合（例如同时撤回移动、推进时间、资源消耗、伤势结算）才用 `commit_turn` 包住内部 `scene-beat transition-beat`、`scene move-location`、`memory record-major-event` 等事件。长期后果写入 `record_memory`，不要留在 scene。
 
 ## 平行线 Subagent
 

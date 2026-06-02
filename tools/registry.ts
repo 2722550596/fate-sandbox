@@ -6,7 +6,6 @@ import { exportStateTool } from "./debug/export-state";
 import { getStateSchemaTool } from "./debug/get-state-schema";
 import { overrideLockedFactTool } from "./debug/override-locked-fact";
 import { resetStateTool } from "./debug/reset-state";
-import { switchToolsetTool } from "./debug/switch-toolset";
 import { lookupTool } from "./lookup/lookup";
 import { commitTurnTool } from "./state/commit-turn";
 import { finishCurrentBeatTool } from "./state/finish-current-beat";
@@ -16,7 +15,6 @@ import { privateResolveTool } from "./state/private-resolve";
 import { recordMemoryTool } from "./state/record-memory";
 import { recordOffscreenEventTool } from "./state/record-offscreen-event";
 import { revealSecretTool } from "./state/reveal-secret";
-import { sceneBeatTool } from "./state/scene-beat";
 import { setScenePresenceTool } from "./state/set-scene-presence";
 import { startSceneBeatTool } from "./state/start-scene-beat";
 import { updateActorConditionTool } from "./state/update-actor-condition";
@@ -36,7 +34,7 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "【必须调用的场景】\n" +
       "- 一轮回复同时改变时间/地点、Scene Objective、伤势、物品、资金、记忆或从者资源中的多个状态\n" +
       "- 叙事已经发生购买、治疗、移动、揭示、消耗、战斗结算等 canonical Game State 变化\n" +
-      "- 复杂 beat 收口时需要按顺序提交 scene_beat transition-beat、移动、memory 等多个事件；若本轮叙事已满足所有目标，transition-beat 可只填 completedBeatId，或显式 resolveAllObjectives=true\n\n" +
+      "- 复杂 beat 收口时需要按顺序提交内部 scene-beat transition、移动、memory 等多个事件；常规收口优先用 finish_current_beat\n\n" +
       "【严禁的行为】\n" +
       "- 把它当裸 patch；events 必须是已有领域事件\n" +
       "- 提交 Hidden Fact 到 Public Game State；秘密仍必须走 reveal_secret/private_resolve/record_offscreen_event\n" +
@@ -199,60 +197,6 @@ export function registerAllTools(pi: ExtensionAPI): void {
     execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
       startSceneBeatTool(params, ctx.sessionManager),
   });
-  pi.registerTool({
-    label: toolLabel,
-    name: "scene_beat",
-    description:
-      "以剧情 beat 为单位管理 storyWindow、Scene Objective、即时威胁和在场 actor；可选同步移动和推进时间，避免用多个 update_scene 调用手动拼工作流。\n\n" +
-      "【必须调用的场景】\n" +
-      "- 复杂场景进入新 beat，需要同时建立剧情窗口和 1-5 个 Scene Objective\n" +
-      "- 进入复杂 beat 的同时发生地点移动或时间推进：使用 kind=move-location\n" +
-      "- beat 完成，需要验证所有 Scene Objective 已解决后切换或清除窗口；若本轮叙事已满足所有目标，transition-beat 可省略 resolvedObjectiveIds/resolvedObjectiveSummaries，默认全部解决\n" +
-      "- 场景切换伴随在场 actor / 同行者变化\n\n" +
-      "【严禁的行为】\n" +
-      "- 用它记录长期目标；长期后果应写入 record_memory\n" +
-      "- 未解决当前目标就 transition-beat；不要用空数组表达未完成，若确实全部完成可省略 resolvedObjectiveIds/resolvedObjectiveSummaries 或填 resolveAllObjectives=true\n" +
-      "- 写入不存在的 actorId 或隐藏真相",
-    parameters: Type.Object({
-      kind: Type.Union([
-        Type.Literal("begin-beat"),
-        Type.Literal("transition-beat"),
-        Type.Literal("move-location"),
-      ]),
-      storyWindow: Type.Optional(storyWindowSchema()),
-      objectives: Type.Optional(
-        Type.Array(Type.String({ description: "begin-beat 必填，1-5 个" })),
-      ),
-      threats: Type.Optional(
-        Type.Array(
-          Type.Object({
-            summary: Type.String(),
-            severity: threatSeveritySchema(),
-          }),
-        ),
-      ),
-      presentActorIds: Type.Optional(Type.Array(Type.String())),
-      allyActorIds: Type.Optional(Type.Array(Type.String())),
-      situation: Type.Optional(situationSchema()),
-      location: Type.Optional(locationSchema()),
-      elapsedMinutes: Type.Optional(Type.Union([Type.Integer(), Type.String()])),
-      completedBeatId: Type.Optional(Type.String()),
-      resolvedObjectiveIds: Type.Optional(Type.Array(Type.String())),
-      resolvedObjectiveSummaries: Type.Optional(
-        Type.Array(Type.String({ description: "可用目标原文或片段；不必记 objective id" })),
-      ),
-      resolveAllObjectives: Type.Optional(
-        Type.Boolean({
-          description: "当前 beat 的 completionCriteria 已全部满足时设为 true，一次解决所有目标",
-        }),
-      ),
-      nextBeat: Type.Optional(Type.Union([Type.Unknown(), Type.Null()])),
-      memoryPrompt: Type.Optional(Type.String()),
-      reason: Type.String(),
-    }),
-    execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
-      sceneBeatTool(params, ctx.sessionManager),
-  });
 
   pi.registerTool({
     label: toolLabel,
@@ -263,11 +207,11 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "- 玩家移动地点或时间推进，且本轮没有其他状态变化\n" +
       "- 用户/续局明确声明当前地点与状态不一致，只需修正地点且不推进时间：用 kind=set-location\n" +
       "- 场景态势切换为日常、调查、社交、战斗、仪式、逃跑、整备\n" +
-      "- 单个当前目标/威胁变化；复杂 beat 用 scene_beat，多事件收口用 commit_turn\n\n" +
+      "- 单个当前目标/威胁变化；复杂 beat 开始用 start_scene_beat，当前 beat 收口用 finish_current_beat，多事件非常规组合用 commit_turn\n\n" +
       "【严禁的行为】\n" +
       "- 用叙事直接跳过时间或改变地点但不调用工具\n" +
       "- 用 set-location 表示剧情中的移动；剧情移动必须用 move-location 并提供 elapsedMinutes > 0\n" +
-      "- 在复杂 beat 中手动拼 set-story-window/add-objective；改用 scene_beat\n" +
+      "- 在复杂 beat 中手动拼 set-story-window/add-objective；改用 start_scene_beat\n" +
       "- 一轮内同时移动、完成目标、记录 memory，却绕过 commit_turn\n" +
       "- 越过当前 storyWindow.forbiddenEscalations 或未满足 completionCriteria 就提前进入下一战斗\n" +
       "- 在场 NPC 尚未写入 actor registry 时调用 private_resolve 或把 actorId 编出来\n" +
@@ -519,7 +463,7 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "【必须调用的场景】\n" +
       "- 已存在 actor 入场、离场、同行者变化\n" +
       "- 使用 upsert_actor materialize 新 actor 后，需要声明其是否在当前 scene\n" +
-      "- 场景切换但不需要完整 scene_beat 时\n\n" +
+      "- 场景切换但不需要 start_scene_beat / finish_current_beat 时\n\n" +
       "【严禁的行为】\n" +
       "- 写入不存在的 actorId；先用 upsert_actor materialize Player-Safe Skeleton\n" +
       "- 用 upsert_actor 的 actor registry 语义暗示在场变化\n" +
@@ -769,16 +713,6 @@ export function registerAllTools(pi: ExtensionAPI): void {
       ),
     }),
     execute: async (_toolCallId, params) => lookupTool(params),
-  });
-
-  pi.registerTool({
-    label: toolLabel,
-    name: "switch_toolset",
-    description: "切换可用工具组。debug 工具组包含调试/维护工具。",
-    parameters: Type.Object({
-      toolset: Type.String({ description: "工具组名: always 或 debug" }),
-    }),
-    execute: async (_toolCallId, params) => switchToolsetTool(params),
   });
 
   pi.registerTool({

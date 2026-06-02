@@ -15,9 +15,9 @@
 
 ## 剧情窗口纪律
 
-- 复杂场景、潜入、侦察、撤退、战斗准备、major beat 开始时，优先用 `start_scene_beat` 一次性锁定当前 beat 的 title、1-5 个 Scene Objective、即时威胁和在场 actor；只有需要完整控制底层 storyWindow 时才用 `scene_beat begin-beat`。
-- 当前回复不得越过 story window 的 forbiddenEscalations；要进入下一 beat，先满足 completionCriteria，再优先用 `finish_current_beat` 收口当前 storyWindow。
-- 只有单独完成/切换 beat、且没有 memory 或 presence 等其他变化时，才直接调用 `scene_beat transition-beat`；非常规多事件组合才使用 `commit_turn`。
+- 复杂场景、潜入、侦察、撤退、战斗准备、major beat 开始时，优先用 `start_scene_beat` 一次性锁定当前 beat 的 title、1-5 个 Scene Objective、即时威胁和在场 actor。
+- 当前回复不得越过 story window 的 forbiddenEscalations；要进入下一 beat，先满足 completionCriteria，再用 `finish_current_beat` 收口当前 storyWindow。
+- 当前 beat 收口优先调用 `finish_current_beat`；非常规多事件组合才使用 `commit_turn`。
 - 简单移动、短时间推进、单个目标/威胁变化才使用 `update_scene`；复杂 beat 不要手动拼 `set-story-window` + 多个 `add-objective`，优先用 `start_scene_beat`。
 - 场景性质变化（侦察→日常、战斗→恢复、紧张→放松）时，必须同步更新 `situation` 字段。
 - `get_status` 的剧情窗口是玩家可见边界；不要把 secret、幕后真相、未来战斗底牌写进 title、allowedActions 或 nextBeatHints。
@@ -36,7 +36,7 @@
 - 一轮内发生多个状态变化时，优先选最贴近叙事意图的 macro tool；当前 storyWindow 收口用 `finish_current_beat`，非常规多事件才用 `commit_turn` 聚合提交。单一、局部变化才直接调用对应领域工具。工具成功前禁止在叙事中声称“已推进时间”“已记录”“已更新”。
 - 如果同一回复里既移动/推进时间，又完成 Scene Objective、切换 beat、记录 memory、改变资源/伤势，必须把这些事件放进一个 `commit_turn.events` 顺序提交。
 - 时间必须推进：10 分钟以上过渡、移动、等待、上课、通勤、休息都必须写入 scene 事件；一轮内发生多段过渡时，用 `commit_turn` 按顺序提交。
-- actor materialization 与 physical presence 分离：新角色首次需要跟踪时用 `upsert_actor` 写入 Public Actor Registry；入场、离场、同行者变化用 `set_scene_presence` 或 `scene_beat`。
+- actor materialization 与 physical presence 分离：新角色首次需要跟踪时用 `upsert_actor` 写入 Public Actor Registry；入场、离场、同行者变化用 `set_scene_presence` 或 `start_scene_beat`。
 - 长期事实、重大事件、半天以上时间跳过必须调用 `record_memory`。
 - 玩家提出真名、宝具、隐藏身份判断时，必须调用 `reveal_secret`；证据不足时不得泄露正确答案。
 - 隐藏事实只可通过 `private_resolve` 产生玩家安全约束，不得把 secret 内容写进叙事。
