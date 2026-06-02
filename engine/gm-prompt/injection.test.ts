@@ -28,13 +28,14 @@ void test("injectGmPromptMessages inserts modular prompt stack", () => {
   const injected = injectGmPromptMessages<UserMessage>(messages);
   const texts = injected.map((message) => textOf(message));
 
-  assert.equal(injected.length, 6);
+  assert.equal(injected.length, 7);
   assert.match(texts[0] ?? "", /世界观与参考信息/);
   assert.equal(texts[1], "继续。");
   assert.match(texts[2] ?? "", /当前机械状态简报/);
   assert.match(texts[3] ?? "", /硬规则模块/);
   assert.match(texts[4] ?? "", /内部检查模块/);
   assert.match(texts[5] ?? "", /最终叙事风格模块/);
+  assert.match(texts[6] ?? "", /最终叙事渲染协议/);
 });
 
 function createUserMessage(text: string): UserMessage {

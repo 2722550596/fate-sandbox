@@ -17,6 +17,7 @@ export interface PromptAssets {
   rules: string;
   think: string;
   style: string;
+  render: string;
 }
 
 interface UserProfile {
@@ -36,6 +37,7 @@ export function loadPromptAssets(): PromptAssets {
       rules: readFileSync(join(__dirname, "..", "..", "agents", "gm-rules.md"), "utf-8"),
       think: readFileSync(join(__dirname, "..", "..", "agents", "gm-think.md"), "utf-8"),
       style: readFileSync(join(__dirname, "..", "..", "agents", "gm-style.md"), "utf-8"),
+      render: readFileSync(join(__dirname, "..", "..", "agents", "gm-render.md"), "utf-8"),
     };
   }
   return cachedAssets;
@@ -66,6 +68,7 @@ export function injectGmPromptMessages<TMessage>(
     buildRulesMessage(),
     buildThinkMessage(),
     buildStyleMessage(),
+    buildRenderMessage(),
     ...messages.slice(lastUserIndex + 1),
   ];
 }
@@ -111,6 +114,13 @@ function buildStyleMessage(): TextMessage {
   return buildInjectedUserMessage(
     "[最终叙事风格模块 — 在不违反硬规则的前提下，按此模块组织正文]",
     loadPromptAssets().style,
+  );
+}
+
+function buildRenderMessage(): TextMessage {
+  return buildInjectedUserMessage(
+    "[最终叙事渲染协议 — 输出前最后执行，禁止写成报告或句法八股]",
+    loadPromptAssets().render,
   );
 }
 
