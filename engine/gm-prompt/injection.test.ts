@@ -21,21 +21,22 @@ void test("buildSystemPrompt appends only the stable narrative lens identity", (
   assert.doesNotMatch(systemPrompt, /最终叙事风格模块/);
 });
 
-void test("injectGmPromptMessages inserts modular prompt stack", () => {
+void test("injectGmPromptMessages inserts slot-based prompt stack", () => {
   resetState();
   const messages: UserMessage[] = [createUserMessage("继续。")];
 
   const injected = injectGmPromptMessages<UserMessage>(messages);
   const texts = injected.map((message) => textOf(message));
 
-  assert.equal(injected.length, 7);
-  assert.match(texts[0] ?? "", /世界观与参考信息/);
-  assert.equal(texts[1], "继续。");
-  assert.match(texts[2] ?? "", /当前机械状态简报/);
-  assert.match(texts[3] ?? "", /硬规则模块/);
-  assert.match(texts[4] ?? "", /内部检查模块/);
-  assert.match(texts[5] ?? "", /最终叙事风格模块/);
-  assert.match(texts[6] ?? "", /最终叙事渲染协议/);
+  assert.equal(injected.length, 8);
+  assert.match(texts[0] ?? "", /<world_context>/);
+  assert.match(texts[1] ?? "", /<writing_guide>/);
+  assert.match(texts[2] ?? "", /<render_protocol>/);
+  assert.equal(texts[3], "继续。");
+  assert.match(texts[4] ?? "", /<mechanical_state>/);
+  assert.match(texts[5] ?? "", /<hard_rules>/);
+  assert.match(texts[6] ?? "", /<story_driver>/);
+  assert.match(texts[7] ?? "", /<output_contract>/);
 });
 
 function createUserMessage(text: string): UserMessage {

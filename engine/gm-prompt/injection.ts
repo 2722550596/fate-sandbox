@@ -18,10 +18,21 @@ export interface PromptAssets {
   think: string;
   style: string;
   render: string;
+  outputContract: string;
 }
 
 interface UserProfile {
   text: string;
+}
+
+type PromptSlot = "pre-history" | "post-last-user" | "final-contract";
+
+interface PromptModule {
+  id: string;
+  slot: PromptSlot;
+  priority: number;
+  header: string;
+  body: string;
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -38,6 +49,10 @@ export function loadPromptAssets(): PromptAssets {
       think: readFileSync(join(__dirname, "..", "..", "agents", "gm-think.md"), "utf-8"),
       style: readFileSync(join(__dirname, "..", "..", "agents", "gm-style.md"), "utf-8"),
       render: readFileSync(join(__dirname, "..", "..", "agents", "gm-render.md"), "utf-8"),
+      outputContract: readFileSync(
+        join(__dirname, "..", "..", "agents", "gm-output-contract.md"),
+        "utf-8",
+      ),
     };
   }
   return cachedAssets;
@@ -61,16 +76,94 @@ export function injectGmPromptMessages<TMessage>(
   }
 
   return [
+    ...buildSlotMessages("pre-history"),
     ...messages.slice(0, lastUserIndex),
-    buildContextMessage(),
     lastUserMessage,
-    buildStatePressureMessage(),
-    buildRulesMessage(),
-    buildThinkMessage(),
-    buildStyleMessage(),
-    buildRenderMessage(),
+    ...buildSlotMessages("post-last-user"),
     ...messages.slice(lastUserIndex + 1),
+    ...buildSlotMessages("final-contract"),
   ];
+}
+
+function buildPromptModules(): PromptModule[] {
+  const assets = loadPromptAssets();
+  const modules: PromptModule[] = [
+    {
+      id: "world-context",
+      slot: "pre-history",
+      priority: 10,
+      header: "world_context",
+      body: assets.context,
+    },
+    {
+      id: "player-character",
+      slot: "pre-history",
+      priority: 20,
+      header: "player_character",
+      body: loadUserProfile().text,
+    },
+    {
+      id: "writing-guide",
+      slot: "pre-history",
+      priority: 30,
+      header: "writing_guide",
+      body: assets.style,
+    },
+    {
+      id: "render-protocol",
+      slot: "pre-history",
+      priority: 40,
+      header: "render_protocol",
+      body: assets.render,
+    },
+    {
+      id: "mechanical-state",
+      slot: "post-last-user",
+      priority: 10,
+      header: "mechanical_state",
+      body: buildStatePressureText(),
+    },
+    {
+      id: "hard-rules",
+      slot: "post-last-user",
+      priority: 20,
+      header: "hard_rules",
+      body: assets.rules,
+    },
+    {
+      id: "story-driver",
+      slot: "post-last-user",
+      priority: 30,
+      header: "story_driver",
+      body: assets.think,
+    },
+    {
+      id: "output-contract",
+      slot: "final-contract",
+      priority: 10,
+      header: "output_contract",
+      body: assets.outputContract,
+    },
+  ];
+  return modules.filter((module) => module.body.length > 0);
+}
+
+function buildSlotMessages(slot: PromptSlot): TextMessage[] {
+  return buildPromptModules()
+    .filter((module) => module.slot === slot)
+    .toSorted(comparePromptModules)
+    .map(buildPromptModuleMessage);
+}
+
+function comparePromptModules(left: PromptModule, right: PromptModule): number {
+  if (left.priority !== right.priority) {
+    return left.priority - right.priority;
+  }
+  return left.id.localeCompare(right.id);
+}
+
+function buildPromptModuleMessage(module: PromptModule): TextMessage {
+  return buildInjectedUserMessage(module.header, module.body);
 }
 
 function findLastUserMessageIndex(messages: ReadonlyArray<unknown>): number {
@@ -82,69 +175,22 @@ function findLastUserMessageIndex(messages: ReadonlyArray<unknown>): number {
   return -1;
 }
 
-function buildContextMessage(): TextMessage {
-  const assets = loadPromptAssets();
-  const userProfile = loadUserProfile().text;
-  let text = "[以下为世界观与参考信息]\n\n" + assets.context;
-  if (userProfile.length > 0) {
-    text += "\n\n---\n\n## 玩家角色档案\n\n" + userProfile;
-  }
-  return {
-    role: "user",
-    content: [{ type: "text", text }],
-    timestamp: 0,
-  };
-}
-
-function buildRulesMessage(): TextMessage {
-  return buildInjectedUserMessage(
-    "[硬规则模块 — 最高优先级，决定世界与机械边界]",
-    loadPromptAssets().rules,
-  );
-}
-
-function buildThinkMessage(): TextMessage {
-  return buildInjectedUserMessage(
-    "[内部检查模块 — 只用于自检，禁止写进最终回复]",
-    loadPromptAssets().think,
-  );
-}
-
-function buildStyleMessage(): TextMessage {
-  return buildInjectedUserMessage(
-    "[最终叙事风格模块 — 在不违反硬规则的前提下，按此模块组织正文]",
-    loadPromptAssets().style,
-  );
-}
-
-function buildRenderMessage(): TextMessage {
-  return buildInjectedUserMessage(
-    "[最终叙事渲染协议 — 输出前最后执行，禁止写成报告或句法八股]",
-    loadPromptAssets().render,
-  );
-}
-
 function buildInjectedUserMessage(header: string, body: string): TextMessage {
   return {
     role: "user",
-    content: [{ type: "text", text: `${header}\n\n${body}` }],
+    content: [{ type: "text", text: `<${header}>\n${body}\n</${header}>` }],
     timestamp: 0,
   };
 }
 
-function buildStatePressureMessage(): TextMessage {
-  const text = [
-    "[当前机械状态简报 — 由 public state 派生，只读参考，工具返回值优先]",
+function buildStatePressureText(): string {
+  return [
+    "当前机械状态简报由 public state 派生，只读参考，工具返回值优先。",
     "",
     buildGmBrief(getPublicState()),
     "",
     "这份简报只用于压住叙事倾向，不能替代工具调用；本轮任何工具返回值都覆盖简报。",
   ].join("\n");
-  return {
-    role: "user",
-    content: [{ type: "text", text }],
-    timestamp: 0,
-  };
 }
 
 function loadUserProfile(): UserProfile {
@@ -159,10 +205,48 @@ function readUserProfile(): UserProfile {
   const raw = readFileSync(path, "utf-8");
   const parsed = parseJsonObject(raw, path);
   const name = parsed["姓名"];
-  if (typeof name === "string" && name.length > 0) {
-    return { text: JSON.stringify(parsed, null, 2) };
+  if (typeof name !== "string" || name.length === 0) {
+    return { text: "" };
   }
-  return { text: "" };
+  return { text: renderUserProfile(parsed) };
+}
+
+function renderUserProfile(profile: Record<string, unknown>): string {
+  const lines = [
+    renderProfileLine("姓名", profile["姓名"]),
+    renderProfileLine("性别", profile["性别"]),
+    renderProfileLine("年龄", profile["年龄"]),
+    renderProfileLine("外貌", profile["外貌"]),
+    renderProfileLine("身世背景", profile["身世背景"]),
+    renderProfileLine("魔术回路", profile["魔术回路"]),
+    renderProfileLine("特殊能力", profile["特殊能力"]),
+    renderProfileLine("性格", profile["性格"]),
+    renderProfileLine("目标", profile["目标"]),
+    renderProfileLine("额外注记", profile["额外注记"]),
+  ];
+  return lines.filter((line) => line.length > 0).join("\n");
+}
+
+function renderProfileLine(label: string, value: unknown): string {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? `${label}: ${trimmed}` : "";
+  }
+  if (isRecord(value)) {
+    const entries = Object.entries(value)
+      .map(([key, nested]) => renderInlineValue(key, nested))
+      .filter((entry) => entry.length > 0);
+    return entries.length > 0 ? `${label}: ${entries.join("；")}` : "";
+  }
+  return "";
+}
+
+function renderInlineValue(label: string, value: unknown): string {
+  if (typeof value !== "string") {
+    return "";
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? `${label}=${trimmed}` : "";
 }
 
 function parseJsonObject(raw: string, path: string): Record<string, unknown> {

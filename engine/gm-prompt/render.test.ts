@@ -7,6 +7,7 @@ void test("render prompt avoids priming the denied negation pattern", () => {
     readFileSync("agents/gm-render.md", "utf-8"),
     readFileSync("agents/gm-style.md", "utf-8"),
     readFileSync("agents/gm-think.md", "utf-8"),
+    readFileSync("agents/gm-output-contract.md", "utf-8"),
   ];
 
   for (const prompt of prompts) {
