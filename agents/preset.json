@@ -18,18 +18,10 @@
       "source": "agents/gm-context.md"
     },
     {
-      "id": "player-character",
-      "enabled": true,
-      "slot": "pre-history",
-      "priority": 30,
-      "header": "player_character",
-      "source": "runtime:player-character"
-    },
-    {
       "id": "input-guide",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 40,
+      "priority": 30,
       "header": "input_guide",
       "source": "agents/gm-input-guide.md"
     },
@@ -37,7 +29,7 @@
       "id": "social-guide",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 50,
+      "priority": 40,
       "header": "social_guide",
       "source": "agents/gm-social-guide.md"
     },
@@ -45,7 +37,7 @@
       "id": "writing-guide",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 60,
+      "priority": 50,
       "header": "writing_guide",
       "source": "agents/gm-style.md"
     },
@@ -53,7 +45,7 @@
       "id": "render-protocol",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 70,
+      "priority": 60,
       "header": "render_protocol",
       "source": "agents/gm-render.md"
     },

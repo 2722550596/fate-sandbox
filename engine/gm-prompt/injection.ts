@@ -22,10 +22,6 @@ export interface PromptAssets {
   preset: PromptPreset;
 }
 
-interface UserProfile {
-  text: string;
-}
-
 interface PromptModule {
   id: string;
   slot: PromptSlot;
@@ -38,7 +34,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, "..", "..");
 
 let cachedAssets: PromptAssets | null = null;
-let cachedUserProfile: UserProfile | null = null;
 const cachedFileSources = new Map<string, string>();
 
 export function loadPromptAssets(): PromptAssets {
@@ -91,9 +86,6 @@ function resolvePromptModuleBody(module: PromptPresetModule): string {
   if (module.source.kind === "file") {
     return readPromptFile(module.source.path);
   }
-  if (module.source.name === "player-character") {
-    return loadUserProfile().text;
-  }
   return buildStatePressureText();
 }
 
@@ -145,70 +137,6 @@ function buildStatePressureText(): string {
     "",
     "这份简报只用于压住叙事倾向，不能替代工具调用；本轮任何工具返回值都覆盖简报。",
   ].join("\n");
-}
-
-function loadUserProfile(): UserProfile {
-  if (cachedUserProfile === null) {
-    cachedUserProfile = readUserProfile();
-  }
-  return cachedUserProfile;
-}
-
-function readUserProfile(): UserProfile {
-  const path = join(PROJECT_ROOT, "data", "user.json");
-  const raw = readFileSync(path, "utf-8");
-  const parsed = parseJsonObject(raw, path);
-  const name = parsed["姓名"];
-  if (typeof name !== "string" || name.length === 0) {
-    return { text: "" };
-  }
-  return { text: renderUserProfile(parsed) };
-}
-
-function renderUserProfile(profile: Record<string, unknown>): string {
-  const lines = [
-    renderProfileLine("姓名", profile["姓名"]),
-    renderProfileLine("性别", profile["性别"]),
-    renderProfileLine("年龄", profile["年龄"]),
-    renderProfileLine("外貌", profile["外貌"]),
-    renderProfileLine("身世背景", profile["身世背景"]),
-    renderProfileLine("魔术回路", profile["魔术回路"]),
-    renderProfileLine("特殊能力", profile["特殊能力"]),
-    renderProfileLine("性格", profile["性格"]),
-    renderProfileLine("目标", profile["目标"]),
-    renderProfileLine("额外注记", profile["额外注记"]),
-  ];
-  return lines.filter((line) => line.length > 0).join("\n");
-}
-
-function renderProfileLine(label: string, value: unknown): string {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? `${label}: ${trimmed}` : "";
-  }
-  if (isRecord(value)) {
-    const entries = Object.entries(value)
-      .map(([key, nested]) => renderInlineValue(key, nested))
-      .filter((entry) => entry.length > 0);
-    return entries.length > 0 ? `${label}: ${entries.join("；")}` : "";
-  }
-  return "";
-}
-
-function renderInlineValue(label: string, value: unknown): string {
-  if (typeof value !== "string") {
-    return "";
-  }
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? `${label}=${trimmed}` : "";
-}
-
-function parseJsonObject(raw: string, path: string): Record<string, unknown> {
-  const parsed: unknown = JSON.parse(raw);
-  if (!isRecord(parsed)) {
-    throw new Error(`Invalid JSON data ${path}: root must be an object.`);
-  }
-  return parsed;
 }
 
 function isMessageWithRole(message: unknown, role: string): boolean {

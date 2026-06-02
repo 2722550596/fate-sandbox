@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export type PromptSlot = "pre-history" | "pre-response" | "final-contract";
-export type RuntimePromptSource = "player-character" | "state-brief";
+export type RuntimePromptSource = "state-brief";
 
 export interface PromptPreset {
   version: 1;
@@ -23,7 +23,7 @@ export type PromptSource =
   | { kind: "runtime"; name: RuntimePromptSource };
 
 const PROMPT_SLOTS: readonly string[] = ["pre-history", "pre-response", "final-contract"];
-const RUNTIME_SOURCES: readonly string[] = ["player-character", "state-brief"];
+const RUNTIME_SOURCES: readonly string[] = ["state-brief"];
 
 export function loadPromptPreset(projectRoot: string): PromptPreset {
   const path = join(projectRoot, "agents", "preset.json");
