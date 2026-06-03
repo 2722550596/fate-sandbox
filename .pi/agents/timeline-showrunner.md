@@ -3,6 +3,7 @@ name: timeline-showrunner
 description: 世界线感知的型月篇章审计器；检查当前剧情是否符合 campaign.timeline 的题材契约，只给纠偏建议，不写正文、不改状态
 tools: lookup
 extensions: /home/ubuntu/cards/fsn/extensions/subagents/timeline/index.ts
+model: deepseek-v4-pro
 inheritProjectContext: false
 inheritSkills: false
 systemPromptMode: replace

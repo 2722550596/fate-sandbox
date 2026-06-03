@@ -155,6 +155,34 @@
         }
       ],
       "notes": ["神秘与宝具层级极高", "性格缺陷是重要战术因素"]
+    },
+    {
+      "id": "richard-i-saber-fsf",
+      "name": "理查一世",
+      "aliases": ["Richard I", "Richard the Lionheart", "狮心王", "FSF Saber", "真实Saber"],
+      "className": "Saber",
+      "trueName": "理查一世",
+      "parameters": {
+        "strength": "B",
+        "endurance": "B",
+        "agility": "A",
+        "mana": "C",
+        "luck": "EX",
+        "noblePhantasm": "A"
+      },
+      "noblePhantasms": [
+        {
+          "name": "Excalibur",
+          "rank": "A",
+          "kind": "特殊/对军级表现",
+          "summary": "理查将生前追逐的圣剑传说投影到各种武器上的表现。具体威力与使用方式须以当前剧情确认。"
+        }
+      ],
+      "notes": [
+        "Fate/strange Fake 原作中 Ayaka 的 Saber；沙盒可被玩家从者替代。",
+        "原作关系只提供结构参考：意外契约、新人御主、公开事故后被多阵营关注。",
+        "若当前局不是理查一世，不得把他的真名、性格、宝具自动套给玩家从者。"
+      ]
     }
   ]
 }

@@ -21,6 +21,23 @@ void test("lookupWorldData finds FSF Ayaka aliases", () => {
 
   assert.match(result.text, /绫香·沙条/);
   assert.match(result.text, /沙条绫香/);
+  assert.match(result.text, /不是谜语人/);
+});
+
+void test("lookupWorldData finds FSF genre contract", () => {
+  const result = lookupWorldData({ query: "FSF 斯诺菲尔德 悬疑 战场情报缺口" });
+
+  assert.match(result.text, /Fate\/strange Fake世界线契约/);
+  assert.match(result.text, /战场情报缺口/);
+  assert.match(result.text, /哥特悬疑道具/);
+});
+
+void test("lookupWorldData finds Snowfield locations", () => {
+  const result = lookupWorldData({ query: "斯诺菲尔德 歌剧院 临时藏身处" });
+
+  assert.match(result.text, /斯诺菲尔德/);
+  assert.match(result.text, /歌剧院/);
+  assert.match(result.text, /临时藏身处/);
 });
 
 void test("lookupWorldData finds Kara no Kyoukai Shiki as a character", () => {

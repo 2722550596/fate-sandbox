@@ -3,6 +3,7 @@ name: parallel-line
 description: 通用 Fate 平行线后台世界进程；基于窄输入推进 NPC 阵营 offscreen 行动，只返回结构化候选事件
 tools: lookup
 extensions: /home/ubuntu/cards/fsn/extensions/subagents/timeline/index.ts
+model: deepseek-v4-pro
 inheritProjectContext: false
 inheritSkills: false
 systemPromptMode: replace
