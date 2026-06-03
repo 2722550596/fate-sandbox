@@ -674,13 +674,27 @@ function getStore(): State {
 }
 
 function setStore(state: State): void {
-  globalThis.__fsn_state_store__ = structuredClone(state);
-  writeStateDebugSnapshot(state);
+  const normalizedState = pruneExpiredParamModifiers(structuredClone(state));
+  globalThis.__fsn_state_store__ = normalizedState;
+  writeStateDebugSnapshot(normalizedState);
 }
 
 function writeStateDebugSnapshot(state: State): void {
   mkdirSync("state", { recursive: true });
   writeFileSync(DEBUG_STATE_PATH, `${JSON.stringify(toStateExport(state), null, 2)}\n`, "utf-8");
+}
+
+function pruneExpiredParamModifiers(state: State): State {
+  const currentAt = Temporal.Instant.from(state.public.clock.currentAt);
+  for (const actor of Object.values(state.public.actors)) {
+    const servantForm = actor.servantForm;
+    if (servantForm === null) continue;
+    servantForm.parameters.modifiers = servantForm.parameters.modifiers.filter((modifier) => {
+      if (modifier.expiresAt === null) return true;
+      return Temporal.Instant.compare(Temporal.Instant.from(modifier.expiresAt), currentAt) > 0;
+    });
+  }
+  return state;
 }
 
 function toStateExport(state: State): StateExport {
