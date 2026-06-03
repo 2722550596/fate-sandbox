@@ -251,7 +251,7 @@ function resolveCondition(
   return { message: `状态已处理：${event.conditionId} (${event.outcome})。` };
 }
 
-function removeCondition<TCondition extends { id: string }>(
+function removeCondition<TCondition extends { id: string; text?: string }>(
   conditions: TCondition[],
   conditionId: string,
   conditionKind: string,
@@ -259,9 +259,25 @@ function removeCondition<TCondition extends { id: string }>(
   const id = assertNonEmptyString(conditionId, "conditionId");
   const next = conditions.filter((condition) => condition.id !== id);
   if (next.length === conditions.length) {
-    throw new Error(`${conditionKind} 不存在: ${id}`);
+    throw new Error(
+      `${conditionKind} 不存在: ${id}。可用 ${conditionKind}: ${formatAvailableConditions(conditions)}`,
+    );
   }
   return next;
+}
+
+function formatAvailableConditions(conditions: readonly { id: string; text?: string }[]): string {
+  if (conditions.length === 0) {
+    return "无";
+  }
+  return conditions.map(formatAvailableCondition).join("；");
+}
+
+function formatAvailableCondition(condition: { id: string; text?: string }): string {
+  if (condition.text === undefined) {
+    return condition.id;
+  }
+  return `${condition.id}（${condition.text}）`;
 }
 
 function changeOutfit(

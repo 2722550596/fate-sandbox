@@ -122,6 +122,37 @@ void test("updateActorCondition resolves recovered afflictions", () => {
   assert.deepEqual(protagonist?.condition.afflictions, []);
 });
 
+void test("updateActorCondition lists available afflictions when resolve id is missing", () => {
+  resetState();
+
+  updateActorCondition({
+    kind: "add-affliction",
+    actorId: "protagonist",
+    text: "魔术回路近乎干涸",
+    source: "连续强化",
+    expectedDuration: "睡眠一夜",
+  });
+  const afflictionId = getState().public.actors.protagonist?.condition.afflictions[0]?.id;
+  if (afflictionId === undefined) {
+    throw new Error("expected affliction id");
+  }
+
+  assert.throws(
+    () =>
+      updateActorCondition({
+        kind: "resolve-condition",
+        actorId: "protagonist",
+        conditionKind: "affliction",
+        conditionId: "ayaka-mana-strain-resting-fatigue",
+        outcome: "recovered",
+        reason: "睡眠后恢复",
+      }),
+    {
+      message: `affliction 不存在: ayaka-mana-strain-resting-fatigue。可用 affliction: ${afflictionId}（魔术回路近乎干涸）`,
+    },
+  );
+});
+
 void test("updateActorCondition rejects missing tracked item transfer", () => {
   resetState();
 
