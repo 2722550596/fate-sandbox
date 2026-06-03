@@ -66,6 +66,14 @@
       "source": "runtime:state-brief"
     },
     {
+      "id": "protagonist-impression",
+      "enabled": true,
+      "slot": "pre-response",
+      "priority": 15,
+      "header": "protagonist_impression",
+      "source": "agents/protagonist-impression.md"
+    },
+    {
       "id": "tool-policy",
       "enabled": true,
       "slot": "pre-response",

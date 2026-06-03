@@ -31,5 +31,5 @@ void test("render prompt emphasizes relationship and body rendering", () => {
   assert.match(renderPrompt, /队形/u);
   assert.match(renderPrompt, /身体代价/u);
   assert.match(renderPrompt, /关系负担/u);
-  assert.match(renderPrompt, /NPC 微动作/u);
+  assert.match(renderPrompt, /NPC 场景参与/u);
 });
