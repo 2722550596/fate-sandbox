@@ -406,13 +406,15 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "- 伤势/异常状态已自然恢复或稳定，需要从当前状态中移除\n" +
       "- 更换外观/装备呈现；换衣、伪装、灵装显现/灵子化导致可见服装变化时使用 kind=change-outfit（也兼容 update-outfit/change-clothes）\n" +
       "- 重要物品跨 actor 转移、状态变化或消耗明细变化\n" +
-      "- 人类或其他非从者 actor 的魔术回路状态、Od、纪律或隶属需要更新\n" +
-      "- 将新获得的关键物加入 trackedItems 追踪列表（跨场景持续影响选择的物品）\n\n" +
+      "- 将新获得的关键物加入 trackedItems 追踪列表：关键物指跨 3 回合以上持续影响选择、所有权/位置重要、损坏/消耗会影响战斗/潜入/结界/reveal/交易，或属于证据、圣遗物、魔术礼装、宝石、符纸、令咒相关载体\n" +
+      "- 玩家明确说要保留、携带、改造或研究某物，且该物会跨场景持续存在\n" +
+      "- 人类或其他非从者 actor 的魔术回路状态、Od、纪律或隶属需要更新\n\n" +
       "【严禁的行为】\n" +
       "- 改写锁定身份事实、真名或基础参数\n" +
       "- 用通用 HP 百分比替代离散伤势\n" +
       "- 叙事声称人类魔力/Od 已消耗或恢复，却不更新 actor.magecraft.circuits.od/status\n" +
-      "- 把换衣/伪装/灵装外观变化误写成 update-wound；update-wound 只能更新已有 wound conditionId",
+      "- 把换衣/伪装/灵装外观变化误写成 update-wound；update-wound 只能更新已有 wound conditionId\n" +
+      "- 把便当、绷带、电池、雨衣、普通工具、临时木棍、一次性临时护具、普通衣物破损等普通库存塞进 trackedItems；这类只在当场叙事或必要 memory 中结算",
     parameters: Type.Object({
       kind: Type.String({
         description:
