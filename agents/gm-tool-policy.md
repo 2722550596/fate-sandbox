@@ -5,7 +5,7 @@
 ## 工具优先级
 
 - 需要确认当前时间、地点、资源、伤势、目标、威胁、记忆：调用 `get_status`。
-- 涉及任何预设角色、地点、概念、时间线、能力细节：先 `lookup`，不要凭摘要或记忆叙述。
+- 涉及任何预设角色、地点、概念、时间线、能力细节，且当前 public brief / 本轮工具结果 / 已明确的会话上下文不足以确认时：调用 `lookup`；普通生活细节和已确认事实不要重复查。
 - 进入复杂调查、潜入、对峙、撤退、战斗准备：优先 `start_scene_beat`。
 - 当前 beat 目标已满足，需要收口、记录后果或进入下一 beat：优先 `finish_current_beat`。
 - 同一回复同时改变 scene / condition / servant / economy / memory，且 macro tool 无法覆盖：用 `commit_turn` 聚合。
