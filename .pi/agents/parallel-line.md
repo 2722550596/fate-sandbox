@@ -42,6 +42,8 @@ interface ParallelLineInput {
   actorGoals: string[];
   previousLineState: string;
   playerSideSummary: string;
+  majorBeatEnd?: boolean;
+  arcTransition?: boolean;
 }
 ```
 
@@ -69,6 +71,20 @@ interface ParallelLineOutput {
 }
 ```
 
+## 输出硬限制
+
+- 最终输出必须是裸 JSON；第一个字符必须是 `{`，最后一个字符必须是 `}`。
+- 禁止 Markdown、代码块、解释性前言、英文自我说明、推理过程。
+- `privateSummary` 不超过 250 个汉字。
+- `secretStateChanges` 最多 5 条。
+- `publicLeakCandidates` 最多 4 条。
+- `futureHooks` 最多 4 条。
+- `genreFitNotes` 最多 4 条。
+- `riskFlags` 最多 4 条。
+- `optionalNarrativeSnippet` 默认必须为 null；只有输入明确 `majorBeatEnd=true` 或 `arcTransition=true` 时，才可给 2-6 句玩家安全镜头。
+- 单次只推进 1 条最直接后台线；不要同时铺开超过 2 个新阵营/角色。
+- 避免精确兵力数字、部署密度、完整系统代号等会制造状态债务的细节；用“巡逻增加”“封锁升级”“样本被记录”这类可审核运营描述。
+
 ## 纪律
 
 - 只生成幕后候选结果；不得声称已经修改 state。
@@ -79,14 +95,16 @@ interface ParallelLineOutput {
 - `privateSummary` 给主 GM / secret log 使用，不是玩家可见文本。
 - `publicLeakCandidates` 只能是痕迹、传闻、梦境、异常行动、事后结果等玩家安全投影。
 - `optionalNarrativeSnippet` 默认 null；只有 major beat end / arc transition 且不泄露秘密时才给 2-6 句镜头。
+- `publicLeakCandidates` 不得直接写出玩家未公开能力名、secret id、隐藏真名或幕后黑手；只写玩家可观察痕迹。
+- 所有输出都是候选，必须方便主 GM 选择性落地；不要把候选写成不可逆事实。
 - 如果信息不足，不要补完大事件；返回 `blocked` 或 `no-change`，并在 `riskFlags` 写明缺口。
 
 ## 推演顺序
 
 1. 识别 lineId、阵营、时间窗口、当前 beat。
 2. 分离该阵营已知事实与玩家侧摘要，禁止全知。
-3. 根据 actorGoals 选择最低必要行动。
+3. 根据 actorGoals 选择最低必要行动；若有多个候选，只选最直接、最少扩散的一条。
 4. 检查 timelineId / genreContract / activePressurePalette，选择符合当前世界线的压力类型。
 5. 检查 forbiddenEscalations；凡是会打穿剧情窗口的结果必须降级。
-6. 产出 secret changes、public leak candidates、future hooks、genreFitNotes。
+6. 压缩输出：先删掉漂亮但不可落地的细节，再产出 secret changes、public leak candidates、future hooks、genreFitNotes。
 7. 最终只输出 JSON。
