@@ -1,6 +1,14 @@
 import type { OffscreenEvent, OffscreenEventSource, OffscreenEventVisibility } from "./state";
 
-import { assertIsoDateString, assertNonEmptyString, createId, updateState } from "./state";
+import { Temporal } from "@js-temporal/polyfill";
+
+import {
+  assertIsoDateString,
+  assertNonEmptyString,
+  cloneState,
+  createId,
+  updateState,
+} from "./state";
 
 export type { OffscreenEventSource, OffscreenEventVisibility } from "./state";
 
@@ -22,6 +30,7 @@ export function recordOffscreenEvent(input: RecordOffscreenEventInput): RecordOf
     start: assertIsoDateString(input.timeRange.start, "timeRange.start"),
     end: assertIsoDateString(input.timeRange.end, "timeRange.end"),
   };
+  assertClosedTimeRange(timeRange);
   const summary = assertNonEmptyString(input.summary, "summary");
   const consequences = input.consequences.map((consequence) =>
     assertNonEmptyString(consequence, "consequences[]"),
@@ -46,6 +55,18 @@ export function recordOffscreenEvent(input: RecordOffscreenEventInput): RecordOf
   });
 
   return { eventId };
+}
+
+function assertClosedTimeRange(timeRange: OffscreenEvent["timeRange"]): void {
+  if (Temporal.Instant.compare(timeRange.end, timeRange.start) < 0) {
+    throw new Error("record_offscreen_event timeRange.end 不能早于 timeRange.start。");
+  }
+  const currentAt = cloneState().public.clock.currentAt;
+  if (Temporal.Instant.compare(timeRange.end, currentAt) > 0) {
+    throw new Error(
+      `record_offscreen_event 只能记录已完成的幕后事件；timeRange.end ${timeRange.end} 晚于当前时间 ${currentAt}。未来候选请保留为 futureHooks，不要写入 offscreenEventLog。`,
+    );
+  }
 }
 
 function assertOffscreenEventVisibility(value: unknown): OffscreenEventVisibility {

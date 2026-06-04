@@ -4,12 +4,13 @@ import test from "node:test";
 import { buildGmBrief } from "./gm-brief";
 import { recordOffscreenEvent } from "./offscreen-event";
 import { getOffscreenEventsForDebug } from "./secrets";
-import { getPublicState, resetState } from "./state";
+import { advanceClock, getPublicState, resetState } from "./state";
 
 const INITIAL_TIME = "2004-01-30T07:00:00.000Z";
 
 void test("offscreen events records secret offscreen events outside the public GM brief", () => {
   resetState();
+  advanceClock(60, "测试推进到幕后事件结束后");
   const result = recordOffscreenEvent({
     lineId: "lancer-church",
     actorIds: ["protagonist"],
@@ -28,6 +29,7 @@ void test("offscreen events records secret offscreen events outside the public G
 
 void test("offscreen events rejects direct player-known writes", () => {
   resetState();
+  advanceClock(60, "测试推进到幕后事件结束后");
   assert.throws(
     () =>
       recordOffscreenEvent({

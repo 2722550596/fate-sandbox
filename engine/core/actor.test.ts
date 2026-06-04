@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { setScenePresence, upsertActor } from "./actor";
+import { retireActor, setScenePresence, upsertActor } from "./actor";
 import { buildGmBrief } from "./gm-brief";
 import {
   configureActorSecrets,
@@ -258,6 +258,10 @@ void test("configured servant secrets can be revealed by evidence", () => {
 });
 
 function upsertTestCaster(): void {
+  upsertTestCasterWithMaster(null);
+}
+
+function upsertTestCasterWithMaster(masterActorId: string | null): void {
   upsertActor({
     kind: "upsert-servant",
     servant: {
@@ -284,9 +288,9 @@ function upsertTestCaster(): void {
       spiritualCore: 100,
       mana: 90,
       spiritualCondition: "完好",
-      masterActorId: null,
-      masterName: "葛木宗一郎",
-      contractStatus: "masterless",
+      masterActorId,
+      masterName: masterActorId === null ? "葛木宗一郎" : "御主",
+      contractStatus: masterActorId === null ? "masterless" : "stable",
       manaSupply: "sufficient",
       currentOrder: "守卫柳洞寺山门",
     },
@@ -355,6 +359,49 @@ void test("upsert-servant writes servant form with full parameter block", () => 
   assert.equal(caster?.servantForm?.contract.status, "masterless");
   assert.equal(caster?.servantForm?.contract.masterName, "葛木宗一郎");
   assert.equal(caster?.magecraft, null);
+});
+
+void test("retireActor removes a non-referenced actor from registry and scene", () => {
+  resetState();
+  upsertTestCaster();
+  setScenePresence({
+    presentActorIds: ["protagonist", "caster"],
+    allyActorIds: [],
+    reason: "Caster enters before retiring",
+  });
+
+  const result = retireActor({ actorId: "caster", reason: "测试敌人退场" });
+  const state = getState();
+
+  assert.match(result.message, /caster/);
+  assert.equal(state.public.actors["caster"], undefined);
+  assert.deepEqual(state.public.scene.presentActorIds, ["protagonist"]);
+});
+
+void test("retireActor rejects actors referenced by master contracts", () => {
+  resetState();
+  upsertActor({
+    kind: "upsert-public-npc",
+    npc: {
+      id: "master",
+      kind: "human",
+      displayName: "御主",
+      publicIdentity: "测试御主",
+      apparentAge: "不明",
+      outfit: { label: "便服", details: "测试" },
+      demeanor: "谨慎",
+      publicRoles: [{ kind: "social", label: "测试御主" }],
+      relationshipToProtagonist: { stance: "neutral", summary: "测试" },
+      ordinaryItems: [],
+    },
+    reason: "测试御主入场",
+  });
+  upsertTestCasterWithMaster("master");
+
+  assert.throws(
+    () => retireActor({ actorId: "master", reason: "仍被从者契约引用" }),
+    /masterActorId/,
+  );
 });
 
 void test("setScenePresence updates current scene independently from actor registry", () => {

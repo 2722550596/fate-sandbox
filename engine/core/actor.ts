@@ -6,6 +6,7 @@ import type {
   NoblePhantasm,
   OutfitState,
   PublicActorState,
+  PublicGameState,
   RelationshipState,
   ServantClass,
   ServantSkill,
@@ -115,6 +116,15 @@ export interface ScenePresenceInput {
 }
 
 export interface ScenePresenceResult {
+  message: string;
+}
+
+export interface RetireActorInput {
+  actorId: ActorId;
+  reason: string;
+}
+
+export interface RetireActorResult {
   message: string;
 }
 
@@ -269,6 +279,50 @@ function normalizeServantMasterName(servant: ServantInput): string | null {
     return null;
   }
   return assertNonEmptyString(servant.masterName, "servant.masterName");
+}
+
+export function retireActor(input: RetireActorInput): RetireActorResult {
+  const actorId = assertNonEmptyString(input.actorId, "actorId");
+  assertNonEmptyString(input.reason, "reason");
+  if (actorId === "protagonist") {
+    throw new Error("不能 retire protagonist。");
+  }
+  updateState((draft) => {
+    const actor = draft.public.actors[actorId];
+    if (actor === undefined) {
+      throw new Error(`actor 不存在，无法 retire: ${actorId}。`);
+    }
+    assertActorHasNoBlockingReferences(draft.public, actorId);
+    delete draft.public.actors[actorId];
+    delete draft.secrets.actorSecrets[actorId];
+    draft.public.scene.presentActorIds = draft.public.scene.presentActorIds.filter(
+      (presentActorId) => presentActorId !== actorId,
+    );
+    draft.public.allyActorIds = draft.public.allyActorIds.filter(
+      (allyActorId) => allyActorId !== actorId,
+    );
+  });
+  return { message: `actor 已退场并从当前 registry 移除：${actorId}。` };
+}
+
+function assertActorHasNoBlockingReferences(publicState: PublicGameState, actorId: ActorId): void {
+  for (const [otherActorId, actor] of Object.entries(publicState.actors)) {
+    if (otherActorId === actorId) continue;
+    const contractedServantIds = actor.roles.flatMap((role) =>
+      role.kind === "master" ? role.contractedServantIds : [],
+    );
+    if (contractedServantIds.includes(actorId)) {
+      throw new Error(`actor ${actorId} 仍被 ${otherActorId} 的 contractedServantIds 引用。`);
+    }
+    if (actor.servantForm?.contract.masterActorId === actorId) {
+      throw new Error(`actor ${actorId} 仍是 ${otherActorId} 的 masterActorId。`);
+    }
+  }
+  for (const [itemId, item] of Object.entries(publicState.trackedItems)) {
+    if (item.ownerActorId === actorId || item.holderActorId === actorId) {
+      throw new Error(`actor ${actorId} 仍持有/拥有 tracked item ${itemId}；请先转移或结算物品。`);
+    }
+  }
 }
 
 function writeActor(actor: PublicActorState): void {
