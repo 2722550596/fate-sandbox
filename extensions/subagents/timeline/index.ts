@@ -9,7 +9,9 @@ import { lookupTool } from "../../../tools/lookup/lookup";
 
 interface TimelineStateContext {
   currentAt: string;
+  timezone: string;
   displayTime: string;
+  timeRangeRule: string;
   campaign: {
     title: string;
     timeline: string;
@@ -80,6 +82,7 @@ function buildTimelineStateInjection(): string {
       "<timeline_state_context>",
       "以下是当前 canonical state 的子代理安全摘要，由 extension 自动注入；不要要求主 GM 重复提供，也不要把本段原样写给玩家。",
       "parallel-line 必须先检查 recentOffscreenEvents，避免连续重复同一 actor/faction/pressureType；如果最近已连续使用同一压力类型，优先换成当前 timeline 的其它生态位或返回 no-change/blocked。",
+      "所有输出 timeRange.start/end 必须是 ISO UTC 字符串；displayTime 只是本地展示时间，不得把本地时钟当 UTC。timeRange.end 不得晚于 currentAt。",
       JSON.stringify(context, null, 2),
       "</timeline_state_context>",
     ].join("\n");
@@ -103,8 +106,11 @@ function buildTimelineStateContext(state: Record<string, unknown>): TimelineStat
 
   return {
     currentAt: requireString(clock["currentAt"], "clock.currentAt"),
+    timezone: requireString(clock["timezone"], "clock.timezone"),
     displayTime:
       optionalString(clock["displayTime"]) ?? requireString(clock["currentAt"], "clock.currentAt"),
+    timeRangeRule:
+      "所有 timeRange.start/end 必须使用 ISO UTC；displayTime 是本地展示时间，不是 UTC；timeRange.end <= currentAt。",
     campaign: {
       title: requireString(campaign["title"], "campaign.title"),
       timeline: requireString(campaign["timeline"], "campaign.timeline"),
