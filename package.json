@@ -29,7 +29,8 @@
     "tsconfig.json",
     ".oxlintrc.json",
     ".oxfmtrc.json",
-    "LICENSE"
+    "LICENSE",
+    "start.ps1"
   ],
   "type": "module",
   "scripts": {

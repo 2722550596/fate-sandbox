@@ -10,9 +10,25 @@ Fate sandbox for pi coding agent. 当前大量测试集中在 Fate/strange Fake 
 
 ## Quick Start
 
+### Linux / macOS
+
 ```bash
 pnpm install
 ./start.sh
+```
+
+### Windows PowerShell
+
+```powershell
+pnpm install
+.\start.ps1
+```
+
+如果 PowerShell 执行策略拦截脚本，可在当前窗口临时放开：
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\start.ps1
 ```
 
 进入 pi 界面后，先确认模型/API 已经配置好；如果没登录，先按自己的 pi 环境执行 `/login` 或配置 provider。
