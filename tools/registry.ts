@@ -283,10 +283,14 @@ export function registerAllTools(pi: ExtensionAPI): void {
         Type.String({ description: "add-objective/add-threat 必填：目标或威胁的玩家可见摘要" }),
       ),
       objectiveId: Type.Optional(
-        Type.String({ description: "resolve-objective 可选；不确定 id 时用 objectiveSummary" }),
+        Type.String({
+          description: "resolve-objective 可选；不确定 id 时不要传空字符串，改用 objectiveSummary",
+        }),
       ),
       objectiveSummary: Type.Optional(
-        Type.String({ description: "resolve-objective 可选：目标原文或片段；不要传 undefined" }),
+        Type.String({
+          description: "resolve-objective 可选：目标原文或片段；不确定 objectiveId 时优先填此字段",
+        }),
       ),
       threatId: Type.Optional(Type.String()),
       severity: Type.Optional(threatSeveritySchema()),
