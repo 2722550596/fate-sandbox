@@ -32,8 +32,8 @@ const POLICY_PATH = join(PROJECT_ROOT, "agents", "compaction-policy.md");
 const STATE_PATH = join(PROJECT_ROOT, "state", "state.json");
 
 export default function compactionPolicyExtension(pi: ExtensionAPI): void {
-  pi.registerCommand("fsn-compact", {
-    description: "Compact chat memory with FSN state exclusion reference",
+  pi.registerCommand("fate-compact", {
+    description: "Compact chat memory with Fate sandbox state exclusion reference",
     handler: async (_args, ctx) => {
       triggerFsnCompaction(ctx);
     },
@@ -42,18 +42,18 @@ export default function compactionPolicyExtension(pi: ExtensionAPI): void {
 
 function triggerFsnCompaction(ctx: ExtensionContext): void {
   if (ctx.hasUI) {
-    ctx.ui.notify("FSN compaction started", "info");
+    ctx.ui.notify("Fate compaction started", "info");
   }
   ctx.compact({
     customInstructions: buildCustomInstructions(),
     onComplete: () => {
       if (ctx.hasUI) {
-        ctx.ui.notify("FSN compaction completed", "info");
+        ctx.ui.notify("Fate compaction completed", "info");
       }
     },
     onError: (error) => {
       if (ctx.hasUI) {
-        ctx.ui.notify(`FSN compaction failed: ${error.message}`, "error");
+        ctx.ui.notify(`Fate compaction failed: ${error.message}`, "error");
       }
     },
   });

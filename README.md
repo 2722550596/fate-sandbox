@@ -41,6 +41,16 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 或直接用自然语言说“开始游戏”。推荐用 `/skill:start-game`，它会按项目的开局流程初始化。
 
+常用 UI 命令：
+
+```txt
+/status     查看当前时间、地点、目标、威胁和资源
+/inventory  查看当前玩家可见资金与物品
+/fate-compact 手动压缩聊天上下文
+```
+
+`/status` 和 `/inventory` 是 UI 面板，不是剧情动作；它们用于命令行里查看自己当前知道/持有的东西。
+
 看到右下角类似 `0.0%` 和一个方块时，那通常是 pi 的上下文/状态 UI，不是下载进度条。首次启动如果没有 API/model 配置，界面可能看起来像“卡住”，但实际是在等你输入命令或配置模型渠道。
 
 ## Local State

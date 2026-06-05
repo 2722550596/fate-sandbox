@@ -85,6 +85,7 @@ pi \
   --skill ./skills/ \
   -e ./extension.ts \
   -e ./extensions/compaction-policy/index.ts \
+  -e ./extensions/player-panel/index.ts \
   --session-dir ./sessions \
   --no-context-files \
   "$@" || pi_exit=$?
