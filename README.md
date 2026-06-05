@@ -8,17 +8,26 @@ Fate sandbox for pi coding agent. 当前大量测试集中在 Fate/strange Fake 
 - pnpm 11.3.0
 - pi coding agent
 
-## Install
+## Quick Start
 
 ```bash
 pnpm install
-```
-
-## Start
-
-```bash
 ./start.sh
 ```
+
+进入 pi 界面后，先确认模型/API 已经配置好；如果没登录，先按自己的 pi 环境执行 `/login` 或配置 provider。
+
+然后在输入框里输入：
+
+```txt
+/skill:start-game
+```
+
+或直接用自然语言说“开始游戏”。推荐用 `/skill:start-game`，它会按项目的开局流程初始化。
+
+看到右下角类似 `0.0%` 和一个方块时，那通常是 pi 的上下文/状态 UI，不是下载进度条。首次启动如果没有 API/model 配置，界面可能看起来像“卡住”，但实际是在等你输入命令或配置模型渠道。
+
+## Local State
 
 首次运行会在项目内创建隔离配置目录：
 
