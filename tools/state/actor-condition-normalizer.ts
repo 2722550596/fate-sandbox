@@ -16,13 +16,30 @@ export function normalizeActorConditionEvent(
     );
   }
   const reason = normalizeOptionalString(input["reason"]);
+  const normalizedInput = normalizeOutcome(input, kind);
   return {
-    ...input,
+    ...normalizedInput,
     kind,
     ...(reason !== null || fallbackReason !== undefined
       ? { reason: normalizeReason(input["reason"], fallbackReason) }
       : {}),
   } as unknown as ActorConditionEvent; // safe: non-outfit variants keep engine validation; this boundary only normalizes LLM-facing aliases/default noise.
+}
+
+function normalizeOutcome(input: Record<string, unknown>, kind: string): Record<string, unknown> {
+  if (kind === "resolve-condition") {
+    return { ...input, outcome: assertResolveOutcome(input["outcome"]) };
+  }
+  return Object.fromEntries(Object.entries(input).filter(([key]) => key !== "outcome"));
+}
+
+function assertResolveOutcome(value: unknown): "recovered" | "stabilized" {
+  if (value === "recovered" || value === "stabilized") {
+    return value;
+  }
+  throw new Error(
+    "resolve-condition outcome 必须是 recovered 或 stabilized；新增、恶化或更新伤势请用 add-wound/update-wound，不要写 outcome。",
+  );
 }
 
 function normalizeChangeOutfit(

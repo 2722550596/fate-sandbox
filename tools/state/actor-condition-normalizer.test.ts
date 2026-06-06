@@ -48,6 +48,36 @@ void test("normalizeActorConditionEvent reports empty wound id when no outfit is
   );
 });
 
+void test("normalizeActorConditionEvent strips stray outcome from non-resolve events", () => {
+  const event = normalizeActorConditionEvent({
+    kind: "add-wound",
+    actorId: "protagonist",
+    severity: "minor",
+    text: "手背擦伤。",
+    source: "玻璃碎片",
+    recoverable: true,
+    outcome: "worsened",
+  });
+
+  assert.equal(event.kind, "add-wound");
+  assert.equal("outcome" in event, false);
+});
+
+void test("normalizeActorConditionEvent reports invalid resolve outcome clearly", () => {
+  assert.throws(
+    () =>
+      normalizeActorConditionEvent({
+        kind: "resolve-condition",
+        actorId: "protagonist",
+        conditionKind: "wound",
+        conditionId: "wound-test",
+        outcome: "worsened",
+        reason: "错误地把伤势恶化写成 resolve。",
+      }),
+    /resolve-condition outcome 必须是 recovered 或 stabilized/,
+  );
+});
+
 void test("commitTurnTool accepts actor-condition update-outfit alias", () => {
   resetState();
 

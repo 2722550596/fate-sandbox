@@ -514,7 +514,12 @@ export function registerAllTools(pi: ExtensionAPI): void {
       ),
       conditionKind: Type.Optional(Type.Union([Type.Literal("wound"), Type.Literal("affliction")])),
       conditionId: Type.Optional(Type.String()),
-      outcome: Type.Optional(Type.Union([Type.Literal("recovered"), Type.Literal("stabilized")])),
+      outcome: Type.Optional(
+        Type.String({
+          description:
+            "resolve-condition 专用：只能是 recovered 或 stabilized。add-wound/update-wound 等其它 kind 不要写 outcome；误写会被忽略。",
+        }),
+      ),
       reason: Type.Optional(Type.String()),
     }),
     execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
