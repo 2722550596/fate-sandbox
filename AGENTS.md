@@ -4,6 +4,23 @@
 
 ---
 
+## 项目当前形态
+
+`fate-sandbox` 不是一张 prompt 卡；它是本地运行的互动叙事 runtime。
+
+核心组成：
+
+- `agents/`：GM prompt 模块。分工包括 system、context、rules、tool-policy、story-driver、render、style、input-guide、output-contract 等。
+- `skills/start-game/`：新游戏初始化流程机。只负责新游戏/重新开始/创建角色，不负责续局或修档。
+- `engine/core/`：确定性领域引擎。state、scene、actor、servant、economy、memory、secret、offscreen 等逻辑在这里落地。
+- `tools/`：GM 领域事件工具。工具不是状态栏更新器，而是 GM 改变世界的接口。
+- `data/`：型月世界数据、lookup 数据、campaign preset、timeline contract。
+- `extensions/`：pi extension。玩家 UI panel、compaction policy、timeline subagent 注入都在这里。
+- `.pi/agents/`：项目作用域子代理定义。必须保持 project-only 语义，不依赖 user-scope agent。
+- `sessions/`、`state/`、`.pi/agent/`：运行产物/本地私有配置，不属于发布内容，不进 git。
+
+---
+
 ## 宪章
 
 本项目是跑在**自己机器上**的东西——没有用户兼容性包袱、没有遗留接口、没有「先这样后面再改」。每一次妥协都会留到下一次、再下一次，最终变成屎山。唯一能拦住这个螺旋的是：**从一开始就不妥协。**
@@ -93,24 +110,126 @@ type SceneResult =
 
 ---
 
+## 叙事系统纪律
+
+### 工具是领域事件，不是 MVU 状态栏
+
+不要把工具设计成“把状态改一下”。工具必须表达世界里发生的事：
+
+- `update_scene`：时间、地点、scene objective / threat 的领域事件。
+- `start_scene_beat` / `finish_current_beat`：玩家当前可行动窗口的开启与收口。
+- `update_economy`：有账户、有来源、有 reason 的资金事件；修账户名用 `rename-purse`，不要伪造 spend/gain。
+- `update_actor_condition`：wound / affliction / outfit / tracked item 等可审计条件变化。
+- `reveal_secret`：隐藏真名、宝具、动机的配置与揭示；不能用叙事直接泄密。
+- `record_offscreen_event`：玩家视野外的真实后台事件；前台只能看到痕迹、传闻、梦境、异常投影或后果。
+
+模型犯错时，优先把错误沉淀成：
+
+1. 工具层归一化或拒绝；
+2. 领域引擎 invariant；
+3. 清晰错误信息，列出可用 id / summary / actor；
+4. 回归测试。
+
+不要只加 prompt 骂模型。
+
+### Public / secrets / player knowledge 分层
+
+“玩家知道”不是 public state visibility。
+
+必须区分：
+
+| 层级              | 含义                        | 允许落点                                                  |
+| ----------------- | --------------------------- | --------------------------------------------------------- |
+| player-only       | 现实玩家知道；角色未必知道  | 不写 state；最多用于 GM 避免误剧透                        |
+| protagonist-known | 玩家角色本人知道            | public actor identity / public memory，前提是剧情内成立   |
+| scene-public      | 当前场景 NPC 或社会层也知道 | public state / public memory                              |
+| hidden-canonical  | 真实存在但未公开确认        | `secrets` / `reveal_secret` / hidden NP / private motives |
+
+典型禁区：
+
+- 玩家设定里知道从者真名 ≠ `public.servantForm.identity.trueName.status = "revealed"`。
+- 穿越者知道原作 ≠ public world fact。
+- GM 知道幕后阵营行动 ≠ NPC 台词或玩家记忆。
+- hidden-canonical 不得写入 public memory。
+
+### Protagonist 从者真名防线
+
+玩家就是从者时：
+
+- 初始化 protagonist 从者不得直接 `trueNameStatus: "revealed"`。
+- 未在剧情世界内公开时，public trueName 必须是 `hidden` 或 `suspected`，display 填职阶名或疑似称呼，如 `Saber`。
+- 真实真名通过 `reveal_secret kind=configure-servant-secrets` 写入 secret slot。
+- 修档时可用 `override_locked_fact kind=servant-true-name status=hidden/suspected` 把误公开状态改回去。
+
+### 新手模式
+
+不了解 Fate 的玩家可以玩，但必须从普通人/穿越者/低知识边界进入。
+
+- `/skill:start-game` 中，用户说“第一次玩”“不了解 Fate”“随便来”时默认新手模式。
+- 新手模式不把术语知识当解谜前提；危险不能来自玩家不知道“御主/令咒/真名/宝具”等专有名词。
+- 专有名词首次影响行动时，只给一句与下一步选择相关的场内解释；禁止百科式灌输。
+- 不建议新人第一次直接进入复杂 FSF 多阵营中心或从者开局，除非用户明确要求。
+
+---
+
+## 子代理纪律
+
+项目子代理是后台导演组/审计器，不是陪聊 NPC。
+
+当前核心项目子代理：
+
+- `.pi/agents/parallel-line.md`：后台平行线候选，只输出结构化 offscreen 候选，不直接改 state，不面向玩家写正文。
+- `.pi/agents/timeline-showrunner.md`：世界线/题材审计，检查 drift、hook 滥用、NPC autonomy、world motion、beat closure。
+
+硬规则：
+
+- 主 GM 必须以 project scope 调用项目子代理；不要依赖 user-scope agent。
+- 子代理不得继承大块主项目上下文或技能目录：`inheritProjectContext: false`、`inheritSkills: false`。
+- 子代理必须显式配置 `tools` 和 `extensions`。不要 omitted `extensions`，否则可能加载普通扩展。
+- timeline 子代理只应加载 `extensions/subagents/timeline/index.ts`，拿到自动注入的 `<timeline_state_context>` 和 `lookup`。
+- `parallel-line` 输出必须是 bare JSON；不要 Markdown、解释、长 prose。
+- 后台事件必须归属到 actor / faction / location / consequence，并给前台一个可行动痕迹；新闻、巡逻、门响、信件不能替代事件本体。
+
+---
+
+## 发布与本地隐私纪律
+
+发布包不是 git 工作区原样打包。
+
+- 不要提交或发布 `.pi/agent/auth.json`、`sessions/`、`state/`、`.pi/npm/`、本地 session HTML。
+- 不要把 `agents/user/` 本地玩家角色印象打进发布包。
+- `docs/` 是开发文档，不进 release zip。
+- 发布脚本会删除 `agents/user/` 和 `*.test.ts`；不要移除这道防线。
+- `start.ps1` 必须保持 ASCII-safe / UTF-8 without BOM，避免 Windows PowerShell 编码误读。
+- README/release copy 描述项目为 experimental interactive narrative game；当前测试重点是 FSF 绫香线，但不要把具体玩家角色作为发布默认。
+- License 为 GPL-3.0-or-later；Fate / TYPE-MOON rights remain with their respective holders。
+
+---
+
 ## 文件与命名
 
 ### 文件按职责分目录，不按类型平铺
 
 ```
-engine/           # 运行时引擎（被 extension.ts import）
-  core/           # 基础组件（state、time、schema）
-    state.ts
-    time.ts
-  codeact.ts      # CodeAct 沙箱
-  codeact-sandbox.d.ts
-  scene.ts        # 场景引擎（视题材）
-data/             # 结构化数据（JSON/TS）
-tools/            # 工具定义与注册
-  registry.ts
-agents/           # GM prompt 分层文件
-extensions/       # pi extension 动态注入（含 subagent）
+engine/                # 确定性运行时引擎
+  core/                # state、scene、actor、servant、economy、memory、secret 等领域逻辑
+  gm-prompt/           # prompt 组装、preset、render/injection 测试
+  world-data/          # lookup 索引与世界数据读取
+
+data/                  # 结构化世界数据、campaign preset、timeline contract
+
+tools/                 # 工具定义与注册
+  registry.ts          # pi tool schema/description/execute 注册
+  state/               # 状态领域工具
+  debug/               # debug/修档工具；常规玩法不得依赖
+  lookup/              # 世界数据查询工具
+
+agents/                # GM prompt 分层模块
+skills/                # 玩家可调用技能，如 start-game
+extensions/            # pi extension 动态注入、UI panel、subagent context
   subagents/
+.pi/agents/            # 项目作用域子代理
+scripts/               # 打包/发布脚本
 ```
 
 ### 文件名：kebab-case
@@ -333,16 +452,23 @@ pnpm typecheck && pnpm lint && pnpm format:check
 | magic number / magic string  | 3.14 → `const TAX_RATE = 0.0314`。`"battle"` → `const SceneKind = { ... } as const` |
 | 深层嵌套三元                 | `a ? b ? c : d : e` → 用 if-else 或 lookup table                                    |
 | `import * as X` 命名空间导入 | 除非是 `import * as fs from "node:fs"` 这种标准库，否则具名导入                     |
+| 裸 JSON Patch 修正常规玩法   | 用领域工具；没有工具就新增窄领域事件                                                |
+| 把 debug 工具当正常 GM 工具  | debug 只用于开发修档，正常剧情必须走领域工具                                        |
 
 ---
 
 ## 修改提示词 / 数据 / 引擎时的规则
 
-- **改 GM prompt** → 保持三层分工：`gm-system.md`（身份+契约）→ `gm-context.md`（工具速查+世界观）→ `gm-rules.md`（硬规则+few-shot）。不要把硬规则塞进 system 层
-- **新增工具** → 在 `tools/registry.ts` 注册；description 必须含「必须调用场景」+「严禁行为」
-- **改 state 结构** → 同步 `INITIAL_STATE` + schema + protected paths 白名单。只允许经 migration 后访问新字段，不做运行时 fallback
-- **查 state 的代码** → 必须处理 `noUncheckedIndexedAccess` 带来的 `| undefined`——每个索引访问都有判空路径
-- **任何改动** → `pnpm typecheck && pnpm lint && pnpm format:check` 全过
+- **改 GM prompt** → 保持模块分工：`gm-system.md` 只放身份与最高契约；世界边界在 `gm-context.md`；硬规则在 `gm-rules.md`；工具路由在 `gm-tool-policy.md`；剧情推进纪律在 `gm-story-driver.md`；渲染在 `gm-render.md`；输入解释在 `gm-input-guide.md`；输出格式在 `gm-output-contract.md`。不要把所有规则塞进 system 层。
+- **改 `/skill:start-game`** → 它只处理新游戏/重新开始/创建角色。必须保持流程机、public/secrets/player knowledge 分层、protagonist 从者真名防泄露、新手模式。
+- **新增工具** → 在 `tools/registry.ts` 注册；description 必须含「必须调用场景」+「严禁行为」。工具应是领域事件，不是状态栏 setter。
+- **模型常犯错** → 先写回归测试，再加工具归一化/领域 invariant/更清晰错误信息。不要只补 prompt。
+- **改 state 结构** → 同步 `INITIAL_STATE` + schema + protected paths 白名单。只允许经 migration 后访问新字段，不做运行时 fallback。
+- **查 state 的代码** → 必须处理 `noUncheckedIndexedAccess` 带来的 `| undefined`——每个索引访问都有判空路径。
+- **改 lookup/data** → 保留 canonical fact skeleton，避免复制 wiki prose；不要引入非 TYPE-MOON 材料污染目标世界。
+- **改 subagent** → project-scope、explicit `tools`、explicit `extensions`、bare JSON 输出约束必须保留。
+- **改 release 包** → 跑打包检查，确认不含 `sessions/`、`state/`、`.pi/agent/`、`agents/user/`、`docs/`、`*.test.ts`。
+- **任何改动** → `pnpm typecheck && pnpm lint && pnpm format:check` 全过。
 
 ---
 
