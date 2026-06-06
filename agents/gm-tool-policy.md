@@ -24,11 +24,13 @@
 
 - 世界线调性跑偏、悬疑拖长但没有明确行动情报、beat 空转：必须先调用 `timeline-showrunner`，再继续正文。
 - 连续两轮的推进或 offscreen 结果只有新闻、广播、媒体口径、巡逻变多、监测阈值、封锁升级，而没有可交互的原作生态钩子：必须先调用 `timeline-showrunner` 检查 `worldMotion`。
-- 玩家明确忽略、搁置或绕开同一个悬疑钩子后，GM 仍想再次描写它抢镜：必须先调用 `timeline-showrunner`；未经审计，不得反复重提该钩子。
-- 关键 NPC 被写成纯线索容器、纯受害者或纯等待状态：必须调用 `timeline-showrunner` 检查 NPC autonomy。
+- 玩家明确忽略、搁置或绕开同一个悬疑钩子后，GM 仍想让它再次抢镜且没有新信息 / 新后果 / payoff：必须先调用 `timeline-showrunner`；有新状态和行动窗口时可以回头推进。
+- 关键 NPC 被写成纯线索容器、纯受害者、纯等待状态，或连续让步 / 保护 / 配合玩家而没有自身代价：必须调用 `timeline-showrunner` 检查 NPC autonomy 与 pressure。
 - 时间推进超过 10-30 分钟、休息、睡眠、治疗、躲藏或过夜：必须调用 `parallel-line` 推进 1 条相关后台阵营，除非本轮没有任何世界背面行动空间并在内部计划中明确跳过理由。
 - 当前 beat 收束、arc transition、或玩家获得安全空窗：必须调用 `parallel-line` 结算世界背面。
-- 调用 `parallel-line` 前必须查看最近 2-3 条 offscreen 事件；输入必须包含 `recentOffscreenEvents`，并用 `excludedActorIds` / `excludedPressureTypes` 排除刚用过的阵营和压力类型。不要连续让任何单一后台生态位（权力机构、教会、魔术协会、从者、普通社会、地点环境等）垄断后台。
+- 调用 `parallel-line` 前必须查看最近 2-3 条 offscreen 事件；输入必须包含 `recentOffscreenEvents`。`excludedActorIds` / `excludedPressureTypes` 只用于硬禁止项；一般重复只写进 recentOffscreenEvents，让子 agent 降权而不是封禁。不要连续让任何单一后台生态位（权力机构、教会、魔术协会、从者、普通社会、地点环境等）用同一种方式垄断后台。
+- 同一后台生态位可以重复出现，但这次必须带来新状态：新位置、新判断、新资源消耗、新关系变化、新行动窗口、新倒计时、内部冲突、失败或 payoff。只有“巡逻更密 / 监测更高 / 新闻更多”这类换皮重复需要避开或审计。
+- 如果连续 2 轮没有代价、没有敌方主动行动、没有资源/时间/关系损耗，必须调用 `parallel-line` 或使用领域工具落地一个硬后果；不要只用气氛暗示压力。
 - 如果主 GM 不确定下一条 `parallel-line` 应该换到哪个生态位，先调用 `timeline-showrunner`，让它给 `pressurePalette` / `worldMotion.requiredAction`，再调用 `parallel-line`。
 - 子 agent 输出不得直接成为 canonical state；需要落地时由主 GM 审核后使用 `record_offscreen_event`、公开 clue/threat/memory 或普通领域工具。
 
@@ -40,4 +42,6 @@
 - 复杂 beat 中不要手动拼 `set-story-window` + 多个 `add-objective`；优先用 `start_scene_beat`。
 - 10 分钟以上低风险过渡用 `update_scene` 推进时间。
 - 高风险、恢复、睡眠、治疗、补魔必须记录代价。
+- 压力进入正文前先判断是否需要状态落地：伤势/疲劳用 `update_actor_condition`，供魔/灵基损耗用 `update_servant_form`，金钱/资源用 `update_economy`，长期敌意或错过窗口用 `record_memory`，幕后敌方推进用 `record_offscreen_event`。
+- “不要触发战斗”解释为不要无预警把玩家拖进正面战；不禁止远处交锋、从者行动、敌方试探、战斗余波、可规避的倒计时或 offscreen 冲突。
 - 普通路人细节、短对话、几分钟生活动作不必调用工具。
