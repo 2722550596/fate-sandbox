@@ -67,6 +67,26 @@ export const CAMPAIGN_PRESETS = {
     situation: "escape",
     economy: { currency: "USD", purseLabel: "随身现金", startingFunds: 200 },
   },
+  extra_2032_seraph: {
+    id: "extra_2032_seraph",
+    title: "Fate/EXTRA 沙盒",
+    timeline: "extra",
+    openingMode: "selected",
+    premise:
+      "2032 年，Moon Cell 内部的霊子虚构世界 SE.RA.PH 举行月之圣杯战争；日期是沙盒启动占位，具体回合与对手由开局确认。",
+    activeRuleSetIds: ["fate-worldview-filter", "fate-rank-combat", "moon-cell-seraph"],
+    timezone: "UTC",
+    startedAt: "2032-01-01T00:00:00.000Z",
+    currentAt: "2032-01-01T00:00:00.000Z",
+    location: {
+      region: "Moon Cell",
+      site: "SE.RA.PH",
+      detail: "月海原学园·教室",
+      boundary: "otherworld",
+    },
+    situation: "daily",
+    economy: { currency: "custom", purseLabel: "SE.RA.PH 资源", startingFunds: 0 },
+  },
 } as const satisfies Record<string, CampaignPreset>;
 
 const CAMPAIGN_PRESET_INDEX: Readonly<Record<string, CampaignPreset>> = CAMPAIGN_PRESETS;

@@ -28,18 +28,20 @@ export type RuleSetId =
   | "fate-worldview-filter"
   | "fate-rank-combat"
   | "jpy-2004-economy"
+  | "moon-cell-seraph"
   | "custom";
 export type TimelineId =
   | "fz"
   | "fsn"
   | "case-files"
   | "fsf"
+  | "extra"
   | "mahoyo"
   | "kara-no-kyoukai"
   | "tsukihime-2000"
   | "tsukihime-2021"
   | "custom";
-export type TimeZoneId = "Asia/Tokyo" | "America/Denver";
+export type TimeZoneId = "Asia/Tokyo" | "America/Denver" | "UTC";
 export type CurrencyCode = "JPY" | "USD" | "custom";
 export type OpeningMode = "random" | "selected" | "custom";
 export type BoundaryKind = "normal" | "bounded-field" | "reality-marble" | "otherworld";
@@ -1854,6 +1856,7 @@ const RULE_SET_IDS = [
   "fate-worldview-filter",
   "fate-rank-combat",
   "jpy-2004-economy",
+  "moon-cell-seraph",
   "custom",
 ] as const;
 const TIMELINES = [
@@ -1861,6 +1864,7 @@ const TIMELINES = [
   "fsn",
   "case-files",
   "fsf",
+  "extra",
   "mahoyo",
   "kara-no-kyoukai",
   "tsukihime-2000",
@@ -1868,7 +1872,7 @@ const TIMELINES = [
   "custom",
 ] as const;
 const CURRENCIES = ["JPY", "USD", "custom"] as const;
-const TIME_ZONES = ["Asia/Tokyo", "America/Denver"] as const;
+const TIME_ZONES = ["Asia/Tokyo", "America/Denver", "UTC"] as const;
 const OPENING_MODES = ["random", "selected", "custom"] as const;
 const BOUNDARIES = ["normal", "bounded-field", "reality-marble", "otherworld"] as const;
 const SITUATIONS = [

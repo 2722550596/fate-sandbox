@@ -174,6 +174,7 @@ protagonist 从者真名规则：
 
 - FSN 冬木：`presetId=fsn_2004_fuyuki`，timezone=`Asia/Tokyo`，currency=`JPY`
 - FSF 斯诺菲尔德：`presetId=fsf_2008_snowfield`，timezone=`America/Denver`，currency=`USD`
+- Fate/EXTRA SE.RA.PH：`presetId=extra_2032_seraph`，timezone=`UTC`，currency=`custom`
 
 时间规则：
 
@@ -186,6 +187,12 @@ FSF 注意：
 - FSF preset 只是提供斯诺菲尔德战争结构。
 - 不要强制原作理查一世行动覆盖玩家从者。
 - 不要强制后续原作事件自动发生。
+
+Fate/EXTRA 注意：
+
+- EXTRA preset 只是提供 Moon Cell / SE.RA.PH 月之圣杯战争结构。
+- 不要默认玩家就是岸波白野；主角身份、Servant、记忆缺损程度和回合位置由开局确认。
+- 不要把冬木七骑规则、Fate/EXTRA CCC、FGO SE.RA.PH 或 EXTELLA 后续设定自动混入。
 
 ---
 

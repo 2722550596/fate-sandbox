@@ -35,20 +35,22 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "配置开局 campaign preset、时间线、本地时区、起始时间、地点和经济规则；这是进入正式剧情前的第一步，也可用于修正当前存档的 campaign 元数据。\n\n" +
       "【必须调用的场景】\n" +
       "- 开局确认时间线/城市/本地时区/货币/开场地点后，正式剧情推进前\n" +
-      "- 用户把 FSN 改成 FSF、空境、月姬或 custom 线，需要同步 campaign 与 clock\n" +
+      "- 用户把 FSN 改成 FSF、EXTRA、空境、月姬或 custom 线，需要同步 campaign 与 clock\n" +
       "- 当前存档 campaign.timeline/timezone 与实际地点不一致，需要热修\n\n" +
       "【严禁的行为】\n" +
       "- 在剧情中随意改时间线或时区来逃避后果\n" +
       "- 用它替代 scene beat 的普通地点移动；普通移动用 start_scene_beat / commit_turn / update_scene\n" +
       "- 未写 reason 就修改 campaign 语义",
     parameters: Type.Object({
-      presetId: Type.String({ description: "fsn_2004_fuyuki / fsf_2008_snowfield" }),
+      presetId: Type.String({
+        description: "fsn_2004_fuyuki / fsf_2008_snowfield / extra_2032_seraph",
+      }),
       title: Type.Optional(Type.String()),
-      timeline: Type.Optional(Type.String({ description: "fsn / fsf / custom 等" })),
+      timeline: Type.Optional(Type.String({ description: "fsn / fsf / extra / custom 等" })),
       openingMode: Type.Optional(Type.String({ description: "random / selected / custom" })),
       premise: Type.Optional(Type.String()),
       activeRuleSetIds: Type.Optional(Type.Array(Type.String())),
-      timezone: Type.Optional(Type.String({ description: "Asia/Tokyo / America/Denver" })),
+      timezone: Type.Optional(Type.String({ description: "Asia/Tokyo / America/Denver / UTC" })),
       startedAt: Type.Optional(Type.String({ description: "UTC ISO instant" })),
       currentAt: Type.Optional(Type.String({ description: "UTC ISO instant" })),
       location: Type.Optional(

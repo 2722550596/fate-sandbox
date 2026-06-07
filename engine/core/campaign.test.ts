@@ -25,6 +25,30 @@ void test("configureCampaign applies FSF Snowfield preset", () => {
   assert.equal(exportState().public.clock.displayTime, "2008年06月02日 星期一 21:28");
 });
 
+void test("configureCampaign applies Fate EXTRA SE.RA.PH preset", () => {
+  resetState();
+
+  const result = configureCampaign({
+    presetId: "extra_2032_seraph",
+    reason: "测试切换到 Fate/EXTRA SE.RA.PH 线",
+  });
+
+  const state = getState();
+  assert.equal(result.message, "Campaign 已配置：Fate/EXTRA 沙盒 (extra, UTC)。");
+  assert.equal(state.public.campaign.timeline, "extra");
+  assert.deepEqual(state.public.campaign.activeRuleSetIds, [
+    "fate-worldview-filter",
+    "fate-rank-combat",
+    "moon-cell-seraph",
+  ]);
+  assert.equal(state.public.clock.timezone, "UTC");
+  assert.equal(state.public.scene.location.region, "Moon Cell");
+  assert.equal(state.public.scene.location.site, "SE.RA.PH");
+  assert.equal(state.public.scene.location.boundary, "otherworld");
+  assert.equal(state.public.economy.currency, "custom");
+  assert.equal(exportState().public.clock.displayTime, "2032年01月01日 星期四 00:00");
+});
+
 void test("configureCampaign rejects unknown preset", () => {
   resetState();
 

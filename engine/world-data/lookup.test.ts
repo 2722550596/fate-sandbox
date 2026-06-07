@@ -32,6 +32,15 @@ void test("lookupWorldData finds FSF genre contract", () => {
   assert.match(result.text, /不可行动的气氛钩子/);
 });
 
+void test("lookupWorldData finds Fate EXTRA timeline contract", () => {
+  const result = lookupWorldData({ query: "Fate EXTRA Moon Cell SE.RA.PH 月之圣杯战争" });
+
+  assert.match(result.text, /\[时间线\] Fate\/EXTRA/);
+  assert.match(result.text, /<timeline id="extra">/);
+  assert.match(result.text, /128 名正式 Master/);
+  assert.match(result.text, /不得混用 Fate\/EXTRA CCC/);
+});
+
 void test("lookupWorldData finds Snowfield locations", () => {
   const result = lookupWorldData({ query: "斯诺菲尔德 歌剧院 临时藏身处" });
 
