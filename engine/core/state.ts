@@ -29,6 +29,7 @@ export type RuleSetId =
   | "fate-rank-combat"
   | "jpy-2004-economy"
   | "moon-cell-seraph"
+  | "moon-cell-far-side"
   | "custom";
 export type TimelineId =
   | "fz"
@@ -36,6 +37,7 @@ export type TimelineId =
   | "case-files"
   | "fsf"
   | "extra"
+  | "extra-ccc"
   | "mahoyo"
   | "kara-no-kyoukai"
   | "tsukihime-2000"
@@ -1857,6 +1859,7 @@ const RULE_SET_IDS = [
   "fate-rank-combat",
   "jpy-2004-economy",
   "moon-cell-seraph",
+  "moon-cell-far-side",
   "custom",
 ] as const;
 const TIMELINES = [
@@ -1865,6 +1868,7 @@ const TIMELINES = [
   "case-files",
   "fsf",
   "extra",
+  "extra-ccc",
   "mahoyo",
   "kara-no-kyoukai",
   "tsukihime-2000",

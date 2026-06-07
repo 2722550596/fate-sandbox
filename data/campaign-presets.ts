@@ -87,6 +87,31 @@ export const CAMPAIGN_PRESETS = {
     situation: "daily",
     economy: { currency: "custom", purseLabel: "SE.RA.PH 资源", startingFunds: 0 },
   },
+  extra_ccc_2032_far_side: {
+    id: "extra_ccc_2032_far_side",
+    title: "Fate/EXTRA CCC 沙盒",
+    timeline: "extra-ccc",
+    openingMode: "selected",
+    premise:
+      "2032 年，Moon Cell 月之裏側出现致命异常；旧校舍成为安全据点，Sakura Labyrinth 与 BB 侧压力包围被卷入者。日期是沙盒启动占位，具体 Servant、路线与卷入时点由开局确认。",
+    activeRuleSetIds: [
+      "fate-worldview-filter",
+      "fate-rank-combat",
+      "moon-cell-seraph",
+      "moon-cell-far-side",
+    ],
+    timezone: "UTC",
+    startedAt: "2032-01-01T00:00:00.000Z",
+    currentAt: "2032-01-01T00:00:00.000Z",
+    location: {
+      region: "Moon Cell",
+      site: "月之裏側",
+      detail: "旧校舍",
+      boundary: "otherworld",
+    },
+    situation: "investigation",
+    economy: { currency: "custom", purseLabel: "Sakura迷宫资源", startingFunds: 0 },
+  },
 } as const satisfies Record<string, CampaignPreset>;
 
 const CAMPAIGN_PRESET_INDEX: Readonly<Record<string, CampaignPreset>> = CAMPAIGN_PRESETS;

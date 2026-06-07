@@ -49,6 +49,32 @@ void test("configureCampaign applies Fate EXTRA SE.RA.PH preset", () => {
   assert.equal(exportState().public.clock.displayTime, "2032年01月01日 星期四 00:00");
 });
 
+void test("configureCampaign applies Fate EXTRA CCC far side preset", () => {
+  resetState();
+
+  const result = configureCampaign({
+    presetId: "extra_ccc_2032_far_side",
+    reason: "测试切换到 Fate/EXTRA CCC 月之裏側线",
+  });
+
+  const state = getState();
+  assert.equal(result.message, "Campaign 已配置：Fate/EXTRA CCC 沙盒 (extra-ccc, UTC)。");
+  assert.equal(state.public.campaign.timeline, "extra-ccc");
+  assert.deepEqual(state.public.campaign.activeRuleSetIds, [
+    "fate-worldview-filter",
+    "fate-rank-combat",
+    "moon-cell-seraph",
+    "moon-cell-far-side",
+  ]);
+  assert.equal(state.public.clock.timezone, "UTC");
+  assert.equal(state.public.scene.location.region, "Moon Cell");
+  assert.equal(state.public.scene.location.site, "月之裏側");
+  assert.equal(state.public.scene.location.detail, "旧校舍");
+  assert.equal(state.public.scene.location.boundary, "otherworld");
+  assert.equal(state.public.economy.currency, "custom");
+  assert.equal(exportState().public.clock.displayTime, "2032年01月01日 星期四 00:00");
+});
+
 void test("configureCampaign rejects unknown preset", () => {
   resetState();
 

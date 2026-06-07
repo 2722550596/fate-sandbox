@@ -288,5 +288,40 @@
     "类型": "角色",
     "原文": "<藤村大河EXTRAcharacter>\n名字:藤村大河（EXTRA）\n别名:Taiga Fujimura (EXTRA);藤村大河;タイガー\n作品:Fate/EXTRA\n时期:Fate/EXTRA\n定位:月海原学园教师 NPC，日常层与支线 quest 接口。\n\n事实边界:\n- EXTRA 中的大河是 Moon Cell 学园 NPC，不是 FSN 冬木的藤村大河本人。\n- 她承担教师与 request/quest 类接口，能给玩家提供轻量目标。\n\n行为边界:\n- 不要把 FSN 卫宫家监护关系、冬木生活和剑道背景自动套入。\n- 喜剧感不能覆盖 Moon Cell 淘汰赛的真实死亡压力。\n\n沙盒注意:\n- 用于学园日常、支线任务、安全喘息和规则外小目标。\n</藤村大河EXTRAcharacter>",
     "时期": "Fate/EXTRA"
+  },
+  "间桐樱（CCC）": {
+    "类型": "角色",
+    "原文": "<间桐樱CCCcharacter>\n名字:间桐樱（CCC）\n别名:Sakura Matou (CCC);間桐桜 (CCC);保健委員;樱NPC\n作品:Fate/EXTRA CCC\n时期:Fate/EXTRA CCC\n定位:月之裏側事件关键 NPC；旧校舍安全据点与 Sakura Labyrinth 异常的核心关联者。\n\n事实边界:\n- CCC 的樱仍是 Moon Cell 侧 NPC，不是 FSN 的间桐樱本人。\n- 官方资料把她标为今作 key person；事件与她有重大关系。\n- 她和 BB 的关系、异常原因、深层真相属于后期/隐藏事实，不能前期公开。\n\n行为边界:\n- 不要套用 FSN 黑圣杯、间桐家创伤或 Rider 主从关系。\n- 不要把她写成万能系统管理员；NPC role 和旧校舍资源都有边界。\n\n沙盒注意:\n- 用于保健室、补给、安全区维护、异常疑点和 BB/Sakura Labyrinth 线索。\n</间桐樱CCCcharacter>",
+    "时期": "Fate/EXTRA CCC"
+  },
+  "BB（CCC）": {
+    "类型": "角色",
+    "原文": "<BBCCCcharacter>\n名字:BB（CCC）\n别名:BB;ビィビィ;黑衣少女;Sakura Labyrinth creator;高级AI;BB核心\n作品:Fate/EXTRA CCC\n时期:Fate/EXTRA CCC\n定位:与间桐樱相似的黑衣少女，BB 侧核心，Sakura Labyrinth 的建造者/干涉者。\n\n事实边界:\n- 官方页面描述她挡在主人公面前，并暗示她可能是迷宫建造者。\n- TYPE-MOON Wiki JP 将她列为 BB 侧核心人物，称她为 Sakura Labyrinth 的建造者。\n- 她的起源、真实动机、权限结构、与樱/祈荒/Alter Ego 的深层关系属于隐藏事实。\n\n行为边界:\n- 不要把 FGO 的 MoonCancer 职阶、CCC 事件后状态或后续作品人格直接套回 CCC 本篇。\n- BB 可以挑衅、改写局部规则、制造选择压力，但不能无成本全知全能地解决或封死玩家。\n\n沙盒注意:\n- 用于异常广播、规则改写、迷宫封锁、Alter Ego 调度、恶作剧和真正危险混杂的压力。\n</BBCCCcharacter>",
+    "时期": "Fate/EXTRA CCC"
+  },
+  "吉娜可＝加里吉利": {
+    "类型": "角色",
+    "原文": "<吉娜可加里吉利character>\n名字:吉娜可＝加里吉利\n别名:Jinako Carigiri;ジナコ＝カリギリ;Jinako;吉娜可\n作品:Fate/EXTRA CCC\n时期:Fate/EXTRA CCC\n定位:CCC 新登场 Master，戴眼镜的网络中毒女性，迦尔纳阵营相关者。\n\n事实边界:\n- 在 CCC 本篇作为 Master 登场，与主人公等人一样被卷入月之裏側异常。\n- 与 Servant 迦尔纳相关。\n- 官方和 Wiki 都强调她的网络中毒、消极/宅居倾向与被卷入后的特殊态度。\n\n行为边界:\n- 不要把她只写成搞笑宅女；她的回避、恐惧、自我保护和迦尔纳关系都能形成真实压力。\n- 迦尔纳的职阶、能力和契约细节使用前要外部检索确认。\n\n沙盒注意:\n- 用于旧校舍生态、迦尔纳阵营、退缩/求生、资源请求和玩家说服窗口。\n</吉娜可加里吉利character>",
+    "时期": "Fate/EXTRA CCC"
+  },
+  "杀生院祈荒（CCC）": {
+    "类型": "角色",
+    "原文": "<杀生院祈荒CCCcharacter>\n名字:杀生院祈荒（CCC）\n别名:Kiara Sessyoin;殺生院キアラ;祈荒;琪亚拉;尼僧服美女\n作品:Fate/EXTRA CCC\n时期:Fate/EXTRA CCC\n定位:CCC Master 之一，尼僧服女性，Caster 安徒生阵营相关者；深层事实高危。\n\n事实边界:\n- 在 CCC 本篇作为 Master 登场，与 Caster 汉斯·克里斯蒂安·安徒生相关。\n- 官方/Wiki 可公开层描述为穏やかな眼差し、楚々とした立ち姿の尼僧服美女。\n- 她的真实立场、能力本质、BB 异常链条和后期身份是重大隐藏事实。\n\n行为边界:\n- 不要把 FGO Beast / Alter Ego 等后续设定自动套回 CCC 本篇。\n- 她不能在未铺垫时被写成普通圣女或普通反派；必须保留心理/宗教/救济/欲望的危险边界。\n\n沙盒注意:\n- 用于心理介入、治疗/救济话术、禁猟乙女领域、安徒生阵营和 CCC 后期真相。\n</杀生院祈荒CCCcharacter>",
+    "时期": "Fate/EXTRA CCC"
+  },
+  "清扫委员长（CCC）": {
+    "类型": "角色",
+    "原文": "<清扫委员长CCCcharacter>\n名字:清扫委员长（CCC）\n别名:清掃委員長;上级AI;高级NPC\n作品:Fate/EXTRA CCC\n时期:Fate/EXTRA CCC\n定位:与主人公一行一起被卷入月之裏側的上级 AI，对 Master 与樱侧协作抱有不信任。\n\n事实边界:\n- 表侧时权限高于间桐樱，被卷入裏側后成为旧校舍生态的一员。\n- 她把圣杯战争 Master 视为 trouble source，对生徒会与樱协作保持警惕。\n\n行为边界:\n- 不要写成纯阻挠 NPC；她应有维护秩序、安全和权限边界的目标。\n- 不要让她无证据知道隐藏真相。\n\n沙盒注意:\n- 用于旧校舍内部摩擦、权限限制、安全区规则和 NPC autonomy。\n</清扫委员长CCCcharacter>",
+    "时期": "Fate/EXTRA CCC"
+  },
+  "NPC5-10": {
+    "类型": "角色",
+    "原文": "<NPC510CCCcharacter>\n名字:NPC5-10\n别名:ゴー・トゥ;Go-To;モノマネ部部長\n作品:Fate/EXTRA CCC\n时期:Fate/EXTRA CCC\n定位:被卷入月之裏側的一般 NPC，表侧 role 是模仿部部长。\n\n事实边界:\n- 正式名称 NPC5-10，CCC 中也称ゴー・トゥ。\n- 不是 Master，也不是核心战斗单位；重点是 NPC role 在裏側异常中的存续。\n\n行为边界:\n- 不要把一般 NPC 写成全知规则解释器。\n- 可用作安全区人群、轻量委托、异常见证和旧校舍生活压力。\n</NPC510CCCcharacter>",
+    "时期": "Fate/EXTRA CCC"
+  },
+  "辣妹子（CCC）": {
+    "类型": "角色",
+    "原文": "<辣妹子CCCcharacter>\n名字:辣妹子（CCC）\n别名:ギャル子;Gal-ko;ギャル系NPC\n作品:Fate/EXTRA CCC\n时期:Fate/EXTRA CCC\n定位:与主人公一行一起被卷入月之裏側的一般 NPC。\n\n事实边界:\n- 原本在表侧圣杯战争途中预定被消去，但因裏側异常暂时逃过删除。\n- 她是 NPC 生态的一部分，不是 Master/Servant 阵营核心。\n\n行为边界:\n- 不要把她写成一次性笑料；她能提供普通 NPC 对“删除”和安全区的恐惧/松懈视角。\n</辣妹子CCCcharacter>",
+    "时期": "Fate/EXTRA CCC"
   }
 }

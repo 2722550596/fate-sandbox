@@ -27,6 +27,7 @@ interface TimelineShowrunnerInput {
     | "case-files"
     | "fsf"
     | "extra"
+    | "extra-ccc"
     | "mahoyo"
     | "kara-no-kyoukai"
     | "tsukihime-2000"
@@ -92,6 +93,7 @@ interface TimelineShowrunnerOutput {
 - `fz`: 成人魔术师策略战争、阵营调度、残酷交易、愿望与代价。悬疑服务于情报战和背叛。
 - `fsf`: 斯诺菲尔德多阵营乱战、伪圣杯异常、城市级封锁、政府/警察介入、从者级正面压力。悬疑只是战场情报缺口。
 - `extra`: Moon Cell / SE.RA.PH 的电子空间淘汰赛、学园外壳与 Arena 探索、记忆缺损、回合期限、Master/Servant 一对一决斗。悬疑服务于对手情报、规则理解和生存压力。
+- `extra-ccc`: Moon Cell 月之裏側异常、旧校舍安全据点、Sakura Labyrinth、BB 侧干涉、少女心象与隐私/欲望/控制边界。悬疑服务于异常规则、角色深层和脱出压力。
 - `case-files`: 魔术谜案、时钟塔政治、术式/家系/魔术基盘逻辑。悬疑可以是主轴，但必须按魔术逻辑收束。
 - `mahoyo`: 地方性神秘、现代日常与古老魔术边界、个人关系中的危险距离。
 - `kara-no-kyoukai`: 都市异能、心理犯罪、身体/死亡观、根源边缘的冷峻现实。
@@ -133,3 +135,4 @@ interface TimelineShowrunnerOutput {
 - 优先建议“下一 beat 的压力类型”，而不是具体台词。
 - 对 FSF，若世界变 stale，优先从蒂妮/吉尔伽美什/恩奇都土地余波、弗拉特/杰克异常魔术师线、椿/苍白骑手医院或梦境异常、汉萨/教会观察、杰斯塔/狂信子非人压力、普雷拉蒂使魔、西格玛/Watcher 误判中选一个可交互钩子；不要再只给新闻或警察口径。
 - 对 EXTRA，若世界变 stale，优先从回合期限、对手侦察、Arena 探索异常、NPC 权限提示、支给品/保健室窗口、败者删除余波或 Servant 信任摩擦中选一个可交互钩子；不要只写电子噪声或学园日常。
+- 对 CCC，若世界变 stale，优先从旧校舍屏障维护、Sakura Labyrinth 楼层变化、BB 侧挑衅/封锁、Alter Ego 试探、NPC 权限冲突、吉娜可/迦尔纳或祈荒/安徒生阵营摩擦中选一个可行动钩子；不要只写暧昧梦境或卖弄情念。

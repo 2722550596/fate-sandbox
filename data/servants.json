@@ -580,7 +580,9 @@
         "赤Saber",
         "Nero Claudius",
         "ネロ・クラウディウス",
-        "セイバー(EXTRA)"
+        "セイバー(EXTRA)",
+        "Saber Bride",
+        "セイバー・ブライド"
       ],
       "className": "Saber",
       "trueName": "尼禄·克劳狄乌斯",
@@ -603,7 +605,8 @@
       "notes": [
         "Fate/EXTRA 主角可选三骑之一。",
         "不要和阿尔托莉雅 Saber 混同；“赤 Saber”只是辨识称呼。",
-        "本地条目只作 Extra 索引；精确参数、技能、宝具效果和回合表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
+        "本地条目只作 Extra 索引；精确参数、技能、宝具效果和回合表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。",
+        "Fate/EXTRA CCC 中可继续作为主人公候选从者；新衣装、个人结局和 CCC route 表现需按 CCC 资料检索。"
       ]
     },
     {
@@ -631,7 +634,8 @@
       "notes": [
         "Fate/EXTRA 主角可选三骑之一。",
         "和 FSN 的 Archer 高度相似但作品语境不同；具体身份边界需查源。",
-        "本地条目只作 Extra 索引；精确参数、技能、宝具效果和回合表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
+        "本地条目只作 Extra 索引；精确参数、技能、宝具效果和回合表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。",
+        "Fate/EXTRA CCC 中可继续作为主人公候选从者；新衣装、个人结局和 CCC route 表现需按 CCC 资料检索。"
       ]
     },
     {
@@ -659,7 +663,8 @@
       "notes": [
         "Fate/EXTRA 主角可选三骑之一。",
         "咒术、变化和献身/毒舌并存是角色核心。",
-        "本地条目只作 Extra 索引；精确参数、技能、宝具效果和回合表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
+        "本地条目只作 Extra 索引；精确参数、技能、宝具效果和回合表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。",
+        "Fate/EXTRA CCC 中可继续作为主人公候选从者；新衣装、个人结局和 CCC route 表现需按 CCC 资料检索。"
       ]
     },
     {
@@ -945,6 +950,206 @@
         "EXTRA 中特维斯·H·皮斯曼相关的特殊从者。",
         "Saver 不是常规七职阶；不得在前期随意揭示或当普通 Boss 工具。",
         "本地条目只作 Extra 索引；精确参数、技能、宝具效果和回合表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
+      ]
+    },
+    {
+      "id": "gilgamesh-servant-ccc",
+      "name": "吉尔伽美什（CCC）",
+      "aliases": [
+        "Gilgamesh (CCC)",
+        "ギルガメッシュ",
+        "英雄王",
+        "主人公候选从者",
+        "classless servant"
+      ],
+      "className": "Custom",
+      "trueName": "吉尔伽美什",
+      "parameters": {
+        "strength": "?",
+        "endurance": "?",
+        "agility": "?",
+        "mana": "?",
+        "luck": "?",
+        "noblePhantasm": "?"
+      },
+      "noblePhantasms": [
+        {
+          "name": "Gate of Babylon / Enuma Elish",
+          "rank": "?",
+          "kind": "王之财宝/乖离剑相关",
+          "summary": "CCC 主人公新增候选从者；宝具解禁、弱体和剧情限制必须按 CCC 资料确认。"
+        }
+      ],
+      "notes": [
+        "CCC 中新增的主人公候选从者之一，自称没有职阶。",
+        "不要直接套用 FSN/FZ 吉尔伽美什的御主关系、慢心状态或冬木经历。",
+        "本地条目只作 CCC 索引；精确参数、技能、宝具效果、职阶细节和路线表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
+      ]
+    },
+    {
+      "id": "karna-servant-ccc",
+      "name": "迦尔纳（CCC）",
+      "aliases": ["Karna (CCC)", "カルナ", "ジナコのサーヴァント", "金色铠甲的白发青年"],
+      "className": "Custom",
+      "trueName": "迦尔纳",
+      "parameters": {
+        "strength": "?",
+        "endurance": "?",
+        "agility": "?",
+        "mana": "?",
+        "luck": "?",
+        "noblePhantasm": "?"
+      },
+      "noblePhantasms": [
+        {
+          "name": "Vasavi Shakti",
+          "rank": "?",
+          "kind": "神枪/对神宝具",
+          "summary": "迦尔纳代表性宝具之一；CCC 中职阶和释放条件需外部检索确认。"
+        }
+      ],
+      "notes": [
+        "CCC 中吉娜可＝加里吉利的 Servant。",
+        "Wiki/官方页面称其职阶不明，不要默认按 FGO/Apocrypha 的 Lancer 状态处理。",
+        "本地条目只作 CCC 索引；精确参数、技能、宝具效果、职阶细节和路线表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
+      ]
+    },
+    {
+      "id": "hans-andersen-caster-ccc",
+      "name": "汉斯·克里斯蒂安·安徒生",
+      "aliases": [
+        "Caster (CCC)",
+        "Hans Christian Andersen",
+        "ハンス・クリスチャン・アンデルセン",
+        "安徒生",
+        "キアラのサーヴァント"
+      ],
+      "className": "Caster",
+      "trueName": "汉斯·克里斯蒂安·安徒生",
+      "parameters": {
+        "strength": "?",
+        "endurance": "?",
+        "agility": "?",
+        "mana": "?",
+        "luck": "?",
+        "noblePhantasm": "?"
+      },
+      "noblePhantasms": [
+        {
+          "name": "Märchen Meines Lebens",
+          "rank": "?",
+          "kind": "创作/人生改稿系宝具",
+          "summary": "与书写、评价、改稿和人物完成相关；具体条件需查源。"
+        }
+      ],
+      "notes": [
+        "CCC 中杀生院祈荒的 Caster。",
+        "外表是小柄美少年，言行和声音不符，毒舌且带绝望感。",
+        "本地条目只作 CCC 索引；精确参数、技能、宝具效果、职阶细节和路线表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
+      ]
+    },
+    {
+      "id": "elizabeth-bathory-lancer-ccc",
+      "name": "伊丽莎白·巴托里",
+      "aliases": [
+        "Lancer (CCC)",
+        "Elizabeth Bathory",
+        "エリザベート＝バートリー",
+        "赤Lancer",
+        "龙娘"
+      ],
+      "className": "Lancer",
+      "trueName": "伊丽莎白·巴托里",
+      "parameters": {
+        "strength": "?",
+        "endurance": "?",
+        "agility": "?",
+        "mana": "?",
+        "luck": "?",
+        "noblePhantasm": "?"
+      },
+      "noblePhantasms": [
+        {
+          "name": "Báthory Erzsébet",
+          "rank": "?",
+          "kind": "音波/城塞/拷问系表现",
+          "summary": "CCC/FGO 等版本表现差异大，使用前查源确认。"
+        }
+      ],
+      "notes": [
+        "CCC 中协助 BB 的谜之 Servant。",
+        "外观有角和尾巴，恶魔感强；不要自动套后续偶像梗或 FGO 成长状态。",
+        "本地条目只作 CCC 索引；精确参数、技能、宝具效果、职阶细节和路线表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
+      ]
+    },
+    {
+      "id": "passionlip-alter-ego-ccc",
+      "name": "帕ッションリップ",
+      "aliases": [
+        "Passionlip",
+        "Passion Lip",
+        "パッションリップ",
+        "Alter Ego M",
+        "アルターエゴM",
+        "BB的眷属"
+      ],
+      "className": "AlterEgo",
+      "trueName": "帕ッションリップ",
+      "parameters": {
+        "strength": "?",
+        "endurance": "?",
+        "agility": "?",
+        "mana": "?",
+        "luck": "?",
+        "noblePhantasm": "?"
+      },
+      "noblePhantasms": [
+        {
+          "name": "Brynhildr Romantia / Trash & Crush",
+          "rank": "?",
+          "kind": "Alter Ego 能力/压缩系表现",
+          "summary": "CCC 与后续作品表现差异大；具体能力、女神复合来源和限制必须查源。"
+        }
+      ],
+      "notes": [
+        "CCC 中 BB 的眷属，拥有巨大カギ爪化的手臂，对主人公抱有好意。",
+        "不要把 FGO 的数值、羁绊和事件状态自动套回 CCC 本篇。",
+        "本地条目只作 CCC 索引；精确参数、技能、宝具效果、职阶细节和路线表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
+      ]
+    },
+    {
+      "id": "meltryllis-alter-ego-ccc",
+      "name": "梅尔特莉莉丝",
+      "aliases": [
+        "Meltryllis",
+        "Meltlilith",
+        "メルトリリス",
+        "Alter Ego S",
+        "アルターエゴS",
+        "BB的眷属"
+      ],
+      "className": "AlterEgo",
+      "trueName": "梅尔特莉莉丝",
+      "parameters": {
+        "strength": "?",
+        "endurance": "?",
+        "agility": "?",
+        "mana": "?",
+        "luck": "?",
+        "noblePhantasm": "?"
+      },
+      "noblePhantasms": [
+        {
+          "name": "Sarasvati Meltout",
+          "rank": "?",
+          "kind": "Alter Ego 能力/溶解吸收系表现",
+          "summary": "CCC 与后续作品表现差异大；具体能力、女神复合来源和限制必须查源。"
+        }
+      ],
+      "notes": [
+        "CCC 中 BB 的眷属，拥有针状双腿，好战且有嗜虐倾向。",
+        "不要把 FGO SE.RA.PH 的经历、恋爱线或能力状态自动套回 CCC 本篇。",
+        "本地条目只作 CCC 索引；精确参数、技能、宝具效果、职阶细节和路线表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
       ]
     }
   ]

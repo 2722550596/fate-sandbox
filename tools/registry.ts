@@ -43,10 +43,13 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "- 未写 reason 就修改 campaign 语义",
     parameters: Type.Object({
       presetId: Type.String({
-        description: "fsn_2004_fuyuki / fsf_2008_snowfield / extra_2032_seraph",
+        description:
+          "fsn_2004_fuyuki / fsf_2008_snowfield / extra_2032_seraph / extra_ccc_2032_far_side",
       }),
       title: Type.Optional(Type.String()),
-      timeline: Type.Optional(Type.String({ description: "fsn / fsf / extra / custom 等" })),
+      timeline: Type.Optional(
+        Type.String({ description: "fsn / fsf / extra / extra-ccc / custom 等" }),
+      ),
       openingMode: Type.Optional(Type.String({ description: "random / selected / custom" })),
       premise: Type.Optional(Type.String()),
       activeRuleSetIds: Type.Optional(Type.Array(Type.String())),

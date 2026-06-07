@@ -61,6 +61,35 @@ void test("lookupWorldData finds Fate EXTRA servant indexes", () => {
   assert.match(saver.text, /Saver 不是常规七职阶/);
 });
 
+void test("lookupWorldData finds Fate EXTRA CCC timeline contract", () => {
+  const result = lookupWorldData({ query: "Fate EXTRA CCC 月之裏側 Sakura Labyrinth BB" });
+
+  assert.match(result.text, /\[时间线\] Fate\/EXTRA CCC/);
+  assert.match(result.text, /<timeline id="extra-ccc">/);
+  assert.match(result.text, /旧校舍是月之裏側少数安全据点/);
+  assert.match(result.text, /不得混用 Fate\/EXTRA CCC FoxTail/);
+});
+
+void test("lookupWorldData finds Fate EXTRA CCC character indexes", () => {
+  const bb = lookupWorldData({ query: "BB核心 黑衣少女 MoonCancer CCC" });
+  assert.match(bb.text, /\[角色\] BB（CCC）/);
+  assert.match(bb.text, /不要把 FGO 的 MoonCancer 职阶/);
+
+  const jinako = lookupWorldData({ query: "吉娜可 迦尔纳 CCC 网络中毒 Master" });
+  assert.match(jinako.text, /\[角色\] 吉娜可＝加里吉利/);
+  assert.match(jinako.text, /迦尔纳阵营/);
+});
+
+void test("lookupWorldData finds Fate EXTRA CCC servant indexes", () => {
+  const karna = lookupWorldData({ query: "迦尔纳 CCC 吉娜可 职阶不明" });
+  assert.match(karna.text, /"id": "karna-servant-ccc"/);
+  assert.match(karna.text, /职阶不明/);
+
+  const alterEgo = lookupWorldData({ query: "Passionlip Meltryllis Alter Ego CCC BB眷属" });
+  assert.match(alterEgo.text, /"id": "passionlip-alter-ego-ccc"/);
+  assert.match(alterEgo.text, /"id": "meltryllis-alter-ego-ccc"/);
+});
+
 void test("lookupWorldData finds Snowfield locations", () => {
   const result = lookupWorldData({ query: "斯诺菲尔德 歌剧院 临时藏身处" });
 
