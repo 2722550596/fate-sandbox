@@ -9,16 +9,17 @@ import type {
 } from "../../engine/core/state";
 
 import { configureCampaign } from "../../engine/core/campaign";
-import { writeStateToDetails } from "../../engine/core/state";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 
 export function configureCampaignTool(params: unknown, sessionManager: unknown): ToolResult {
-  const result = configureCampaign(assertConfigureCampaignInput(params));
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { result };
-  writeStateToDetails(details);
-  return textResult(result.message, details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => configureCampaign(assertConfigureCampaignInput(params)),
+    details: resultDetails,
+    message: (result) => result.message,
+  });
 }
 
 function assertConfigureCampaignInput(params: unknown): Parameters<typeof configureCampaign>[0] {

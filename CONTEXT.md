@@ -92,6 +92,10 @@ _Avoid_: Global lock registry, rule note
 A tool that changes Game State by applying a constrained domain event to an aggregate, rather than accepting raw object patches. Domain event tools protect schema boundaries and return player-safe narrative constraints.
 _Avoid_: Patch tool, raw update, replace object
 
+**Domain Event Tool Runner**:
+The execution module shared by Domain Event Tools. It owns the common order: run the domain event, persist Game State, attach the state snapshot to tool details, and return player-safe text.
+_Avoid_: Per-tool persistence boilerplate, manual result wrapper
+
 **Revelation**:
 A domain event that moves hidden truth from Secret Game State into Public Game State. Ordinary reveal tools accept player-facing claims and evidence, not secret IDs; the tool internally matches and validates whether anything is revealed.
 _Avoid_: Secret ID reveal, manual public copy

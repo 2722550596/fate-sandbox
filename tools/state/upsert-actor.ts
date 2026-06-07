@@ -19,9 +19,9 @@ import type {
 
 import { upsertActor } from "../../engine/core/actor";
 import { assertFateRank } from "../../engine/core/fate-rank";
-import { writeStateToDetails } from "../../engine/core/state";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 
 const ACTOR_KINDS = ["human", "outsider", "spirit", "other"] as const;
 const RELATIONSHIP_STANCES = ["self", "ally", "friendly", "neutral", "wary", "hostile", "unknown"] as const;
@@ -31,11 +31,12 @@ const CONTRACT_STATUSES = ["stable", "weak", "cut", "masterless"] as const;
 const MANA_SUPPLIES = ["sufficient", "strained", "starved"] as const;
 
 export function upsertActorTool(params: unknown, sessionManager: unknown): ToolResult {
-  const result = upsertActor(assertActorRegistryInput(params));
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { result };
-  writeStateToDetails(details);
-  return textResult(result.message, details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => upsertActor(assertActorRegistryInput(params)),
+    details: resultDetails,
+    message: (result) => result.message,
+  });
 }
 
 function assertActorRegistryInput(params: unknown): ActorRegistryInput {

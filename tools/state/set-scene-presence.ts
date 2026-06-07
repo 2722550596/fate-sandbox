@@ -1,16 +1,17 @@
 import type { ScenePresenceInput } from "../../engine/core/actor";
 
 import { setScenePresence } from "../../engine/core/actor";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { writeStateToDetails } from "../../engine/core/state";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 
 export function setScenePresenceTool(params: unknown, sessionManager: unknown): ToolResult {
-  const result = setScenePresence(assertScenePresenceInput(params));
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { result };
-  writeStateToDetails(details);
-  return textResult(result.message, details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => setScenePresence(assertScenePresenceInput(params)),
+    details: resultDetails,
+    message: (result) => result.message,
+  });
 }
 
 function assertScenePresenceInput(params: unknown): ScenePresenceInput {

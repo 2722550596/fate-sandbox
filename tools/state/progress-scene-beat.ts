@@ -11,9 +11,9 @@ import type { SceneBeatThreatInput } from "../../engine/core/scene";
 import type { LocationState, SituationKind } from "../../engine/core/state";
 
 import { progressSceneBeat } from "../../engine/core/scene-beat-lifecycle";
-import { writeStateToDetails } from "../../engine/core/state";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 
 const SITUATIONS = [
   "daily",
@@ -47,11 +47,12 @@ const MEMORY_CERTAINTIES = [
 ] as const satisfies readonly MemoryClaim["certainty"][];
 
 export function progressSceneBeatTool(params: unknown, sessionManager: unknown): ToolResult {
-  const result = progressSceneBeat(normalizeSceneBeatProgressInput(params));
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { result };
-  writeStateToDetails(details);
-  return textResult(result.message, details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => progressSceneBeat(normalizeSceneBeatProgressInput(params)),
+    details: resultDetails,
+    message: (result) => result.message,
+  });
 }
 
 function normalizeSceneBeatProgressInput(params: unknown): SceneBeatProgressInput {

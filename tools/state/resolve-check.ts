@@ -1,13 +1,20 @@
 import { assertCheckInput, resolveCheck, type RawCheckInput } from "../../engine/core/check";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { writeStateToDetails } from "../../engine/core/state";
 import { noNumberNarrativeHint } from "../runtime/narrative-hints";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { runDomainEventTool } from "./domain-tool-runner";
 
 export function resolveCheckTool(params: RawCheckInput, sessionManager: unknown): ToolResult {
-  const result = resolveCheck(assertCheckInput(params));
-  persistCurrentState(sessionManager);
-  const text = [
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => resolveCheck(assertCheckInput(params)),
+    details: () => ({}),
+    message: formatResult,
+  });
+}
+
+function formatResult(result: ReturnType<typeof resolveCheck>): string {
+  return [
     "判定已结算：",
     `🎲 ${formatRolls(result.roll.rolls)}，保留 ${result.roll.kept}；修正 ${formatSigned(result.roll.modifier)}；总计 ${result.roll.total} vs DC ${result.roll.dc}`,
     `📌 结果: ${result.outcome}`,
@@ -21,10 +28,6 @@ export function resolveCheckTool(params: RawCheckInput, sessionManager: unknown)
       [...result.narrativeConstraints, noNumberNarrativeHint()],
     ).map((hint) => `- ${hint}`),
   ].join("\n");
-
-  const details: Record<string, unknown> = {};
-  writeStateToDetails(details);
-  return textResult(text, details);
 }
 
 function formatRolls(rolls: number[]): string {

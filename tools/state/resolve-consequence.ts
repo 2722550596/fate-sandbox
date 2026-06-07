@@ -1,7 +1,7 @@
 import { assertConsequenceInput, resolveConsequence, type RawConsequenceInput } from "../../engine/core/consequence";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { writeStateToDetails } from "../../engine/core/state";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { runDomainEventTool } from "./domain-tool-runner";
 
 export interface ConsequenceToolDetails {
   actionType: string;
@@ -10,22 +10,27 @@ export interface ConsequenceToolDetails {
 }
 
 export function resolveConsequenceTool(params: RawConsequenceInput, sessionManager: unknown): ToolResult {
-  const validated = assertConsequenceInput(params);
-  const result = resolveConsequence(validated);
-  persistCurrentState(sessionManager);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => resolveConsequence(assertConsequenceInput(params)),
+    details: consequenceDetails,
+    message: formatResult,
+  });
+}
 
-  const text = [
+function consequenceDetails(result: ReturnType<typeof resolveConsequence>): ConsequenceToolDetails & Record<string, unknown> {
+  return {
+    actionType: result.actionType,
+    riskLevel: result.riskLevel,
+    pressureSummary: `${result.durationMinutes}min`,
+  };
+}
+
+function formatResult(result: ReturnType<typeof resolveConsequence>): string {
+  return [
     `# ${result.actionType} · ${result.riskLevel} · ${result.durationMinutes}min`,
     "",
     "## 叙事约束",
     ...result.narrativeConstraints.map((hint) => `- ${hint}`),
   ].join("\n");
-
-  const details: Record<string, unknown> = {
-    actionType: result.actionType,
-    riskLevel: result.riskLevel,
-    pressureSummary: `${result.durationMinutes}min`,
-  };
-  writeStateToDetails(details);
-  return textResult(text, details);
 }

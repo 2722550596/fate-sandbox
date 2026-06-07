@@ -1,17 +1,20 @@
 import type { MemoryEvent, MemoryEventResult } from "../../engine/core/memory";
 
 import { recordMemory } from "../../engine/core/memory";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { writeStateToDetails } from "../../engine/core/state";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { runDomainEventTool } from "./domain-tool-runner";
 
 export function recordMemoryTool(params: unknown, sessionManager: unknown): ToolResult {
-  const event = assertMemoryEvent(params);
-  const result = recordMemory(event);
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { result };
-  writeStateToDetails(details);
-  return textResult(formatResult(event, result), details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => {
+      const event = assertMemoryEvent(params);
+      return { event, result: recordMemory(event) };
+    },
+    details: ({ result }) => ({ result }),
+    message: ({ event, result }) => formatResult(event, result),
+  });
 }
 
 function formatResult(params: MemoryEvent, result: MemoryEventResult): string {

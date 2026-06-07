@@ -6,9 +6,10 @@ import type {
 } from "../../engine/core/state";
 
 import { updateScene, type SceneEvent } from "../../engine/core/scene";
-import { assertNonNegativeInteger, writeStateToDetails } from "../../engine/core/state";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { assertNonNegativeInteger } from "../../engine/core/state";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 import { assertOneOfString } from "./domain-assert";
 
 const SCENE_EVENT_KINDS = [
@@ -38,11 +39,12 @@ const BOUNDARIES = ["normal", "bounded-field", "reality-marble", "otherworld"] a
 const THREAT_SEVERITIES = ["low", "medium", "high", "lethal"] as const satisfies readonly SceneThreatSeverity[];
 
 export function updateSceneTool(params: unknown, sessionManager: unknown): ToolResult {
-  const result = updateScene(assertSceneEvent(params));
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { result };
-  writeStateToDetails(details);
-  return textResult(result.message, details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => updateScene(assertSceneEvent(params)),
+    details: resultDetails,
+    message: (result) => result.message,
+  });
 }
 
 function assertSceneEvent(params: unknown): SceneEvent {

@@ -2,17 +2,20 @@ import type { RecordOffscreenEventInput } from "../../engine/core/offscreen-even
 import type { OffscreenEventSource, OffscreenEventVisibility } from "../../engine/core/state";
 
 import { recordOffscreenEvent } from "../../engine/core/offscreen-event";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { writeStateToDetails } from "../../engine/core/state";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { runDomainEventTool } from "./domain-tool-runner";
 
 export function recordOffscreenEventTool(params: unknown, sessionManager: unknown): ToolResult {
-  const event = assertRecordOffscreenEventInput(params);
-  const result = recordOffscreenEvent(event);
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { result };
-  writeStateToDetails(details);
-  return textResult(`幕后事件已记录：${result.eventId}\n- ${event.summary}`, details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => {
+      const event = assertRecordOffscreenEventInput(params);
+      return { event, result: recordOffscreenEvent(event) };
+    },
+    details: ({ result }) => ({ result }),
+    message: ({ event, result }) => `幕后事件已记录：${result.eventId}\n- ${event.summary}`,
+  });
 }
 
 function assertRecordOffscreenEventInput(params: unknown): RecordOffscreenEventInput {
@@ -74,12 +77,7 @@ function assertStringArray(value: unknown, fieldName: string): string[] {
   if (!Array.isArray(value)) {
     throw new Error(`${fieldName} 必须是字符串数组。`);
   }
-  return value.map((entry) => {
-    if (typeof entry !== "string") {
-      throw new Error(`${fieldName}[] 必须是字符串。`);
-    }
-    return entry;
-  });
+  return value.map((entry) => assertString(entry, `${fieldName}[]`));
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

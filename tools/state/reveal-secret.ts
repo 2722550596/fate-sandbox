@@ -1,44 +1,60 @@
 import type {
   ConfigureActorSecretsInput,
+  ConfigureActorSecretsResult,
   ConfigureServantSecretsInput,
+  ConfigureServantSecretsResult,
   RevealSecretEvent,
+  RevealSecretResult,
   ServantSecretNoblePhantasmInput,
   ServantSecretStringInput,
 } from "../../engine/core/secrets";
 import type { NoblePhantasm } from "../../engine/core/state";
 
 import { configureActorSecrets, configureServantSecrets, revealSecret } from "../../engine/core/secrets";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { writeStateToDetails } from "../../engine/core/state";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { runDomainEventTool } from "./domain-tool-runner";
+
+type RevealSecretToolInput = ConfigureActorSecretsInput | ConfigureServantSecretsInput | RevealSecretEvent;
+
+type RevealSecretToolResult =
+  | { kind: "configure"; result: ConfigureActorSecretsResult | ConfigureServantSecretsResult }
+  | { kind: "reveal"; result: RevealSecretResult };
 
 export function revealSecretTool(params: unknown, sessionManager: unknown): ToolResult {
-  const input = assertSecretToolInput(params);
-  if (input.kind === "configure-servant-secrets") {
-    const result = configureServantSecrets(input);
-    persistCurrentState(sessionManager);
-    const details: Record<string, unknown> = { result };
-    writeStateToDetails(details);
-    return textResult(result.message, details);
-  }
-  if (input.kind === "configure-actor-secrets") {
-    const result = configureActorSecrets(input);
-    persistCurrentState(sessionManager);
-    const details: Record<string, unknown> = { result };
-    writeStateToDetails(details);
-    return textResult(result.message, details);
-  }
-
-  const result = revealSecret(input);
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { outcome: result.outcome };
-  writeStateToDetails(details);
-  return textResult(result.playerSafeMessage, details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => executeSecretTool(assertSecretToolInput(params)),
+    details: secretDetails,
+    message: secretMessage,
+  });
 }
 
-function assertSecretToolInput(
-  params: unknown,
-): ConfigureActorSecretsInput | ConfigureServantSecretsInput | RevealSecretEvent {
+function executeSecretTool(input: RevealSecretToolInput): RevealSecretToolResult {
+  if (input.kind === "configure-servant-secrets") {
+    return { kind: "configure", result: configureServantSecrets(input) };
+  }
+  if (input.kind === "configure-actor-secrets") {
+    return { kind: "configure", result: configureActorSecrets(input) };
+  }
+  return { kind: "reveal", result: revealSecret(input) };
+}
+
+function secretDetails(output: RevealSecretToolResult): Record<string, unknown> {
+  if (output.kind === "configure") {
+    return { result: output.result };
+  }
+  return { outcome: output.result.outcome };
+}
+
+function secretMessage(output: RevealSecretToolResult): string {
+  if (output.kind === "configure") {
+    return output.result.message;
+  }
+  return output.result.playerSafeMessage;
+}
+
+function assertSecretToolInput(params: unknown): RevealSecretToolInput {
   if (!isRecord(params)) {
     throw new Error("reveal_secret 参数必须是对象。");
   }

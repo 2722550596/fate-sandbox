@@ -2,9 +2,10 @@ import type { EconomyEvent, MoneyGainSource } from "../../engine/core/economy";
 import type { MoneyPurse } from "../../engine/core/state";
 
 import { updateEconomy } from "../../engine/core/economy";
-import { assertNonNegativeInteger, getPublicState, writeStateToDetails } from "../../engine/core/state";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { assertNonNegativeInteger, getPublicState } from "../../engine/core/state";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 import { assertOneOfString } from "./domain-assert";
 
 const ECONOMY_EVENT_KINDS = [
@@ -28,11 +29,12 @@ const MONEY_GAIN_SOURCES = [
 const PURSE_ACCESSES = ["held", "shared", "requires-permission"] as const satisfies readonly MoneyPurse["access"][];
 
 export function updateEconomyTool(params: unknown, sessionManager: unknown): ToolResult {
-  const result = updateEconomy(assertEconomyEvent(params));
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { result };
-  writeStateToDetails(details);
-  return textResult(result.message, details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => updateEconomy(assertEconomyEvent(params)),
+    details: resultDetails,
+    message: (result) => result.message,
+  });
 }
 
 function assertEconomyEvent(params: unknown): EconomyEvent {

@@ -2,9 +2,10 @@ import type { ServantFormEvent } from "../../engine/core/servant";
 import type { FateParams, ParamModifier, PermanentDefect, ServantContractState } from "../../engine/core/state";
 
 import { updateServantForm } from "../../engine/core/servant";
-import { assertIsoDateString, assertNonNegativeInteger, writeStateToDetails } from "../../engine/core/state";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { assertIsoDateString, assertNonNegativeInteger } from "../../engine/core/state";
+import type { ToolResult } from "../runtime/tool-result";
+
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 import { assertOneOfString } from "./domain-assert";
 
 const ALLOWED_KINDS = [
@@ -28,11 +29,12 @@ const FATE_PARAM_KEYS = [
 ] as const satisfies readonly (keyof FateParams)[];
 
 export function updateServantFormTool(params: unknown, sessionManager: unknown): ToolResult {
-  const result = updateServantForm(assertServantFormEvent(params));
-  persistCurrentState(sessionManager);
-  const details: Record<string, unknown> = { result };
-  writeStateToDetails(details);
-  return textResult(result.message, details);
+  return runDomainEventTool({
+    sessionManager,
+    execute: () => updateServantForm(assertServantFormEvent(params)),
+    details: resultDetails,
+    message: (result) => result.message,
+  });
 }
 
 function assertServantFormEvent(params: unknown): ServantFormEvent {
