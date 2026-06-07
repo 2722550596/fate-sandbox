@@ -10,7 +10,7 @@ import { assertNonNegativeInteger } from "../../engine/core/state";
 import type { ToolResult } from "../runtime/tool-result";
 
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
-import { assertOneOfString } from "./domain-assert";
+import { assertOneOf, assertRecord, assertString } from "./tool-input";
 
 const SCENE_EVENT_KINDS = [
   "advance-time",
@@ -49,7 +49,7 @@ export function updateSceneTool(params: unknown, sessionManager: unknown): ToolR
 
 function assertSceneEvent(params: unknown): SceneEvent {
   const input = assertRecord(params, "update_scene 参数");
-  const kind = assertOneOfString(input["kind"], SCENE_EVENT_KINDS, "update_scene.kind");
+  const kind = assertOneOf(input["kind"], "update_scene.kind", SCENE_EVENT_KINDS);
   const reason = assertString(input["reason"], "reason");
 
   switch (kind) {
@@ -71,7 +71,7 @@ function assertSceneEvent(params: unknown): SceneEvent {
     case "set-situation":
       return {
         kind,
-        situation: assertOneOfString(input["situation"], SITUATIONS, "situation"),
+        situation: assertOneOf(input["situation"], "situation", SITUATIONS),
         reason,
       };
     case "set-story-window":
@@ -83,15 +83,15 @@ function assertSceneEvent(params: unknown): SceneEvent {
     case "resolve-objective":
       return {
         kind,
-        objectiveId: normalizeOptionalString(input["objectiveId"]),
-        objectiveSummary: normalizeOptionalString(input["objectiveSummary"]),
+        objectiveId: normalizeOptionalObjectiveSelector(input["objectiveId"]),
+        objectiveSummary: normalizeOptionalObjectiveSelector(input["objectiveSummary"]),
         reason,
       };
     case "add-threat":
       return {
         kind,
         summary: assertString(input["summary"], "summary"),
-        severity: assertOneOfString(input["severity"], THREAT_SEVERITIES, "severity"),
+        severity: assertOneOf(input["severity"], "severity", THREAT_SEVERITIES),
         reason,
       };
     case "clear-threat":
@@ -105,37 +105,19 @@ function normalizeLocation(value: unknown): LocationState {
     region: assertString(location["region"], "location.region"),
     site: assertString(location["site"], "location.site"),
     detail: assertString(location["detail"], "location.detail"),
-    boundary: assertOneOfString(location["boundary"], BOUNDARIES, "location.boundary"),
+    boundary: assertOneOf(location["boundary"], "location.boundary", BOUNDARIES),
   };
+}
+
+function normalizeOptionalObjectiveSelector(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 function trustStoryWindow(value: unknown): StoryWindowState {
   assertRecord(value, "storyWindow");
   return value as StoryWindowState; // safe: scene engine/state schema validates full storyWindow before mutation.
-}
-
-function normalizeOptionalString(value: unknown): string | undefined {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-  const trimmed = value.trim();
-  return trimmed === "" ? undefined : trimmed;
-}
-
-function assertString(value: unknown, fieldName: string): string {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`${fieldName} 必须是非空字符串。`);
-  }
-  return value.trim();
-}
-
-function assertRecord(value: unknown, fieldName: string): Record<string, unknown> {
-  if (!isRecord(value)) {
-    throw new Error(`${fieldName} 必须是对象。`);
-  }
-  return value;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

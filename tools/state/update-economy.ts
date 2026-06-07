@@ -6,7 +6,7 @@ import { assertNonNegativeInteger, getPublicState } from "../../engine/core/stat
 import type { ToolResult } from "../runtime/tool-result";
 
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
-import { assertOneOfString } from "./domain-assert";
+import { assertOneOf, assertRecord, assertString, normalizeOptionalString } from "./tool-input";
 
 const ECONOMY_EVENT_KINDS = [
   "spend-money",
@@ -39,30 +39,30 @@ export function updateEconomyTool(params: unknown, sessionManager: unknown): Too
 
 function assertEconomyEvent(params: unknown): EconomyEvent {
   const input = assertRecord(params, "update_economy 参数");
-  const kind = assertOneOfString(input["kind"], ECONOMY_EVENT_KINDS, "update_economy.kind");
+  const kind = assertOneOf(input["kind"], "update_economy.kind", ECONOMY_EVENT_KINDS);
   const reason = assertString(input["reason"], "reason");
 
   switch (kind) {
     case "spend-money": {
-      const purseId = normalizeOptionalString(input["purseId"]);
+      const purseId = normalizeOptionalString(input["purseId"], "purseId");
       assertExistingPurseIdIfPresent(purseId);
       return {
         kind,
         purseId,
-        ownerActorId: normalizeOptionalString(input["ownerActorId"]),
+        ownerActorId: normalizeOptionalString(input["ownerActorId"], "ownerActorId"),
         amount: assertNonNegativeInteger(input["amount"], "amount"),
         reason,
       };
     }
     case "gain-money": {
-      const purseId = normalizeOptionalString(input["purseId"]);
+      const purseId = normalizeOptionalString(input["purseId"], "purseId");
       assertExistingPurseIdIfPresent(purseId);
       return {
         kind,
         purseId,
-        ownerActorId: normalizeOptionalString(input["ownerActorId"]),
+        ownerActorId: normalizeOptionalString(input["ownerActorId"], "ownerActorId"),
         amount: assertNonNegativeInteger(input["amount"], "amount"),
-        source: assertOneOfString(input["source"], MONEY_GAIN_SOURCES, "source"),
+        source: assertOneOf(input["source"], "source", MONEY_GAIN_SOURCES),
         counterparty: assertString(input["counterparty"], "counterparty"),
         reason,
       };
@@ -73,7 +73,7 @@ function assertEconomyEvent(params: unknown): EconomyEvent {
         ownerActorId: assertString(input["ownerActorId"], "ownerActorId"),
         label: assertString(input["label"], "label"),
         amount: assertNonNegativeInteger(input["amount"], "amount"),
-        access: assertOneOfString(input["access"], PURSE_ACCESSES, "access"),
+        access: assertOneOf(input["access"], "access", PURSE_ACCESSES),
         reason,
       };
     case "rename-purse": {
@@ -107,30 +107,4 @@ function assertExistingPurseIdIfPresent(purseId: string | undefined): void {
 function formatPurseIds(): string {
   const purseIds = getPublicState().economy.accessibleFunds.map((purse) => purse.id);
   return purseIds.length === 0 ? "无" : purseIds.join(", ");
-}
-
-function normalizeOptionalString(value: unknown): string | undefined {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-  const trimmed = value.trim();
-  return trimmed.length === 0 ? undefined : trimmed;
-}
-
-function assertString(value: unknown, fieldName: string): string {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`${fieldName} 必须是非空字符串。`);
-  }
-  return value.trim();
-}
-
-function assertRecord(value: unknown, fieldName: string): Record<string, unknown> {
-  if (!isRecord(value)) {
-    throw new Error(`${fieldName} 必须是对象。`);
-  }
-  return value;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
