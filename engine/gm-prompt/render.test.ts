@@ -21,15 +21,15 @@ void test("output contract blocks assistant delivery wrappers", () => {
 
   assert.match(outputContract, /状态已经/u);
   assert.match(outputContract, /现在为你写/u);
-  assert.match(outputContract, /Markdown 分割线/u);
-  assert.match(outputContract, /第一行必须是场景内/u);
+  assert.match(outputContract, /Markdown dividers/u);
+  assert.match(outputContract, /first line must be in-scene/u);
 });
 
 void test("render prompt emphasizes relationship and body rendering", () => {
   const renderPrompt = readFileSync("agents/gm-render.md", "utf-8");
 
-  assert.match(renderPrompt, /队形/u);
-  assert.match(renderPrompt, /身体代价/u);
-  assert.match(renderPrompt, /关系负担/u);
-  assert.match(renderPrompt, /NPC 场景参与/u);
+  assert.match(renderPrompt, /Formation \/ distance/u);
+  assert.match(renderPrompt, /Body cost/u);
+  assert.match(renderPrompt, /Relationship burden/u);
+  assert.match(renderPrompt, /NPC scene participation/u);
 });

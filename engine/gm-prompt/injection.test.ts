@@ -15,11 +15,11 @@ void test("buildSystemPrompt appends only the stable narrative lens identity", (
   const systemPrompt = buildSystemPrompt("base");
 
   assert.match(systemPrompt, /base/);
-  assert.match(systemPrompt, /Fate\/Stay Night 沙盒/);
-  assert.match(systemPrompt, /叙事镜头/);
-  assert.doesNotMatch(systemPrompt, /叙事者（GM）/);
-  assert.doesNotMatch(systemPrompt, /内部检查模块/);
-  assert.doesNotMatch(systemPrompt, /最终叙事风格模块/);
+  assert.match(systemPrompt, /Fate\/Stay Night Sandbox/);
+  assert.match(systemPrompt, /narrative camera/);
+  assert.doesNotMatch(systemPrompt, /narrator \(GM\)/u);
+  assert.doesNotMatch(systemPrompt, /Internal Check Module/);
+  assert.doesNotMatch(systemPrompt, /Final Output Contract/);
 });
 
 void test("injectGmPromptMessages inserts slot-based prompt stack", () => {

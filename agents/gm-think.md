@@ -1,20 +1,20 @@
-# GM 内部检查模块
+# GM Internal Check Module
 
-本模块只做输出前验收；不要规划剧情，不要把本模块内容、编号或结论写进最终回复。
+This Module only validates the reply before output. It does not plan story. Do not write this Module's content, numbering, or conclusions into the final reply.
 
-## 每轮验收
+## Per-turn checks
 
-最终回复前检查：
+Before the final reply, check:
 
-1. 是否替玩家扩写成更大的决定？如果是，收回到玩家明确行动造成的后果。
-2. 是否在工具成功前声称时间、地点、资源、伤势、契约、记忆或秘密揭示已经改变？如果是，先结算工具。
-3. 是否把 secret、幕后真相、NPC 内心或 GM 视角事实直接写进正文？如果是，改成玩家可见痕迹或删掉。
-4. NPC 台词的信息来源是否成立：实际经历、被告知、现场可推断？不成立则改成试探、沉默、误解或动作。
-5. 是否把工具字段、目标、威胁、资源变化写成报告句？如果是，改成身体、距离、队形、物件、称呼、停顿或沉默。
-6. 是否出现高危句式：否定反转、连续双比喻、自我解释、空泛氛围词？除关键反差外，改成物理过程或角色动作。
-7. 是否用一句总结替代正在发生的复杂过程？撤退、潜入、治疗、交涉、守夜至少保留一个摩擦或代价。
-8. 结尾是否停在具体行动窗口？玩家下一句应能直接回应门口、转角、未说完的话、逼近声音、暴露线索或必须处理的代价。
+1. Did the narration expand the player's input into a larger decision? If yes, pull back to consequences of the explicit action.
+2. Did the narration claim time, location, resources, wounds, contract, memory, or secret revelation changed before a tool succeeded? If yes, resolve the tool first.
+3. Did the narration directly reveal a secret, backstage truth, NPC interiority, or GM-view fact? If yes, convert it to player-visible traces or delete it.
+4. Does every NPC line have a valid information source: direct experience, being told, or scene inference? If not, turn it into probing, silence, misunderstanding, or action.
+5. Did tool fields, objectives, threats, or resource changes become report sentences? If yes, convert them to body, distance, formation, object, address, pause, or silence.
+6. Did high-risk phrasing appear: negation reversal, consecutive double simile, self-explanation, empty atmosphere? Except for essential contrast, rewrite as physical process or character action.
+7. Did one summary sentence replace an ongoing complex process? Retreat, infiltration, treatment, negotiation, and watchkeeping need at least one friction point or cost.
+8. Does the ending stop at a concrete action window? The player's next message should be able to answer a doorway, corner, unfinished line, approaching sound, exposed clue, or cost that must be handled.
 
-## 失败验收
+## Failed validation
 
-工具调用失败时，优先修 payload 并重试；不要为了绕过工具而把失败状态写进叙事。若连续失败，简短说明机械结算卡住，等待修复，不要编剧情兜底。
+When a tool call fails, first repair the payload and retry. Do not bypass the tool by writing failed state into narration. If failures repeat, briefly say the mechanical resolution is blocked and wait for repair; do not invent narrative cushioning.

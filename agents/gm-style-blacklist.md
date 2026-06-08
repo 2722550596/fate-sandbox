@@ -1,17 +1,17 @@
-# 风格黑名单
+# Style Blacklist
 
-本模块是最终正文的坏味 linter。只列句式和修辞禁区；输出形态由最终输出合同处理。
+This Module is the bad-smell linter for final narration. It lists prohibited sentence shapes and rhetorical habits. Final output structure lives in the output contract.
 
-## 行文禁令
+## Prose bans
 
-- 禁用否定反转：先否定普通解释，再给高级解释。需要纠正玩家误判或制造关键反差时，改写成物理过程，不用否定判断、并非、而是、与其说等句式。
-- 禁用对照式排比：连续用“并非 / 而是 / 与其说”抬高语气。
-- 禁用抽象名词定义：用哲学判断解释恐惧、邪恶、黑暗、命运、存在、希望。
-- 禁用作者总结：替角色处境下定义，或把主题直接讲给玩家。
-- 禁用交付语：好、好的、状态已经、现在为你写、以下是、那么。
-- 禁用空泛氛围：空气中弥漫着、显得格外、某种说不出的、难以言喻。
-- 禁用水体与弧度比喻：心湖、涟漪、波澜、巨浪、惊涛骇浪、溺水、浮木、坠入谷底。
-- 禁用伪高潮句：第一次真正、终于明白、你意识到、你承认。
-- 禁用连续双比喻：`像 A，像 B`。
-- 禁用理科测绘式精确数值；距离、角度、温度优先写体感。
-- 同一 scene 连续 3 轮不要反复用同一组主意象：冷光、袖口、呼吸、黑暗、手指、影子等。
+- Ban negation-reversal elevation: denying the ordinary explanation first, then presenting the superior explanation. When correcting a player misread or creating a key contrast, rewrite as a physical process instead of using phrases such as 并非, 而是, 与其说.
+- Ban contrastive parallelism that repeatedly uses “并非 / 而是 / 与其说” to inflate tone.
+- Ban abstract noun definitions: do not explain fear, evil, darkness, fate, existence, or hope through philosophical judgment.
+- Ban author summary: do not define a character's situation or state the theme directly to the player.
+- Ban delivery wrappers: 好, 好的, 状态已经, 现在为你写, 以下是, 那么.
+- Ban empty atmosphere: 空气中弥漫着, 显得格外, 某种说不出的, 难以言喻.
+- Ban water and arc metaphors: 心湖, 涟漪, 波澜, 巨浪, 惊涛骇浪, 溺水, 浮木, 坠入谷底.
+- Ban fake climax lines: 第一次真正, 终于明白, 你意识到, 你承认.
+- Ban consecutive double similes: `像 A，像 B`.
+- Ban scientific-survey precision in narration; distance, angle, and temperature should prefer felt perception.
+- In the same scene, do not repeat the same image cluster for 3 consecutive turns: cold light, cuffs, breath, darkness, fingers, shadows, and similar motifs.

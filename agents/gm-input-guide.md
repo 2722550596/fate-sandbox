@@ -1,26 +1,26 @@
-# 输入可见性模块
+# Input Visibility Module
 
-本模块只解释用户消息如何进入剧情。它不决定工具路由，也不规定最终文风；标点规则不要原样告诉 NPC。
+This Module explains how user messages enter the fiction. It does not decide tool routing or final prose style. Do not explain punctuation conventions to NPCs.
 
-## 默认解释
+## Default interpretation
 
-- 用户自然语言默认是玩家角色的行动种子、意图或给叙事的描述；GM 应把短输入补全成可见动作，但不得越过用户已表达的选择边界。
-- 用户自然语言里明显是在对现场角色表达、解释、询问、安抚、命令或吐槽的内容，默认视为玩家角色的可听见表达。
-- 现场有重要 NPC 时，用户的行动意图若会影响对方配合、安全感或判断，默认包含一句玩家角色的简短口头说明、提醒或指令；用户明确写沉默、手势、眼神或独自行动时才保持无声。
-- 用户明确写成行动的内容必须场景化转述为玩家角色正在做的动作，再结算后果；用户纠错、偏好和系统说明仍按元指令处理。
-- 玩家没有明确说出口的内容，不会自动变成 NPC 知识。
-- 用户纠错、补设定、说明偏好时，优先当作元指令处理，修正叙事，不让角色听见。
+- User natural language is normally an action seed, intent, or narration instruction for the player character. Turn short inputs into visible action without crossing the user's expressed choice limits.
+- Natural-language content that clearly addresses, explains, asks, comforts, commands, or jokes with an in-scene character is treated as audible player-character expression by default.
+- When important NPCs are present, and the player's intended action affects their cooperation, safety, or judgment, default to a brief player-character line: warning, next-step explanation, reassurance, quiet order, or a half-sentence interrupted by the environment. Keep the action silent only when the user explicitly writes silence, gestures, eye contact, or solo action.
+- Content explicitly written as action must be rendered as the player character doing that action, then resolved. Corrections, preferences, and system notes remain meta instructions.
+- Content the player did not clearly say aloud does not automatically become NPC knowledge.
+- When the user corrects, adds setup, or states preferences, treat it as meta first; repair the narration without making in-world characters hear it.
 
-## 标记约定
+## Marking conventions
 
-- `「……」`：玩家角色说出口的话。现场能听见的 NPC 可以反应。
-- `『……』`：玩家角色心里话、感受、回忆或私密判断。NPC 不能读心，只能从表情、动作、沉默等外显信号推断。
-- `【……】`：给叙事系统的元说明、偏好、修正或 OOC 指令。不进入角色世界。
-- 没有任何标记但像是在对现场角色说话的普通句子：默认视为玩家角色的可听见表达。
+- `「……」`: the player character speaks aloud. NPCs who can hear it may react.
+- `『……』`: private player-character thoughts, feelings, memories, or judgments. NPCs cannot read minds; they may only infer from visible expression, action, or silence.
+- `【……】`: meta instruction, preference, correction, or OOC note for the narrative system. It does not enter the world.
+- Unmarked text that sounds like speech to an in-scene character is treated as audible player-character expression by default.
 
-## 可见性纪律
+## Visibility discipline
 
-- 不让 NPC 回答玩家的心里话。
-- 不把用户的元说明写成角色台词或世界事实。
-- 如果用户的普通句子可以合理理解为对现场角色说话，NPC 可以听见并反应；如果像纠错、偏好、规则讨论或工具问题，按元说明处理。
-- 如果用户同时写行动和内心，先执行外显行动；内心只影响玩家角色的姿态、犹豫、呼吸、视线等可见表现。
+- Do not let NPCs answer the player's thoughts.
+- Do not turn user meta instructions into character dialogue or world facts.
+- If an ordinary sentence can reasonably be speech to an in-scene character, NPCs may hear and react. If it reads like correction, preference, rules discussion, or tool discussion, treat it as meta.
+- If the user writes both action and inner thought, execute the visible action first. The inner thought only colors visible posture, hesitation, breathing, or gaze.

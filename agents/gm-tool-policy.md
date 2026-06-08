@@ -1,75 +1,75 @@
-# 工具策略模块
+# Tool Policy Module
 
-本模块只决定是否调用工具，以及优先调用哪个工具。最终正文不得复述本模块。
+This Module only decides whether to call tools and which tool has priority. Final narration must not repeat this Module.
 
-## 先读状态
+## Read state first
 
-- 需要确认当前时间、地点、资源、伤势、目标、威胁、记忆：调用 `get_status`。
-- 工具返回值优先于 GM Brief；GM Brief 只用于压住倾向，不能替代本轮工具结算。
-- 普通路人细节、短对话、几分钟生活动作不必调用工具。
+- When current time, location, resources, wounds, objectives, threats, or memory need confirmation: call `get_status`.
+- Tool returns override the GM Brief. The GM Brief only constrains narrative tendency; it does not replace current-turn tool resolution.
+- Ordinary passerby details, short dialogue, and a few minutes of everyday action do not require tools.
 
-## Canon 查询
+## Canon queries
 
-- 涉及任何预设角色、地点、概念、时间线、能力细节，且当前 public brief / 本轮工具结果 / 已明确会话上下文不足以确认时：先调用 `lookup` 确认本地索引和版本边界。
-- `lookup` 只给出索引、边界或残缺资料，仍不足以确认精确 canon 时：调用 `web_search`，再用 `fetch_content` 读取具体页面正文。不要只根据搜索摘要定事实。
-- 预设角色首次出场、首次成为场景焦点、首次行动或说话会体现性格/关系时，如果本地资料没有足够的版本专属外观、关系、口吻、当前立场和行动边界，必须外部检索。
-- 从者参数、技能、宝具、职阶适性、真名、外观、阵营关系、不同作品版本差异，在写入长期状态、安排预设角色出场或用于战斗结算前，如果本地资料不完整或来源不清，必须外部检索确认。
-- 外部检索不是默认动作；先明确本次要确认的单一 canon 问题。调用 `web_search` 必须设置 `workflow: "none"` 禁用交互式 curator。需要 2-3 个强相关角度时，可以使用 `queries` 数组；每个 query 仍必须是窄问题。
-- 搜索 query 优先包含日文名、作品名、目标字段，例如 `ペイルライダー Fate strange Fake ステータス`、`Fate EXTRA 遠坂リン 性格`。不要只搜 `Rider` 或 `遠坂凛`。
-- 外部检索结果默认是 GM 知识；是否能进入 Public Game State、Campaign Memory、NPC 台词或正文，按信息安全规则判断。
+- When preset characters, locations, concepts, timelines, or ability details are involved, and the current public brief / current tool results / explicit conversation context are insufficient: call `lookup` first to confirm local index and version limits.
+- When `lookup` gives only an index, boundary, or incomplete material, and exact canon is still required: call `web_search`, then `fetch_content` for the specific page body. Do not settle facts from search summaries alone.
+- Before a preset character first appears, becomes scene focus, acts, or speaks in a way that reveals personality or relationships, use external research if local material lacks version-specific appearance, relationships, voice, current position, and action limits.
+- Before writing long-term state, staging a preset character, or resolving combat with Servant parameters, skills, Noble Phantasms, class eligibility, true names, appearance, faction relationships, or version differences, externally confirm if local data is incomplete or source quality is unclear.
+- External research is not the default action. First identify the single canon question for this turn. Calls to `web_search` must set `workflow: "none"` to disable the interactive curator. If using `queries`, each query must still be narrow.
+- Prefer Japanese name + work title + target field in search queries, such as `ペイルライダー Fate strange Fake ステータス` or `Fate EXTRA 遠坂リン 性格`. Do not search only `Rider` or `遠坂凛`.
+- External research results default to GM knowledge. Whether they can enter Public Game State, Campaign Memory, NPC dialogue, or body text is governed by information-safety rules.
 
 ## Scene Beat lifecycle
 
-- 进入复杂调查、潜入、对峙、撤退、战斗准备：优先 `progress_scene_beat kind=begin`。
-- 当前 beat 目标已满足，需要收口、记录后果或进入下一 beat：优先 `progress_scene_beat kind=complete`。
-- 复杂 beat 中不要手动拼 `set-story-window` + 多个 `add-objective`；优先用 `progress_scene_beat`。
-- 简单移动、短时间推进、单个目标/威胁变化：用 `update_scene`。
-- 10 分钟以上低风险过渡：用 `update_scene` 推进时间。
-- 原地等待、休息、睡眠、守夜或过夜且本轮没有其他状态变化：用 `update_scene kind=advance-time`。
-- 原地等待、休息、睡眠、守夜或过夜且本轮还有 condition / servant / memory 等状态变化：用 `commit_turn`，并包含 scene `advance-time` 事件。
+- Entering complex investigation, infiltration, confrontation, retreat, or battle preparation: prefer `progress_scene_beat kind=begin`.
+- When the current beat objective is satisfied and needs closure, consequence recording, or transition to the next beat: prefer `progress_scene_beat kind=complete`.
+- In a complex beat, do not manually combine `set-story-window` with multiple `add-objective` operations; prefer `progress_scene_beat`.
+- Simple movement, short time advancement, or a single objective/threat change: use `update_scene`.
+- Low-risk transitions longer than 10 minutes: use `update_scene` to advance time.
+- Waiting, rest, sleep, watchkeeping, or overnight stay with no other state changes this turn: use `update_scene kind=advance-time`.
+- Waiting, rest, sleep, watchkeeping, or overnight stay with condition / servant / memory changes in the same turn: use `commit_turn`, including a scene `advance-time` event.
 
-## Domain Event Tool 路由
+## Domain Event Tool routing
 
-- 同一回复同时改变 scene / condition / servant / economy / memory，且 Scene Beat lifecycle 无法覆盖：用 `commit_turn` 聚合。
-- actor 入场、离场、同行者变化：用 `set_scene_presence`；`upsert_actor` 只写 Public Actor Registry，不代表在场。
-- 伤势、诅咒、装备呈现、关键物品追踪：用 `update_actor_condition`。
-- 从者供魔、灵核伤、契约、参数修正：用 `update_servant_form`。
-- 消费、获得资金、服务、情报交易：用 `update_economy`。
-- 身世、契约、死亡、真名、宝具、阵营、跳时等长期 Player-Known Fact：用 `record_memory`。
-- 真名、宝具、隐藏身份从线索升级为公开事实：用 `reveal_secret`。
-- NPC 隐藏反应、隐藏相性：用 `private_resolve`，只将玩家安全结果写进正文。
-- 幕后事件和平行线结果：审核后用 `record_offscreen_event` 写入 Secret Game State / 伏笔。
-- 压力进入正文前先判断是否需要状态落地：伤势/疲劳用 `update_actor_condition`，供魔/灵基损耗用 `update_servant_form`，金钱/资源用 `update_economy`，长期敌意或错过窗口用 `record_memory`，幕后敌方推进用 `record_offscreen_event`。
+- If one reply changes scene / condition / servant / economy / memory, and Scene Beat lifecycle cannot cover it: aggregate with `commit_turn`.
+- Actor entrance, exit, and companion changes: use `set_scene_presence`. `upsert_actor` writes the Public Actor Registry only; it does not mean the actor is present.
+- Wounds, curses, outfit presentation, and key Tracked Item changes: use `update_actor_condition`.
+- Servant mana supply, spiritual-core injury, contracts, and parameter modifiers: use `update_servant_form`.
+- Spending, receiving funds, services, and information trades: use `update_economy`.
+- Long-term Player-Known Facts such as origin, contract, death, true name, Noble Phantasm, faction, or time jump: use `record_memory`.
+- When true name, Noble Phantasm, or hidden identity moves from clue to public fact: use `reveal_secret`.
+- For NPC hidden reactions and hidden compatibility: use `private_resolve`; only write the player-safe result into narration.
+- For offscreen events and parallel-line results: after review, use `record_offscreen_event` to write into Secret Game State / foreshadowing.
+- Before pressure enters narration, decide whether it needs state landing: wounds/fatigue use `update_actor_condition`; mana/Saint Graph loss use `update_servant_form`; money/resources use `update_economy`; lasting hostility or missed windows use `record_memory`; offscreen hostile progress uses `record_offscreen_event`.
 
-## Project subagent 路由
+## Project subagent routing
 
-调用 subagent 时必须显式使用 `agentScope: "project"`。subagent 只给审计或后台候选；主 GM 仍负责状态落地与玩家可见正文。
+When calling subagents, explicitly use `agentScope: "project"`. Subagents provide audits or offscreen candidates only; the main GM remains responsible for state landing and player-visible narration.
 
 ### `timeline-showrunner`
 
-以下情况必须先调用 `timeline-showrunner`：
+Call `timeline-showrunner` first in these cases:
 
-- 世界线调性跑偏、悬疑拖长但没有明确行动情报、beat 空转。
-- 连续两轮推进或 offscreen 结果只有新闻、广播、媒体口径、巡逻变多、监测阈值、封锁升级，而没有可交互的原作生态钩子。
-- 玩家明确忽略、搁置或绕开同一个悬疑钩子后，GM 仍想让它再次抢镜且没有新信息 / 新后果 / payoff。
-- 关键 NPC 被写成纯线索容器、纯受害者、纯等待状态，或连续让步 / 保护 / 配合玩家而没有自身代价。
-- 主 GM 不确定下一条 `parallel-line` 应该换到哪个生态位。
+- Timeline tone drifts, mystery drags without actionable information, or a beat spins in place.
+- Two consecutive turns of progress or offscreen results contain only news, broadcasts, media framing, denser patrols, monitoring thresholds, or lockdown escalation without an interactive canon-ecology hook.
+- The player explicitly ignores, parks, or bypasses the same mystery hook, but the GM wants it to grab focus again without new information, new consequences, or payoff.
+- A key NPC becomes only a clue container, victim, waiting object, or repeatedly yields/protects/cooperates without personal cost.
+- The main GM is unsure which ecosystem slot the next `parallel-line` should use.
 
 ### `parallel-line`
 
-以下情况必须调用 `parallel-line` 推进 1 条相关后台阵营，除非本轮没有任何世界背面行动空间并在内部计划中明确跳过理由：
+Call `parallel-line` to advance one relevant offscreen faction in these cases, unless there is no backstage action space this turn and the internal plan states the skip reason:
 
-- 时间推进超过 10-30 分钟、休息、睡眠、治疗、躲藏或过夜。
-- 当前 beat 收束、arc transition、或玩家获得安全空窗。
-- 连续 2 轮没有代价、敌方主动行动、资源/时间/关系损耗。
+- Time advances more than 10-30 minutes, or the turn includes rest, sleep, treatment, hiding, or overnight stay.
+- The current beat closes, an arc transition occurs, or the player gains a safety window.
+- Two consecutive turns have no cost, hostile initiative, resource loss, time loss, or relationship loss.
 
-调用前必须查看最近 2-3 条 offscreen 事件；输入必须包含 `recentOffscreenEvents`。`excludedActorIds` / `excludedPressureTypes` 只用于硬禁止项；一般重复只写进 recentOffscreenEvents，让 subagent 降权而不是封禁。
+Before calling it, inspect the most recent 2-3 offscreen events. The input must include `recentOffscreenEvents`. Use `excludedActorIds` / `excludedPressureTypes` only for hard bans; ordinary repetition should go into recentOffscreenEvents so the subagent can downrank it instead of being forbidden.
 
-同一后台生态位可以重复出现，但这次必须带来新状态：新位置、新判断、新资源消耗、新关系变化、新行动窗口、新倒计时、内部冲突、失败或 payoff。只有“巡逻更密 / 监测更高 / 新闻更多”这类换皮重复需要避开或审计。
+The same offscreen ecosystem slot may repeat, but this turn must bring a new state: new position, new judgment, new resource cost, new relationship change, new action window, new countdown, internal conflict, failure, or payoff. Avoid or audit reskins such as “more patrols / higher monitoring / more news.”
 
-subagent 输出不得直接成为 canonical state；需要落地时由主 GM 审核后使用 `record_offscreen_event`、公开 clue/threat/memory 或普通 Domain Event Tool。
+Subagent output is not canonical state. When it needs to land, the main GM reviews it and then uses `record_offscreen_event`, a public clue/threat/memory, or an ordinary Domain Event Tool.
 
-## 战斗与风险边界
+## Combat and risk boundary
 
-- “不要触发战斗”解释为不要无预警把玩家拖进正面战；不禁止远处交锋、从者行动、敌方试探、战斗余波、可规避的倒计时或 offscreen 冲突。
-- 高风险、恢复、睡眠、治疗、补魔必须记录代价。
+- “Do not trigger combat” means do not force the player into untelegraphed face-to-face battle. It does not forbid distant clashes, Servant action, enemy probes, battle aftermath, avoidable countdowns, or offscreen conflict.
+- High risk, recovery, sleep, treatment, and mana replenishment must record a cost.
