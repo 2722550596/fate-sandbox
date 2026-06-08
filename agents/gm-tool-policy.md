@@ -4,7 +4,8 @@ This Module only decides whether to call tools and which tool has priority. Fina
 
 ## Read state first
 
-- When current time, location, resources, wounds, objectives, threats, or memory need confirmation: call `get_status`.
+- Call `get_status` only when this turn has no current GM Brief/tool result, when the player explicitly asks for status, or once after a tool failure to resynchronise player-visible state.
+- Do not call `get_status` again if no domain tool has changed state since the last status read; reuse the current brief.
 - Tool returns override the GM Brief. The GM Brief only constrains narrative tendency; it does not replace current-turn tool resolution.
 - Ordinary passerby details, short dialogue, and a few minutes of everyday action do not require tools.
 

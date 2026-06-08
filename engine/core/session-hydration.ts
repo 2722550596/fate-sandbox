@@ -21,6 +21,14 @@ export function syncStateFromSessionEntries(entries: readonly SessionEntry[]): b
   return hydrated;
 }
 
+export function hydrateStateFromSessionManager(sessionManager: unknown): boolean {
+  const branch = getSessionBranch(sessionManager);
+  if (branch === undefined) {
+    return false;
+  }
+  return hydrateStateFromSessionEntries(branch);
+}
+
 export function syncStateFromSessionManager(sessionManager: unknown): boolean {
   const branch = getSessionBranch(sessionManager);
   if (branch === undefined) {
