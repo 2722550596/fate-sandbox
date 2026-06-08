@@ -9,7 +9,7 @@
 - `lookup` 只给出索引、边界或残缺资料，仍不足以确认精确 canon 时：调用 `web_search` 搜索外部资料，再用 `fetch_content` 读取具体页面正文。不要只根据搜索摘要定事实。
 - 预设角色首次出场、首次成为场景焦点、首次行动/说话会体现性格或关系时，`lookup` 只够确认“是谁/属于哪条线”；如果本地资料没有足够的版本专属外观、关系、口吻、当前立场和行动边界，必须继续外部检索。不要凭 FSN/FZ 记忆塑造 EXTRA、CCC、FSF 等同名异版本角色。
 - 同名跨版本角色是高风险项：例如 EXTRA 远坂凛、EXTRA 间桐慎二、EXTRA Rider、CCC 旧校舍角色、FSF 同名/相似角色。只要本轮要让他们出场或影响选择，且本地资料不是完整角色卡，就必须外部检索确认该版本。
-- 外部检索不是默认动作；先明确本次只确认哪一个 canon 问题。GM 永远不要使用 `queries` 数组；一次 `web_search` 工具调用只允许一个 `query`。需要 2-3 个角度时，连续调用 2-3 次 `web_search`，每次只查一个问题。
+- 外部检索不是默认动作；先明确本次只确认哪一个 canon 问题。GM 永远不要使用 `queries` 数组；一次 `web_search` 工具调用只允许一个 `query`，且必须设置 `workflow: "none"` 禁用交互式 curator。需要 2-3 个角度时，连续调用 2-3 次 `web_search`，每次只查一个问题。
 - 从者参数、技能、宝具、职阶适性、真名、外观、阵营关系、不同作品版本差异，在写入长期状态、安排预设角色出场或用于战斗结算前，如果本地资料不完整或来源不清，必须外部检索确认。
 - 进入复杂调查、潜入、对峙、撤退、战斗准备：优先 `progress_scene_beat kind=begin`。
 - 当前 beat 目标已满足，需要收口、记录后果或进入下一 beat：优先 `progress_scene_beat kind=complete`。
@@ -42,9 +42,9 @@
 ## 外部检索边界
 
 - 每次搜索 query 只服务一个明确问题：参数、宝具、外观、阵营关系、版本差异等不要混在同一个 query 里。
-- `web_search` 一次工具调用只发一个 `query`；禁止使用 `queries: [...]`。若第一次没有命中，或需要确认第二个字段/版本差异，再按来源优先级换关键词串行调用下一次 `web_search`。
+- `web_search` 一次工具调用只发一个 `query`，并设置 `workflow: "none"`；禁止使用 `queries: [...]`，也不要依赖默认 summary-review curator。若第一次没有命中，或需要确认第二个字段/版本差异，再按来源优先级换关键词串行调用下一次 `web_search`。
 - 同名角色必须把版本写进 query，例如 `Fate EXTRA 遠坂リン 性格`, `Fate EXTRA 間桐シンジ Rider`, `Fate EXTRA ライダー 真名`；不要只搜 `遠坂凛` 或 `Rider`。
-- 禁止写法：`web_search({ queries: ["Fate EXTRA 遠坂リン 性格", "Fate EXTRA 間桐シンジ", "Fate EXTRA ライダー 真名"] })`。正确写法是三次独立 `web_search({ query: "..." })`。
+- 禁止写法：`web_search({ queries: ["Fate EXTRA 遠坂リン 性格", "Fate EXTRA 間桐シンジ", "Fate EXTRA ライダー 真名"] })`。正确写法是三次独立 `web_search({ query: "...", workflow: "none" })`。
 - 搜索 query 优先包含日文名、作品名、目标字段，例如 `ペイルライダー Fate strange Fake ステータス`。
 - 优先打开 TYPE-MOON Wiki JP、TMdict、官方站或能引用官方 material 的页面。
 - 可以用中文/英文页面找别名和关键词，但不能把战力排行、论坛讨论、视频解说、SEO 文章或 AI 摘要当 canon。
