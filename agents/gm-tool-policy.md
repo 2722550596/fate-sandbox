@@ -79,4 +79,7 @@ Subagent output is not canonical state. When it needs to land, the main GM revie
 ## Combat and risk boundary
 
 - “Do not trigger combat” means do not force the player into untelegraphed face-to-face battle. It does not forbid distant clashes, Servant action, enemy probes, battle aftermath, avoidable countdowns, or offscreen conflict.
+- For high-risk combat, retreat, protection, ability probing, restraint breaking, Noble Phantasm exchange, or any contested action where Fate parameters / Mystery / resources decide the result, call `resolve_combat_exchange` before writing the outcome.
+- `resolve_combat_exchange` only judges the current exchange window. It does not change state and does not finish the whole fight by itself; apply required wounds, mana, scene threats, memories, or reveals with the appropriate domain tools.
+- Do not feed hidden GM facts into `knownAdvantages` / `knownDisadvantages`; use only player-visible facts, current tool results, public state, or safely abstracted secret-resolution outputs.
 - High risk, recovery, sleep, treatment, and mana replenishment must record a cost.
