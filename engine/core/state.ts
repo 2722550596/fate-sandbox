@@ -4,6 +4,7 @@ import { Temporal } from "@js-temporal/polyfill";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 import { formatHumanTime, normalizeIsoInstant, nowIso } from "./date-time";
+import { parseTurnTimePolicySchema } from "./turn-time-schema";
 
 export type {
   OffscreenEvent,
@@ -1074,43 +1075,10 @@ function assertTurnLogEntry(raw: unknown, fieldName: string): TurnLogEntry {
     summary: assertNonEmptyString(raw["summary"], `${fieldName}.summary`),
     startedAt: assertIsoDateString(raw["startedAt"], `${fieldName}.startedAt`),
     endedAt: assertIsoDateString(raw["endedAt"], `${fieldName}.endedAt`),
-    time: assertTurnTimePolicy(raw["time"], `${fieldName}.time`),
+    time: parseTurnTimePolicySchema(raw["time"], `${fieldName}.time`),
     eventCount: assertNonNegativeInteger(raw["eventCount"], `${fieldName}.eventCount`),
     resultCount: assertNonNegativeInteger(raw["resultCount"], `${fieldName}.resultCount`),
   };
-}
-
-function assertTurnTimePolicy(raw: unknown, fieldName: string): TurnTimePolicy {
-  if (!isRecord(raw)) {
-    throw new Error(`非法 ${fieldName}: ${formatUnknown(raw)}。`);
-  }
-  const kind = assertOneOf(raw["kind"], TURN_TIME_KINDS, `${fieldName}.kind`);
-  const reason = assertNonEmptyString(raw["reason"], `${fieldName}.reason`);
-  switch (kind) {
-    case "elapsed":
-      return {
-        kind,
-        elapsedMinutes: assertPositiveElapsedMinutes(raw["elapsedMinutes"], fieldName),
-        reason,
-      };
-    case "travel":
-      return {
-        kind,
-        location: assertLocationState(raw["location"], `${fieldName}.location`),
-        elapsedMinutes: assertPositiveElapsedMinutes(raw["elapsedMinutes"], fieldName),
-        reason,
-      };
-    default:
-      throw new Error("unreachable turn time kind");
-  }
-}
-
-function assertPositiveElapsedMinutes(value: unknown, fieldName: string): number {
-  const elapsedMinutes = assertNonNegativeInteger(value, `${fieldName}.elapsedMinutes`);
-  if (elapsedMinutes === 0) {
-    throw new Error(`${fieldName}.elapsedMinutes 必须大于 0。`);
-  }
-  return elapsedMinutes;
 }
 
 function assertSceneState(raw: unknown, actors: Record<ActorId, PublicActorState>): SceneState {
@@ -2060,7 +2028,6 @@ const SITUATIONS = [
   "escape",
   "downtime",
 ] as const;
-const TURN_TIME_KINDS = ["elapsed", "travel"] as const;
 const OBJECTIVE_STATUSES = ["active", "blocked", "resolved"] as const;
 const THREAT_SEVERITIES = ["low", "medium", "high", "lethal"] as const;
 const ACTOR_KINDS = ["human", "outsider", "spirit", "other"] as const;

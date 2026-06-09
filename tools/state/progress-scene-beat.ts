@@ -10,6 +10,7 @@ import type { SceneBeatThreatInput } from "../../engine/core/scene";
 import type { SituationKind } from "../../engine/core/state";
 
 import { progressSceneBeat } from "../../engine/core/scene-beat-lifecycle";
+import { parseTurnTimePolicySchema } from "../../engine/core/turn-time-schema";
 import type { ToolResult } from "../runtime/tool-result";
 
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
@@ -22,7 +23,6 @@ import {
   normalizeOptionalString,
   normalizeOptionalStringArray,
 } from "./tool-input";
-import { normalizeTurnTimePolicy } from "./time-policy-normalizer";
 
 const SITUATIONS = [
   "daily",
@@ -53,6 +53,7 @@ const MEMORY_CERTAINTIES = [
   "rumor",
   "hypothesis",
 ] as const satisfies readonly MemoryClaim["certainty"][];
+const PROGRESS_SCENE_BEAT_KINDS = ["begin", "complete"] as const satisfies readonly SceneBeatProgressInput["kind"][];
 
 export function progressSceneBeatTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
@@ -65,34 +66,39 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
 
 function normalizeSceneBeatProgressInput(params: unknown): SceneBeatProgressInput {
   const input = assertRecord(params, "progress_scene_beat 参数");
-  const kind = assertString(input["kind"], "kind");
-  switch (kind) {
-    case "begin":
-      return {
-        kind,
-        title: assertString(input["title"], "title"),
-        objectives: assertStringArray(input["objectives"], "objectives"),
-        purpose: assertString(input["purpose"], "purpose"),
-        time: normalizeTurnTimePolicy(input["time"], "time"),
-        beatId: normalizeOptionalString(input["beatId"], "beatId"),
-        actionPolicy: normalizeOptionalActionPolicy(input["actionPolicy"]),
-        threats: normalizeOptionalThreats(input["threats"]),
-        presence: normalizeOptionalPresence(input["presence"]),
-        situation: normalizeOptionalSituation(input["situation"], "situation"),
-      };
-    case "complete":
-      return {
-        kind,
-        outcome: assertString(input["outcome"], "outcome"),
-        time: normalizeTurnTimePolicy(input["time"], "time"),
-        memory: normalizeOptionalMemory(input["memory"]),
-        nextBeat: normalizeOptionalNextBeat(input["nextBeat"]),
-        presence: normalizeOptionalPresence(input["presence"]),
-        situation: normalizeOptionalSituation(input["situation"], "situation"),
-      };
-    default:
-      throw new Error("非法 progress_scene_beat.kind: 必须是 begin 或 complete。");
-  }
+  const kind = assertOneOf(input["kind"], "progress_scene_beat.kind", PROGRESS_SCENE_BEAT_KINDS);
+  return kind === "begin" ? normalizeBeginSceneBeatInput(input) : normalizeCompleteSceneBeatInput(input);
+}
+
+function normalizeBeginSceneBeatInput(
+  input: Record<string, unknown>,
+): Extract<SceneBeatProgressInput, { kind: "begin" }> {
+  return {
+    kind: "begin",
+    title: assertString(input["title"], "title"),
+    objectives: assertStringArray(input["objectives"], "objectives"),
+    purpose: assertString(input["purpose"], "purpose"),
+    time: parseTurnTimePolicySchema(input["time"], "time"),
+    beatId: normalizeOptionalString(input["beatId"], "beatId"),
+    actionPolicy: normalizeOptionalActionPolicy(input["actionPolicy"]),
+    threats: normalizeOptionalThreats(input["threats"]),
+    presence: normalizeOptionalPresence(input["presence"]),
+    situation: normalizeOptionalSituation(input["situation"], "situation"),
+  };
+}
+
+function normalizeCompleteSceneBeatInput(
+  input: Record<string, unknown>,
+): Extract<SceneBeatProgressInput, { kind: "complete" }> {
+  return {
+    kind: "complete",
+    outcome: assertString(input["outcome"], "outcome"),
+    time: parseTurnTimePolicySchema(input["time"], "time"),
+    memory: normalizeOptionalMemory(input["memory"]),
+    nextBeat: normalizeOptionalNextBeat(input["nextBeat"]),
+    presence: normalizeOptionalPresence(input["presence"]),
+    situation: normalizeOptionalSituation(input["situation"], "situation"),
+  };
 }
 
 function normalizeOptionalActionPolicy(value: unknown): SceneBeatActionPolicy | undefined {

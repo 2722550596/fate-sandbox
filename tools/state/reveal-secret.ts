@@ -13,10 +13,17 @@ import type { NoblePhantasm } from "../../engine/core/state";
 import { configureActorSecrets, configureServantSecrets, revealSecret } from "../../engine/core/secrets";
 import type { ToolResult } from "../runtime/tool-result";
 
+import { assertOneOfString } from "./domain-assert";
 import { runDomainEventTool } from "./domain-tool-runner";
 import { assertArray, assertRecord, assertString, assertStringArray } from "./tool-input";
 
 type RevealSecretToolInput = ConfigureActorSecretsInput | ConfigureServantSecretsInput | RevealSecretEvent;
+
+const NOBLE_PHANTASM_STATUSES = [
+  "hidden",
+  "suspected",
+  "revealed",
+] as const satisfies readonly NoblePhantasm["status"][];
 
 type RevealSecretToolResult =
   | { kind: "configure"; result: ConfigureActorSecretsResult | ConfigureServantSecretsResult }
@@ -157,9 +164,5 @@ function assertFateRankOrNone(value: unknown, fieldName: string): NoblePhantasm[
 }
 
 function assertNoblePhantasmStatus(value: unknown, fieldName: string): NoblePhantasm["status"] {
-  const status = assertString(value, fieldName);
-  if (status === "hidden" || status === "suspected" || status === "revealed") {
-    return status;
-  }
-  throw new Error(`${fieldName} 必须是 hidden、suspected 或 revealed。`);
+  return assertOneOfString(value, NOBLE_PHANTASM_STATUSES, fieldName, { style: "must-be" });
 }

@@ -2,9 +2,20 @@ import type { RecordOffscreenEventInput } from "../../engine/core/offscreen-even
 import type { OffscreenEventSource, OffscreenEventVisibility } from "../../engine/core/state";
 
 import { recordOffscreenEvent } from "../../engine/core/offscreen-event";
+import { assertOneOfString } from "../../engine/core/string-enum";
 import type { ToolResult } from "../runtime/tool-result";
 
 import { runDomainEventTool } from "./domain-tool-runner";
+
+const TOOL_OFFSCREEN_EVENT_VISIBILITIES = [
+  "secret",
+  "foreshadowed",
+] as const satisfies readonly OffscreenEventVisibility[];
+const OFFSCREEN_EVENT_SOURCES = [
+  "parallel-line-subagent",
+  "gm",
+  "debug",
+] as const satisfies readonly OffscreenEventSource[];
 
 export function recordOffscreenEventTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
@@ -46,24 +57,15 @@ function assertTimeRange(value: unknown): RecordOffscreenEventInput["timeRange"]
 }
 
 function assertVisibility(value: unknown): OffscreenEventVisibility {
-  switch (value) {
-    case "secret":
-    case "foreshadowed":
-      return value;
-    default:
-      throw new Error("visibility 必须是 secret 或 foreshadowed。");
-  }
+  return assertOneOfString(value, TOOL_OFFSCREEN_EVENT_VISIBILITIES, "visibility", {
+    style: "must-be",
+  });
 }
 
 function assertSource(value: unknown): OffscreenEventSource {
-  switch (value) {
-    case "parallel-line-subagent":
-    case "gm":
-    case "debug":
-      return value;
-    default:
-      throw new Error("createdFrom 必须是 parallel-line-subagent、gm 或 debug。");
-  }
+  return assertOneOfString(value, OFFSCREEN_EVENT_SOURCES, "createdFrom", {
+    style: "must-be",
+  });
 }
 
 function assertString(value: unknown, fieldName: string): string {

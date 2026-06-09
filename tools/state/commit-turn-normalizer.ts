@@ -5,8 +5,9 @@ import type { SceneEvent } from "../../engine/core/scene";
 import type { ServantFormEvent } from "../../engine/core/servant";
 import type { TurnCommitEvent, TurnCommitInput } from "../../engine/core/turn-commit";
 
+import { parseTurnTimePolicySchema } from "../../engine/core/turn-time-schema";
+
 import { normalizeActorConditionEvent } from "./actor-condition-normalizer";
-import { normalizeTurnTimePolicy } from "./time-policy-normalizer";
 
 const DEFAULT_SUMMARY = "本轮状态变化。";
 const TURN_EVENT_KINDS = [
@@ -31,7 +32,7 @@ const COMMIT_SCENE_EVENT_KINDS = [
 export function normalizeTurnCommitInput(params: unknown): TurnCommitInput {
   const input = assertRecord(params, "commit_turn 参数");
   const rawEvents = assertArray(input["events"], "events");
-  const time = normalizeTurnTimePolicy(input["time"], "time");
+  const time = parseTurnTimePolicySchema(input["time"], "time");
   const summary = normalizeSummary(input["summary"], rawEvents, time.reason);
   return {
     summary,

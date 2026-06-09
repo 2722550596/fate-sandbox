@@ -42,54 +42,87 @@ function assertEconomyEvent(params: unknown): EconomyEvent {
   const kind = assertOneOf(input["kind"], "update_economy.kind", ECONOMY_EVENT_KINDS);
   const reason = assertString(input["reason"], "reason");
 
-  switch (kind) {
-    case "spend-money": {
-      const purseId = normalizeOptionalString(input["purseId"], "purseId");
-      assertExistingPurseIdIfPresent(purseId);
-      return {
-        kind,
-        purseId,
-        ownerActorId: normalizeOptionalString(input["ownerActorId"], "ownerActorId"),
-        amount: assertNonNegativeInteger(input["amount"], "amount"),
-        reason,
-      };
-    }
-    case "gain-money": {
-      const purseId = normalizeOptionalString(input["purseId"], "purseId");
-      assertExistingPurseIdIfPresent(purseId);
-      return {
-        kind,
-        purseId,
-        ownerActorId: normalizeOptionalString(input["ownerActorId"], "ownerActorId"),
-        amount: assertNonNegativeInteger(input["amount"], "amount"),
-        source: assertOneOf(input["source"], "source", MONEY_GAIN_SOURCES),
-        counterparty: assertString(input["counterparty"], "counterparty"),
-        reason,
-      };
-    }
-    case "add-purse":
-      return {
-        kind,
-        ownerActorId: assertString(input["ownerActorId"], "ownerActorId"),
-        label: assertString(input["label"], "label"),
-        amount: assertNonNegativeInteger(input["amount"], "amount"),
-        access: assertOneOf(input["access"], "access", PURSE_ACCESSES),
-        reason,
-      };
-    case "rename-purse": {
-      const purseId = assertString(input["purseId"], "purseId");
-      assertExistingPurseIdIfPresent(purseId);
-      return { kind, purseId, label: assertString(input["label"], "label"), reason };
-    }
-    case "add-debt":
-      return {
-        kind,
-        debtorActorId: assertString(input["debtorActorId"], "debtorActorId"),
-        creditor: assertString(input["creditor"], "creditor"),
-        amount: assertNonNegativeInteger(input["amount"], "amount"),
-        reason,
-      };
+  if (kind === "spend-money") {
+    return normalizeSpendMoney(input, reason);
   }
+  if (kind === "gain-money") {
+    return normalizeGainMoney(input, reason);
+  }
+  if (kind === "add-purse") {
+    return normalizeAddPurse(input, reason);
+  }
+  if (kind === "rename-purse") {
+    return normalizeRenamePurse(input, reason);
+  }
+  return normalizeAddDebt(input, reason);
+}
+
+function normalizeSpendMoney(
+  input: Record<string, unknown>,
+  reason: string,
+): Extract<EconomyEvent, { kind: "spend-money" }> {
+  const purseId = normalizeOptionalString(input["purseId"], "purseId");
+  assertExistingPurseIdIfPresent(purseId);
+  return {
+    kind: "spend-money",
+    purseId,
+    ownerActorId: normalizeOptionalString(input["ownerActorId"], "ownerActorId"),
+    amount: assertNonNegativeInteger(input["amount"], "amount"),
+    reason,
+  };
+}
+
+function normalizeGainMoney(
+  input: Record<string, unknown>,
+  reason: string,
+): Extract<EconomyEvent, { kind: "gain-money" }> {
+  const purseId = normalizeOptionalString(input["purseId"], "purseId");
+  assertExistingPurseIdIfPresent(purseId);
+  return {
+    kind: "gain-money",
+    purseId,
+    ownerActorId: normalizeOptionalString(input["ownerActorId"], "ownerActorId"),
+    amount: assertNonNegativeInteger(input["amount"], "amount"),
+    source: assertOneOf(input["source"], "source", MONEY_GAIN_SOURCES),
+    counterparty: assertString(input["counterparty"], "counterparty"),
+    reason,
+  };
+}
+
+function normalizeAddPurse(
+  input: Record<string, unknown>,
+  reason: string,
+): Extract<EconomyEvent, { kind: "add-purse" }> {
+  return {
+    kind: "add-purse",
+    ownerActorId: assertString(input["ownerActorId"], "ownerActorId"),
+    label: assertString(input["label"], "label"),
+    amount: assertNonNegativeInteger(input["amount"], "amount"),
+    access: assertOneOf(input["access"], "access", PURSE_ACCESSES),
+    reason,
+  };
+}
+
+function normalizeRenamePurse(
+  input: Record<string, unknown>,
+  reason: string,
+): Extract<EconomyEvent, { kind: "rename-purse" }> {
+  const purseId = assertString(input["purseId"], "purseId");
+  assertExistingPurseIdIfPresent(purseId);
+  return { kind: "rename-purse", purseId, label: assertString(input["label"], "label"), reason };
+}
+
+function normalizeAddDebt(
+  input: Record<string, unknown>,
+  reason: string,
+): Extract<EconomyEvent, { kind: "add-debt" }> {
+  return {
+    kind: "add-debt",
+    debtorActorId: assertString(input["debtorActorId"], "debtorActorId"),
+    creditor: assertString(input["creditor"], "creditor"),
+    amount: assertNonNegativeInteger(input["amount"], "amount"),
+    reason,
+  };
 }
 
 function assertExistingPurseIdIfPresent(purseId: string | undefined): void {

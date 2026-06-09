@@ -15,7 +15,8 @@ const ALLOWED_KINDS = [
   "add-param-modifier",
   "change-contract",
   "add-permanent-defect",
-] as const;
+] as const satisfies readonly ServantFormEvent["kind"][];
+const LOCKED_FIELD_KINDS = ["change-true-name", "change-class", "change-base-params", "change-noble-phantasm"] as const;
 
 const CONTRACT_STATUSES = ["stable", "weak", "cut", "masterless"] as const satisfies readonly ServantContractState["status"][];
 const MANA_SUPPLIES = ["sufficient", "strained", "starved"] as const satisfies readonly ServantContractState["manaSupply"][];
@@ -43,26 +44,47 @@ function assertServantFormEvent(params: unknown): ServantFormEvent {
   const actorId = assertString(input["actorId"], "actorId");
   const reason = assertString(input["reason"], "reason");
 
-  switch (kind) {
-    case "spend-mana":
-    case "restore-mana":
-    case "damage-spiritual-core":
-      return { kind, actorId, amount: assertNonNegativeInteger(input["amount"], "amount"), reason };
-    case "add-param-modifier":
-      return { kind, actorId, modifier: assertParamModifier(input["modifier"]), reason };
-    case "change-contract":
-      return { kind, actorId, contract: assertServantContract(input["contract"]), reason };
-    case "add-permanent-defect":
-      return { kind, actorId, defect: assertPermanentDefect(input["defect"]), reason };
+  if (isResourceUpdateKind(kind)) {
+    return { kind, actorId, amount: assertNonNegativeInteger(input["amount"], "amount"), reason };
+  }
+  if (kind === "add-param-modifier") {
+    return { kind, actorId, modifier: assertParamModifier(input["modifier"]), reason };
+  }
+  if (kind === "change-contract") {
+    return { kind, actorId, contract: assertServantContract(input["contract"]), reason };
+  }
+  return { kind, actorId, defect: assertPermanentDefect(input["defect"]), reason };
+}
+
+function assertServantFormKind(value: unknown): ServantFormEvent["kind"] {
+  if (isLockedFieldKind(value)) {
+    throw lockedFieldKindError(value);
+  }
+  try {
+    return assertOneOfString(value, ALLOWED_KINDS, "update_servant_form.kind");
+  } catch (error) {
+    throw new Error(`${String(error)} 常规工具只能更新资源、契约、参数修正和永久缺损。`, {
+      cause: error,
+    });
   }
 }
 
-function assertServantFormKind(value: unknown): (typeof ALLOWED_KINDS)[number] {
-  if (typeof value === "string" && ALLOWED_KINDS.some((kind) => kind === value)) {
-    return value as (typeof ALLOWED_KINDS)[number]; // safe: guarded by ALLOWED_KINDS membership check above.
+function isResourceUpdateKind(
+  kind: ServantFormEvent["kind"],
+): kind is "spend-mana" | "restore-mana" | "damage-spiritual-core" {
+  return kind === "spend-mana" || kind === "restore-mana" || kind === "damage-spiritual-core";
+}
+
+function isLockedFieldKind(value: unknown): boolean {
+  if (typeof value !== "string") {
+    return false;
   }
-  throw new Error(
-    `非法 update_servant_form.kind: ${formatUnknown(value)}。常规工具只能更新资源、契约、参数修正和永久缺损；真名、职阶、基础参数、宝具是锁定字段，必须使用 debug 工具 override_locked_fact（宝具当前无常规增删事件），严禁使用 patch_state。允许值: ${ALLOWED_KINDS.join(", ")}。`,
+  return LOCKED_FIELD_KINDS.some((kind) => kind === value);
+}
+
+function lockedFieldKindError(value: unknown): Error {
+  return new Error(
+    `非法 update_servant_form.kind: ${formatUnknown(value)}。真名、职阶、基础参数、宝具是锁定字段，必须使用 debug 工具 override_locked_fact（宝具当前无常规增删事件），严禁使用 patch_state。允许值: ${ALLOWED_KINDS.join(", ")}。`,
   );
 }
 

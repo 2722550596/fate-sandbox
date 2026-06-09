@@ -9,10 +9,22 @@ import {
   createId,
   updateState,
 } from "./state";
+import { assertOneOfString } from "./string-enum";
 
 export type { OffscreenEventSource, OffscreenEventVisibility } from "./state";
 
 export type RecordOffscreenEventInput = Omit<OffscreenEvent, "id">;
+
+const OFFSCREEN_EVENT_VISIBILITIES = [
+  "secret",
+  "foreshadowed",
+  "player-known",
+] as const satisfies readonly OffscreenEventVisibility[];
+const OFFSCREEN_EVENT_SOURCES = [
+  "parallel-line-subagent",
+  "gm",
+  "debug",
+] as const satisfies readonly OffscreenEventSource[];
 
 export interface RecordOffscreenEventResult {
   eventId: string;
@@ -70,24 +82,13 @@ function assertClosedTimeRange(timeRange: OffscreenEvent["timeRange"]): void {
 }
 
 function assertOffscreenEventVisibility(value: unknown): OffscreenEventVisibility {
-  switch (value) {
-    case "secret":
-    case "foreshadowed":
-      return value;
-    case "player-known":
-      return "player-known";
-    default:
-      throw new Error("visibility 必须是 secret、foreshadowed 或 player-known。");
-  }
+  return assertOneOfString(value, OFFSCREEN_EVENT_VISIBILITIES, "visibility", {
+    style: "must-be",
+  });
 }
 
 function assertOffscreenEventSource(value: unknown): OffscreenEventSource {
-  switch (value) {
-    case "parallel-line-subagent":
-    case "gm":
-    case "debug":
-      return value;
-    default:
-      throw new Error("createdFrom 必须是 parallel-line-subagent、gm 或 debug。");
-  }
+  return assertOneOfString(value, OFFSCREEN_EVENT_SOURCES, "createdFrom", {
+    style: "must-be",
+  });
 }
