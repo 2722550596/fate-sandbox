@@ -30,7 +30,9 @@ void test("resolveCombatExchangeTool returns player-safe constraints and state d
 
   const text = result.content[0]?.text ?? "";
   assert.match(text, /交锋裁决：/u);
+  assert.match(text, /战场变数：/u);
   assert.match(text, /状态落点：/u);
+  assert.match(text, /后果力度：/u);
   assert.match(text, /禁止输出 HP/u);
   assert.ok(result.details["fsn-state"] !== undefined);
 });

@@ -13,6 +13,7 @@ export type CombatExchangeTactic =
   | "noble-phantasm"
   | "support";
 export type CombatRiskTolerance = "low" | "medium" | "high" | "desperate";
+export type CombatSwing = "bad-break" | "pressure" | "neutral" | "opening" | "turnabout";
 export type CombatOutcomeBand =
   | "clean-advantage"
   | "advantage-with-cost"
@@ -45,6 +46,7 @@ export interface CombatExchangeInput {
   knownAdvantages: string[];
   knownDisadvantages: string[];
   riskTolerance: CombatRiskTolerance;
+  swing?: CombatSwing;
 }
 
 export interface CombatStateLanding {
@@ -60,8 +62,10 @@ export interface CombatExchangeResult {
   tactic: CombatExchangeTactic;
   outcome: CombatOutcomeBand;
   score: number;
+  swing: CombatSwing;
   rankCheck: string;
   stateLandings: CombatStateLanding[];
+  consequenceGuidance: string[];
   narrativeConstraints: string[];
   forbiddenNarration: string[];
   nextActionWindow: string;
@@ -97,6 +101,13 @@ const COMBAT_PARAMETERS = [
   "luck",
   "noblePhantasm",
 ] as const satisfies readonly CombatParameter[];
+const COMBAT_SWINGS = [
+  "bad-break",
+  "pressure",
+  "neutral",
+  "opening",
+  "turnabout",
+] as const satisfies readonly CombatSwing[];
 const EMPTY_MARKERS = new Set(["none", "无", "n/a", "null"]);
 
 export function assertCombatExchangeInput(raw: RawCombatExchangeInput): CombatExchangeInput {
@@ -124,6 +135,7 @@ export function assertCombatExchangeInput(raw: RawCombatExchangeInput): CombatEx
     knownAdvantages: normalizeStringArray(raw["knownAdvantages"], "knownAdvantages"),
     knownDisadvantages: normalizeStringArray(raw["knownDisadvantages"], "knownDisadvantages"),
     riskTolerance: assertOneOf(raw["riskTolerance"], "riskTolerance", RISK_TOLERANCES),
+    swing: assertOptionalOneOf(raw["swing"], "swing", COMBAT_SWINGS) ?? "neutral",
   };
 }
 
@@ -146,6 +158,7 @@ export function resolveCombatExchange(input: CombatExchangeInput): CombatExchang
     "opponentNoblePhantasmName",
   );
   const rankComparison = compareProfiles(actorProfile, opponentProfile);
+  const swing = combatSwing(input);
   const score = calculateScore(input, actor, opponent, rankComparison);
   const outcome = determineOutcome(score, input);
   return {
@@ -155,8 +168,10 @@ export function resolveCombatExchange(input: CombatExchangeInput): CombatExchang
     tactic: input.tactic,
     outcome,
     score,
+    swing,
     rankCheck: formatRankCheck(actorProfile, opponentProfile, rankComparison),
     stateLandings: buildStateLandings(input, outcome, actorProfile),
+    consequenceGuidance: buildConsequenceGuidance(outcome, swing),
     narrativeConstraints: buildNarrativeConstraints(input, outcome, rankComparison),
     forbiddenNarration: buildForbiddenNarration(outcome),
     nextActionWindow: buildNextActionWindow(input, outcome),
@@ -317,6 +332,7 @@ function calculateScore(
     rankScore(rankComparison) +
     scaleScore(actor, opponent) +
     factorScore(input) +
+    swingScore(combatSwing(input)) +
     vulnerabilityScore(opponent) -
     vulnerabilityScore(actor)
   );
@@ -363,6 +379,44 @@ function factorScore(input: CombatExchangeInput): number {
     Math.min(input.knownDisadvantages.length, 3) +
     riskScore(input.riskTolerance)
   );
+}
+
+function combatSwing(input: CombatExchangeInput): CombatSwing {
+  return input.swing ?? "neutral";
+}
+
+function swingScore(swing: CombatSwing): number {
+  switch (swing) {
+    case "bad-break":
+      return -2;
+    case "pressure":
+      return -1;
+    case "neutral":
+      return 0;
+    case "opening":
+      return 1;
+    case "turnabout":
+      return 2;
+    default:
+      throw new Error("unreachable combat swing");
+  }
+}
+
+export function formatCombatSwing(swing: CombatSwing): string {
+  switch (swing) {
+    case "bad-break":
+      return "恶化变数：敌方抓到节奏或环境突然转坏。";
+    case "pressure":
+      return "压力变数：火线、距离或误判让行动更吃紧。";
+    case "neutral":
+      return "平稳变数：没有额外偏移，按参数、资源和目标裁决。";
+    case "opening":
+      return "开口变数：出现短暂位置、节奏或判断破绽。";
+    case "turnabout":
+      return "逆转变数：罕见破绽放大，允许低位方争取局部翻盘窗口。";
+    default:
+      throw new Error("unreachable combat swing");
+  }
 }
 
 function riskScore(riskTolerance: CombatRiskTolerance): number {
@@ -476,7 +530,13 @@ function buildStateLandings(
     landings.push({
       kind: "actor-condition",
       required: true,
-      reason: "高风险或失利交锋需要伤势、疲劳、失衡、暴露或其他可审计代价。",
+      reason: "失利或绝境交锋需要伤势、疲劳、失衡、暴露或其他可审计代价。",
+    });
+  } else if (input.riskTolerance === "high" || input.riskTolerance === "desperate") {
+    landings.push({
+      kind: "actor-condition",
+      required: false,
+      reason: "高风险代价可落在疲劳、失衡或暴露；若已由魔力、位置或敌方下一手承接，可不写伤势。",
     });
   }
   if (actorProfile.scale === "servant" && requiresServantCost(outcome, input)) {
@@ -506,12 +566,10 @@ function requiresActorCost(
   riskTolerance: CombatRiskTolerance,
 ): boolean {
   return (
-    outcome === "advantage-with-cost" ||
     outcome === "forced-defense" ||
     outcome === "failed-with-cost" ||
     outcome === "overwhelmed" ||
-    riskTolerance === "high" ||
-    riskTolerance === "desperate"
+    (outcome === "advantage-with-cost" && riskTolerance === "desperate")
   );
 }
 
@@ -521,6 +579,38 @@ function requiresServantCost(outcome: CombatOutcomeBand, input: CombatExchangeIn
     input.committedResources.length > 0 ||
     outcome !== "clean-advantage"
   );
+}
+
+function buildConsequenceGuidance(outcome: CombatOutcomeBand, swing: CombatSwing): string[] {
+  const guidance: string[] = [];
+  switch (outcome) {
+    case "clean-advantage":
+      guidance.push("给出明确战果：位置、火线、阵型、距离或目标进度至少改变一项。");
+      break;
+    case "advantage-with-cost":
+      guidance.push("战果要大于一句挡住：允许切开火力、撕出通路、逼退一步或迫使敌方改手。");
+      guidance.push("代价优先落到魔力、暴露、位置或倒计时；不要默认每次都写伤势。");
+      break;
+    case "exchange":
+      guidance.push("双方都要有后果：至少交换位置、情报、资源、距离或下一手主动权。");
+      break;
+    case "forced-defense":
+      guidance.push("防守不是原地卡住：必须给出撤退路线、保护窗口、资源投入口或改换目标。");
+      break;
+    case "failed-with-cost":
+    case "overwhelmed":
+      guidance.push("失败后果可以重：位置崩坏、保护目标受压、资源大耗、暴露弱点或被迫分离。");
+      break;
+    default:
+      throw new Error("unreachable combat outcome");
+  }
+  if (swing === "opening" || swing === "turnabout") {
+    guidance.push("有利变数可以打破单调等级压制，但只能兑现为局部窗口、资源交换或目标推进。");
+  }
+  if (swing === "bad-break" || swing === "pressure") {
+    guidance.push("不利变数应扩大局势后果，而不是只把动作写成失败。");
+  }
+  return guidance;
 }
 
 function buildNarrativeConstraints(
@@ -539,11 +629,13 @@ function buildNarrativeConstraints(
     );
   }
   if (input.riskTolerance === "high" || input.riskTolerance === "desperate") {
-    constraints.push("高风险投入必须留下代价；成功也不能写成免费干净成功。");
+    constraints.push(
+      "高风险投入必须留下代价，但代价可落在魔力、暴露、位置、倒计时或敌方下一手；不要每次都写伤势或停手。",
+    );
   }
   if (outcome === "overwhelmed") {
     constraints.push(
-      "被压制方不得正面赢下交换；只能保住局部目标、被迫退让、付出代价或等待新资源介入。 ",
+      "被压制方不得正面赢下交换；只能保住局部目标、被迫退让、付出代价或等待新资源介入。",
     );
   }
   return constraints;
@@ -556,7 +648,7 @@ function buildForbiddenNarration(outcome: CombatOutcomeBand): string[] {
     "禁止把无资源投入的高风险行动写成免费成功。",
   ];
   if (outcome === "overwhelmed") {
-    forbidden.push("禁止让被压制方靠决心、气势或一句台词正面反杀。 ");
+    forbidden.push("禁止让被压制方靠决心、气势或一句台词正面反杀。");
   }
   return forbidden;
 }
@@ -564,17 +656,17 @@ function buildForbiddenNarration(outcome: CombatOutcomeBand): string[] {
 function buildNextActionWindow(input: CombatExchangeInput, outcome: CombatOutcomeBand): string {
   switch (outcome) {
     case "clean-advantage":
-      return `「${input.intent}」取得局部主动；停在是否追击、撤离、逼问、保护目标或扩大战果的选择点。`;
+      return `「${input.intent}」取得局部主动；推进到追击、撤离、逼问、保护目标或扩大战果的选择点。`;
     case "advantage-with-cost":
-      return `「${input.intent}」推进成功但代价已经显现；停在是否承受代价继续、转入防守或要求支援的选择点。`;
+      return `「${input.intent}」推进成功且代价显现；推进到承受代价继续、转入防守或要求支援的选择点。`;
     case "exchange":
-      return `「${input.intent}」与对方应对相互抵消；停在距离、情报或目标出现新缺口的选择点。`;
+      return `「${input.intent}」与对方应对相互抵消；推进到距离、情报或目标出现新缺口的选择点。`;
     case "forced-defense":
-      return `「${input.intent}」被迫转为防守；停在撤退、保护同伴、投入资源或改换目标的选择点。`;
+      return `「${input.intent}」被迫转为防守；推进到撤退、保护同伴、投入资源或改换目标的选择点。`;
     case "failed-with-cost":
-      return `「${input.intent}」失败且代价落下；停在处理伤势/失衡/暴露或请求援护的选择点。`;
+      return `「${input.intent}」失败且代价落下；推进到处理伤势/失衡/暴露或请求援护的选择点。`;
     case "overwhelmed":
-      return `「${input.intent}」遭到压制；停在是否付出更高代价、利用地形相性、撤退或等待外部窗口的选择点。`;
+      return `「${input.intent}」遭到压制；推进到付出更高代价、利用地形相性、撤退或等待外部窗口的选择点。`;
     default:
       throw new Error("unreachable combat outcome");
   }
@@ -601,6 +693,17 @@ function assertOptionalString(value: unknown, fieldName: string): string | undef
     return undefined;
   }
   return assertString(value, fieldName);
+}
+
+function assertOptionalOneOf<const T extends readonly string[]>(
+  value: unknown,
+  fieldName: string,
+  allowed: T,
+): T[number] | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return assertOneOf(value, fieldName, allowed);
 }
 
 function assertString(value: unknown, fieldName: string): string {
