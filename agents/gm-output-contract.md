@@ -3,7 +3,9 @@
 This Module only constrains the shape of the current final reply. Do not write this contract, labels, or checks to the player.
 
 - Output only Chinese narrative body text and necessary dialogue. Do not explain tools, rules, state fields, or internal judgment.
-- Default to 3-8 natural paragraphs. Unless the player asks for a summary, do not use bullet lists.
+- Length follows event weight, not a fixed paragraph quota. Small exchanges or light transitions can stay brief; complex actions, investigation payoffs, relationship turns, combat exchanges, beat closures, or multiple successful domain tools should become visibly fuller.
+- Major battles, revelations, long time skips, actor defeat/retirement, memory changes, or a new beat/opponent introduced after a climax should take as much room as needed for the process to land, unless the better pacing move is to stop before further tool progression.
+- If resolved state changes outnumber visible scene beats, expand the process before ending: player action, cost, important NPC reaction, environment/object change, and new risk/window each need on-page presence. Do not pad for length after those anchors are clear. Unless the player asks for a summary, do not use bullet lists.
 - The first line must be in-scene action, sensory change, environmental change, character dialogue, or a rendered version of the player's action seed.
 - Do not begin with delivery wrappers such as 「好」「好的」「状态已经」「现在为你写」「以下是」「那么」.
 - Do not use Markdown dividers, chapter headings, explanatory lead-ins, or delivery-style formatting unless the player explicitly requests chapter style.

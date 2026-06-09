@@ -72,7 +72,7 @@ function commitCanonicalTurn(input: TurnCommitInput): TurnCommitResult {
     eventCount: input.events.length,
     resultCount: finalResults.length,
   });
-  const warnings = collectWarnings();
+  const warnings = collectWarnings(input);
   return {
     message: formatMessage(summary, finalResults, warnings),
     results: finalResults,
@@ -135,7 +135,7 @@ function closeCompletedOpenStoryWindow(): TurnCommitEventResult | null {
   };
 }
 
-function collectWarnings(): string[] {
+function collectWarnings(input: TurnCommitInput): string[] {
   const state = getState();
   const warnings: string[] = [];
   const storyWindow = state.public.scene.storyWindow;
@@ -146,6 +146,22 @@ function collectWarnings(): string[] {
     if (unresolvedObjectives.length === 0) {
       warnings.push(`剧情窗口仍在进行，但当前没有未解决的 Scene Objective：${storyWindow.title}。`);
     }
+  }
+  warnings.push(...collectPacingWarnings(input));
+  return warnings;
+}
+
+function collectPacingWarnings(input: TurnCommitInput): string[] {
+  const warnings: string[] = [];
+  if (input.events.length >= 3) {
+    warnings.push(
+      "叙事节奏：本轮已有多个领域事件；请停止继续推进下一前台回合，先把当前动作、代价、NPC 反应和新风险写足。",
+    );
+  }
+  if (input.time.elapsedMinutes > 30) {
+    warnings.push(
+      "叙事节奏：本轮已推进较长时间；除必要的后台记录外，请不要继续游玩下一个行动窗口。",
+    );
   }
   return warnings;
 }

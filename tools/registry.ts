@@ -134,12 +134,14 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "- 每次 canonical turn 都必须提交 time；等待、休息、睡眠、过夜、守夜、调查、治疗、移动都必须在顶层 time 裁决\n" +
       "- 一轮回复同时改变时间/地点、Scene Objective、伤势、物品、资金、记忆或从者资源中的多个状态\n" +
       "- 叙事已经发生购买、治疗、移动、揭示、消耗、战斗结算等 canonical Game State 变化\n" +
-      "- 一轮回复同时改变非 beat lifecycle 的多个状态；Scene Beat 开启/收口必须优先用 progress_scene_beat\n\n" +
+      "- 一轮回复同时改变非 beat lifecycle 的多个状态；Scene Beat 开启/收口必须优先用 progress_scene_beat\n" +
+      "- 只覆盖当前玩家行动窗口及其直接后果；重大结算后应停止前台推进并先写足正文\n\n" +
       "【严禁的行为】\n" +
       "- 把它当裸 patch；events 必须是已有领域事件\n" +
       "- 在 events 里写时间或移动；时间与移动只写顶层 time\n" +
       "- 提交 Hidden Fact 到 Public Game State；秘密仍必须走 reveal_secret/private_resolve/record_offscreen_event\n" +
-      "- 没有状态变化时为了形式调用",
+      "- 没有状态变化时为了形式调用\n" +
+      "- 在同一 assistant 回复中连续提交多个前台 canonical turn，跳过玩家可回应窗口",
     parameters: Type.Object({
       summary: Type.Optional(
         Type.String({
@@ -172,14 +174,16 @@ export function registerAllTools(pi: ExtensionAPI): void {
       "【必须调用的场景】\n" +
       "- 进入新的调查、潜入、对峙、撤退、战斗准备等复杂场景，需要 1-5 个当前目标：kind=begin\n" +
       "- 当前 GM brief 显示存在剧情窗口，且当前 beat 已经收口，需要一次性解决全部 active Scene Objective、清理 Scene Threat、可选记录 Campaign Memory、可选进入 nextBeat：kind=complete\n" +
-      "- 进入或收口 beat 时必须填写 time；移动用 time.kind=travel；非移动事件用 time.kind=elapsed，最小 1 分钟\n\n" +
+      "- 进入或收口 beat 时必须填写 time；移动用 time.kind=travel；非移动事件用 time.kind=elapsed，最小 1 分钟\n" +
+      "- begin 或 complete 形成新的玩家行动窗口后，应停止继续游玩下一窗口，先输出足量场景正文\n\n" +
       "【严禁的行为】\n" +
       "- 用它记录长期目标或幕后真相；长期后果写 memory，秘密走 reveal/private_resolve/offscreen\n" +
       "- 当前 GM brief 显示剧情窗口未设定或当前目标为无时调用 complete\n" +
       "- 未满足当前 completionCriteria 就强行 complete；失败/撤退可以 complete，但 outcome 必须写明代价或后果\n" +
       "- nextBeat 继续复读同一中心冲突：撤退/逃亡完成后必须转为落脚、治疗、隐蔽、休整、交涉或新信息处理\n" +
       "- 用 memory 写入未揭示 secret；公开记忆仍必须提供 claims 并遵守证据门禁\n" +
-      "- 手写 set-story-window/add-objective 或 commit_turn scene-beat AST 来绕过 Scene Beat lifecycle",
+      "- 手写 set-story-window/add-objective 或 commit_turn scene-beat AST 来绕过 Scene Beat lifecycle\n" +
+      "- complete 后立刻继续结算下一 foreground beat，把多个可回应窗口压进一条最终回复",
     parameters: Type.Object({
       kind: Type.String({ description: "允许: begin / complete" }),
       title: Type.Optional(Type.String({ description: "begin 必填：Scene Beat 标题" })),

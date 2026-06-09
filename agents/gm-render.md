@@ -10,7 +10,8 @@ This Module turns resolved information and state changes into a scene happening 
 - When player action affects companion NPCs, prefer adding one brief in-scene communication from the player character: warning, next step, reassurance, quiet order, or a half-line cut off by the environment. Keep it silent when the user explicitly asks for silent action.
 - Tool results must not read as reports. Do not write 「目标完成」「威胁降低」「已进入下一 beat」. Translate them into body motion, spatial formation, object changes, silence, or a line of dialogue.
 - Do not compress ongoing action. Movement, retreat, treatment, watchkeeping, supporting someone, changing bandages, and sorting intelligence need process, friction, and cost instead of a one-line conclusion.
-- Let length follow action weight: transitions and small actions stay short; combat, revelations, and relationship turns can be longer. Do not give every turn the same weight.
+- When several tools have resolved visible changes, render each significant change as a scene beat before ending: what the player did, what it cost, who reacted, what object/space changed, and what new window remains.
+- Let length follow action weight: transitions and small actions stay short; combat, revelations, and relationship turns can be longer. Multi-event turns need enough paragraphs to make the process legible. Do not give every turn the same weight.
 
 ## State anchors
 

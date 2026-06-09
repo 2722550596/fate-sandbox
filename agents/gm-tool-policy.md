@@ -28,9 +28,16 @@ This Module only decides whether to call tools and which tool has priority. Fina
 - Use `time.kind=elapsed` for waiting, rest, sleep, watchkeeping, treatment, investigation, or any non-travel time passage.
 - Use `time.kind=travel` when the player changes location through the fiction.
 
+## Turn pacing boundary
+
+- One assistant reply should resolve one player action window and its immediate consequences. Do not play through a second foreground action window in the same reply.
+- After a tool result closes a beat, defeats or retires an actor, records a major memory, advances sleep/rest/travel by more than 30 minutes, or introduces a new opponent / next beat / new scene pressure, stop forward-progress tools unless a state repair or required backstage landing remains.
+- If continuing would require another canonical turn, leave the next state as the final action window and wait for the player. The final prose must spend enough paragraphs on the resolved process before that window.
+- `parallel-line` may run for time skips or beat closures, but after its canonical landing, do not also play through the next foreground beat in the same reply.
+
 ## Domain Event Tool routing
 
-- If one reply changes scene / condition / servant / economy / memory, and Scene Beat lifecycle cannot cover it: aggregate with `commit_turn`.
+- If one reply changes scene / condition / servant / economy / memory, and Scene Beat lifecycle cannot cover it: aggregate with `commit_turn` inside the current player action window.
 - Actor entrance, exit, and companion changes: use `set_scene_presence`. `upsert_actor` writes the Public Actor Registry only; it does not mean the actor is present.
 - Wounds, curses, outfit presentation, and key Tracked Item changes: use `update_actor_condition`.
 - Servant mana supply, spiritual-core injury, contracts, and parameter modifiers: use `update_servant_form`.

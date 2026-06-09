@@ -257,7 +257,11 @@ function shouldApplyPostCompletionSituation(
 }
 
 function formatBeginMessage(time: SceneEventResult, beat: SceneBeatResult): string {
-  return `${time.message}\n${beat.message}`;
+  return [
+    time.message,
+    beat.message,
+    "叙事节奏：此工具已开启新的玩家行动窗口；接下来应停止前台推进，写出入口压力和可回应点。",
+  ].join("\n");
 }
 
 function formatCompleteMessage(
@@ -277,5 +281,8 @@ function formatCompleteMessage(
   if (situation !== null) {
     lines.push(situation.message);
   }
+  lines.push(
+    "叙事节奏：此工具已收口当前 beat；除必要修复或后台落点外，不要在同一回复继续游玩 nextBeat。最终正文需写足收口过程、代价、NPC 反应与新窗口。",
+  );
   return lines.join("\n");
 }
