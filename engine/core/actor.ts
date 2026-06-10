@@ -12,7 +12,7 @@ import type {
   ServantSkill,
 } from "./state";
 
-import type { ScenePresenceInput } from "./actor-schema";
+import type { RetireActorInput, ScenePresenceInput } from "./actor-schema";
 
 import { assertNonEmptyString, updateState } from "./state";
 
@@ -117,10 +117,7 @@ export interface ScenePresenceResult {
   message: string;
 }
 
-export interface RetireActorInput {
-  actorId: ActorId;
-  reason: string;
-}
+export type { RetireActorInput } from "./actor-schema";
 
 export interface RetireActorResult {
   message: string;

@@ -22,3 +22,16 @@ const SCENE_PRESENCE_INPUT_VALIDATOR = Compile(SCENE_PRESENCE_INPUT_SCHEMA);
 export function parseScenePresenceInput(value: unknown, fieldName: string): ScenePresenceInput {
   return parseTypeBoxValue(trimStringsDeep(value), fieldName, SCENE_PRESENCE_INPUT_VALIDATOR);
 }
+
+export const RETIRE_ACTOR_INPUT_SCHEMA = Type.Object({
+  actorId: Type.String({ minLength: 1 }),
+  reason: Type.String({ minLength: 1 }),
+});
+
+export type RetireActorInput = Static<typeof RETIRE_ACTOR_INPUT_SCHEMA>;
+
+const RETIRE_ACTOR_INPUT_VALIDATOR = Compile(RETIRE_ACTOR_INPUT_SCHEMA);
+
+export function parseRetireActorInput(value: unknown, fieldName: string): RetireActorInput {
+  return parseTypeBoxValue(trimStringsDeep(value), fieldName, RETIRE_ACTOR_INPUT_VALIDATOR);
+}
