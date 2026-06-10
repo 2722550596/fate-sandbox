@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "extension.ts",
+    "extensions/**/index.ts",
+    "engine/**/*.test.ts",
+    "tools/**/*.test.ts",
+    "tests/**/*.test.ts"
+  ],
+  "project": ["engine/**/*.ts", "tools/**/*.ts", "data/**/*.ts", "extensions/**/*.ts"]
+}
