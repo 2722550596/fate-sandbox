@@ -12,6 +12,8 @@ import type {
   ServantSkill,
 } from "./state";
 
+import type { ScenePresenceInput } from "./actor-schema";
+
 import { assertNonEmptyString, updateState } from "./state";
 
 export interface UpsertActorInput {
@@ -109,11 +111,7 @@ export function setScenePresence(input: ScenePresenceInput): ScenePresenceResult
   return { message: "场景在场 actor 已更新。" };
 }
 
-export interface ScenePresenceInput {
-  presentActorIds: ActorId[];
-  allyActorIds: ActorId[];
-  reason: string;
-}
+export type { ScenePresenceInput } from "./actor-schema";
 
 export interface ScenePresenceResult {
   message: string;
