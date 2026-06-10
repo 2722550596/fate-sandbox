@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state";
+import { getState, resetState } from "../../engine/core/state-store";
 import { progressSceneBeatTool } from "./progress-scene-beat";
 
 void test("progressSceneBeatTool begins a beat from the GM-facing adapter", () => {

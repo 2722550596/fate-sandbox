@@ -1,5 +1,5 @@
-import { resetState, writeStateToDetails } from "../../engine/core/state";
-import { persistCurrentState } from "../../engine/core/state-persistence";
+import { persistCurrentState, writeStateToDetails } from "../../engine/core/state-persistence";
+import { resetState } from "../../engine/core/state-store";
 import { textResult, type ToolResult } from "../runtime/tool-result";
 
 export function resetStateTool(params: { reason: string }, sessionManager: unknown): ToolResult {

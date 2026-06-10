@@ -3,12 +3,12 @@ import test from "node:test";
 
 import { upsertActor } from "./actor";
 import { updateActorCondition } from "./actor-condition";
-import { getState, resetState } from "./state";
+import { createInitialState } from "./state-store";
 
 void test("updateActorCondition records discrete wounds", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "add-wound",
     actorId: "protagonist",
     severity: "moderate",
@@ -17,14 +17,14 @@ void test("updateActorCondition records discrete wounds", () => {
     recoverable: true,
   });
 
-  const protagonist = getState().public.actors["protagonist"];
+  const protagonist = draft.public.actors["protagonist"];
   assert.equal(protagonist?.condition.wounds[0]?.text, "左臂裂伤");
   assert.equal(protagonist?.condition.wounds[0]?.severity, "moderate");
 });
 
 void test("updateActorCondition updates non-servant magecraft circuits", () => {
-  resetState();
-  upsertActor({
+  const draft = createInitialState();
+  upsertActor(draft, {
     kind: "setup-protagonist",
     actor: {
       id: "protagonist",
@@ -51,22 +51,22 @@ void test("updateActorCondition updates non-servant magecraft circuits", () => {
     reason: "测试",
   });
 
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "update-magecraft-circuits",
     actorId: "protagonist",
     circuits: { count: "27", quality: "E", od: 12, status: "depleted", traits: ["低效率"] },
     reason: "强化魔术消耗",
   });
 
-  const actor = getState().public.actors["protagonist"];
+  const actor = draft.public.actors["protagonist"];
   assert.equal(actor?.magecraft?.circuits.od, 12);
   assert.equal(actor?.magecraft?.circuits.status, "depleted");
 });
 
 void test("updateActorCondition updates wound treatment in place", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "add-wound",
     actorId: "protagonist",
     severity: "minor",
@@ -74,12 +74,12 @@ void test("updateActorCondition updates wound treatment in place", () => {
     source: "石阶滑倒",
     recoverable: true,
   });
-  const woundId = getState().public.actors.protagonist?.condition.wounds[0]?.id;
+  const woundId = draft.public.actors.protagonist?.condition.wounds[0]?.id;
   if (woundId === undefined) {
     throw new Error("expected wound id");
   }
 
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "update-wound",
     actorId: "protagonist",
     conditionId: woundId,
@@ -88,28 +88,28 @@ void test("updateActorCondition updates wound treatment in place", () => {
     reason: "正式处理擦伤",
   });
 
-  const wounds = getState().public.actors.protagonist?.condition.wounds;
+  const wounds = draft.public.actors.protagonist?.condition.wounds;
   assert.equal(wounds?.length, 1);
   assert.equal(wounds?.[0]?.text, "右膝擦伤——已清洁包扎");
   assert.equal(wounds?.[0]?.treatment, "消毒棉清创，消炎软膏，新绷带包扎");
 });
 
 void test("updateActorCondition resolves recovered afflictions", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "add-affliction",
     actorId: "protagonist",
     text: "魔术回路近乎干涸",
     source: "连续强化",
     expectedDuration: "睡眠一夜",
   });
-  const afflictionId = getState().public.actors.protagonist?.condition.afflictions[0]?.id;
+  const afflictionId = draft.public.actors.protagonist?.condition.afflictions[0]?.id;
   if (afflictionId === undefined) {
     throw new Error("expected affliction id");
   }
 
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "resolve-condition",
     actorId: "protagonist",
     conditionKind: "affliction",
@@ -118,28 +118,28 @@ void test("updateActorCondition resolves recovered afflictions", () => {
     reason: "睡眠后恢复",
   });
 
-  const protagonist = getState().public.actors["protagonist"];
+  const protagonist = draft.public.actors["protagonist"];
   assert.deepEqual(protagonist?.condition.afflictions, []);
 });
 
 void test("updateActorCondition lists available afflictions when resolve id is missing", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "add-affliction",
     actorId: "protagonist",
     text: "魔术回路近乎干涸",
     source: "连续强化",
     expectedDuration: "睡眠一夜",
   });
-  const afflictionId = getState().public.actors.protagonist?.condition.afflictions[0]?.id;
+  const afflictionId = draft.public.actors.protagonist?.condition.afflictions[0]?.id;
   if (afflictionId === undefined) {
     throw new Error("expected affliction id");
   }
 
   assert.throws(
     () =>
-      updateActorCondition({
+      updateActorCondition(draft, {
         kind: "resolve-condition",
         actorId: "protagonist",
         conditionKind: "affliction",
@@ -154,9 +154,9 @@ void test("updateActorCondition lists available afflictions when resolve id is m
 });
 
 void test("updateActorCondition points to the actor that owns the missing condition id", () => {
-  resetState();
+  const draft = createInitialState();
 
-  upsertActor({
+  upsertActor(draft, {
     kind: "ensure-public-npc",
     npc: {
       actorId: "ayaka-sajyou",
@@ -167,21 +167,21 @@ void test("updateActorCondition points to the actor that owns the missing condit
     },
     reason: "测试 NPC",
   });
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "add-affliction",
     actorId: "ayaka-sajyou",
     text: "供魔反冲疲惫",
     source: "连续供魔",
     expectedDuration: "休息后缓解",
   });
-  const afflictionId = getState().public.actors["ayaka-sajyou"]?.condition.afflictions[0]?.id;
+  const afflictionId = draft.public.actors["ayaka-sajyou"]?.condition.afflictions[0]?.id;
   if (afflictionId === undefined) {
     throw new Error("expected affliction id");
   }
 
   assert.throws(
     () =>
-      updateActorCondition({
+      updateActorCondition(draft, {
         kind: "resolve-condition",
         actorId: "protagonist",
         conditionKind: "affliction",
@@ -196,11 +196,11 @@ void test("updateActorCondition points to the actor that owns the missing condit
 });
 
 void test("updateActorCondition rejects missing tracked item transfer", () => {
-  resetState();
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      updateActorCondition({
+      updateActorCondition(draft, {
         kind: "transfer-tracked-item",
         itemId: "missing-item",
         holderActorId: "protagonist",
@@ -211,9 +211,9 @@ void test("updateActorCondition rejects missing tracked item transfer", () => {
 });
 
 void test("add-tracked-item creates item in trackedItems map", () => {
-  resetState();
+  const draft = createInitialState();
 
-  upsertActor({
+  upsertActor(draft, {
     kind: "setup-protagonist",
     actor: {
       id: "protagonist",
@@ -240,7 +240,7 @@ void test("add-tracked-item creates item in trackedItems map", () => {
     reason: "测试 setup",
   });
 
-  const result = updateActorCondition({
+  const result = updateActorCondition(draft, {
     kind: "add-tracked-item",
     label: "魔力遮蔽用玻璃珠",
     itemKind: "mystic-code",
@@ -254,7 +254,7 @@ void test("add-tracked-item creates item in trackedItems map", () => {
 
   assert.match(result.message, /已记录到追踪列表/);
 
-  const state = getState();
+  const state = draft;
   const items = Object.values(state.public.trackedItems);
   assert.equal(items.length, 1);
   assert.equal(items[0]?.label, "魔力遮蔽用玻璃珠");
@@ -266,9 +266,9 @@ void test("add-tracked-item creates item in trackedItems map", () => {
 });
 
 void test("update-tracked-item records item consumption", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "add-tracked-item",
     label: "药妆店应急处理用品",
     itemKind: "mundane",
@@ -279,12 +279,12 @@ void test("update-tracked-item records item consumption", () => {
     notes: ["宽绷带×1", "消毒棉×1包", "消炎软膏×1管"],
     reason: "测试物品追踪",
   });
-  const itemId = Object.values(getState().public.trackedItems)[0]?.id;
+  const itemId = Object.values(draft.public.trackedItems)[0]?.id;
   if (itemId === undefined) {
     throw new Error("expected item id");
   }
 
-  updateActorCondition({
+  updateActorCondition(draft, {
     kind: "update-tracked-item",
     itemId,
     condition: "damaged",
@@ -292,17 +292,17 @@ void test("update-tracked-item records item consumption", () => {
     reason: "处理右膝擦伤消耗部分用品",
   });
 
-  const item = getState().public.trackedItems[itemId];
+  const item = draft.public.trackedItems[itemId];
   assert.equal(item?.condition, "damaged");
   assert.deepEqual(item?.notes, ["绷带已裁一截", "消毒棉已开封", "软膏已使用一次"]);
 });
 
 void test("add-tracked-item rejects invalid holder actor", () => {
-  resetState();
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      updateActorCondition({
+      updateActorCondition(draft, {
         kind: "add-tracked-item",
         label: "测试物品",
         itemKind: "key-item",

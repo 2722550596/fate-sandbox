@@ -1,5 +1,12 @@
 import type { TLocalizedValidationError } from "typebox/error";
 
+import type { Percent } from "./state";
+
+import { normalizeIsoInstant } from "./date-time";
+
+const MIN_PERCENT = 0;
+const MAX_PERCENT = 100;
+
 export interface TypeBoxValidator<T> {
   Convert(value: unknown): unknown;
   /** 剔除 schema 未声明的多余字段，对齐旧手写 normalizer 重建对象的 strip 语义。 */
@@ -62,6 +69,65 @@ function assertRecordForValidation(value: unknown, fieldName: string): Record<st
 /** 共享的 record 类型守卫：全仓唯一定义，不要再复制粘贴。 */
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function assertPercent(value: unknown, fieldName: string): Percent {
+  const percent = assertInteger(value, fieldName);
+  if (percent < MIN_PERCENT || percent > MAX_PERCENT) {
+    throw new Error(`非法${fieldName}: ${percent}。必须在 0-100 之间。`);
+  }
+  return percent;
+}
+
+export function assertNonEmptyString(value: unknown, fieldName: string): string {
+  if (typeof value !== "string") {
+    throw new Error(`非法${fieldName}: ${formatUnknown(value)}。必须是字符串。`);
+  }
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    throw new Error(`非法${fieldName}: 不能为空。`);
+  }
+  return trimmed;
+}
+
+export function assertOptionalString(value: unknown, fieldName: string): string | null {
+  if (value === null) {
+    return null;
+  }
+  return assertNonEmptyString(value, fieldName);
+}
+
+export function assertIsoDateString(value: unknown, fieldName: string): string {
+  if (typeof value !== "string") {
+    throw new Error(`非法${fieldName}: ${formatUnknown(value)}。必须是 ISO 时间字符串。`);
+  }
+  return normalizeIsoInstant(value, fieldName);
+}
+
+export function assertNonNegativeInteger(value: unknown, fieldName: string): number {
+  const integer = assertInteger(value, fieldName);
+  if (integer < 0) {
+    throw new Error(`非法${fieldName}: ${integer}。不能为负数。`);
+  }
+  return integer;
+}
+
+export function assertInteger(value: unknown, fieldName: string): number {
+  if (typeof value === "number" && Number.isInteger(value)) {
+    return value;
+  }
+  if (typeof value === "string" && /^-?\d+$/.test(value.trim())) {
+    return Number(value.trim());
+  }
+  throw new Error(`非法${fieldName}: ${formatUnknown(value)}。必须是整数。`);
+}
+
+export function formatUnknown(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch (error) {
+    return `无法序列化的值 (${String(error)})`;
+  }
 }
 
 function cloneValidationInput(value: unknown, fieldName: string): unknown {

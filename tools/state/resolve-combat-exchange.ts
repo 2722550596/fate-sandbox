@@ -9,7 +9,8 @@ import {
   type RawCombatExchangeInput,
 } from "../../engine/core/combat-exchange";
 import { parseCombatExchangeInput } from "../../engine/core/combat-exchange-schema";
-import { writeStateToDetails } from "../../engine/core/state";
+import { getState } from "../../engine/core/state-store";
+import { writeStateToDetails } from "../../engine/core/state-persistence";
 import { noNumberNarrativeHint } from "../runtime/narrative-hints";
 import { textResult, type ToolResult } from "../runtime/tool-result";
 
@@ -18,7 +19,7 @@ export function resolveCombatExchangeTool(
   _sessionManager: unknown,
 ): ToolResult {
   const input = parseCombatExchangeInput(params, "resolve_combat_exchange 参数");
-  const result = resolveCombatExchange({ ...input, swing: input.swing ?? rollCombatSwing() });
+  const result = resolveCombatExchange(getState(), { ...input, swing: input.swing ?? rollCombatSwing() });
   const details: Record<string, unknown> = { result };
   writeStateToDetails(details);
   return textResult(formatCombatExchangeResult(result), details);

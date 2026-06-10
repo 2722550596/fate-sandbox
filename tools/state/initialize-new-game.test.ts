@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState, sessionKey } from "../../engine/core/state";
+import { getState, resetState } from "../../engine/core/state-store";
+import { sessionKey } from "../../engine/core/state-persistence";
 import { initializeNewGameTool } from "./initialize-new-game";
 
 void test("initializeNewGameTool initializes human protagonist and persists details", () => {

@@ -8,8 +8,8 @@ import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 export function progressSceneBeatTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () =>
-      progressSceneBeat(parseSceneBeatProgressInput(params, "progress_scene_beat 参数")),
+    execute: (draft) =>
+      progressSceneBeat(draft, parseSceneBeatProgressInput(params, "progress_scene_beat 参数")),
     details: resultDetails,
     message: (result) => result.message,
   });

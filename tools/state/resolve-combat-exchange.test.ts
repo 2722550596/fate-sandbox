@@ -3,7 +3,7 @@ import test from "node:test";
 
 import type { FateParams, PublicActorState } from "../../engine/core/state";
 
-import { resetState, updateState } from "../../engine/core/state";
+import { cloneState, commitState, resetState } from "../../engine/core/state-store";
 import { resolveCombatExchangeTool } from "./resolve-combat-exchange";
 
 void test("resolveCombatExchangeTool returns player-safe constraints and state details", () => {
@@ -38,9 +38,9 @@ void test("resolveCombatExchangeTool returns player-safe constraints and state d
 });
 
 function insertActor(actor: PublicActorState): void {
-  updateState((draft) => {
-    draft.public.actors[actor.id] = actor;
-  });
+  const draft = cloneState();
+  draft.public.actors[actor.id] = actor;
+  commitState(draft);
 }
 
 function servantActor(id: string, displayName: string, parameters: FateParams): PublicActorState {

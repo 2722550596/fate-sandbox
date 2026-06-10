@@ -16,8 +16,8 @@ import { isRecord } from "../../engine/core/typebox-validation";
 export function upsertActorTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () =>
-      upsertActor(parseActorRegistryInput(prepareUpsertActorParams(params), "upsert_actor 参数")),
+    execute: (draft) =>
+      upsertActor(draft, parseActorRegistryInput(prepareUpsertActorParams(params), "upsert_actor 参数")),
     details: resultDetails,
     message: (result) => result.message,
   });
@@ -102,7 +102,7 @@ function assertPublicActorStateCandidate(value: unknown): asserts value is Publi
   const actor = assertRecord(value, "actor");
   assertString(actor["id"], "actor.id");
   assertActorKind(actor["kind"], "actor.kind");
-  // Full actor shape is intentionally validated by updateState/assertState after cleanup; this assertion only narrows the tool-boundary record type.
+  // Full actor shape is intentionally validated by the Domain Event Tool Runner commit (assertState) after cleanup; this assertion only narrows the tool-boundary record type.
 }
 
 function normalizeSetupMagecraft(value: unknown): unknown {

@@ -6,13 +6,13 @@ import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
 import { FATE_PARAMS_SCHEMA } from "../../engine/core/actor-schema";
-import { updateState, writeStateToDetails } from "../../engine/core/state";
 import {
   REVEAL_STATUS_SCHEMA,
   SERVANT_CLASS_SCHEMA,
   stringEnumSchema,
 } from "../../engine/core/state-enum-schemas";
-import { persistCurrentState } from "../../engine/core/state-persistence";
+import { persistCurrentState, writeStateToDetails } from "../../engine/core/state-persistence";
+import { cloneState, commitState } from "../../engine/core/state-store";
 import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../../engine/core/typebox-validation";
 import { textResult, type ToolResult } from "../runtime/tool-result";
 
@@ -73,30 +73,30 @@ export function overrideLockedFactTool(params: unknown, sessionManager: unknown)
     OVERRIDE_LOCKED_FACT_KIND_VALIDATOR,
     OVERRIDE_LOCKED_FACT_VARIANT_VALIDATORS,
   );
-  updateState((draft) => {
-    const actor = draft.public.actors[override.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${override.actorId}`);
-    }
-    const servantForm = actor.servantForm;
-    if (servantForm === null) {
-      throw new Error(`actor ${override.actorId} 没有 servantForm。`);
-    }
-    switch (override.kind) {
-      case "servant-class":
-        servantForm.identity.className = override.className;
-        break;
-      case "servant-true-name":
-        servantForm.identity.trueName = {
-          status: override.status ?? "revealed",
-          display: override.display,
-        };
-        break;
-      case "servant-base-params":
-        servantForm.parameters.base = override.base;
-        break;
-    }
-  });
+  const draft = cloneState();
+  const actor = draft.public.actors[override.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${override.actorId}`);
+  }
+  const servantForm = actor.servantForm;
+  if (servantForm === null) {
+    throw new Error(`actor ${override.actorId} 没有 servantForm。`);
+  }
+  switch (override.kind) {
+    case "servant-class":
+      servantForm.identity.className = override.className;
+      break;
+    case "servant-true-name":
+      servantForm.identity.trueName = {
+        status: override.status ?? "revealed",
+        display: override.display,
+      };
+      break;
+    case "servant-base-params":
+      servantForm.parameters.base = override.base;
+      break;
+  }
+  commitState(draft);
   persistCurrentState(sessionManager);
   const details: Record<string, unknown> = {
     kind: override.kind,

@@ -7,7 +7,7 @@ import { normalizeTurnCommitInput } from "./commit-turn-normalizer";
 export function commitTurnTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => commitTurn(normalizeTurnCommitInput(params)),
+    execute: (draft) => commitTurn(draft, normalizeTurnCommitInput(params)),
     details: resultDetails,
     message: (result) => result.message,
   });

@@ -11,6 +11,7 @@ import {
   configureServantSecrets,
   revealSecret,
 } from "../../engine/core/secrets";
+import type { State } from "../../engine/core/state";
 import { parseRevealSecretToolInput } from "../../engine/core/secrets-schema";
 
 import { runDomainEventTool } from "./domain-tool-runner";
@@ -22,20 +23,20 @@ type RevealSecretToolResult =
 export function revealSecretTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => executeSecretTool(parseRevealSecretToolInput(params, "reveal_secret 参数")),
+    execute: (draft) => executeSecretTool(draft, parseRevealSecretToolInput(params, "reveal_secret 参数")),
     details: secretDetails,
     message: secretMessage,
   });
 }
 
-function executeSecretTool(input: RevealSecretToolInput): RevealSecretToolResult {
+function executeSecretTool(draft: State, input: RevealSecretToolInput): RevealSecretToolResult {
   if (input.kind === "configure-servant-secrets") {
-    return { kind: "configure", result: configureServantSecrets(input) };
+    return { kind: "configure", result: configureServantSecrets(draft, input) };
   }
   if (input.kind === "configure-actor-secrets") {
-    return { kind: "configure", result: configureActorSecrets(input) };
+    return { kind: "configure", result: configureActorSecrets(draft, input) };
   }
-  return { kind: "reveal", result: revealSecret(input) };
+  return { kind: "reveal", result: revealSecret(draft, input) };
 }
 
 function secretDetails(output: RevealSecretToolResult): Record<string, unknown> {

@@ -3,13 +3,13 @@ import test from "node:test";
 
 import { recordOffscreenEvent } from "./offscreen-event";
 import { getOffscreenEventsForDebug } from "./secrets";
-import { resetState } from "./state";
+import { createInitialState } from "./state-store";
 
 const INITIAL_TIME = "2004-01-30T07:00:00.000Z";
 
 void test("offscreen events accepts opaque offscreen actor ids", () => {
-  resetState();
-  recordOffscreenEvent({
+  const draft = createInitialState();
+  recordOffscreenEvent(draft, {
     lineId: "lancer-church",
     actorIds: ["cu-chulainn-lancer", "kotomine-kirei"],
     timeRange: { start: INITIAL_TIME, end: INITIAL_TIME },
@@ -20,6 +20,6 @@ void test("offscreen events accepts opaque offscreen actor ids", () => {
     createdFrom: "parallel-line-subagent",
   });
 
-  const event = getOffscreenEventsForDebug()[0];
+  const event = getOffscreenEventsForDebug(draft)[0];
   assert.deepEqual(event?.actorIds, ["cu-chulainn-lancer", "kotomine-kirei"]);
 });

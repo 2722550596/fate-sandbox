@@ -1,7 +1,8 @@
 import type { ActorConditionEvent } from "./actor-condition-schema";
-import type { ActorId, PermanentEffect, PublicActorState } from "./state";
+import type { ActorId, PermanentEffect, PublicActorState, State } from "./state";
 
-import { assertNonEmptyString, createId, updateState } from "./state";
+import { createId } from "./ids";
+import { assertNonEmptyString } from "./typebox-validation";
 
 export type { ActorConditionEvent } from "./actor-condition-schema";
 
@@ -9,170 +10,167 @@ export interface ActorConditionEventResult {
   message: string;
 }
 
-export function updateActorCondition(event: ActorConditionEvent): ActorConditionEventResult {
+export function updateActorCondition(
+  draft: State,
+  event: ActorConditionEvent,
+): ActorConditionEventResult {
   switch (event.kind) {
     case "add-wound":
-      return addWound(event);
+      return addWound(draft, event);
     case "update-wound":
-      return updateWound(event);
+      return updateWound(draft, event);
     case "add-affliction":
-      return addAffliction(event);
+      return addAffliction(draft, event);
     case "add-permanent-effect":
-      return addPermanentEffect(event);
+      return addPermanentEffect(draft, event);
     case "update-magecraft-circuits":
-      return updateMagecraftCircuits(event);
+      return updateMagecraftCircuits(draft, event);
     case "resolve-condition":
-      return resolveCondition(event);
+      return resolveCondition(draft, event);
     case "change-outfit":
-      return changeOutfit(event);
+      return changeOutfit(draft, event);
     case "transfer-tracked-item":
-      return transferTrackedItem(event);
+      return transferTrackedItem(draft, event);
     case "update-tracked-item":
-      return updateTrackedItem(event);
+      return updateTrackedItem(draft, event);
     case "add-tracked-item":
-      return addTrackedItem(event);
+      return addTrackedItem(draft, event);
     default:
       throw new Error("unreachable actor condition event kind");
   }
 }
 
 function addWound(
+  draft: State,
   event: Extract<ActorConditionEvent, { kind: "add-wound" }>,
 ): ActorConditionEventResult {
-  updateState((draft) => {
-    const actor = draft.public.actors[event.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${event.actorId}`);
-    }
-    actor.condition.wounds.push({
-      id: createId("wound"),
-      severity: event.severity,
-      text: assertNonEmptyString(event.text, "text"),
-      recoverable: event.recoverable,
-      treatment: assertNonEmptyString(event.source, "source"),
-    });
+  const actor = draft.public.actors[event.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${event.actorId}`);
+  }
+  actor.condition.wounds.push({
+    id: createId(draft, "wound"),
+    severity: event.severity,
+    text: assertNonEmptyString(event.text, "text"),
+    recoverable: event.recoverable,
+    treatment: assertNonEmptyString(event.source, "source"),
   });
   return { message: "伤势已记录。" };
 }
 
 function updateWound(
+  draft: State,
   event: Extract<ActorConditionEvent, { kind: "update-wound" }>,
 ): ActorConditionEventResult {
   assertNonEmptyString(event.reason, "reason");
-  updateState((draft) => {
-    const actor = draft.public.actors[event.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${event.actorId}`);
-    }
-    const wound = actor.condition.wounds.find((condition) => condition.id === event.conditionId);
-    if (wound === undefined) {
-      throw new Error(`wound 不存在: ${event.conditionId}`);
-    }
-    if (event.severity !== undefined) {
-      wound.severity = event.severity;
-    }
-    if (event.text !== undefined) {
-      wound.text = assertNonEmptyString(event.text, "text");
-    }
-    if (event.treatment !== undefined) {
-      wound.treatment = assertNonEmptyString(event.treatment, "treatment");
-    }
-    if (event.recoverable !== undefined) {
-      wound.recoverable = event.recoverable;
-    }
-  });
+  const actor = draft.public.actors[event.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${event.actorId}`);
+  }
+  const wound = actor.condition.wounds.find((condition) => condition.id === event.conditionId);
+  if (wound === undefined) {
+    throw new Error(`wound 不存在: ${event.conditionId}`);
+  }
+  if (event.severity !== undefined) {
+    wound.severity = event.severity;
+  }
+  if (event.text !== undefined) {
+    wound.text = assertNonEmptyString(event.text, "text");
+  }
+  if (event.treatment !== undefined) {
+    wound.treatment = assertNonEmptyString(event.treatment, "treatment");
+  }
+  if (event.recoverable !== undefined) {
+    wound.recoverable = event.recoverable;
+  }
   return { message: `伤势已更新：${event.conditionId}。` };
 }
 
 function addAffliction(
+  draft: State,
   event: Extract<ActorConditionEvent, { kind: "add-affliction" }>,
 ): ActorConditionEventResult {
-  updateState((draft) => {
-    const actor = draft.public.actors[event.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${event.actorId}`);
-    }
-    actor.condition.afflictions.push({
-      id: createId("affliction"),
-      source: assertNonEmptyString(event.source, "source"),
-      text: assertNonEmptyString(event.text, "text"),
-      expectedDuration:
-        event.expectedDuration === null
-          ? null
-          : assertNonEmptyString(event.expectedDuration, "expectedDuration"),
-    });
+  const actor = draft.public.actors[event.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${event.actorId}`);
+  }
+  actor.condition.afflictions.push({
+    id: createId(draft, "affliction"),
+    source: assertNonEmptyString(event.source, "source"),
+    text: assertNonEmptyString(event.text, "text"),
+    expectedDuration:
+      event.expectedDuration === null
+        ? null
+        : assertNonEmptyString(event.expectedDuration, "expectedDuration"),
   });
   return { message: "异常状态已记录。" };
 }
 
 function addPermanentEffect(
+  draft: State,
   event: Extract<ActorConditionEvent, { kind: "add-permanent-effect" }>,
 ): ActorConditionEventResult {
+  const actor = draft.public.actors[event.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${event.actorId}`);
+  }
   const effect: PermanentEffect = {
-    id: createId("effect"),
+    id: createId(draft, "effect"),
     source: assertNonEmptyString(event.source, "source"),
     text: assertNonEmptyString(event.text, "text"),
     mechanicalEffect: assertNonEmptyString(event.mechanicalEffect, "mechanicalEffect"),
   };
-  updateState((draft) => {
-    const actor = draft.public.actors[event.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${event.actorId}`);
-    }
-    actor.condition.permanentEffects.push(effect);
-  });
+  actor.condition.permanentEffects.push(effect);
   return { message: "长期影响已记录。" };
 }
 
 function updateMagecraftCircuits(
+  draft: State,
   event: Extract<ActorConditionEvent, { kind: "update-magecraft-circuits" }>,
 ): ActorConditionEventResult {
   assertNonEmptyString(event.reason, "reason");
-  updateState((draft) => {
-    const actor = draft.public.actors[event.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${event.actorId}`);
-    }
-    if (actor.magecraft === null) {
-      throw new Error(`actor 没有 magecraft: ${event.actorId}`);
-    }
-    actor.magecraft.circuits = event.circuits;
-  });
+  const actor = draft.public.actors[event.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${event.actorId}`);
+  }
+  if (actor.magecraft === null) {
+    throw new Error(`actor 没有 magecraft: ${event.actorId}`);
+  }
+  actor.magecraft.circuits = event.circuits;
   return { message: "魔术回路状态已更新。" };
 }
 
 function resolveCondition(
+  draft: State,
   event: Extract<ActorConditionEvent, { kind: "resolve-condition" }>,
 ): ActorConditionEventResult {
   assertNonEmptyString(event.reason, "reason");
-  updateState((draft) => {
-    const actor = draft.public.actors[event.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${event.actorId}`);
-    }
-    switch (event.conditionKind) {
-      case "wound":
-        actor.condition.wounds = removeCondition({
-          conditions: actor.condition.wounds,
-          conditionId: event.conditionId,
-          conditionKind: "wound",
-          actor,
-          actors: draft.public.actors,
-        });
-        break;
-      case "affliction":
-        actor.condition.afflictions = removeCondition({
-          conditions: actor.condition.afflictions,
-          conditionId: event.conditionId,
-          conditionKind: "affliction",
-          actor,
-          actors: draft.public.actors,
-        });
-        break;
-      default:
-        throw new Error("unreachable condition kind");
-    }
-  });
+  const actor = draft.public.actors[event.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${event.actorId}`);
+  }
+  switch (event.conditionKind) {
+    case "wound":
+      actor.condition.wounds = removeCondition({
+        conditions: actor.condition.wounds,
+        conditionId: event.conditionId,
+        conditionKind: "wound",
+        actor,
+        actors: draft.public.actors,
+      });
+      break;
+    case "affliction":
+      actor.condition.afflictions = removeCondition({
+        conditions: actor.condition.afflictions,
+        conditionId: event.conditionId,
+        conditionKind: "affliction",
+        actor,
+        actors: draft.public.actors,
+      });
+      break;
+    default:
+      throw new Error("unreachable condition kind");
+  }
   return { message: `状态已处理：${event.conditionId} (${event.outcome})。` };
 }
 
@@ -252,98 +250,94 @@ function formatAvailableCondition(condition: { id: string; text?: string }): str
 }
 
 function changeOutfit(
+  draft: State,
   event: Extract<ActorConditionEvent, { kind: "change-outfit" }>,
 ): ActorConditionEventResult {
   assertNonEmptyString(event.reason, "reason");
-  updateState((draft) => {
-    const actor = draft.public.actors[event.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${event.actorId}`);
-    }
-    actor.presentation.outfit = event.outfit;
-  });
+  const actor = draft.public.actors[event.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${event.actorId}`);
+  }
+  actor.presentation.outfit = event.outfit;
   return { message: "外观装备已更新。" };
 }
 
 function transferTrackedItem(
+  draft: State,
   event: Extract<ActorConditionEvent, { kind: "transfer-tracked-item" }>,
 ): ActorConditionEventResult {
   assertNonEmptyString(event.reason, "reason");
-  updateState((draft) => {
-    const item = draft.public.trackedItems[event.itemId];
-    if (item === undefined) {
-      throw new Error(`tracked item 不存在: ${event.itemId}`);
-    }
-    const holderId = event.holderActorId || null;
+  const item = draft.public.trackedItems[event.itemId];
+  if (item === undefined) {
+    throw new Error(`tracked item 不存在: ${event.itemId}`);
+  }
+  const holderId = event.holderActorId || null;
+  if (holderId !== null && draft.public.actors[holderId] === undefined) {
+    throw new Error(`holder actor 不存在: ${holderId}`);
+  }
+  item.holderActorId = holderId;
+  item.location = null;
+  return { message: "重要物品持有者已更新。" };
+}
+
+function updateTrackedItem(
+  draft: State,
+  event: Extract<ActorConditionEvent, { kind: "update-tracked-item" }>,
+): ActorConditionEventResult {
+  assertNonEmptyString(event.reason, "reason");
+  const item = draft.public.trackedItems[event.itemId];
+  if (item === undefined) {
+    throw new Error(`tracked item 不存在: ${event.itemId}`);
+  }
+  if (event.holderActorId !== undefined) {
+    const holderId = event.holderActorId ?? null;
     if (holderId !== null && draft.public.actors[holderId] === undefined) {
       throw new Error(`holder actor 不存在: ${holderId}`);
     }
     item.holderActorId = holderId;
     item.location = null;
-  });
-  return { message: "重要物品持有者已更新。" };
-}
-
-function updateTrackedItem(
-  event: Extract<ActorConditionEvent, { kind: "update-tracked-item" }>,
-): ActorConditionEventResult {
-  assertNonEmptyString(event.reason, "reason");
-  updateState((draft) => {
-    const item = draft.public.trackedItems[event.itemId];
-    if (item === undefined) {
-      throw new Error(`tracked item 不存在: ${event.itemId}`);
+  }
+  if (event.ownerActorId !== undefined) {
+    const ownerId = event.ownerActorId ?? null;
+    if (ownerId !== null && draft.public.actors[ownerId] === undefined) {
+      throw new Error(`owner actor 不存在: ${ownerId}`);
     }
-    if (event.holderActorId !== undefined) {
-      const holderId = event.holderActorId ?? null;
-      if (holderId !== null && draft.public.actors[holderId] === undefined) {
-        throw new Error(`holder actor 不存在: ${holderId}`);
-      }
-      item.holderActorId = holderId;
-      item.location = null;
-    }
-    if (event.ownerActorId !== undefined) {
-      const ownerId = event.ownerActorId ?? null;
-      if (ownerId !== null && draft.public.actors[ownerId] === undefined) {
-        throw new Error(`owner actor 不存在: ${ownerId}`);
-      }
-      item.ownerActorId = ownerId;
-    }
-    if (event.condition !== undefined) {
-      item.condition = event.condition;
-    }
-    if (event.notes !== undefined) {
-      item.notes = event.notes;
-    }
-  });
+    item.ownerActorId = ownerId;
+  }
+  if (event.condition !== undefined) {
+    item.condition = event.condition;
+  }
+  if (event.notes !== undefined) {
+    item.notes = event.notes;
+  }
   return { message: `重要物品已更新：${event.itemId}。` };
 }
 
 function addTrackedItem(
+  draft: State,
   event: Extract<ActorConditionEvent, { kind: "add-tracked-item" }>,
 ): ActorConditionEventResult {
   assertNonEmptyString(event.label, "label");
   assertNonEmptyString(event.reason, "reason");
   const holderId = event.holderActorId ?? null;
   const ownerId = event.ownerActorId ?? null;
-  updateState((draft) => {
-    if (holderId !== null && draft.public.actors[holderId] === undefined) {
-      throw new Error(`holder actor 不存在: ${holderId}`);
-    }
-    if (ownerId !== null && draft.public.actors[ownerId] === undefined) {
-      throw new Error(`owner actor 不存在: ${ownerId}`);
-    }
-    const id = createId("item");
-    draft.public.trackedItems[id] = {
-      id,
-      label: event.label,
-      kind: event.itemKind,
-      ownerActorId: ownerId,
-      holderActorId: holderId,
-      location: null,
-      condition: event.condition,
-      visibility: event.visibility,
-      notes: event.notes,
-    };
-  });
+  if (holderId !== null && draft.public.actors[holderId] === undefined) {
+    throw new Error(`holder actor 不存在: ${holderId}`);
+  }
+  if (ownerId !== null && draft.public.actors[ownerId] === undefined) {
+    throw new Error(`owner actor 不存在: ${ownerId}`);
+  }
+  const id = createId(draft, "item");
+  draft.public.trackedItems[id] = {
+    id,
+    label: event.label,
+    kind: event.itemKind,
+    ownerActorId: ownerId,
+    holderActorId: holderId,
+    location: null,
+    condition: event.condition,
+    visibility: event.visibility,
+    notes: event.notes,
+  };
   return { message: "重要物品已记录到追踪列表。" };
 }

@@ -1,18 +1,18 @@
-import type { FateParams, NoblePhantasm, PublicActorState } from "./state";
+import type { FateParams, NoblePhantasm, PublicActorState, State } from "./state";
 
 import assert from "node:assert/strict";
 import test from "node:test";
 
 import { resolveCombatExchange } from "./combat-exchange";
 import { parseCombatExchangeInput } from "./combat-exchange-schema";
-import { resetState, updateState } from "./state";
+import { createInitialState } from "./state-store";
 
 void test("resolveCombatExchange gives a superior servant local advantage without HP math", () => {
-  resetState();
-  insertActor(servantActor("saber", "Saber", strongParams()));
-  insertActor(servantActor("rider", "Rider", weakParams()));
+  const draft = createInitialState();
+  insertActor(draft, servantActor("saber", "Saber", strongParams()));
+  insertActor(draft, servantActor("rider", "Rider", weakParams()));
 
-  const result = resolveCombatExchange({
+  const result = resolveCombatExchange(draft, {
     actorId: "saber",
     opponentId: "rider",
     intent: "正面逼退 Rider，为御主创造撤离窗口",
@@ -32,8 +32,9 @@ void test("resolveCombatExchange gives a superior servant local advantage withou
 });
 
 void test("resolveCombatExchange uses concrete noble phantasm rank for true-name releases", () => {
-  resetState();
+  const draft = createInitialState();
   insertActor(
+    draft,
     servantActor("saber", "Saber", weakParams(), [
       {
         name: "无垢识·空之境界 (Mukushiki Kara no Kyoukai)",
@@ -45,6 +46,7 @@ void test("resolveCombatExchange uses concrete noble phantasm rank for true-name
     ]),
   );
   insertActor(
+    draft,
     servantActor("rider", "Rider", { ...strongParams(), noblePhantasm: "A+" }, [
       {
         name: "黄金鹿与暴风夜 (Golden Wild Hunt)",
@@ -56,7 +58,7 @@ void test("resolveCombatExchange uses concrete noble phantasm rank for true-name
     ]),
   );
 
-  const result = resolveCombatExchange({
+  const result = resolveCombatExchange(draft, {
     actorId: "saber",
     opponentId: "rider",
     intent: "真名解放，以无垢识·空之境界切开 Rider 的舰队级炮火",
@@ -75,8 +77,9 @@ void test("resolveCombatExchange uses concrete noble phantasm rank for true-name
 });
 
 void test("resolveCombatExchange requires explicit public noble phantasm names for multi-NP releases", () => {
-  resetState();
+  const draft = createInitialState();
   insertActor(
+    draft,
     servantActor("saber", "Saber", weakParams(), [
       {
         name: "第一宝具",
@@ -95,6 +98,7 @@ void test("resolveCombatExchange requires explicit public noble phantasm names f
     ]),
   );
   insertActor(
+    draft,
     servantActor("rider", "Rider", { ...strongParams(), noblePhantasm: "A+" }, [
       {
         name: "黄金鹿与暴风夜 (Golden Wild Hunt)",
@@ -119,20 +123,20 @@ void test("resolveCombatExchange requires explicit public noble phantasm names f
     riskTolerance: "high" as const,
   };
 
-  assert.throws(() => resolveCombatExchange(input), /actorNoblePhantasmName/u);
+  assert.throws(() => resolveCombatExchange(draft, input), /actorNoblePhantasmName/u);
 
-  const result = resolveCombatExchange({ ...input, actorNoblePhantasmName: "第二宝具" });
+  const result = resolveCombatExchange(draft, { ...input, actorNoblePhantasmName: "第二宝具" });
 
   assert.match(result.rankCheck, /第二宝具.*B/u);
   assert.doesNotMatch(result.rankCheck, /第一宝具.*EX/u);
 });
 
 void test("resolveCombatExchange blocks clean wins under servant-scale suppression", () => {
-  resetState();
-  insertActor(servantActor("saber", "Saber", weakParams()));
-  insertActor(servantActor("berserker", "Berserker", strongParams()));
+  const draft = createInitialState();
+  insertActor(draft, servantActor("saber", "Saber", weakParams()));
+  insertActor(draft, servantActor("berserker", "Berserker", strongParams()));
 
-  const result = resolveCombatExchange({
+  const result = resolveCombatExchange(draft, {
     actorId: "saber",
     opponentId: "berserker",
     intent: "无资源投入地正面斩开 Berserker 的压制",
@@ -151,11 +155,11 @@ void test("resolveCombatExchange blocks clean wins under servant-scale suppressi
 });
 
 void test("resolveCombatExchange lets resources turn a bad matchup into a costly contested exchange", () => {
-  resetState();
-  insertActor(servantActor("saber", "Saber", weakParams()));
-  insertActor(servantActor("rider", "Rider", strongParams()));
+  const draft = createInitialState();
+  insertActor(draft, servantActor("saber", "Saber", weakParams()));
+  insertActor(draft, servantActor("rider", "Rider", strongParams()));
 
-  const result = resolveCombatExchange({
+  const result = resolveCombatExchange(draft, {
     actorId: "saber",
     opponentId: "rider",
     intent: "斩断拘束术式而不是直接击败 Rider",
@@ -175,9 +179,9 @@ void test("resolveCombatExchange lets resources turn a bad matchup into a costly
 });
 
 void test("resolveCombatExchange lets battle swing soften rank suppression into a local exchange", () => {
-  resetState();
-  insertActor(servantActor("saber", "Saber", weakParams()));
-  insertActor(servantActor("rider", "Rider", strongParams()));
+  const draft = createInitialState();
+  insertActor(draft, servantActor("saber", "Saber", weakParams()));
+  insertActor(draft, servantActor("rider", "Rider", strongParams()));
 
   const baseInput = {
     actorId: "saber",
@@ -192,8 +196,8 @@ void test("resolveCombatExchange lets battle swing soften rank suppression into 
     riskTolerance: "medium" as const,
   };
 
-  const neutral = resolveCombatExchange({ ...baseInput, swing: "neutral" });
-  const turnabout = resolveCombatExchange({ ...baseInput, swing: "turnabout" });
+  const neutral = resolveCombatExchange(draft, { ...baseInput, swing: "neutral" });
+  const turnabout = resolveCombatExchange(draft, { ...baseInput, swing: "turnabout" });
 
   assert.equal(neutral.outcome, "forced-defense");
   assert.equal(turnabout.outcome, "exchange");
@@ -201,8 +205,9 @@ void test("resolveCombatExchange lets battle swing soften rank suppression into 
 });
 
 void test("resolveCombatExchange does not force wounds or hard stops for costly NP advantage", () => {
-  resetState();
+  const draft = createInitialState();
   insertActor(
+    draft,
     servantActor("saber", "Saber", weakParams(), [
       {
         name: "无垢识·空之境界 (Mukushiki Kara no Kyoukai)",
@@ -214,6 +219,7 @@ void test("resolveCombatExchange does not force wounds or hard stops for costly 
     ]),
   );
   insertActor(
+    draft,
     servantActor("rider", "Rider", { ...strongParams(), noblePhantasm: "A+" }, [
       {
         name: "黄金鹿与暴风夜 (Golden Wild Hunt)",
@@ -225,7 +231,7 @@ void test("resolveCombatExchange does not force wounds or hard stops for costly 
     ]),
   );
 
-  const result = resolveCombatExchange({
+  const result = resolveCombatExchange(draft, {
     actorId: "saber",
     opponentId: "rider",
     intent: "真名解放，以无垢识·空之境界切开 Rider 的舰队级炮火",
@@ -269,10 +275,8 @@ void test("parseCombatExchangeInput rejects model-authored difficulty language",
   );
 });
 
-function insertActor(actor: PublicActorState): void {
-  updateState((draft) => {
-    draft.public.actors[actor.id] = actor;
-  });
+function insertActor(draft: State, actor: PublicActorState): void {
+  draft.public.actors[actor.id] = actor;
 }
 
 function servantActor(

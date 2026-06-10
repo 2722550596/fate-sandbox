@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene";
-import { getState, resetState } from "./state";
+import { createInitialState } from "./state-store";
 
 void test("updateScene can correct current location without advancing time", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateScene({
+  updateScene(draft, {
     kind: "set-location",
     location: {
       region: "冬木市",
@@ -18,26 +18,26 @@ void test("updateScene can correct current location without advancing time", () 
     reason: "续局声明当前位置为新都公园",
   });
 
-  const state = getState();
+  const state = draft;
   assert.equal(state.public.scene.location.detail, "公园长椅旁");
   assert.equal(state.public.clock.currentAt, "2004-01-30T07:00:00.000Z");
 });
 
 void test("updateScene creates objective ids after existing state ids", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateScene({ kind: "add-objective", summary: "第一目标", reason: "测试 id" });
-  updateScene({ kind: "add-objective", summary: "第二目标", reason: "测试 id" });
+  updateScene(draft, { kind: "add-objective", summary: "第一目标", reason: "测试 id" });
+  updateScene(draft, { kind: "add-objective", summary: "第二目标", reason: "测试 id" });
 
-  const objectives = getState().public.scene.objectives;
+  const objectives = draft.public.scene.objectives;
   assert.equal(objectives[0]?.id, "objective-1");
   assert.equal(objectives[1]?.id, "objective-2");
 });
 
 void test("updateScene records story window boundaries", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateScene({
+  updateScene(draft, {
     kind: "set-story-window",
     storyWindow: {
       currentArcId: "B2",
@@ -51,15 +51,15 @@ void test("updateScene records story window boundaries", () => {
     reason: "锁定侦察收尾 beat",
   });
 
-  const storyWindow = getState().public.scene.storyWindow;
+  const storyWindow = draft.public.scene.storyWindow;
   assert.equal(storyWindow?.currentBeatId, "ryudou-scouting-wrapup");
   assert.deepEqual(storyWindow?.forbiddenEscalations, ["不得触发佐佐木小次郎正面战"]);
 });
 
 void test("beginSceneBeat creates window objectives threats and presence together", () => {
-  resetState();
+  const draft = createInitialState();
 
-  const result = beginSceneBeat({
+  const result = beginSceneBeat(draft, {
     storyWindow: {
       currentArcId: "B2",
       currentBeatId: "ryudou-scouting-wrapup",
@@ -77,7 +77,7 @@ void test("beginSceneBeat creates window objectives threats and presence togethe
     reason: "锁定侦察收尾 beat",
   });
 
-  const state = getState();
+  const state = draft;
   assert.equal(state.public.scene.storyWindow?.currentBeatId, "ryudou-scouting-wrapup");
   assert.equal(state.public.scene.objectives.length, 2);
   assert.equal(state.public.scene.threats[0]?.summary, "寺内巡逻接近");
@@ -91,9 +91,9 @@ void test("beginSceneBeat creates window objectives threats and presence togethe
 });
 
 void test("beginSceneBeat rejects opening over an active beat", () => {
-  resetState();
+  const draft = createInitialState();
 
-  beginSceneBeat({
+  beginSceneBeat(draft, {
     storyWindow: {
       currentArcId: "B1",
       currentBeatId: "active-beat",
@@ -109,7 +109,7 @@ void test("beginSceneBeat rejects opening over an active beat", () => {
 
   assert.throws(
     () =>
-      beginSceneBeat({
+      beginSceneBeat(draft, {
         storyWindow: {
           currentArcId: "B1",
           currentBeatId: "second-beat",
@@ -125,13 +125,13 @@ void test("beginSceneBeat rejects opening over an active beat", () => {
     /当前已有 active beat active-beat/,
   );
 
-  assert.equal(getState().public.scene.storyWindow?.currentBeatId, "active-beat");
+  assert.equal(draft.public.scene.storyWindow?.currentBeatId, "active-beat");
 });
 
 void test("updateScene set-story-window rejects replacing an active beat", () => {
-  resetState();
+  const draft = createInitialState();
 
-  beginSceneBeat({
+  beginSceneBeat(draft, {
     storyWindow: {
       currentArcId: "B1",
       currentBeatId: "active-beat",
@@ -147,7 +147,7 @@ void test("updateScene set-story-window rejects replacing an active beat", () =>
 
   assert.throws(
     () =>
-      updateScene({
+      updateScene(draft, {
         kind: "set-story-window",
         storyWindow: {
           currentArcId: "B1",
@@ -165,9 +165,9 @@ void test("updateScene set-story-window rejects replacing an active beat", () =>
 });
 
 void test("transitionSceneBeat can close current beat and open the next beat", () => {
-  resetState();
+  const draft = createInitialState();
 
-  beginSceneBeat({
+  beginSceneBeat(draft, {
     storyWindow: {
       currentArcId: "B1",
       currentBeatId: "active-beat",
@@ -182,7 +182,7 @@ void test("transitionSceneBeat can close current beat and open the next beat", (
     reason: "设置当前 beat",
   });
 
-  transitionSceneBeat({
+  transitionSceneBeat(draft, {
     completedBeatId: "active-beat",
     resolveAllObjectives: true,
     nextBeat: {
@@ -201,16 +201,16 @@ void test("transitionSceneBeat can close current beat and open the next beat", (
     reason: "完成当前 beat",
   });
 
-  assert.equal(getState().public.scene.storyWindow?.currentBeatId, "next-beat");
-  assert.deepEqual(getState().public.scene.threats, []);
+  assert.equal(draft.public.scene.storyWindow?.currentBeatId, "next-beat");
+  assert.deepEqual(draft.public.scene.threats, []);
 });
 
 void test("beginSceneBeat rejects beats without objectives", () => {
-  resetState();
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      beginSceneBeat({
+      beginSceneBeat(draft, {
         storyWindow: {
           currentArcId: "B2",
           currentBeatId: "empty",
@@ -228,8 +228,8 @@ void test("beginSceneBeat rejects beats without objectives", () => {
 });
 
 void test("transitionSceneBeat refuses unresolved objectives", () => {
-  resetState();
-  const beat = beginSceneBeat({
+  const draft = createInitialState();
+  const beat = beginSceneBeat(draft, {
     storyWindow: {
       currentArcId: "B2",
       currentBeatId: "wrapup",
@@ -245,7 +245,7 @@ void test("transitionSceneBeat refuses unresolved objectives", () => {
 
   assert.throws(
     () =>
-      transitionSceneBeat({
+      transitionSceneBeat(draft, {
         completedBeatId: "wrapup",
         resolvedObjectiveIds: [beat.objectiveIds[0] ?? "missing"],
         nextBeat: null,
@@ -256,8 +256,8 @@ void test("transitionSceneBeat refuses unresolved objectives", () => {
 });
 
 void test("transitionSceneBeat can resolve all objectives", () => {
-  resetState();
-  beginSceneBeat({
+  const draft = createInitialState();
+  beginSceneBeat(draft, {
     storyWindow: {
       currentArcId: "B2",
       currentBeatId: "wrapup",
@@ -271,20 +271,20 @@ void test("transitionSceneBeat can resolve all objectives", () => {
     reason: "设置 beat",
   });
 
-  const result = transitionSceneBeat({
+  const result = transitionSceneBeat(draft, {
     completedBeatId: "wrapup",
     resolveAllObjectives: true,
     reason: "已完成全部目标",
   });
 
-  const state = getState();
+  const state = draft;
   assert.equal(state.public.scene.storyWindow, null);
   assert.equal(result.resolvedObjectiveIds.length, 2);
 });
 
 void test("transitionSceneBeat accepts partial objective summaries", () => {
-  resetState();
-  beginSceneBeat({
+  const draft = createInitialState();
+  beginSceneBeat(draft, {
     storyWindow: {
       currentArcId: "B2",
       currentBeatId: "trace",
@@ -298,19 +298,19 @@ void test("transitionSceneBeat accepts partial objective summaries", () => {
     reason: "设置 beat",
   });
 
-  const result = transitionSceneBeat({
+  const result = transitionSceneBeat(draft, {
     completedBeatId: "trace",
     resolvedObjectiveSummaries: ["检查地面、墙角和排水沟"],
     reason: "痕迹检查完成",
   });
 
-  assert.equal(getState().public.scene.storyWindow, null);
+  assert.equal(draft.public.scene.storyWindow, null);
   assert.equal(result.resolvedObjectiveIds.length, 1);
 });
 
 void test("transitionSceneBeat resolves all objectives by default when no selectors are provided", () => {
-  resetState();
-  beginSceneBeat({
+  const draft = createInitialState();
+  beginSceneBeat(draft, {
     storyWindow: {
       currentArcId: "B2",
       currentBeatId: "night-scan",
@@ -324,36 +324,44 @@ void test("transitionSceneBeat resolves all objectives by default when no select
     reason: "设置 beat",
   });
 
-  const result = transitionSceneBeat({
+  const result = transitionSceneBeat(draft, {
     completedBeatId: "night-scan",
     reason: "观察与确认都已完成",
   });
 
-  const state = getState();
+  const state = draft;
   assert.equal(state.public.scene.storyWindow, null);
   assert.equal(result.resolvedObjectiveIds.length, 2);
 });
 
 void test("updateScene resolves objectives by summary", () => {
-  resetState();
-  updateScene({ kind: "add-objective", summary: "确认当前圣杯战争的基本局势", reason: "测试" });
+  const draft = createInitialState();
+  updateScene(draft, {
+    kind: "add-objective",
+    summary: "确认当前圣杯战争的基本局势",
+    reason: "测试",
+  });
 
-  updateScene({
+  updateScene(draft, {
     kind: "resolve-objective",
     objectiveSummary: "圣杯战争的基本局势",
     reason: "已确认局势",
   });
 
-  assert.equal(getState().public.scene.objectives[0]?.status, "resolved");
+  assert.equal(draft.public.scene.objectives[0]?.status, "resolved");
 });
 
 void test("updateScene explains missing resolve-objective selector", () => {
-  resetState();
-  updateScene({ kind: "add-objective", summary: "确认当前圣杯战争的基本局势", reason: "测试" });
+  const draft = createInitialState();
+  updateScene(draft, {
+    kind: "add-objective",
+    summary: "确认当前圣杯战争的基本局势",
+    reason: "测试",
+  });
 
   assert.throws(
     () =>
-      updateScene({
+      updateScene(draft, {
         kind: "resolve-objective",
         reason: "模型漏填 objectiveId",
       }),
@@ -362,8 +370,8 @@ void test("updateScene explains missing resolve-objective selector", () => {
 });
 
 void test("transitionSceneBeat clears completed window and can open next beat", () => {
-  resetState();
-  const beat = beginSceneBeat({
+  const draft = createInitialState();
+  const beat = beginSceneBeat(draft, {
     storyWindow: {
       currentArcId: "B2",
       currentBeatId: "wrapup",
@@ -377,7 +385,7 @@ void test("transitionSceneBeat clears completed window and can open next beat", 
     reason: "设置 beat",
   });
 
-  const result = transitionSceneBeat({
+  const result = transitionSceneBeat(draft, {
     completedBeatId: "wrapup",
     resolvedObjectiveIds: beat.objectiveIds,
     nextBeat: {
@@ -397,7 +405,7 @@ void test("transitionSceneBeat clears completed window and can open next beat", 
     reason: "beat 完成",
   });
 
-  const state = getState();
+  const state = draft;
   assert.equal(state.public.scene.storyWindow?.currentBeatId, "home-debrief");
   assert.equal(state.public.scene.objectives.length, 1);
   assert.equal(state.public.scene.objectives[0]?.summary, "整理情报");

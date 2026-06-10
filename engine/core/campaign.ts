@@ -1,8 +1,10 @@
 import type { ConfigureCampaignInput } from "./campaign-schema";
+import type { State } from "./state";
 
 import { getCampaignPreset } from "../../data/campaign-presets";
 import { normalizeIsoInstant } from "./date-time";
-import { assertNonEmptyString, createId, updateState } from "./state";
+import { createId } from "./ids";
+import { assertNonEmptyString } from "./typebox-validation";
 
 export type { ConfigureCampaignInput } from "./campaign-schema";
 
@@ -10,7 +12,10 @@ export interface ConfigureCampaignResult {
   message: string;
 }
 
-export function configureCampaign(input: ConfigureCampaignInput): ConfigureCampaignResult {
+export function configureCampaign(
+  draft: State,
+  input: ConfigureCampaignInput,
+): ConfigureCampaignResult {
   const reason = assertNonEmptyString(input.reason, "reason");
   const preset = getCampaignPreset(input.presetId);
   const title = input.title ?? preset.title;
@@ -29,50 +34,47 @@ export function configureCampaign(input: ConfigureCampaignInput): ConfigureCampa
   const currency = input.currency ?? preset.economy.currency;
   const startingFunds = input.startingFunds ?? preset.economy.startingFunds;
   const purseLabel = input.purseLabel ?? preset.economy.purseLabel;
-
-  updateState((draft) => {
-    draft.public.campaign = {
-      title,
-      timeline,
-      openingMode,
-      premise,
-      activeRuleSetIds,
-    };
-    draft.public.clock.startedAt = startedAt;
-    draft.public.clock.currentAt = currentAt;
-    draft.public.clock.timezone = timezone;
-    draft.public.clock.lastLongRestAt = null;
-    draft.public.scene.location = location;
-    draft.public.scene.situation = situation;
-    draft.public.scene.lastResolvedAt = currentAt;
-    draft.public.economy.currency = currency;
-    draft.public.economy.accessibleFunds = [
-      {
-        id: "purse-protagonist-cash",
-        ownerActorId: draft.public.protagonistActorId,
-        label: purseLabel,
-        amount: startingFunds,
-        access: "held",
-      },
-    ];
-    draft.public.memory.pinnedFacts = [
-      ...draft.public.memory.pinnedFacts.filter((fact) => fact.id !== "fact-campaign-configured"),
-      {
-        id: "fact-campaign-configured",
-        scope: "world",
-        subject: "campaign",
-        text: `Campaign 已配置：${title}；timeline=${timeline}；timezone=${timezone}。${reason}`,
-        since: currentAt,
-        sourceEventId: null,
-      },
-    ];
-    draft.public.memory.eventLog.push({
-      id: createId("event"),
-      time: currentAt,
-      title: "Campaign 配置",
-      summary: reason,
-      consequences: [`当前时间线: ${timeline}`, `本地时区: ${timezone}`],
-    });
+  draft.public.campaign = {
+    title,
+    timeline,
+    openingMode,
+    premise,
+    activeRuleSetIds,
+  };
+  draft.public.clock.startedAt = startedAt;
+  draft.public.clock.currentAt = currentAt;
+  draft.public.clock.timezone = timezone;
+  draft.public.clock.lastLongRestAt = null;
+  draft.public.scene.location = location;
+  draft.public.scene.situation = situation;
+  draft.public.scene.lastResolvedAt = currentAt;
+  draft.public.economy.currency = currency;
+  draft.public.economy.accessibleFunds = [
+    {
+      id: "purse-protagonist-cash",
+      ownerActorId: draft.public.protagonistActorId,
+      label: purseLabel,
+      amount: startingFunds,
+      access: "held",
+    },
+  ];
+  draft.public.memory.pinnedFacts = [
+    ...draft.public.memory.pinnedFacts.filter((fact) => fact.id !== "fact-campaign-configured"),
+    {
+      id: "fact-campaign-configured",
+      scope: "world",
+      subject: "campaign",
+      text: `Campaign 已配置：${title}；timeline=${timeline}；timezone=${timezone}。${reason}`,
+      since: currentAt,
+      sourceEventId: null,
+    },
+  ];
+  draft.public.memory.eventLog.push({
+    id: createId(draft, "event"),
+    time: currentAt,
+    title: "Campaign 配置",
+    summary: reason,
+    consequences: [`当前时间线: ${timeline}`, `本地时区: ${timezone}`],
   });
 
   return { message: `Campaign 已配置：${title} (${timeline}, ${timezone})。` };

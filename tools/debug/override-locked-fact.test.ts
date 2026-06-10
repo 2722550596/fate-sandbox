@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state";
+import { getState, resetState } from "../../engine/core/state-store";
 import { upsertActorTool } from "../state/upsert-actor";
 import { overrideLockedFactTool } from "./override-locked-fact";
 

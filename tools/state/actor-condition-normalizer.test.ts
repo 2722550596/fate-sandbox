@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state";
+import { getState, resetState } from "../../engine/core/state-store";
 import { normalizeActorConditionEvent } from "./actor-condition-normalizer";
 import { commitTurnTool } from "./commit-turn";
 import { updateActorConditionTool } from "./update-actor-condition";

@@ -10,9 +10,9 @@ import { isRecord } from "../../engine/core/typebox-validation";
 export function recordMemoryTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => {
+    execute: (draft) => {
       const event = parseMemoryEvent(normalizeSourceEventId(params), "record_memory 参数");
-      return { event, result: recordMemory(event) };
+      return { event, result: recordMemory(draft, event) };
     },
     details: ({ result }) => ({ result }),
     message: ({ event, result }) => formatResult(event, result),

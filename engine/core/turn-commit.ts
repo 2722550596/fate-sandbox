@@ -10,7 +10,7 @@ import type {
   SceneEventResult,
 } from "./scene";
 import type { ServantFormEvent, ServantFormEventResult } from "./servant";
-import type { TurnTimePolicy } from "./state";
+import type { State, TurnTimePolicy } from "./state";
 
 import { setScenePresence } from "./actor";
 import { updateActorCondition } from "./actor-condition";
@@ -18,8 +18,9 @@ import { updateEconomy } from "./economy";
 import { recordMemory } from "./memory";
 import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene";
 import { updateServantForm } from "./servant";
-import { appendTurnLogEntry, assertNonEmptyString, getState, transactState } from "./state";
+import { appendTurnLogEntry } from "./turn-log";
 import { applyTurnTime } from "./turn-time";
+import { assertNonEmptyString } from "./typebox-validation";
 
 export type TurnCommitEvent =
   | { kind: "scene"; event: SceneEvent }
@@ -51,28 +52,24 @@ export interface TurnCommitResult {
   warnings: string[];
 }
 
-export function commitTurn(input: TurnCommitInput): TurnCommitResult {
-  return transactState(() => commitCanonicalTurn(input));
-}
-
-function commitCanonicalTurn(input: TurnCommitInput): TurnCommitResult {
+export function commitTurn(draft: State, input: TurnCommitInput): TurnCommitResult {
   const summary = assertNonEmptyString(input.summary, "summary");
-  const startedAt = getState().public.clock.currentAt;
-  const timeResult = applyTurnTime(input.time);
-  const results = input.events.map(applyTurnEvent);
+  const startedAt = draft.public.clock.currentAt;
+  const timeResult = applyTurnTime(draft, input.time);
+  const results = input.events.map((event) => applyTurnEvent(draft, event));
   const timeResults = [{ kind: "scene" as const, result: timeResult }];
-  const autoCloseResult = closeCompletedOpenStoryWindow();
+  const autoCloseResult = closeCompletedOpenStoryWindow(draft);
   const baseResults = [...timeResults, ...results];
   const finalResults = autoCloseResult === null ? baseResults : [...baseResults, autoCloseResult];
-  appendTurnLogEntry({
+  appendTurnLogEntry(draft, {
     summary,
     startedAt,
-    endedAt: getState().public.clock.currentAt,
+    endedAt: draft.public.clock.currentAt,
     time: input.time,
     eventCount: input.events.length,
     resultCount: finalResults.length,
   });
-  const warnings = collectWarnings(input);
+  const warnings = collectWarnings(draft, input);
   return {
     message: formatMessage(summary, finalResults, warnings),
     results: finalResults,
@@ -80,47 +77,47 @@ function commitCanonicalTurn(input: TurnCommitInput): TurnCommitResult {
   };
 }
 
-function applyTurnEvent(event: TurnCommitEvent): TurnCommitEventResult {
+function applyTurnEvent(draft: State, event: TurnCommitEvent): TurnCommitEventResult {
   switch (event.kind) {
     case "scene":
-      return { kind: event.kind, result: updateScene(event.event) };
+      return { kind: event.kind, result: updateScene(draft, event.event) };
     case "scene-presence":
-      return { kind: event.kind, result: setScenePresence(event.event) };
+      return { kind: event.kind, result: setScenePresence(draft, event.event) };
     case "scene-beat":
-      return { kind: event.kind, result: applySceneBeatEvent(event.event) };
+      return { kind: event.kind, result: applySceneBeatEvent(draft, event.event) };
     case "actor-condition":
-      return { kind: event.kind, result: updateActorCondition(event.event) };
+      return { kind: event.kind, result: updateActorCondition(draft, event.event) };
     case "servant-form":
-      return { kind: event.kind, result: updateServantForm(event.event) };
+      return { kind: event.kind, result: updateServantForm(draft, event.event) };
     case "economy":
-      return { kind: event.kind, result: updateEconomy(event.event) };
+      return { kind: event.kind, result: updateEconomy(draft, event.event) };
     case "memory":
-      return { kind: event.kind, result: recordMemory(event.event) };
+      return { kind: event.kind, result: recordMemory(draft, event.event) };
     default:
       throw new Error("unreachable turn commit event kind");
   }
 }
 
 function applySceneBeatEvent(
+  draft: State,
   event: SceneBeatTurnEvent,
 ): SceneBeatResult | SceneBeatTransitionResult {
   switch (event.kind) {
     case "begin-beat":
-      return beginSceneBeat(event.input);
+      return beginSceneBeat(draft, event.input);
     case "transition-beat":
-      return transitionSceneBeat(event.input);
+      return transitionSceneBeat(draft, event.input);
     default:
       throw new Error("unreachable scene beat event kind");
   }
 }
 
-function closeCompletedOpenStoryWindow(): TurnCommitEventResult | null {
-  const state = getState();
-  const storyWindow = state.public.scene.storyWindow;
+function closeCompletedOpenStoryWindow(draft: State): TurnCommitEventResult | null {
+  const storyWindow = draft.public.scene.storyWindow;
   if (storyWindow === null) {
     return null;
   }
-  const activeObjectives = state.public.scene.objectives.filter(
+  const activeObjectives = draft.public.scene.objectives.filter(
     (objective) => objective.status !== "resolved",
   );
   if (activeObjectives.length > 0) {
@@ -128,19 +125,18 @@ function closeCompletedOpenStoryWindow(): TurnCommitEventResult | null {
   }
   return {
     kind: "scene",
-    result: updateScene({
+    result: updateScene(draft, {
       kind: "clear-story-window",
       reason: `Scene Beat「${storyWindow.title}」的目标已全部解决，自动收束当前剧情窗口。`,
     }),
   };
 }
 
-function collectWarnings(input: TurnCommitInput): string[] {
-  const state = getState();
+function collectWarnings(draft: State, input: TurnCommitInput): string[] {
   const warnings: string[] = [];
-  const storyWindow = state.public.scene.storyWindow;
+  const storyWindow = draft.public.scene.storyWindow;
   if (storyWindow !== null) {
-    const unresolvedObjectives = state.public.scene.objectives.filter(
+    const unresolvedObjectives = draft.public.scene.objectives.filter(
       (objective) => objective.status !== "resolved",
     );
     if (unresolvedObjectives.length === 0) {

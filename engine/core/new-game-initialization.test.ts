@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { initializeNewGame } from "./new-game-initialization";
-import { getState } from "./state";
+import { createInitialState } from "./state-store";
 
 const PLAIN_OUTFIT = { label: "日常服装", details: "便于行动的普通衣物。" };
 
 void describe("initializeNewGame", () => {
   void it("initializes a human protagonist campaign recipe", () => {
-    const result = initializeNewGame({
+    const draft = createInitialState();
+    const result = initializeNewGame(draft, {
       kind: "human-protagonist",
       campaign: { presetId: "fsn_2004_fuyuki" },
       protagonist: {
@@ -25,7 +26,7 @@ void describe("initializeNewGame", () => {
       reason: "新手模式初始化普通人 protagonist",
     });
 
-    const state = getState();
+    const state = draft;
     const protagonist = state.public.actors["protagonist"];
 
     assert.deepEqual(result.steps, [
@@ -46,7 +47,8 @@ void describe("initializeNewGame", () => {
   });
 
   void it("initializes servant protagonist secrets without revealing true name publicly", () => {
-    initializeNewGame({
+    const draft = createInitialState();
+    initializeNewGame(draft, {
       kind: "servant-protagonist",
       campaign: { presetId: "fsf_2008_snowfield" },
       protagonist: {
@@ -66,7 +68,7 @@ void describe("initializeNewGame", () => {
       reason: "初始化玩家从者且隐藏真名",
     });
 
-    const state = getState();
+    const state = draft;
     const protagonist = state.public.actors["protagonist"];
 
     assert.equal(protagonist?.servantForm?.identity.trueName.status, "hidden");

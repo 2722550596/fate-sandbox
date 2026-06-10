@@ -1,4 +1,4 @@
-import { cloneState, migrateState, replaceStateForDebug } from "../../engine/core/state";
+import { cloneState, migrateState, replaceStateForDebug } from "../../engine/core/state-store";
 import { isRecord } from "../../engine/core/typebox-validation";
 import { textResult, type ToolResult } from "../runtime/tool-result";
 

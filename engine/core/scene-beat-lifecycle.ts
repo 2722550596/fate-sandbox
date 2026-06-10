@@ -12,7 +12,7 @@ import type {
   SceneBeatMemoryInput,
   SceneBeatProgressInput,
 } from "./scene-beat-schema";
-import type { SituationKind } from "./state";
+import type { SituationKind, State } from "./state";
 
 export type {
   SceneBeatActionPolicy,
@@ -25,9 +25,10 @@ export type {
 } from "./scene-beat-schema";
 
 import { setScenePresence } from "./actor";
+import { createId } from "./ids";
 import { recordMemory } from "./memory";
 import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene";
-import { appendTurnLogEntry, createId, getState, transactState } from "./state";
+import { appendTurnLogEntry } from "./turn-log";
 import { applyTurnTime } from "./turn-time";
 
 export type SceneBeatProgressResult =
@@ -49,27 +50,28 @@ export type SceneBeatProgressResult =
 
 const DEFAULT_ALLOWED_ACTIONS = ["观察当前局势", "回应在场角色", "决定下一步行动"];
 
-export function progressSceneBeat(input: SceneBeatProgressInput): SceneBeatProgressResult {
-  return transactState(() => {
-    switch (input.kind) {
-      case "begin":
-        return beginCurrentSceneBeat(input);
-      case "complete":
-        return completeCurrentSceneBeat(input);
-      default:
-        throw new Error("unreachable scene beat progress kind");
-    }
-  });
+export function progressSceneBeat(
+  draft: State,
+  input: SceneBeatProgressInput,
+): SceneBeatProgressResult {
+  switch (input.kind) {
+    case "begin":
+      return beginCurrentSceneBeat(draft, input);
+    case "complete":
+      return completeCurrentSceneBeat(draft, input);
+    default:
+      throw new Error("unreachable scene beat progress kind");
+  }
 }
 
-function beginCurrentSceneBeat(input: SceneBeatBeginInput): SceneBeatProgressResult {
-  const startedAt = getState().public.clock.currentAt;
-  const time = applyTurnTime(input.time);
-  const beat = beginSceneBeat(buildBeginSceneBeatInput(input));
-  appendTurnLogEntry({
+function beginCurrentSceneBeat(draft: State, input: SceneBeatBeginInput): SceneBeatProgressResult {
+  const startedAt = draft.public.clock.currentAt;
+  const time = applyTurnTime(draft, input.time);
+  const beat = beginSceneBeat(draft, buildBeginSceneBeatInput(draft, input));
+  appendTurnLogEntry(draft, {
     summary: input.purpose,
     startedAt,
-    endedAt: getState().public.clock.currentAt,
+    endedAt: draft.public.clock.currentAt,
     time: input.time,
     eventCount: 1,
     resultCount: 2,
@@ -77,39 +79,50 @@ function beginCurrentSceneBeat(input: SceneBeatBeginInput): SceneBeatProgressRes
   return { kind: "begin", message: formatBeginMessage(time, beat), time, beat };
 }
 
-function completeCurrentSceneBeat(input: SceneBeatCompleteInput): SceneBeatProgressResult {
-  const state = getState();
-  const currentWindow = state.public.scene.storyWindow;
+function completeCurrentSceneBeat(
+  draft: State,
+  input: SceneBeatCompleteInput,
+): SceneBeatProgressResult {
+  const currentWindow = draft.public.scene.storyWindow;
   if (currentWindow === null) {
     throw new Error(
       "progress_scene_beat complete 需要当前存在 Scene Beat。当前没有 active beat；复杂新场景请用 progress_scene_beat begin，非 Scene Beat lifecycle 的状态变化请用 commit_turn。",
     );
   }
 
-  const startedAt = getState().public.clock.currentAt;
-  const time = applyTurnTime(input.time);
-  const transition = transitionSceneBeat({
-    completedBeatId: currentWindow.currentBeatId,
+  // 注意：currentWindow 是 draft 内对象的引用，transitionSceneBeat 会清空 storyWindow，
+  // 所以先读出需要的字段。
+  const completedBeatId = currentWindow.currentBeatId;
+  const completedArcId = currentWindow.currentArcId;
+  const startedAt = draft.public.clock.currentAt;
+  const time = applyTurnTime(draft, input.time);
+  const transition = transitionSceneBeat(draft, {
+    completedBeatId,
     resolveAllObjectives: true,
-    nextBeat: buildNextBeatInput(input, currentWindow.currentArcId, currentWindow.currentBeatId),
+    nextBeat: buildNextBeatInput(input, completedArcId, completedBeatId),
     reason: input.outcome,
   });
-  const memory = input.memory === undefined ? null : recordMemory(buildMemoryEvent(input.memory));
+  const memory =
+    input.memory === undefined ? null : recordMemory(draft, buildMemoryEvent(input.memory));
   const presence = shouldApplyPostCompletionPresence(input)
-    ? setScenePresence({
-        presentActorIds: input.presence?.presentActorIds ?? getState().public.scene.presentActorIds,
-        allyActorIds: input.presence?.allyActorIds ?? getState().public.allyActorIds,
+    ? setScenePresence(draft, {
+        presentActorIds: input.presence?.presentActorIds ?? draft.public.scene.presentActorIds,
+        allyActorIds: input.presence?.allyActorIds ?? draft.public.allyActorIds,
         reason: input.outcome,
       })
     : null;
   const situation = shouldApplyPostCompletionSituation(input)
-    ? updateScene({ kind: "set-situation", situation: input.situation, reason: input.outcome })
+    ? updateScene(draft, {
+        kind: "set-situation",
+        situation: input.situation,
+        reason: input.outcome,
+      })
     : null;
 
-  appendTurnLogEntry({
+  appendTurnLogEntry(draft, {
     summary: input.outcome,
     startedAt,
-    endedAt: getState().public.clock.currentAt,
+    endedAt: draft.public.clock.currentAt,
     time: input.time,
     eventCount: countCompleteInputEvents(input),
     resultCount: countCompleteResults(time, memory, presence, situation),
@@ -126,11 +139,11 @@ function completeCurrentSceneBeat(input: SceneBeatCompleteInput): SceneBeatProgr
   };
 }
 
-function buildBeginSceneBeatInput(input: SceneBeatBeginInput): SceneBeatInput {
+function buildBeginSceneBeatInput(draft: State, input: SceneBeatBeginInput): SceneBeatInput {
   return {
     storyWindow: {
-      currentArcId: getState().public.scene.storyWindow?.currentArcId ?? "main",
-      currentBeatId: input.beatId ?? createId("beat"),
+      currentArcId: draft.public.scene.storyWindow?.currentArcId ?? "main",
+      currentBeatId: input.beatId ?? createId(draft, "beat"),
       title: input.title,
       allowedActions: input.actionPolicy?.allowedActions ?? DEFAULT_ALLOWED_ACTIONS,
       forbiddenEscalations: input.actionPolicy?.forbiddenEscalations ?? [],

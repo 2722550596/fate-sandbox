@@ -1,15 +1,18 @@
+import type { State } from "./state";
+
 import assert from "node:assert/strict";
 import test from "node:test";
 
 import { upsertActor } from "./actor";
 import { updateServantForm } from "./servant";
-import { advanceClock, getState, resetState } from "./state";
+import { createInitialState } from "./state-store";
+import { advanceClock } from "./turn-time";
 
 void test("advanceClock removes expired servant parameter modifiers", () => {
-  resetState();
-  upsertTestCaster();
+  const draft = createInitialState();
+  upsertTestCaster(draft);
 
-  updateServantForm({
+  updateServantForm(draft, {
     kind: "add-param-modifier",
     actorId: "caster",
     modifier: {
@@ -22,17 +25,17 @@ void test("advanceClock removes expired servant parameter modifiers", () => {
     reason: "测试加入限时修正",
   });
 
-  advanceClock(31, "测试时间推进超过修正过期点");
+  advanceClock(draft, 31, "测试时间推进超过修正过期点");
 
-  const modifiers = getState().public.actors["caster"]?.servantForm?.parameters.modifiers;
+  const modifiers = draft.public.actors["caster"]?.servantForm?.parameters.modifiers;
   assert.deepEqual(modifiers, []);
 });
 
 void test("advanceClock keeps permanent and future servant parameter modifiers", () => {
-  resetState();
-  upsertTestCaster();
+  const draft = createInitialState();
+  upsertTestCaster(draft);
 
-  updateServantForm({
+  updateServantForm(draft, {
     kind: "add-param-modifier",
     actorId: "caster",
     modifier: {
@@ -44,7 +47,7 @@ void test("advanceClock keeps permanent and future servant parameter modifiers",
     },
     reason: "测试加入永久修正",
   });
-  updateServantForm({
+  updateServantForm(draft, {
     kind: "add-param-modifier",
     actorId: "caster",
     modifier: {
@@ -57,17 +60,17 @@ void test("advanceClock keeps permanent and future servant parameter modifiers",
     reason: "测试加入未来修正",
   });
 
-  advanceClock(31, "测试时间推进但未越过未来修正");
+  advanceClock(draft, 31, "测试时间推进但未越过未来修正");
 
-  const modifiers = getState().public.actors["caster"]?.servantForm?.parameters.modifiers;
+  const modifiers = draft.public.actors["caster"]?.servantForm?.parameters.modifiers;
   assert.deepEqual(
     modifiers?.map((modifier) => modifier.source),
     ["永久缺损", "短时加护"],
   );
 });
 
-function upsertTestCaster(): void {
-  upsertActor({
+function upsertTestCaster(draft: State): void {
+  upsertActor(draft, {
     kind: "upsert-servant",
     servant: {
       id: "caster",

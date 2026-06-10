@@ -1,4 +1,4 @@
-import { exportState, writeDebugStateFile } from "../../engine/core/state";
+import { exportState, writeDebugStateFile } from "../../engine/core/state-store";
 import { textResult, type ToolResult } from "../runtime/tool-result";
 
 export function exportStateTool(): ToolResult {

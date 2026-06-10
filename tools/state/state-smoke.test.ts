@@ -8,7 +8,8 @@ import {
   syncStateFromSessionEntries,
   syncStateFromSessionManager,
 } from "../../engine/core/session-hydration";
-import { cloneState, resetState, sessionKey } from "../../engine/core/state";
+import { cloneState, resetState } from "../../engine/core/state-store";
+import { sessionKey } from "../../engine/core/state-persistence";
 import { commitTurnTool } from "./commit-turn";
 import { getStatusTool } from "./get-status";
 import { upsertActorTool } from "./upsert-actor";

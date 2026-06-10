@@ -1,16 +1,16 @@
-import type { OffscreenEvent, OffscreenEventSource, OffscreenEventVisibility } from "./state";
+import type {
+  OffscreenEvent,
+  OffscreenEventSource,
+  OffscreenEventVisibility,
+  State,
+} from "./state";
 
 import { Temporal } from "@js-temporal/polyfill";
 
-import {
-  assertIsoDateString,
-  assertNonEmptyString,
-  cloneState,
-  createId,
-  updateState,
-} from "./state";
+import { createId } from "./ids";
 import { OFFSCREEN_EVENT_SOURCES, OFFSCREEN_EVENT_VISIBILITIES } from "./state-enum-schemas";
 import { assertOneOfString } from "./string-enum";
+import { assertIsoDateString, assertNonEmptyString } from "./typebox-validation";
 
 export type { OffscreenEventSource, OffscreenEventVisibility } from "./state";
 
@@ -20,8 +20,11 @@ export interface RecordOffscreenEventResult {
   eventId: string;
 }
 
-export function recordOffscreenEvent(input: RecordOffscreenEventInput): RecordOffscreenEventResult {
-  const eventId = createId("offscreen-event");
+export function recordOffscreenEvent(
+  draft: State,
+  input: RecordOffscreenEventInput,
+): RecordOffscreenEventResult {
+  const eventId = createId(draft, "offscreen-event");
   const visibility = assertOffscreenEventVisibility(input.visibility);
   if (visibility === "player-known") {
     throw new Error("record_offscreen_event 不能直接写入 player-known；请改用 record_memory。");
@@ -32,7 +35,7 @@ export function recordOffscreenEvent(input: RecordOffscreenEventInput): RecordOf
     start: assertIsoDateString(input.timeRange.start, "timeRange.start"),
     end: assertIsoDateString(input.timeRange.end, "timeRange.end"),
   };
-  assertClosedTimeRange(timeRange);
+  assertClosedTimeRange(draft, timeRange);
   const summary = assertNonEmptyString(input.summary, "summary");
   const consequences = input.consequences.map((consequence) =>
     assertNonEmptyString(consequence, "consequences[]"),
@@ -42,28 +45,26 @@ export function recordOffscreenEvent(input: RecordOffscreenEventInput): RecordOf
   );
   const createdFrom = assertOffscreenEventSource(input.createdFrom);
 
-  updateState((draft) => {
-    draft.secrets.offscreenEventLog.push({
-      id: eventId,
-      lineId,
-      actorIds,
-      timeRange,
-      visibility,
-      summary,
-      consequences,
-      futureHooks,
-      createdFrom,
-    });
+  draft.secrets.offscreenEventLog.push({
+    id: eventId,
+    lineId,
+    actorIds,
+    timeRange,
+    visibility,
+    summary,
+    consequences,
+    futureHooks,
+    createdFrom,
   });
 
   return { eventId };
 }
 
-function assertClosedTimeRange(timeRange: OffscreenEvent["timeRange"]): void {
+function assertClosedTimeRange(draft: State, timeRange: OffscreenEvent["timeRange"]): void {
   if (Temporal.Instant.compare(timeRange.end, timeRange.start) < 0) {
     throw new Error("record_offscreen_event timeRange.end 不能早于 timeRange.start。");
   }
-  const currentAt = cloneState().public.clock.currentAt;
+  const currentAt = draft.public.clock.currentAt;
   if (Temporal.Instant.compare(timeRange.end, currentAt) > 0) {
     throw new Error(
       `record_offscreen_event 只能记录已完成的幕后事件；timeRange.end ${timeRange.end} 晚于当前时间 ${currentAt}。未来候选请保留为 futureHooks，不要写入 offscreenEventLog。`,

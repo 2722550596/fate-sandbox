@@ -7,7 +7,7 @@ import { normalizeActorConditionEvent } from "./actor-condition-normalizer";
 export function updateActorConditionTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => updateActorCondition(normalizeActorConditionEvent(params)),
+    execute: (draft) => updateActorCondition(draft, normalizeActorConditionEvent(params)),
     details: resultDetails,
     message: (result) => result.message,
   });

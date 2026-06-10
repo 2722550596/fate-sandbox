@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "./state";
 import { parseStateSchema } from "./state-schema";
+import { createInitialState } from "./state-store";
 import { isRecord } from "./typebox-validation";
 
 void test("parseStateSchema round-trips a freshly initialized state", () => {
-  resetState();
-  const state = getState();
+  const draft = createInitialState();
+  const state = draft;
 
   const parsed = parseStateSchema(state);
 
@@ -15,7 +15,6 @@ void test("parseStateSchema round-trips a freshly initialized state", () => {
 });
 
 void test("parseStateSchema rejects unknown enum values with field path", () => {
-  resetState();
   const raw = rawState();
   section(section(raw, "public"), "campaign")["timeline"] = "nope";
 
@@ -23,7 +22,6 @@ void test("parseStateSchema rejects unknown enum values with field path", () => 
 });
 
 void test("parseStateSchema rejects actor registry key mismatch", () => {
-  resetState();
   const raw = rawState();
   const actors = section(section(raw, "public"), "actors");
   actors["impostor"] = actors["protagonist"];
@@ -35,7 +33,6 @@ void test("parseStateSchema rejects actor registry key mismatch", () => {
 });
 
 void test("parseStateSchema rejects dangling actor references", () => {
-  resetState();
   const raw = rawState();
   section(raw, "public")["allyActorIds"] = ["no-such-actor"];
 
@@ -43,7 +40,6 @@ void test("parseStateSchema rejects dangling actor references", () => {
 });
 
 void test("parseStateSchema defaults a missing offscreenEventLog to an empty array", () => {
-  resetState();
   const raw = rawState();
   delete section(raw, "secrets")["offscreenEventLog"];
 
@@ -53,7 +49,6 @@ void test("parseStateSchema defaults a missing offscreenEventLog to an empty arr
 });
 
 void test("parseStateSchema trims strings and strips unknown fields", () => {
-  resetState();
   const raw = rawState();
   section(section(raw, "public"), "campaign")["title"] = "  冬木圣杯战争  ";
   raw["legacyField"] = "should be stripped";
@@ -65,7 +60,6 @@ void test("parseStateSchema trims strings and strips unknown fields", () => {
 });
 
 void test("parseStateSchema normalizes ISO instants to canonical form", () => {
-  resetState();
   const raw = rawState();
   section(section(raw, "public"), "clock")["currentAt"] = "2004-01-30T16:00:00+09:00";
 
@@ -75,7 +69,6 @@ void test("parseStateSchema normalizes ISO instants to canonical form", () => {
 });
 
 void test("parseStateSchema rejects malformed ISO instants", () => {
-  resetState();
   const raw = rawState();
   section(section(raw, "public"), "clock")["currentAt"] = "昨天下午";
 
@@ -83,7 +76,6 @@ void test("parseStateSchema rejects malformed ISO instants", () => {
 });
 
 void test("parseStateSchema rejects command spells with remaining above total", () => {
-  resetState();
   const raw = rawState();
   const protagonist = section(section(section(raw, "public"), "actors"), "protagonist");
   protagonist["roles"] = [
@@ -94,7 +86,7 @@ void test("parseStateSchema rejects command spells with remaining above total", 
 });
 
 function rawState(): Record<string, unknown> {
-  const cloned: unknown = structuredClone(getState());
+  const cloned: unknown = structuredClone(createInitialState());
   if (!isRecord(cloned)) {
     throw new Error("unreachable: state 必须是对象");
   }

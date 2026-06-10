@@ -12,11 +12,11 @@ import {
   formatPublicLocation,
   formatSceneThreats,
 } from "./public-projection";
-import { getPublicState, resetState } from "./state";
+import { createInitialState } from "./state-store";
 
 void test("buildGmBrief throws when protagonist is missing", () => {
-  resetState();
-  const publicState = getPublicState();
+  const draft = createInitialState();
+  const publicState = draft.public;
 
   assert.throws(
     () => buildGmBrief({ ...publicState, actors: {} }),
@@ -37,8 +37,8 @@ void test("formatPublicLocation hides normal boundary and shows special boundari
 });
 
 void test("formatActiveObjectives filters resolved objectives", () => {
-  resetState();
-  const publicState = getPublicState();
+  const draft = createInitialState();
+  const publicState = draft.public;
   publicState.scene.objectives = [
     { id: "obj-1", summary: "确认教会的中立立场", status: "active" },
     { id: "obj-2", summary: "已完成的旧目标", status: "resolved" },
@@ -58,8 +58,8 @@ void test("formatActiveObjectives filters resolved objectives", () => {
 });
 
 void test("formatSceneThreats formats severity-prefixed entries", () => {
-  resetState();
-  const publicState = getPublicState();
+  const draft = createInitialState();
+  const publicState = draft.public;
 
   assert.equal(formatSceneThreats(publicState, { separator: "；", colon: ":" }), "无");
 
@@ -74,8 +74,8 @@ void test("formatSceneThreats formats severity-prefixed entries", () => {
 });
 
 void test("GM brief objective routing covers all three branches", () => {
-  resetState();
-  const publicState = getPublicState();
+  const draft = createInitialState();
+  const publicState = draft.public;
 
   assert.match(buildGmBrief(publicState), /当前没有可 resolve 的目标/);
 
@@ -104,8 +104,8 @@ void test("GM brief objective routing covers all three branches", () => {
 });
 
 void test("inventory markdown only lists player-known tracked items", () => {
-  resetState();
-  const publicState = getPublicState();
+  const draft = createInitialState();
+  const publicState = draft.public;
   publicState.trackedItems = {
     "item-known": buildTrackedItem({
       id: "item-known",
@@ -134,8 +134,8 @@ void test("inventory markdown only lists player-known tracked items", () => {
 });
 
 void test("inventory markdown reports placeholders for empty funds and items", () => {
-  resetState();
-  const publicState = getPublicState();
+  const draft = createInitialState();
+  const publicState = draft.public;
   publicState.economy.accessibleFunds = [];
   publicState.trackedItems = {};
   for (const actor of Object.values(publicState.actors)) {
@@ -149,8 +149,8 @@ void test("inventory markdown reports placeholders for empty funds and items", (
 });
 
 void test("buildStatusMarkdown lists scene summary with present actor display names", () => {
-  resetState();
-  const publicState = getPublicState();
+  const draft = createInitialState();
+  const publicState = draft.public;
   publicState.scene.presentActorIds = ["protagonist"];
 
   const markdown = buildStatusMarkdown(publicState);
@@ -163,8 +163,8 @@ void test("buildStatusMarkdown lists scene summary with present actor display na
 });
 
 void test("actorDisplayName falls back to the actor id for unknown actors", () => {
-  resetState();
-  const publicState = getPublicState();
+  const draft = createInitialState();
+  const publicState = draft.public;
 
   assert.equal(actorDisplayName(publicState, "no-such-actor"), "no-such-actor");
   assert.equal(
@@ -186,8 +186,8 @@ function buildTrackedItem(
 }
 
 void test("public projection helpers never mutate their input", () => {
-  resetState();
-  const publicState = getPublicState();
+  const draft = createInitialState();
+  const publicState = draft.public;
   const snapshot = JSON.stringify(publicState);
 
   buildGmBrief(publicState);
@@ -197,5 +197,5 @@ void test("public projection helpers never mutate their input", () => {
   formatSceneThreats(publicState, { separator: "；", colon: ":" });
 
   assert.equal(JSON.stringify(publicState), snapshot);
-  assert.equal(JSON.stringify(getPublicState()), snapshot);
+  assert.equal(JSON.stringify(draft.public), snapshot);
 });

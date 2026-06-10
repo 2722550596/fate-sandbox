@@ -17,7 +17,8 @@ const CURRENCY_ALIASES: Readonly<Record<string, CurrencyCode>> = {
 export function configureCampaignTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => configureCampaign(parseConfigureCampaignInput(normalizeCurrencyAlias(params))),
+    execute: (draft) =>
+      configureCampaign(draft, parseConfigureCampaignInput(normalizeCurrencyAlias(params))),
     details: resultDetails,
     message: (result) => result.message,
   });

@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "./state";
+import { createInitialState } from "./state-store";
 import { commitTurn } from "./turn-commit";
 
 const MIN_TIME = { kind: "elapsed", elapsedMinutes: 1, reason: "推进一个最小时间单位。" } as const;
 
 void test("commitTurn applies mandatory travel time before domain events", () => {
-  resetState();
+  const draft = createInitialState();
 
-  const result = commitTurn({
+  const result = commitTurn(draft, {
     summary: "移动到新都并采购基础物资。",
     time: {
       kind: "travel",
@@ -35,7 +35,7 @@ void test("commitTurn applies mandatory travel time before domain events", () =>
     ],
   });
 
-  const state = getState();
+  const state = draft;
   assert.equal(state.public.clock.currentAt, "2004-01-30T07:40:00.000Z");
   assert.equal(state.public.scene.location.detail, "商业街");
   assert.equal(state.public.economy.accessibleFunds[0]?.amount, 46200);
@@ -43,33 +43,35 @@ void test("commitTurn applies mandatory travel time before domain events", () =>
 });
 
 void test("commitTurn accepts elapsed time as the only canonical change", () => {
-  resetState();
+  const draft = createInitialState();
 
-  const result = commitTurn({
+  const result = commitTurn(draft, {
     summary: "守夜到清晨。",
     time: { kind: "elapsed", elapsedMinutes: 420, reason: "灵体化守夜至清晨" },
     events: [],
   });
 
-  assert.equal(getState().public.clock.currentAt, "2004-01-30T14:00:00.000Z");
+  assert.equal(draft.public.clock.currentAt, "2004-01-30T14:00:00.000Z");
   assert.match(result.message, /领域事件：1/);
 });
 
 void test("commitTurn accepts elapsed time without domain events", () => {
-  resetState();
+  const draft = createInitialState();
 
-  const result = commitTurn({ summary: "只推进时间。", time: MIN_TIME, events: [] });
+  const result = commitTurn(draft, { summary: "只推进时间。", time: MIN_TIME, events: [] });
 
-  assert.equal(getState().public.clock.currentAt, "2004-01-30T07:01:00.000Z");
+  assert.equal(draft.public.clock.currentAt, "2004-01-30T07:01:00.000Z");
   assert.equal(result.results.length, 1);
 });
 
-void test("commitTurn rolls back time when a later domain event fails", () => {
-  resetState();
+void test("commitTurn throws when a later domain event fails", () => {
+  // 原子性契约：draft 是一次性工作副本，失败时 Domain Event Tool Runner 不提交，
+  // Game State Store 保持不变。store 级原子性由 tools/state/commit-turn.test.ts 验证。
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      commitTurn({
+      commitTurn(draft, {
         summary: "测试事务回滚。",
         time: {
           kind: "travel",
@@ -97,16 +99,12 @@ void test("commitTurn rolls back time when a later domain event fails", () => {
       }),
     /必须提供 claims/,
   );
-
-  const state = getState();
-  assert.equal(state.public.clock.currentAt, "2004-01-30T07:00:00.000Z");
-  assert.equal(state.public.scene.location.detail, "穗群原学园·校门外");
 });
 
 void test("commitTurn auto-closes a beat after resolving the last objective", () => {
-  resetState();
+  const draft = createInitialState();
 
-  commitTurn({
+  commitTurn(draft, {
     summary: "开启调查 beat。",
     time: MIN_TIME,
     events: [
@@ -132,7 +130,7 @@ void test("commitTurn auto-closes a beat after resolving the last objective", ()
     ],
   });
 
-  const result = commitTurn({
+  const result = commitTurn(draft, {
     summary: "解决最后目标。",
     time: MIN_TIME,
     events: [
@@ -147,15 +145,15 @@ void test("commitTurn auto-closes a beat after resolving the last objective", ()
     ],
   });
 
-  assert.deepEqual(getState().public.scene.objectives, []);
-  assert.equal(getState().public.scene.storyWindow, null);
+  assert.deepEqual(draft.public.scene.objectives, []);
+  assert.equal(draft.public.scene.storyWindow, null);
   assert.equal(result.results.length, 3);
 });
 
 void test("commitTurn records presence with explicit elapsed time policy", () => {
-  resetState();
+  const draft = createInitialState();
 
-  const result = commitTurn({
+  const result = commitTurn(draft, {
     summary: "凛暂时离场。",
     time: MIN_TIME,
     events: [
@@ -170,7 +168,7 @@ void test("commitTurn records presence with explicit elapsed time policy", () =>
     ],
   });
 
-  assert.deepEqual(getState().public.scene.presentActorIds, ["protagonist"]);
+  assert.deepEqual(draft.public.scene.presentActorIds, ["protagonist"]);
   assert.equal(result.results[0]?.kind, "scene");
   assert.equal(result.results[1]?.kind, "scene-presence");
 });

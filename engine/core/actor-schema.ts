@@ -176,7 +176,7 @@ export const SERVANT_INPUT_SCHEMA = Type.Object({
 });
 export type ServantInput = Static<typeof SERVANT_INPUT_SCHEMA>;
 
-/** setup-protagonist 的 actor 整体由 updateState/assertState 负责校验；这里故意放行。 */
+/** setup-protagonist 的 actor 整体由 Domain Event Tool Runner 提交时的 assertState 负责校验；这里故意放行。 */
 const PUBLIC_ACTOR_STATE_DELEGATED_SCHEMA = Type.Unsafe<PublicActorState>({});
 
 export const ACTOR_REGISTRY_KINDS = [

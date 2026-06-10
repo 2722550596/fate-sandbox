@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state";
+import { getState, resetState } from "../../engine/core/state-store";
 import { updateEconomyTool } from "./update-economy";
 
 void test("updateEconomy reports available purse ids for an unknown purse", () => {

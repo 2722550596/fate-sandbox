@@ -3,10 +3,9 @@ import type {
   CombatRiskTolerance,
   CombatSwing,
 } from "./combat-exchange-schema";
-import type { FateParams, FateRank, NoblePhantasm, PublicActorState } from "./state";
+import type { FateParams, FateRank, NoblePhantasm, PublicActorState, State } from "./state";
 
 import { compareFateRanks, type FateRankComparison } from "./fate-rank";
-import { getState } from "./state";
 
 export type {
   CombatExchangeTactic,
@@ -77,8 +76,10 @@ interface CombatProfile {
   label: string;
 }
 
-export function resolveCombatExchange(input: CombatExchangeInput): CombatExchangeResult {
-  const state = getState();
+export function resolveCombatExchange(
+  state: State,
+  input: CombatExchangeInput,
+): CombatExchangeResult {
   const actor = requireActor(state.public.actors[input.actorId], input.actorId);
   const opponent = requireActor(state.public.actors[input.opponentId], input.opponentId);
   const actorProfile = buildCombatProfile(

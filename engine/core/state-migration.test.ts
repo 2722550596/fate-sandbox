@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { cloneState, hydrateState, migrateState, resetState } from "./state";
+import { cloneState, hydrateState, migrateState, createInitialState } from "./state-store";
 
 void test("migrateState upgrades schema v1 states to schema v3 turn log shape", () => {
-  const current = resetState();
+  const current = createInitialState();
   const { turnLog: _turnLog, ...publicV1 } = current.public;
   const rawV1 = {
     ...current,
@@ -20,7 +20,7 @@ void test("migrateState upgrades schema v1 states to schema v3 turn log shape", 
 });
 
 void test("migrateState drops schema v2 non-advancing turn log entries", () => {
-  const current = resetState();
+  const current = createInitialState();
   const rawV2 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 2 },
@@ -57,7 +57,7 @@ void test("migrateState drops schema v2 non-advancing turn log entries", () => {
 });
 
 void test("hydrateState accepts session-wrapped schema v1 states through migration", () => {
-  const current = resetState();
+  const current = createInitialState();
   const { turnLog: _turnLog, ...publicV1 } = current.public;
   const rawV1 = {
     ...current,

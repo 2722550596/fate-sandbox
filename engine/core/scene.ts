@@ -10,7 +10,8 @@ import type {
   StoryWindowState,
 } from "./state";
 
-import { assertNonEmptyString, createId, updateState } from "./state";
+import { createId } from "./ids";
+import { assertNonEmptyString } from "./typebox-validation";
 
 export type { SceneEvent } from "./scene-schema";
 
@@ -60,18 +61,12 @@ export interface SceneBeatTransitionResult {
   memoryPrompt: string | null;
 }
 
-export function beginSceneBeat(input: SceneBeatInput): SceneBeatResult {
+export function beginSceneBeat(draft: State, input: SceneBeatInput): SceneBeatResult {
   assertNonEmptyString(input.reason, "reason");
   assertBeatObjectives(input.objectives);
-  return beginSceneBeatUnchecked(input);
-}
-
-function beginSceneBeatUnchecked(input: SceneBeatInput): SceneBeatResult {
   const objectiveIds: SceneObjectiveId[] = [];
   const threatIds: SceneThreatId[] = [];
-  updateState((draft) => {
-    beginSceneBeatOnDraft(draft, input, objectiveIds, threatIds);
-  });
+  beginSceneBeatOnDraft(draft, input, objectiveIds, threatIds);
   return {
     message: `Scene Beat 已开始：${input.storyWindow.title}；目标 ${objectiveIds.length} 个。`,
     objectiveIds,
@@ -100,61 +95,68 @@ function beginSceneBeatOnDraft(
     assertActorsExist(draft.public.actors, input.allyActorIds, "allyActorIds");
     draft.public.allyActorIds = uniqueActorIds(input.allyActorIds);
   }
-  draft.public.scene.objectives = input.objectives.map((summary) => {
-    const id = createId("objective");
+  // 逐个写入 draft：createId 扫描 draft 避让，批量 map 会产生重复 ID。
+  draft.public.scene.objectives = [];
+  for (const summary of input.objectives) {
+    const id = createId(draft, "objective");
     objectiveIds.push(id);
-    return { id, summary: assertNonEmptyString(summary, "objectives[]"), status: "active" };
-  });
-  draft.public.scene.threats = (input.threats ?? []).map((threat) => {
-    const id = createId("threat");
+    draft.public.scene.objectives.push({
+      id,
+      summary: assertNonEmptyString(summary, "objectives[]"),
+      status: "active",
+    });
+  }
+  draft.public.scene.threats = [];
+  for (const threat of input.threats ?? []) {
+    const id = createId(draft, "threat");
     threatIds.push(id);
-    return {
+    draft.public.scene.threats.push({
       id,
       summary: assertNonEmptyString(threat.summary, "threat.summary"),
       severity: threat.severity,
-    };
-  });
+    });
+  }
 }
 
-export function transitionSceneBeat(input: SceneBeatTransitionInput): SceneBeatTransitionResult {
+export function transitionSceneBeat(
+  draft: State,
+  input: SceneBeatTransitionInput,
+): SceneBeatTransitionResult {
   assertNonEmptyString(input.reason, "reason");
   const memoryPrompt = normalizeOptionalString(input.memoryPrompt);
   let nextBeat: SceneBeatResult | null = null;
-  let resolvedObjectiveIds: SceneObjectiveId[] = [];
-  updateState((draft) => {
-    const currentWindow = draft.public.scene.storyWindow;
-    if (currentWindow === null) {
-      throw new Error(`无法 transition beat：当前没有 storyWindow。`);
-    }
-    if (currentWindow.currentBeatId !== input.completedBeatId) {
-      throw new Error(
-        `无法 transition beat：当前 beat 是 ${currentWindow.currentBeatId}，不是 ${input.completedBeatId}。`,
-      );
-    }
-    const shouldResolveAll = shouldResolveAllObjectives(input);
-    resolvedObjectiveIds = resolveObjectiveIds(
-      draft.public.scene.objectives,
-      input.resolvedObjectiveIds ?? [],
-      input.resolvedObjectiveSummaries ?? [],
-      shouldResolveAll,
+  const currentWindow = draft.public.scene.storyWindow;
+  if (currentWindow === null) {
+    throw new Error(`无法 transition beat：当前没有 storyWindow。`);
+  }
+  if (currentWindow.currentBeatId !== input.completedBeatId) {
+    throw new Error(
+      `无法 transition beat：当前 beat 是 ${currentWindow.currentBeatId}，不是 ${input.completedBeatId}。`,
     );
-    for (const objectiveId of resolvedObjectiveIds) {
-      const objective = draft.public.scene.objectives.find((entry) => entry.id === objectiveId);
-      if (objective === undefined) {
-        throw new Error(`目标不存在: ${objectiveId}`);
-      }
-      objective.status = "resolved";
+  }
+  const shouldResolveAll = shouldResolveAllObjectives(input);
+  const resolvedObjectiveIds = resolveObjectiveIds(
+    draft.public.scene.objectives,
+    input.resolvedObjectiveIds ?? [],
+    input.resolvedObjectiveSummaries ?? [],
+    shouldResolveAll,
+  );
+  for (const objectiveId of resolvedObjectiveIds) {
+    const objective = draft.public.scene.objectives.find((entry) => entry.id === objectiveId);
+    if (objective === undefined) {
+      throw new Error(`目标不存在: ${objectiveId}`);
     }
-    const activeObjectives = draft.public.scene.objectives.filter(
-      (objective) => objective.status !== "resolved",
-    );
-    if (activeObjectives.length > 0) {
-      throw new Error(formatUnresolvedObjectivesError(activeObjectives));
-    }
-    clearBeatScopedSceneState(draft);
-  });
+    objective.status = "resolved";
+  }
+  const activeObjectives = draft.public.scene.objectives.filter(
+    (objective) => objective.status !== "resolved",
+  );
+  if (activeObjectives.length > 0) {
+    throw new Error(formatUnresolvedObjectivesError(activeObjectives));
+  }
+  clearBeatScopedSceneState(draft);
   if (input.nextBeat !== undefined && input.nextBeat !== null) {
-    nextBeat = beginSceneBeat(input.nextBeat);
+    nextBeat = beginSceneBeat(draft, input.nextBeat);
   }
   return {
     message: nextBeat === null ? "Scene Beat 已完成。" : `Scene Beat 已切换：${nextBeat.message}`,
@@ -164,60 +166,59 @@ export function transitionSceneBeat(input: SceneBeatTransitionInput): SceneBeatT
   };
 }
 
-export function updateScene(event: SceneEvent): SceneEventResult {
+export function updateScene(draft: State, event: SceneEvent): SceneEventResult {
   assertNonEmptyString(event.reason, "reason");
   switch (event.kind) {
     case "set-location":
-      return setLocation(event);
+      return setLocation(draft, event);
     case "set-situation":
-      return setSituation(event);
+      return setSituation(draft, event);
     case "set-story-window":
-      return setStoryWindow(event);
+      return setStoryWindow(draft, event);
     case "clear-story-window":
-      return clearStoryWindow();
+      return clearStoryWindow(draft);
     case "add-objective":
-      return addObjective(event);
+      return addObjective(draft, event);
     case "resolve-objective":
-      return resolveObjective(event);
+      return resolveObjective(draft, event);
     case "add-threat":
-      return addThreat(event);
+      return addThreat(draft, event);
     case "clear-threat":
-      return clearThreat(event);
+      return clearThreat(draft, event);
     default:
       throw new Error("unreachable scene event kind");
   }
 }
 
-function setLocation(event: Extract<SceneEvent, { kind: "set-location" }>): SceneEventResult {
-  updateState((draft) => {
-    draft.public.scene.location = event.location;
-  });
+function setLocation(
+  draft: State,
+  event: Extract<SceneEvent, { kind: "set-location" }>,
+): SceneEventResult {
+  draft.public.scene.location = event.location;
   return { message: "地点已修正。" };
 }
 
-function setSituation(event: Extract<SceneEvent, { kind: "set-situation" }>): SceneEventResult {
-  updateState((draft) => {
-    draft.public.scene.situation = event.situation;
-  });
+function setSituation(
+  draft: State,
+  event: Extract<SceneEvent, { kind: "set-situation" }>,
+): SceneEventResult {
+  draft.public.scene.situation = event.situation;
   return { message: `态势已更新为 ${event.situation}。` };
 }
 
 function setStoryWindow(
+  draft: State,
   event: Extract<SceneEvent, { kind: "set-story-window" }>,
 ): SceneEventResult {
-  updateState((draft) => {
-    if (draft.public.scene.storyWindow !== null) {
-      throw new Error(formatActiveBeatExistsError(draft.public.scene.storyWindow));
-    }
-    draft.public.scene.storyWindow = event.storyWindow;
-  });
+  if (draft.public.scene.storyWindow !== null) {
+    throw new Error(formatActiveBeatExistsError(draft.public.scene.storyWindow));
+  }
+  draft.public.scene.storyWindow = event.storyWindow;
   return { message: `剧情窗口已更新：${event.storyWindow.title}。` };
 }
 
-function clearStoryWindow(): SceneEventResult {
-  updateState((draft) => {
-    clearBeatScopedSceneState(draft);
-  });
+function clearStoryWindow(draft: State): SceneEventResult {
+  clearBeatScopedSceneState(draft);
   return { message: "剧情窗口已清除。" };
 }
 
@@ -227,14 +228,15 @@ function clearBeatScopedSceneState(draft: State): void {
   draft.public.scene.threats = [];
 }
 
-function addObjective(event: Extract<SceneEvent, { kind: "add-objective" }>): SceneEventResult {
-  const id = createId("objective");
-  updateState((draft) => {
-    draft.public.scene.objectives.push({
-      id,
-      summary: assertNonEmptyString(event.summary, "summary"),
-      status: "active",
-    });
+function addObjective(
+  draft: State,
+  event: Extract<SceneEvent, { kind: "add-objective" }>,
+): SceneEventResult {
+  const id = createId(draft, "objective");
+  draft.public.scene.objectives.push({
+    id,
+    summary: assertNonEmptyString(event.summary, "summary"),
+    status: "active",
   });
   return { message: `目标已加入：${id}。` };
 }
@@ -251,23 +253,20 @@ function shouldResolveAllObjectives(input: SceneBeatTransitionInput): boolean {
 }
 
 function resolveObjective(
+  draft: State,
   event: Extract<SceneEvent, { kind: "resolve-objective" }>,
 ): SceneEventResult {
-  let resolvedObjectiveId: SceneObjectiveId;
-  updateState((draft) => {
-    const objectiveId = resolveSingleObjectiveId(
-      draft.public.scene.objectives,
-      event.objectiveId,
-      event.objectiveSummary,
-    );
-    const objective = draft.public.scene.objectives.find((entry) => entry.id === objectiveId);
-    if (objective === undefined) {
-      throw new Error(formatObjectiveIdNotFoundError(objectiveId, draft.public.scene.objectives));
-    }
-    objective.status = "resolved";
-    resolvedObjectiveId = objectiveId;
-  });
-  return { message: `目标已解决：${resolvedObjectiveId!}。` };
+  const objectiveId = resolveSingleObjectiveId(
+    draft.public.scene.objectives,
+    event.objectiveId,
+    event.objectiveSummary,
+  );
+  const objective = draft.public.scene.objectives.find((entry) => entry.id === objectiveId);
+  if (objective === undefined) {
+    throw new Error(formatObjectiveIdNotFoundError(objectiveId, draft.public.scene.objectives));
+  }
+  objective.status = "resolved";
+  return { message: `目标已解决：${objectiveId}。` };
 }
 
 function resolveSingleObjectiveId(
@@ -289,28 +288,30 @@ function resolveSingleObjectiveId(
   throw new Error(formatMissingObjectiveSelectorError(objectives));
 }
 
-function addThreat(event: Extract<SceneEvent, { kind: "add-threat" }>): SceneEventResult {
-  const id = createId("threat");
-  updateState((draft) => {
-    draft.public.scene.threats.push({
-      id,
-      summary: assertNonEmptyString(event.summary, "summary"),
-      severity: event.severity,
-    });
+function addThreat(
+  draft: State,
+  event: Extract<SceneEvent, { kind: "add-threat" }>,
+): SceneEventResult {
+  const id = createId(draft, "threat");
+  draft.public.scene.threats.push({
+    id,
+    summary: assertNonEmptyString(event.summary, "summary"),
+    severity: event.severity,
   });
   return { message: `威胁已加入：${id}。` };
 }
 
-function clearThreat(event: Extract<SceneEvent, { kind: "clear-threat" }>): SceneEventResult {
-  updateState((draft) => {
-    const before = draft.public.scene.threats.length;
-    draft.public.scene.threats = draft.public.scene.threats.filter(
-      (threat) => threat.id !== event.threatId,
-    );
-    if (draft.public.scene.threats.length === before) {
-      throw new Error(`威胁不存在: ${event.threatId}`);
-    }
-  });
+function clearThreat(
+  draft: State,
+  event: Extract<SceneEvent, { kind: "clear-threat" }>,
+): SceneEventResult {
+  const before = draft.public.scene.threats.length;
+  draft.public.scene.threats = draft.public.scene.threats.filter(
+    (threat) => threat.id !== event.threatId,
+  );
+  if (draft.public.scene.threats.length === before) {
+    throw new Error(`威胁不存在: ${event.threatId}`);
+  }
   return { message: `威胁已清除：${event.threatId}。` };
 }
 

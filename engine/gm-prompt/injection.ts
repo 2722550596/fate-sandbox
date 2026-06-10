@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { buildGmBrief } from "../core/gm-brief";
-import { getPublicState } from "../core/state";
+import { getPublicState } from "../core/state-store";
 import { isRecord } from "../core/typebox-validation";
 import {
   loadPromptPreset,

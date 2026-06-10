@@ -8,7 +8,7 @@ import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 export function retireActorTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => retireActor(parseRetireActorInput(params, "retire_actor 参数")),
+    execute: (draft) => retireActor(draft, parseRetireActorInput(params, "retire_actor 参数")),
     details: resultDetails,
     message: (result) => result.message,
   });

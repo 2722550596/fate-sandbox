@@ -6,19 +6,18 @@ import type {
   ServantSecretNoblePhantasmInput,
   ServantSecretStringInput,
 } from "./secrets-schema";
+import type {
+  ActorId,
+  ActorSecretSlots,
+  NoblePhantasm,
+  OffscreenEvent,
+  SecretSlot,
+  State,
+} from "./state";
 
 import { recordMemory } from "./memory";
 import { recordOffscreenEvent } from "./offscreen-event";
-import {
-  assertNonEmptyString,
-  getState,
-  type ActorId,
-  type ActorSecretSlots,
-  type NoblePhantasm,
-  type OffscreenEvent,
-  type SecretSlot,
-  updateState,
-} from "./state";
+import { assertNonEmptyString } from "./typebox-validation";
 
 export type {
   ConfigureActorSecretsInput,
@@ -50,6 +49,7 @@ export interface RevealSecretResult {
 }
 
 export function configureServantSecrets(
+  draft: State,
   input: ConfigureServantSecretsInput,
 ): ConfigureServantSecretsResult {
   assertNonEmptyString(input.reason, "reason");
@@ -58,34 +58,33 @@ export function configureServantSecrets(
     throw new Error("configure-servant-secrets 必须提供 trueName 或 hiddenNoblePhantasms。");
   }
 
-  updateState((draft) => {
-    const actor = draft.public.actors[input.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${input.actorId}`);
-    }
-    if (actor.servantForm === null) {
-      throw new Error(`actor 不是从者: ${input.actorId}`);
-    }
+  const actor = draft.public.actors[input.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${input.actorId}`);
+  }
+  if (actor.servantForm === null) {
+    throw new Error(`actor 不是从者: ${input.actorId}`);
+  }
 
-    const existing =
-      draft.secrets.actorSecrets[input.actorId] ?? createEmptyActorSecretSlots(input.actorId);
-    if (input.trueName !== undefined) {
-      existing.trueName = buildStringSecretSlot(
-        existing.trueName,
-        `${input.actorId}-true-name`,
-        input.trueName,
-      );
-    }
-    for (const noblePhantasm of input.hiddenNoblePhantasms ?? []) {
-      upsertNoblePhantasmSecretSlot(existing.hiddenNoblePhantasms, input.actorId, noblePhantasm);
-    }
-    draft.secrets.actorSecrets[input.actorId] = existing;
-  });
+  const existing =
+    draft.secrets.actorSecrets[input.actorId] ?? createEmptyActorSecretSlots(input.actorId);
+  if (input.trueName !== undefined) {
+    existing.trueName = buildStringSecretSlot(
+      existing.trueName,
+      `${input.actorId}-true-name`,
+      input.trueName,
+    );
+  }
+  for (const noblePhantasm of input.hiddenNoblePhantasms ?? []) {
+    upsertNoblePhantasmSecretSlot(existing.hiddenNoblePhantasms, input.actorId, noblePhantasm);
+  }
+  draft.secrets.actorSecrets[input.actorId] = existing;
 
   return { message: `从者 secrets 已配置：${input.actorId}。` };
 }
 
 export function configureActorSecrets(
+  draft: State,
   input: ConfigureActorSecretsInput,
 ): ConfigureActorSecretsResult {
   assertNonEmptyString(input.reason, "reason");
@@ -97,33 +96,31 @@ export function configureActorSecrets(
     throw new Error("configure-actor-secrets 必须提供 privateMotives 或 unrevealedAffiliations。");
   }
 
-  updateState((draft) => {
-    const actor = draft.public.actors[input.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${input.actorId}`);
-    }
+  const actor = draft.public.actors[input.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${input.actorId}`);
+  }
 
-    const existing =
-      draft.secrets.actorSecrets[input.actorId] ?? createEmptyActorSecretSlots(input.actorId);
-    appendStringSecretSlots(
-      existing.privateMotives,
-      input.actorId,
-      "motive",
-      input.privateMotives ?? [],
-    );
-    appendStringSecretSlots(
-      existing.unrevealedAffiliations,
-      input.actorId,
-      "affiliation",
-      input.unrevealedAffiliations ?? [],
-    );
-    draft.secrets.actorSecrets[input.actorId] = existing;
-  });
+  const existing =
+    draft.secrets.actorSecrets[input.actorId] ?? createEmptyActorSecretSlots(input.actorId);
+  appendStringSecretSlots(
+    existing.privateMotives,
+    input.actorId,
+    "motive",
+    input.privateMotives ?? [],
+  );
+  appendStringSecretSlots(
+    existing.unrevealedAffiliations,
+    input.actorId,
+    "affiliation",
+    input.unrevealedAffiliations ?? [],
+  );
+  draft.secrets.actorSecrets[input.actorId] = existing;
 
   return { message: `actor secrets 已配置：${input.actorId}。` };
 }
 
-export function revealSecret(event: RevealSecretEvent): RevealSecretResult {
+export function revealSecret(draft: State, event: RevealSecretEvent): RevealSecretResult {
   const evidence = event.kind === "claim-reveal" ? event.evidence : event.evidence;
   assertNonEmptyString(evidence, "evidence");
   if (event.kind === "claim-reveal") {
@@ -132,56 +129,10 @@ export function revealSecret(event: RevealSecretEvent): RevealSecretResult {
     assertNonEmptyString(event.trigger, "trigger");
   }
 
-  let result: RevealSecretResult = {
-    outcome: "insufficient-evidence",
-    playerSafeMessage: "证据不足，暂不能确认隐藏事实。",
-  };
-
-  updateState((draft) => {
-    const actor = draft.public.actors[event.actorId];
-    if (actor === undefined) {
-      throw new Error(`actor 不存在: ${event.actorId}`);
-    }
-    const slots = draft.secrets.actorSecrets[event.actorId];
-    if (slots === undefined) {
-      result = { outcome: "insufficient-evidence", playerSafeMessage: "没有足够证据确认。" };
-      return;
-    }
-    const trueName = slots.trueName;
-    if (trueName !== undefined && canRevealStringSlot(event, trueName)) {
-      trueName.revealState = "revealed";
-      if (actor.servantForm !== null) {
-        actor.servantForm.identity.trueName = { status: "revealed", display: trueName.value };
-      }
-      result = { outcome: "revealed", playerSafeMessage: "真名揭示已经成立。" };
-      return;
-    }
-    const noblePhantasm = slots.hiddenNoblePhantasms.find((slot) =>
-      canRevealNoblePhantasmSlot(event, slot),
-    );
-    if (noblePhantasm !== undefined && actor.servantForm !== null) {
-      noblePhantasm.revealState = "revealed";
-      const revealedEntry = { ...noblePhantasm.value, status: "revealed" as const };
-      const hiddenIndex = findReplaceableHiddenNoblePhantasmIndex(
-        actor.servantForm.noblePhantasms,
-        noblePhantasm.value.name,
-      );
-      if (hiddenIndex === -1) {
-        actor.servantForm.noblePhantasms.push(revealedEntry);
-      } else {
-        actor.servantForm.noblePhantasms[hiddenIndex] = revealedEntry;
-      }
-      result = { outcome: "revealed", playerSafeMessage: "隐藏宝具信息已经揭示。" };
-      return;
-    }
-    const foreshadowed = markForeshadowed(slots, evidence);
-    if (foreshadowed) {
-      result = { outcome: "foreshadowed", playerSafeMessage: "线索成立，但尚不足以完全揭示。" };
-    }
-  });
+  const result = applyRevealSecret(draft, event, evidence);
 
   if (result.outcome === "revealed") {
-    recordMemory({
+    recordMemory(draft, {
       kind: "record-major-event",
       title: "隐藏事实揭示",
       summary: result.playerSafeMessage,
@@ -198,6 +149,53 @@ export function revealSecret(event: RevealSecretEvent): RevealSecretResult {
   }
 
   return result;
+}
+
+function applyRevealSecret(
+  draft: State,
+  event: RevealSecretEvent,
+  evidence: string,
+): RevealSecretResult {
+  const actor = draft.public.actors[event.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${event.actorId}`);
+  }
+  const slots = draft.secrets.actorSecrets[event.actorId];
+  if (slots === undefined) {
+    return { outcome: "insufficient-evidence", playerSafeMessage: "没有足够证据确认。" };
+  }
+  const trueName = slots.trueName;
+  if (trueName !== undefined && canRevealStringSlot(event, trueName)) {
+    trueName.revealState = "revealed";
+    if (actor.servantForm !== null) {
+      actor.servantForm.identity.trueName = { status: "revealed", display: trueName.value };
+    }
+    return { outcome: "revealed", playerSafeMessage: "真名揭示已经成立。" };
+  }
+  const noblePhantasm = slots.hiddenNoblePhantasms.find((slot) =>
+    canRevealNoblePhantasmSlot(event, slot),
+  );
+  if (noblePhantasm !== undefined && actor.servantForm !== null) {
+    noblePhantasm.revealState = "revealed";
+    const revealedEntry = { ...noblePhantasm.value, status: "revealed" as const };
+    const hiddenIndex = findReplaceableHiddenNoblePhantasmIndex(
+      actor.servantForm.noblePhantasms,
+      noblePhantasm.value.name,
+    );
+    if (hiddenIndex === -1) {
+      actor.servantForm.noblePhantasms.push(revealedEntry);
+    } else {
+      actor.servantForm.noblePhantasms[hiddenIndex] = revealedEntry;
+    }
+    return { outcome: "revealed", playerSafeMessage: "隐藏宝具信息已经揭示。" };
+  }
+  if (markForeshadowed(slots, evidence)) {
+    return { outcome: "foreshadowed", playerSafeMessage: "线索成立，但尚不足以完全揭示。" };
+  }
+  return {
+    outcome: "insufficient-evidence",
+    playerSafeMessage: "证据不足，暂不能确认隐藏事实。",
+  };
 }
 
 function createEmptyActorSecretSlots(actorId: ActorId): ActorSecretSlots {
@@ -374,33 +372,33 @@ export interface PrivateResolveResult {
   narrativeConstraints: string[];
 }
 
-export function privateResolve(event: PrivateResolveEvent): PrivateResolveResult {
-  return event.kind === "hidden-reaction" ? hiddenReaction(event) : secretCompatibility(event);
+export function privateResolve(draft: State, event: PrivateResolveEvent): PrivateResolveResult {
+  return event.kind === "hidden-reaction"
+    ? hiddenReaction(draft, event)
+    : secretCompatibility(draft, event);
 }
 
-export function getOffscreenEventsForDebug(): readonly OffscreenEvent[] {
-  return getState().secrets.offscreenEventLog;
+export function getOffscreenEventsForDebug(state: State): readonly OffscreenEvent[] {
+  return state.secrets.offscreenEventLog;
 }
 
 function hiddenReaction(
+  draft: State,
   event: Extract<PrivateResolveEvent, { kind: "hidden-reaction" }>,
 ): PrivateResolveResult {
   assertNonEmptyString(event.stimulus, "stimulus");
   assertNonEmptyString(event.publicContext, "publicContext");
-  const state = getState();
-  if (state.public.actors[event.actorId] === undefined) {
+  if (draft.public.actors[event.actorId] === undefined) {
     throw new Error(`actor 不存在: ${event.actorId}`);
   }
-  const slots = state.secrets.actorSecrets[event.actorId];
+  const slots = draft.secrets.actorSecrets[event.actorId];
   const hasRelevantSecret =
     slots !== undefined && secretText(slots).includes(event.stimulus.toLowerCase());
   if (hasRelevantSecret) {
-    // 注意：不能在 updateState mutator 内调 recordOffscreenEvent——
-    // 内层嵌套 updateState 的写入会被外层 setStore 用旧克隆覆盖丢失。
-    recordOffscreenEvent({
+    recordOffscreenEvent(draft, {
       lineId: "private-resolve",
       actorIds: [event.actorId],
-      timeRange: { start: state.public.clock.currentAt, end: state.public.clock.currentAt },
+      timeRange: { start: draft.public.clock.currentAt, end: draft.public.clock.currentAt },
       visibility: "secret",
       summary: `隐藏反应触发：${event.publicContext}`,
       consequences: [],
@@ -417,19 +415,19 @@ function hiddenReaction(
 }
 
 function secretCompatibility(
+  draft: State,
   event: Extract<PrivateResolveEvent, { kind: "secret-compatibility" }>,
 ): PrivateResolveResult {
   assertNonEmptyString(event.interaction, "interaction");
-  const state = getState();
-  if (state.public.actors[event.actorId] === undefined) {
+  if (draft.public.actors[event.actorId] === undefined) {
     throw new Error(`actor 不存在: ${event.actorId}`);
   }
-  if (state.public.actors[event.targetActorId] === undefined) {
+  if (draft.public.actors[event.targetActorId] === undefined) {
     throw new Error(`target actor 不存在: ${event.targetActorId}`);
   }
   const bothHaveSecrets =
-    state.secrets.actorSecrets[event.actorId] !== undefined &&
-    state.secrets.actorSecrets[event.targetActorId] !== undefined;
+    draft.secrets.actorSecrets[event.actorId] !== undefined &&
+    draft.secrets.actorSecrets[event.targetActorId] !== undefined;
   return {
     outcome: bothHaveSecrets ? "strong-reaction" : "no-special-effect",
     narrativeConstraints: bothHaveSecrets

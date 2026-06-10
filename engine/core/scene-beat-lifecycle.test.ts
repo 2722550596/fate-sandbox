@@ -1,13 +1,15 @@
+import type { State } from "./state";
+
 import assert from "node:assert/strict";
 import test from "node:test";
 
 import { progressSceneBeat } from "./scene-beat-lifecycle";
-import { getState, resetState } from "./state";
+import { createInitialState } from "./state-store";
 
 void test("progressSceneBeat begins a Scene Beat through the lifecycle seam", () => {
-  resetState();
+  const draft = createInitialState();
 
-  const result = progressSceneBeat({
+  const result = progressSceneBeat(draft, {
     kind: "begin",
     title: "柳洞寺外围侦察",
     objectives: ["观察结界", "安全撤回"],
@@ -18,7 +20,7 @@ void test("progressSceneBeat begins a Scene Beat through the lifecycle seam", ()
     situation: "investigation",
   });
 
-  const state = getState();
+  const state = draft;
   assert.equal(result.kind, "begin");
   assert.equal(state.public.scene.storyWindow?.title, "柳洞寺外围侦察");
   assert.equal(state.public.scene.storyWindow.currentArcId, "main");
@@ -33,9 +35,9 @@ void test("progressSceneBeat begins a Scene Beat through the lifecycle seam", ()
 });
 
 void test("progressSceneBeat can travel and begin in one lifecycle step", () => {
-  resetState();
+  const draft = createInitialState();
 
-  progressSceneBeat({
+  progressSceneBeat(draft, {
     kind: "begin",
     title: "新都商业街调查",
     objectives: ["确认魔力痕迹"],
@@ -53,17 +55,17 @@ void test("progressSceneBeat can travel and begin in one lifecycle step", () => 
     },
   });
 
-  const state = getState();
+  const state = draft;
   assert.equal(state.public.clock.currentAt, "2004-01-30T07:40:00.000Z");
   assert.equal(state.public.scene.location.detail, "商业街");
   assert.equal(state.public.scene.storyWindow?.title, "新都商业街调查");
 });
 
 void test("progressSceneBeat completes current beat and opens next beat", () => {
-  resetState();
-  openCurrentBeat();
+  const draft = createInitialState();
+  openCurrentBeat(draft);
 
-  const result = progressSceneBeat({
+  const result = progressSceneBeat(draft, {
     kind: "complete",
     outcome: "真名与宝具揭示成立，现场进入短暂停顿。",
     time: { kind: "elapsed", elapsedMinutes: 1, reason: "收口当前 beat。" },
@@ -86,7 +88,7 @@ void test("progressSceneBeat completes current beat and opens next beat", () => 
     },
   });
 
-  const state = getState();
+  const state = draft;
   assert.equal(result.kind, "complete");
   assert.equal(state.public.scene.storyWindow?.title, "揭示后的短暂停顿");
   assert.equal(state.public.scene.storyWindow.currentArcId, "main");
@@ -101,11 +103,11 @@ void test("progressSceneBeat completes current beat and opens next beat", () => 
 });
 
 void test("progressSceneBeat rejects complete without an active Scene Beat", () => {
-  resetState();
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      progressSceneBeat({
+      progressSceneBeat(draft, {
         kind: "complete",
         outcome: "没有当前 beat 却尝试收口。",
         time: { kind: "elapsed", elapsedMinutes: 1, reason: "即时行动也推进一个最小时间单位。" },
@@ -114,8 +116,8 @@ void test("progressSceneBeat rejects complete without an active Scene Beat", () 
   );
 });
 
-function openCurrentBeat(): void {
-  progressSceneBeat({
+function openCurrentBeat(draft: State): void {
+  progressSceneBeat(draft, {
     kind: "begin",
     title: "真名与宝具揭示收口",
     objectives: ["真名揭示成立", "宝具揭示成立"],

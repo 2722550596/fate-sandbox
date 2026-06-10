@@ -1,5 +1,22 @@
-import { getState, sessionKey, toSessionEntry } from "./state";
+import type { State } from "./state";
+
+import { CURRENT_STATE_SCHEMA_VERSION } from "./state";
+import { getState } from "./state-store";
 import { isRecord } from "./typebox-validation";
+
+const SESSION_KEY = "fsn-state";
+
+export function sessionKey(): string {
+  return SESSION_KEY;
+}
+
+export function toSessionEntry(state: State): Record<string, unknown> {
+  return { v: CURRENT_STATE_SCHEMA_VERSION, turn: 0, state: structuredClone(state) };
+}
+
+export function writeStateToDetails(details: Record<string, unknown>): void {
+  details[SESSION_KEY] = toSessionEntry(getState());
+}
 
 export function persistCurrentState(sessionManager: unknown): void {
   const writer = asStateSessionWriter(sessionManager);

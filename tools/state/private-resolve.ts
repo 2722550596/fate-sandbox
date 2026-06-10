@@ -8,7 +8,7 @@ import { runDomainEventTool } from "./domain-tool-runner";
 export function privateResolveTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => privateResolve(parsePrivateResolveEvent(params, "private_resolve 参数")),
+    execute: (draft) => privateResolve(draft, parsePrivateResolveEvent(params, "private_resolve 参数")),
     details: (result) => ({ outcome: result.outcome }),
     message: formatResult,
   });

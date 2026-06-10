@@ -8,7 +8,8 @@ import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
 export function setScenePresenceTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => setScenePresence(parseScenePresenceInput(params, "set_scene_presence 参数")),
+    execute: (draft) =>
+      setScenePresence(draft, parseScenePresenceInput(params, "set_scene_presence 参数")),
     details: resultDetails,
     message: (result) => result.message,
   });

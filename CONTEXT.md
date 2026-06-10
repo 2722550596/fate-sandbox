@@ -97,8 +97,12 @@ A tool that changes Game State by applying a constrained domain event to an aggr
 _Avoid_: Patch tool, raw update, replace object
 
 **Domain Event Tool Runner**:
-The execution module shared by Domain Event Tools. It owns the common order: run the domain event, persist Game State, attach the state snapshot to tool details, and return player-safe text.
-_Avoid_: Per-tool persistence boilerplate, manual result wrapper
+The execution module shared by Domain Event Tools, and the only writer of the Game State Store. It owns the common order: clone a working draft from the Game State Store, run the domain event against the draft, validate and commit the draft, persist Game State, attach the state snapshot to tool details, and return player-safe text. If the domain event throws, the draft is discarded and the store is untouched.
+_Avoid_: Per-tool persistence boilerplate, manual result wrapper, domain-level rollback
+
+**Game State Store**:
+The single runtime holder of the committed Game State. Reads are open to projections and tools; writes happen only through the Domain Event Tool Runner's commit or store lifecycle operations such as session hydration and reset. Domain event functions never touch the store: they receive a draft Game State value and mutate only that draft.
+_Avoid_: Hidden global state, implicit getState/updateState inside domain logic, module-level mutable counters
 
 **Tool Input Normalization**:
 The module that narrows unknown tool parameters into domain event inputs at the tool seam. It owns common record, string, enum, array, and positive-integer checks so Domain Event Tools do not duplicate shallow boundary parsing.

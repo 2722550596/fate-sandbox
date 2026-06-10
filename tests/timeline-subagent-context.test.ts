@@ -2,18 +2,18 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { configureCampaign } from "../engine/core/campaign";
-import { getState, resetState } from "../engine/core/state";
+import { createInitialState } from "../engine/core/state-store";
 import { isRecord } from "../engine/core/typebox-validation";
 import { buildTimelineStateContext } from "../extensions/subagents/timeline/index";
 
 void test("timeline subagent context renders campaign timezone local time", () => {
-  resetState();
-  configureCampaign({
+  const draft = createInitialState();
+  configureCampaign(draft, {
     presetId: "fsf_2008_snowfield",
     reason: "测试 Denver 时区注入。",
   });
 
-  const raw: unknown = JSON.parse(JSON.stringify(getState()));
+  const raw: unknown = JSON.parse(JSON.stringify(draft));
   if (!isRecord(raw)) {
     throw new Error("serialized state must be an object");
   }

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { exportState, resetState } from "../../engine/core/state";
+import { exportState, resetState } from "../../engine/core/state-store";
 import { configureCampaignTool } from "./configure-campaign";
 
 void test("configureCampaignTool updates campaign and timezone", () => {

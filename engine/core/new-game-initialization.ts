@@ -13,13 +13,14 @@ import type {
   RelationshipState,
   ServantClass,
   ServantSkill,
+  State,
 } from "./state";
 
 import { setScenePresence, upsertActor } from "./actor";
 import { configureCampaign } from "./campaign";
 import { recordMemory } from "./memory";
 import { configureServantSecrets } from "./secrets";
-import { getState, resetState } from "./state";
+import { createInitialState } from "./state-store";
 
 export type NewGameInitializationInput = HumanNewGameInput | ServantNewGameInput;
 
@@ -114,27 +115,30 @@ const DEFAULT_FATE_PARAMS: FateParams = {
   noblePhantasm: "E",
 };
 
-export function initializeNewGame(input: NewGameInitializationInput): NewGameInitializationResult {
+export function initializeNewGame(
+  draft: State,
+  input: NewGameInitializationInput,
+): NewGameInitializationResult {
   const steps: string[] = [];
-  resetState();
+  Object.assign(draft, createInitialState());
   steps.push("reset-state");
 
-  configureCampaign({ ...input.campaign, reason: input.campaign.reason ?? input.reason });
+  configureCampaign(draft, { ...input.campaign, reason: input.campaign.reason ?? input.reason });
   steps.push("configure-campaign");
 
   if (input.kind === "human-protagonist") {
-    upsertActor({
+    upsertActor(draft, {
       kind: "setup-protagonist",
       actor: buildHumanProtagonist(input.protagonist),
       reason: input.reason,
     });
     steps.push("setup-human-protagonist");
   } else {
-    initializeServantProtagonist(input, steps);
+    initializeServantProtagonist(draft, input, steps);
   }
 
   if (input.presence !== undefined) {
-    setScenePresence({
+    setScenePresence(draft, {
       presentActorIds: input.presence.presentActorIds,
       allyActorIds: input.presence.allyActorIds ?? [],
       reason: input.reason,
@@ -143,7 +147,7 @@ export function initializeNewGame(input: NewGameInitializationInput): NewGameIni
   }
 
   for (const fact of input.knownFacts ?? []) {
-    recordMemory({
+    recordMemory(draft, {
       kind: "pin-fact",
       scope: fact.scope,
       subject: fact.subject ?? PROTAGONIST_ACTOR_ID,
@@ -154,17 +158,21 @@ export function initializeNewGame(input: NewGameInitializationInput): NewGameIni
     steps.push("record-known-fact");
   }
 
-  assertNewGameInitialized(input);
+  assertNewGameInitialized(draft, input);
   return { message: "新游戏 state 已初始化。", steps };
 }
 
-function initializeServantProtagonist(input: ServantNewGameInput, steps: string[]): void {
+function initializeServantProtagonist(
+  draft: State,
+  input: ServantNewGameInput,
+  steps: string[],
+): void {
   if (input.master !== undefined) {
-    upsertActor({ kind: "ensure-public-npc", npc: input.master, reason: input.reason });
+    upsertActor(draft, { kind: "ensure-public-npc", npc: input.master, reason: input.reason });
     steps.push("ensure-master-npc");
   }
 
-  upsertActor({
+  upsertActor(draft, {
     kind: "upsert-servant",
     servant: buildServantProtagonist(input.protagonist),
     reason: input.reason,
@@ -172,7 +180,7 @@ function initializeServantProtagonist(input: ServantNewGameInput, steps: string[
   steps.push("setup-servant-protagonist");
 
   if (input.hiddenTrueName !== undefined || input.hiddenNoblePhantasms !== undefined) {
-    configureServantSecrets({
+    configureServantSecrets(draft, {
       kind: "configure-servant-secrets",
       actorId: PROTAGONIST_ACTOR_ID,
       trueName: input.hiddenTrueName,
@@ -244,8 +252,7 @@ function buildServantProtagonist(input: ServantProtagonistOpeningInput): Servant
   };
 }
 
-function assertNewGameInitialized(input: NewGameInitializationInput): void {
-  const state = getState();
+function assertNewGameInitialized(state: State, input: NewGameInitializationInput): void {
   const protagonist = state.public.actors[PROTAGONIST_ACTOR_ID];
   if (protagonist === undefined) {
     throw new Error("新游戏初始化失败：protagonist actor 不存在。");

@@ -1,3 +1,5 @@
+import type { State } from "./state";
+
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -9,18 +11,18 @@ import {
   privateResolve,
   revealSecret,
 } from "./secrets";
-import { getPublicState, getState, resetState } from "./state";
+import { createInitialState } from "./state-store";
 
 const TRUE_NAME = "美狄亚";
 const NP_NAME = "Rule Breaker";
 
 void test("configureServantSecrets rejects payload without trueName or hiddenNoblePhantasms", () => {
-  resetState();
-  upsertTestCaster();
+  const draft = createInitialState();
+  upsertTestCaster(draft);
 
   assert.throws(
     () =>
-      configureServantSecrets({
+      configureServantSecrets(draft, {
         kind: "configure-servant-secrets",
         actorId: "caster",
         reason: "测试空 secrets 配置",
@@ -30,12 +32,12 @@ void test("configureServantSecrets rejects payload without trueName or hiddenNob
 });
 
 void test("configureServantSecrets rejects unknown actor and non-servant actor", () => {
-  resetState();
-  upsertTestNpc("sakura");
+  const draft = createInitialState();
+  upsertTestNpc(draft, "sakura");
 
   assert.throws(
     () =>
-      configureServantSecrets({
+      configureServantSecrets(draft, {
         kind: "configure-servant-secrets",
         actorId: "no-such-actor",
         trueName: { value: TRUE_NAME, revealConditions: ["科尔基斯"] },
@@ -45,7 +47,7 @@ void test("configureServantSecrets rejects unknown actor and non-servant actor",
   );
   assert.throws(
     () =>
-      configureServantSecrets({
+      configureServantSecrets(draft, {
         kind: "configure-servant-secrets",
         actorId: "sakura",
         trueName: { value: TRUE_NAME, revealConditions: ["科尔基斯"] },
@@ -56,34 +58,34 @@ void test("configureServantSecrets rejects unknown actor and non-servant actor",
 });
 
 void test("configured secrets never leak into public projection", () => {
-  resetState();
-  upsertTestCaster();
-  configureCasterSecrets();
+  const draft = createInitialState();
+  upsertTestCaster(draft);
+  configureCasterSecrets(draft);
 
-  const publicJson = JSON.stringify(getPublicState());
+  const publicJson = JSON.stringify(draft.public);
   assert.equal(publicJson.includes(TRUE_NAME), false);
   assert.equal(publicJson.includes(NP_NAME), false);
   assert.equal(publicJson.includes("科尔基斯"), false);
 
-  const brief = buildGmBrief(getPublicState());
+  const brief = buildGmBrief(draft.public);
   assert.equal(brief.includes(TRUE_NAME), false);
   assert.equal(brief.includes(NP_NAME), false);
 
-  const caster = getPublicState().actors["caster"];
+  const caster = draft.public.actors["caster"];
   assert.equal(caster?.servantForm?.identity.trueName.status, "hidden");
   assert.equal(caster?.servantForm?.identity.trueName.display, "Caster");
 
-  const markdown = buildStatusMarkdown(getPublicState());
+  const markdown = buildStatusMarkdown(draft.public);
   assert.equal(markdown.includes(TRUE_NAME), false);
   assert.equal(markdown.includes(NP_NAME), false);
 });
 
 void test("revealSecret denies a correct claim when evidence does not match reveal conditions", () => {
-  resetState();
-  upsertTestCaster();
-  configureCasterSecrets();
+  const draft = createInitialState();
+  upsertTestCaster(draft);
+  configureCasterSecrets(draft);
 
-  const result = revealSecret({
+  const result = revealSecret(draft, {
     kind: "claim-reveal",
     actorId: "caster",
     claim: TRUE_NAME,
@@ -92,17 +94,17 @@ void test("revealSecret denies a correct claim when evidence does not match reve
 
   assert.equal(result.outcome, "insufficient-evidence");
   assert.equal(result.playerSafeMessage.includes(TRUE_NAME), false);
-  const caster = getState().public.actors["caster"];
+  const caster = draft.public.actors["caster"];
   assert.equal(caster?.servantForm?.identity.trueName.status, "hidden");
   assert.equal(caster?.servantForm?.identity.trueName.display, "Caster");
 });
 
 void test("revealSecret marks foreshadowed when evidence matches but claim does not", () => {
-  resetState();
-  upsertTestCaster();
-  configureCasterSecrets();
+  const draft = createInitialState();
+  upsertTestCaster(draft);
+  configureCasterSecrets(draft);
 
-  const result = revealSecret({
+  const result = revealSecret(draft, {
     kind: "claim-reveal",
     actorId: "caster",
     claim: "阿尔托莉雅",
@@ -111,17 +113,17 @@ void test("revealSecret marks foreshadowed when evidence matches but claim does 
 
   assert.equal(result.outcome, "foreshadowed");
   assert.equal(result.playerSafeMessage.includes(TRUE_NAME), false);
-  const slots = getState().secrets.actorSecrets["caster"];
+  const slots = draft.secrets.actorSecrets["caster"];
   assert.equal(slots?.trueName?.revealState, "foreshadowed");
-  assert.equal(getState().public.actors["caster"]?.servantForm?.identity.trueName.status, "hidden");
+  assert.equal(draft.public.actors["caster"]?.servantForm?.identity.trueName.status, "hidden");
 });
 
 void test("revealSecret does not re-reveal an already revealed slot", () => {
-  resetState();
-  upsertTestCaster();
-  configureCasterSecrets();
+  const draft = createInitialState();
+  upsertTestCaster(draft);
+  configureCasterSecrets(draft);
 
-  const first = revealSecret({
+  const first = revealSecret(draft, {
     kind: "claim-reveal",
     actorId: "caster",
     claim: TRUE_NAME,
@@ -129,7 +131,7 @@ void test("revealSecret does not re-reveal an already revealed slot", () => {
   });
   assert.equal(first.outcome, "revealed");
 
-  const second = revealSecret({
+  const second = revealSecret(draft, {
     kind: "claim-reveal",
     actorId: "caster",
     claim: TRUE_NAME,
@@ -139,12 +141,12 @@ void test("revealSecret does not re-reveal an already revealed slot", () => {
 });
 
 void test("revealSecret records a player-safe memory entry on success", () => {
-  resetState();
-  upsertTestCaster();
-  configureCasterSecrets();
-  const eventCountBefore = getState().public.memory.eventLog.length;
+  const draft = createInitialState();
+  upsertTestCaster(draft);
+  configureCasterSecrets(draft);
+  const eventCountBefore = draft.public.memory.eventLog.length;
 
-  const result = revealSecret({
+  const result = revealSecret(draft, {
     kind: "claim-reveal",
     actorId: "caster",
     claim: TRUE_NAME,
@@ -152,7 +154,7 @@ void test("revealSecret records a player-safe memory entry on success", () => {
   });
 
   assert.equal(result.outcome, "revealed");
-  const eventLog = getState().public.memory.eventLog;
+  const eventLog = draft.public.memory.eventLog;
   assert.equal(eventLog.length, eventCountBefore + 1);
   const entry = eventLog.at(-1);
   assert.equal(entry?.title, "隐藏事实揭示");
@@ -160,12 +162,12 @@ void test("revealSecret records a player-safe memory entry on success", () => {
 });
 
 void test("revealSecret throws for unknown actor and stays safe without configured secrets", () => {
-  resetState();
-  upsertTestCaster();
+  const draft = createInitialState();
+  upsertTestCaster(draft);
 
   assert.throws(
     () =>
-      revealSecret({
+      revealSecret(draft, {
         kind: "claim-reveal",
         actorId: "no-such-actor",
         claim: TRUE_NAME,
@@ -174,7 +176,7 @@ void test("revealSecret throws for unknown actor and stays safe without configur
     /actor 不存在: no-such-actor/,
   );
 
-  const result = revealSecret({
+  const result = revealSecret(draft, {
     kind: "claim-reveal",
     actorId: "caster",
     claim: TRUE_NAME,
@@ -184,17 +186,17 @@ void test("revealSecret throws for unknown actor and stays safe without configur
 });
 
 void test("hidden-reaction without relevant secret reports no special effect", () => {
-  resetState();
-  upsertTestNpc("sakura");
-  configureActorSecrets({
+  const draft = createInitialState();
+  upsertTestNpc(draft, "sakura");
+  configureActorSecrets(draft, {
     kind: "configure-actor-secrets",
     actorId: "sakura",
     privateMotives: [{ value: "提及慎二会触发细微紧张。", revealConditions: ["慎二"] }],
     reason: "测试无关刺激",
   });
-  const offscreenCountBefore = getState().secrets.offscreenEventLog.length;
+  const offscreenCountBefore = draft.secrets.offscreenEventLog.length;
 
-  const result = privateResolve({
+  const result = privateResolve(draft, {
     kind: "hidden-reaction",
     actorId: "sakura",
     stimulus: "弓道部的训练日程",
@@ -202,7 +204,7 @@ void test("hidden-reaction without relevant secret reports no special effect", (
   });
 
   assert.equal(result.outcome, "no-special-effect");
-  assert.equal(getState().secrets.offscreenEventLog.length, offscreenCountBefore);
+  assert.equal(draft.secrets.offscreenEventLog.length, offscreenCountBefore);
   assert.equal(
     result.narrativeConstraints.some((constraint) => constraint.includes("不要暗示不存在的秘密")),
     true,
@@ -210,16 +212,16 @@ void test("hidden-reaction without relevant secret reports no special effect", (
 });
 
 void test("hidden-reaction with relevant secret logs a secret-visibility offscreen event", () => {
-  resetState();
-  upsertTestNpc("sakura");
-  configureActorSecrets({
+  const draft = createInitialState();
+  upsertTestNpc(draft, "sakura");
+  configureActorSecrets(draft, {
     kind: "configure-actor-secrets",
     actorId: "sakura",
     privateMotives: [{ value: "提及慎二会触发细微紧张。", revealConditions: ["慎二"] }],
     reason: "测试隐藏反应记录",
   });
 
-  const result = privateResolve({
+  const result = privateResolve(draft, {
     kind: "hidden-reaction",
     actorId: "sakura",
     stimulus: "慎二",
@@ -227,7 +229,7 @@ void test("hidden-reaction with relevant secret logs a secret-visibility offscre
   });
 
   assert.equal(result.outcome, "subtle-reaction");
-  const offscreenEntry = getState().secrets.offscreenEventLog.at(-1);
+  const offscreenEntry = draft.secrets.offscreenEventLog.at(-1);
   assert.equal(offscreenEntry?.visibility, "secret");
   assert.equal(
     result.narrativeConstraints.some((constraint) => constraint.includes("不得泄露隐藏真相")),
@@ -236,17 +238,17 @@ void test("hidden-reaction with relevant secret logs a secret-visibility offscre
 });
 
 void test("secret-compatibility requires both actors to hold secrets", () => {
-  resetState();
-  upsertTestNpc("sakura");
-  upsertTestNpc("shinji");
-  configureActorSecrets({
+  const draft = createInitialState();
+  upsertTestNpc(draft, "sakura");
+  upsertTestNpc(draft, "shinji");
+  configureActorSecrets(draft, {
     kind: "configure-actor-secrets",
     actorId: "sakura",
     privateMotives: [{ value: "间桐家的魔术刻印继承。", revealConditions: ["间桐"] }],
     reason: "测试相性",
   });
 
-  const oneSided = privateResolve({
+  const oneSided = privateResolve(draft, {
     kind: "secret-compatibility",
     actorId: "sakura",
     targetActorId: "shinji",
@@ -254,13 +256,13 @@ void test("secret-compatibility requires both actors to hold secrets", () => {
   });
   assert.equal(oneSided.outcome, "no-special-effect");
 
-  configureActorSecrets({
+  configureActorSecrets(draft, {
     kind: "configure-actor-secrets",
     actorId: "shinji",
     privateMotives: [{ value: "对家族继承权的嫉妒。", revealConditions: ["继承"] }],
     reason: "测试相性",
   });
-  const bothSides = privateResolve({
+  const bothSides = privateResolve(draft, {
     kind: "secret-compatibility",
     actorId: "sakura",
     targetActorId: "shinji",
@@ -270,7 +272,7 @@ void test("secret-compatibility requires both actors to hold secrets", () => {
 
   assert.throws(
     () =>
-      privateResolve({
+      privateResolve(draft, {
         kind: "secret-compatibility",
         actorId: "sakura",
         targetActorId: "no-such-actor",
@@ -281,12 +283,12 @@ void test("secret-compatibility requires both actors to hold secrets", () => {
 });
 
 void test("configureActorSecrets validates payload and dedupes motives by value", () => {
-  resetState();
-  upsertTestNpc("sakura");
+  const draft = createInitialState();
+  upsertTestNpc(draft, "sakura");
 
   assert.throws(
     () =>
-      configureActorSecrets({
+      configureActorSecrets(draft, {
         kind: "configure-actor-secrets",
         actorId: "sakura",
         reason: "测试空配置",
@@ -295,7 +297,7 @@ void test("configureActorSecrets validates payload and dedupes motives by value"
   );
   assert.throws(
     () =>
-      configureActorSecrets({
+      configureActorSecrets(draft, {
         kind: "configure-actor-secrets",
         actorId: "no-such-actor",
         privateMotives: [{ value: "测试动机。", revealConditions: ["测试"] }],
@@ -304,26 +306,26 @@ void test("configureActorSecrets validates payload and dedupes motives by value"
     /actor 不存在: no-such-actor/,
   );
 
-  configureActorSecrets({
+  configureActorSecrets(draft, {
     kind: "configure-actor-secrets",
     actorId: "sakura",
     privateMotives: [{ value: "间桐家的魔术刻印继承。", revealConditions: ["间桐"] }],
     reason: "测试首次写入",
   });
-  configureActorSecrets({
+  configureActorSecrets(draft, {
     kind: "configure-actor-secrets",
     actorId: "sakura",
     privateMotives: [{ value: "间桐家的魔术刻印继承。", revealConditions: ["刻印", "间桐"] }],
     reason: "测试重复写入合并",
   });
 
-  const slots = getState().secrets.actorSecrets["sakura"];
+  const slots = draft.secrets.actorSecrets["sakura"];
   assert.equal(slots?.privateMotives.length, 1);
   assert.deepEqual(slots?.privateMotives[0]?.revealConditions, ["间桐", "刻印"]);
 });
 
-function configureCasterSecrets(): void {
-  configureServantSecrets({
+function configureCasterSecrets(draft: State): void {
+  configureServantSecrets(draft, {
     kind: "configure-servant-secrets",
     actorId: "caster",
     trueName: { value: TRUE_NAME, revealConditions: ["科尔基斯", "金羊皮"] },
@@ -343,8 +345,8 @@ function configureCasterSecrets(): void {
   });
 }
 
-function upsertTestCaster(): void {
-  upsertActor({
+function upsertTestCaster(draft: State): void {
+  upsertActor(draft, {
     kind: "upsert-servant",
     servant: {
       id: "caster",
@@ -380,8 +382,8 @@ function upsertTestCaster(): void {
   });
 }
 
-function upsertTestNpc(id: string): void {
-  upsertActor({
+function upsertTestNpc(draft: State, id: string): void {
+  upsertActor(draft, {
     kind: "upsert-public-npc",
     npc: {
       id,

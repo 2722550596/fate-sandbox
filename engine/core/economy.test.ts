@@ -2,44 +2,44 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { updateEconomy } from "./economy";
-import { getState, resetState } from "./state";
+import { createInitialState } from "./state-store";
 
 void test("updateEconomy spends money from a named purse", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateEconomy({
+  updateEconomy(draft, {
     kind: "spend-money",
     purseId: "purse-protagonist-cash",
     amount: 1200,
     reason: "晚餐",
   });
 
-  const purse = getState().public.economy.accessibleFunds.find(
+  const purse = draft.public.economy.accessibleFunds.find(
     (entry) => entry.id === "purse-protagonist-cash",
   );
   assert.equal(purse?.amount, 48800);
 });
 
 void test("updateEconomy can spend from actor held purse", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateEconomy({
+  updateEconomy(draft, {
     kind: "spend-money",
     ownerActorId: "protagonist",
     amount: 4200,
     reason: "采购医疗用品",
   });
 
-  const purse = getState().public.economy.accessibleFunds.find(
+  const purse = draft.public.economy.accessibleFunds.find(
     (entry) => entry.id === "purse-protagonist-cash",
   );
   assert.equal(purse?.amount, 45800);
 });
 
 void test("updateEconomy can gain money from an audited source", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateEconomy({
+  updateEconomy(draft, {
     kind: "gain-money",
     ownerActorId: "protagonist",
     amount: 12000,
@@ -48,18 +48,18 @@ void test("updateEconomy can gain money from an audited source", () => {
     reason: "寒假帮忙整理仓库的报酬",
   });
 
-  const purse = getState().public.economy.accessibleFunds.find(
+  const purse = draft.public.economy.accessibleFunds.find(
     (entry) => entry.id === "purse-protagonist-cash",
   );
   assert.equal(purse?.amount, 62000);
 });
 
 void test("updateEconomy rejects unaudited large found money", () => {
-  resetState();
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      updateEconomy({
+      updateEconomy(draft, {
         kind: "gain-money",
         purseId: "purse-protagonist-cash",
         amount: 949999,
@@ -72,11 +72,11 @@ void test("updateEconomy rejects unaudited large found money", () => {
 });
 
 void test("updateEconomy requires a counterparty for gained money", () => {
-  resetState();
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      updateEconomy({
+      updateEconomy(draft, {
         kind: "gain-money",
         purseId: "purse-protagonist-cash",
         amount: 1000,
@@ -89,11 +89,11 @@ void test("updateEconomy requires a counterparty for gained money", () => {
 });
 
 void test("updateEconomy rejects zero amount changes", () => {
-  resetState();
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      updateEconomy({
+      updateEconomy(draft, {
         kind: "gain-money",
         purseId: "purse-protagonist-cash",
         amount: 0,
@@ -105,7 +105,7 @@ void test("updateEconomy rejects zero amount changes", () => {
   );
   assert.throws(
     () =>
-      updateEconomy({
+      updateEconomy(draft, {
         kind: "spend-money",
         purseId: "purse-protagonist-cash",
         amount: 0,
@@ -116,11 +116,11 @@ void test("updateEconomy rejects zero amount changes", () => {
 });
 
 void test("updateEconomy rejects overspending", () => {
-  resetState();
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      updateEconomy({
+      updateEconomy(draft, {
         kind: "spend-money",
         purseId: "purse-protagonist-cash",
         amount: 999999,
@@ -131,16 +131,16 @@ void test("updateEconomy rejects overspending", () => {
 });
 
 void test("updateEconomy renames a purse without changing funds", () => {
-  resetState();
+  const draft = createInitialState();
 
-  updateEconomy({
+  updateEconomy(draft, {
     kind: "rename-purse",
     purseId: "purse-protagonist-cash",
     label: "绫香的钱包",
     reason: "修正资金账户显示名",
   });
 
-  const purse = getState().public.economy.accessibleFunds.find(
+  const purse = draft.public.economy.accessibleFunds.find(
     (entry) => entry.id === "purse-protagonist-cash",
   );
   assert.equal(purse?.label, "绫香的钱包");
@@ -148,11 +148,11 @@ void test("updateEconomy renames a purse without changing funds", () => {
 });
 
 void test("updateEconomy reports available purse ids for an unknown purse", () => {
-  resetState();
+  const draft = createInitialState();
 
   assert.throws(
     () =>
-      updateEconomy({
+      updateEconomy(draft, {
         kind: "spend-money",
         purseId: "protagonist-cash",
         amount: 100,

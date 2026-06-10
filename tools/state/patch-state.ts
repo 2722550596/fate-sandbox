@@ -1,4 +1,6 @@
-import { patchState, writeStateToDetails, type PatchOp } from "../../engine/core/state";
+import { patchState } from "../../engine/core/state-store";
+import { writeStateToDetails } from "../../engine/core/state-persistence";
+import type { PatchOp } from "../../engine/core/state";
 import { textResult, type ToolResult } from "../runtime/tool-result";
 
 export interface PatchStateParams {

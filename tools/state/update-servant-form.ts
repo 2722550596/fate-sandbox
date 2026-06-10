@@ -21,7 +21,7 @@ const LOCKED_FIELD_KINDS = [
 export function updateServantFormTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => updateServantForm(parseServantFormEventBoundary(params)),
+    execute: (draft) => updateServantForm(draft, parseServantFormEventBoundary(params)),
     details: resultDetails,
     message: (result) => result.message,
   });

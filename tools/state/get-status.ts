@@ -1,6 +1,6 @@
 import { buildGmBrief } from "../../engine/core/gm-brief";
 import { hydrateStateFromSessionManager } from "../../engine/core/session-hydration";
-import { getState } from "../../engine/core/state";
+import { getState } from "../../engine/core/state-store";
 import { textResult, type ToolResult } from "../runtime/tool-result";
 
 const lastStatusRevisionBySession = new WeakMap<object, string>();

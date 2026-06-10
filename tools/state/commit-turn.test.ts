@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state";
+import { getState, resetState } from "../../engine/core/state-store";
 import { commitTurnTool } from "./commit-turn";
 
 void test("commitTurnTool requires top-level time", () => {
@@ -127,6 +127,39 @@ void test("commitTurnTool ignores blank objectiveId when objectiveSummary is pre
   );
 
   assert.match(result.content[0]?.text ?? "", /回合已提交/);
+});
+
+void test("commitTurnTool does not commit state when a later domain event fails", () => {
+  resetState();
+  const before = getState();
+
+  assert.throws(
+    () =>
+      commitTurnTool(
+        {
+          summary: "测试事务原子性。",
+          time: { kind: "elapsed", elapsedMinutes: 40, reason: "测试推进时间后失败。" },
+          events: [
+            {
+              kind: "memory",
+              event: {
+                kind: "record-major-event",
+                title: "无效记忆",
+                summary: "缺少 claims。",
+                consequences: [],
+                claims: [],
+              },
+            },
+          ],
+        },
+        createNoopSessionManager(),
+      ),
+    /必须提供 claims/,
+  );
+
+  // Runner 未 commitState：Game State Store 保持提交前状态。
+  assert.equal(getState().public.clock.currentAt, before.public.clock.currentAt);
+  assert.equal(getState().public.scene.location.detail, before.public.scene.location.detail);
 });
 
 function createNoopSessionManager(): unknown {
