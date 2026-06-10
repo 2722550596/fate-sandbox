@@ -1,14 +1,14 @@
-import type { PrivateResolveEvent } from "../../engine/core/secrets";
+import type { ToolResult } from "../runtime/tool-result";
 
 import { privateResolve } from "../../engine/core/secrets";
-import type { ToolResult } from "../runtime/tool-result";
+import { parsePrivateResolveEvent } from "../../engine/core/secrets-schema";
 
 import { runDomainEventTool } from "./domain-tool-runner";
 
 export function privateResolveTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: () => privateResolve(assertPrivateResolveEvent(params)),
+    execute: () => privateResolve(parsePrivateResolveEvent(params, "private_resolve 参数")),
     details: (result) => ({ outcome: result.outcome }),
     message: formatResult,
   });
@@ -20,8 +20,4 @@ function formatResult(result: ReturnType<typeof privateResolve>): string {
     "叙事约束：",
     ...result.narrativeConstraints.map((entry) => `- ${entry}`),
   ].join("\n");
-}
-
-function assertPrivateResolveEvent(params: unknown): PrivateResolveEvent {
-  return params as PrivateResolveEvent; // safe: privateResolve validates actor existence and returns only player-safe constraints.
 }

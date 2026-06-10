@@ -14,6 +14,7 @@ import {
 import type {
   ConfigureActorSecretsInput,
   ConfigureServantSecretsInput,
+  PrivateResolveEvent,
   RevealSecretEvent,
   ServantSecretNoblePhantasmInput,
   ServantSecretStringInput,
@@ -22,6 +23,7 @@ import type {
 export type {
   ConfigureActorSecretsInput,
   ConfigureServantSecretsInput,
+  PrivateResolveEvent,
   RevealSecretEvent,
   RevealSecretToolInput,
   ServantSecretNoblePhantasmInput,
@@ -366,10 +368,6 @@ function markForeshadowed(slots: ActorSecretSlots, evidence: string): boolean {
   }
   return marked;
 }
-
-export type PrivateResolveEvent =
-  | { kind: "hidden-reaction"; actorId: ActorId; stimulus: string; publicContext: string }
-  | { kind: "secret-compatibility"; actorId: ActorId; targetActorId: ActorId; interaction: string };
 
 export interface PrivateResolveResult {
   outcome: "no-special-effect" | "subtle-reaction" | "strong-reaction" | "dangerous-escalation";

@@ -90,6 +90,46 @@ const REVEAL_SECRET_TOOL_VARIANT_VALIDATORS = {
   "observed-reveal": OBSERVED_REVEAL_VALIDATOR,
 } satisfies Record<RevealSecretToolInput["kind"], TypeBoxValidator<RevealSecretToolInput>>;
 
+export const PRIVATE_RESOLVE_EVENT_KINDS = ["hidden-reaction", "secret-compatibility"] as const;
+const PRIVATE_RESOLVE_EVENT_KIND_SCHEMA = stringEnumSchema(PRIVATE_RESOLVE_EVENT_KINDS);
+
+export const HIDDEN_REACTION_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("hidden-reaction"),
+  actorId: Type.String({ minLength: 1 }),
+  stimulus: Type.String({ minLength: 1 }),
+  publicContext: Type.String({ minLength: 1 }),
+});
+
+export const SECRET_COMPATIBILITY_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("secret-compatibility"),
+  actorId: Type.String({ minLength: 1 }),
+  targetActorId: Type.String({ minLength: 1 }),
+  interaction: Type.String({ minLength: 1 }),
+});
+
+export type PrivateResolveEvent =
+  | Static<typeof HIDDEN_REACTION_EVENT_SCHEMA>
+  | Static<typeof SECRET_COMPATIBILITY_EVENT_SCHEMA>;
+
+const PRIVATE_RESOLVE_EVENT_KIND_VALIDATOR = Compile(PRIVATE_RESOLVE_EVENT_KIND_SCHEMA);
+const HIDDEN_REACTION_EVENT_VALIDATOR = Compile(HIDDEN_REACTION_EVENT_SCHEMA);
+const SECRET_COMPATIBILITY_EVENT_VALIDATOR = Compile(SECRET_COMPATIBILITY_EVENT_SCHEMA);
+
+const PRIVATE_RESOLVE_EVENT_VARIANT_VALIDATORS = {
+  "hidden-reaction": HIDDEN_REACTION_EVENT_VALIDATOR,
+  "secret-compatibility": SECRET_COMPATIBILITY_EVENT_VALIDATOR,
+} satisfies Record<PrivateResolveEvent["kind"], TypeBoxValidator<PrivateResolveEvent>>;
+
+export function parsePrivateResolveEvent(value: unknown, fieldName: string): PrivateResolveEvent {
+  return parseTaggedTypeBoxUnion<PrivateResolveEvent["kind"], PrivateResolveEvent>(
+    trimStringsDeep(value),
+    fieldName,
+    "kind",
+    PRIVATE_RESOLVE_EVENT_KIND_VALIDATOR,
+    PRIVATE_RESOLVE_EVENT_VARIANT_VALIDATORS,
+  );
+}
+
 export function parseRevealSecretToolInput(
   value: unknown,
   fieldName: string,
