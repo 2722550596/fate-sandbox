@@ -52,7 +52,7 @@ void test("updateEconomy reports invalid enum-like fields clearly", () => {
         },
         undefined,
       ),
-    /非法 source.*earned, refund, found, gift, withdrawal, sale, quest-reward/,
+    /source 必须是允许值之一: earned, refund, found, gift, withdrawal, sale, quest-reward/,
   );
 
   assert.throws(
@@ -68,6 +68,6 @@ void test("updateEconomy reports invalid enum-like fields clearly", () => {
         },
         undefined,
       ),
-    /非法 access.*held, shared, requires-permission/,
+    /access 必须是允许值之一: held, shared, requires-permission/,
   );
 });

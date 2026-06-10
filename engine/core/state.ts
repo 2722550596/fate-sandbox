@@ -3,6 +3,7 @@ import type {
   BoundaryKind,
   CurrencyCode,
   OpeningMode,
+  PurseAccess,
   RuleSetId,
   SituationKind,
   TimelineId,
@@ -17,6 +18,7 @@ import {
   BOUNDARY_KINDS as BOUNDARIES,
   CURRENCY_CODES as CURRENCIES,
   OPENING_MODES,
+  PURSE_ACCESSES,
   RULE_SET_IDS,
   SITUATION_KINDS as SITUATIONS,
   TIMELINE_IDS as TIMELINES,
@@ -28,6 +30,7 @@ export type {
   BoundaryKind,
   CurrencyCode,
   OpeningMode,
+  PurseAccess,
   RuleSetId,
   SituationKind,
   TimelineId,
@@ -446,7 +449,7 @@ export interface MoneyPurse {
   ownerActorId: ActorId;
   label: string;
   amount: number;
-  access: "held" | "shared" | "requires-permission";
+  access: PurseAccess;
 }
 
 export interface DebtState {
@@ -2061,7 +2064,6 @@ const FATE_PARAM_KEYS = [
   "luck",
   "noblePhantasm",
 ] as const;
-const PURSE_ACCESSES = ["held", "shared", "requires-permission"] as const;
 const MEMORY_SCOPES = ["protagonist", "npc", "faction", "world"] as const;
 const SECRET_REVEAL_STATES = ["hidden", "foreshadowed", "revealed"] as const;
 const OFFSCREEN_EVENT_VISIBILITIES = ["secret", "foreshadowed", "player-known"] as const;

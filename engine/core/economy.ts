@@ -15,42 +15,9 @@ function assertPositiveInteger(value: unknown, fieldName: string): number {
   return amount;
 }
 
-export type MoneyGainSource =
-  | "earned"
-  | "refund"
-  | "found"
-  | "gift"
-  | "withdrawal"
-  | "sale"
-  | "quest-reward";
+import type { EconomyEvent } from "./economy-schema";
 
-export type EconomyEvent =
-  | {
-      kind: "spend-money";
-      purseId?: string;
-      ownerActorId?: ActorId;
-      amount: number;
-      reason: string;
-    }
-  | {
-      kind: "gain-money";
-      purseId?: string;
-      ownerActorId?: ActorId;
-      amount: number;
-      source: MoneyGainSource;
-      counterparty: string;
-      reason: string;
-    }
-  | {
-      kind: "add-purse";
-      ownerActorId: ActorId;
-      label: string;
-      amount: number;
-      access: MoneyPurse["access"];
-      reason: string;
-    }
-  | { kind: "rename-purse"; purseId: string; label: string; reason: string }
-  | { kind: "add-debt"; debtorActorId: ActorId; creditor: string; amount: number; reason: string };
+export type { EconomyEvent, MoneyGainSource } from "./economy-schema";
 
 export interface EconomyEventResult {
   message: string;

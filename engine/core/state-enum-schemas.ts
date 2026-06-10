@@ -14,7 +14,7 @@ import { Type } from "typebox";
  * 注意 tools/registry.ts 的 parameters schema 故意保持松（枚举写在
  * description 里），不从这里引用——那一层是 LLM-facing 文档，职责不同。
  */
-function stringEnumSchema<const T extends readonly string[]>(values: T) {
+export function stringEnumSchema<const T extends readonly string[]>(values: T) {
   return Type.Unsafe<T[number]>({ enum: [...values] });
 }
 
@@ -72,3 +72,7 @@ export const SITUATION_KINDS = [
 ] as const;
 export const SITUATION_KIND_SCHEMA = stringEnumSchema(SITUATION_KINDS);
 export type SituationKind = Static<typeof SITUATION_KIND_SCHEMA>;
+
+export const PURSE_ACCESSES = ["held", "shared", "requires-permission"] as const;
+export const PURSE_ACCESS_SCHEMA = stringEnumSchema(PURSE_ACCESSES);
+export type PurseAccess = Static<typeof PURSE_ACCESS_SCHEMA>;
