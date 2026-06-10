@@ -1,3 +1,4 @@
+import type { SceneBeatThreatInput } from "./scene-beat-schema";
 import type {
   ActorId,
   LocationState,
@@ -44,10 +45,7 @@ export interface SceneBeatInput {
   reason: string;
 }
 
-export interface SceneBeatThreatInput {
-  summary: string;
-  severity: SceneThreatSeverity;
-}
+export type { SceneBeatThreatInput } from "./scene-beat-schema";
 
 export interface SceneBeatTransitionInput {
   completedBeatId: StoryBeatId;

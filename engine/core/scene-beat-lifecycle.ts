@@ -1,73 +1,34 @@
 import type { ScenePresenceResult } from "./actor";
-import type { MemoryClaim, MemoryEvent, MemoryEventResult } from "./memory";
+import type { MemoryEvent, MemoryEventResult } from "./memory";
 import type {
   SceneBeatInput,
   SceneBeatResult,
-  SceneBeatThreatInput,
   SceneBeatTransitionResult,
   SceneEventResult,
 } from "./scene";
-import type { ActorId, SituationKind, StoryBeatId, TurnTimePolicy } from "./state";
+import type {
+  SceneBeatBeginInput,
+  SceneBeatCompleteInput,
+  SceneBeatMemoryInput,
+  SceneBeatProgressInput,
+} from "./scene-beat-schema";
+import type { SituationKind } from "./state";
+
+export type {
+  SceneBeatActionPolicy,
+  SceneBeatBeginInput,
+  SceneBeatCompleteInput,
+  SceneBeatMemoryInput,
+  SceneBeatNextBeatInput,
+  SceneBeatPresenceInput,
+  SceneBeatProgressInput,
+} from "./scene-beat-schema";
 
 import { setScenePresence } from "./actor";
 import { recordMemory } from "./memory";
 import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene";
 import { appendTurnLogEntry, createId, getState, transactState } from "./state";
 import { applyTurnTime } from "./turn-time";
-
-export interface SceneBeatActionPolicy {
-  allowedActions?: string[];
-  forbiddenEscalations?: string[];
-  completionCriteria?: string[];
-  nextBeatHints?: string[];
-}
-
-export interface SceneBeatPresenceInput {
-  presentActorIds?: ActorId[];
-  allyActorIds?: ActorId[];
-}
-
-export interface SceneBeatMemoryInput {
-  title: string;
-  summary: string;
-  consequences?: string[];
-  claims: MemoryClaim[];
-}
-
-export interface SceneBeatBeginInput {
-  kind: "begin";
-  title: string;
-  objectives: string[];
-  purpose: string;
-  time: TurnTimePolicy;
-  beatId?: StoryBeatId;
-  actionPolicy?: SceneBeatActionPolicy;
-  threats?: SceneBeatThreatInput[];
-  presence?: SceneBeatPresenceInput;
-  situation?: SituationKind;
-}
-
-export interface SceneBeatCompleteInput {
-  kind: "complete";
-  outcome: string;
-  time: TurnTimePolicy;
-  memory?: SceneBeatMemoryInput;
-  nextBeat?: SceneBeatNextBeatInput | null;
-  presence?: SceneBeatPresenceInput;
-  situation?: SituationKind;
-}
-
-export interface SceneBeatNextBeatInput {
-  title: string;
-  objectives: string[];
-  beatId?: StoryBeatId;
-  actionPolicy?: SceneBeatActionPolicy;
-  threats?: SceneBeatThreatInput[];
-  presence?: SceneBeatPresenceInput;
-  situation?: SituationKind;
-}
-
-export type SceneBeatProgressInput = SceneBeatBeginInput | SceneBeatCompleteInput;
 
 export type SceneBeatProgressResult =
   | {

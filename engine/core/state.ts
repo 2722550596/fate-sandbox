@@ -10,6 +10,7 @@ import type {
   PurseAccess,
   RevealStatus,
   RuleSetId,
+  SceneThreatSeverity,
   SituationKind,
   TimelineId,
   TimeZoneId,
@@ -29,6 +30,7 @@ import {
   MANA_SUPPLIES,
   MEMORY_SCOPES,
   OFFSCREEN_EVENT_SOURCES,
+  SCENE_THREAT_SEVERITIES as THREAT_SEVERITIES,
   OFFSCREEN_EVENT_VISIBILITIES,
   OPENING_MODES,
   PURSE_ACCESSES,
@@ -50,6 +52,7 @@ export type {
   PurseAccess,
   RevealStatus,
   RuleSetId,
+  SceneThreatSeverity,
   SituationKind,
   TimelineId,
   TimeZoneId,
@@ -75,7 +78,6 @@ export type MemoryFactId = string;
 export type MajorEventMemoryId = string;
 export type DailySummaryMemoryId = string;
 export type SceneObjectiveStatus = "active" | "blocked" | "resolved";
-export type SceneThreatSeverity = "low" | "medium" | "high" | "lethal";
 export type ActorKind = "human" | "outsider" | "spirit" | "other";
 export type ActorStance = "self" | "ally" | "friendly" | "neutral" | "wary" | "hostile" | "unknown";
 export type FateRankBase = "E" | "D" | "C" | "B" | "A" | "EX";
@@ -2006,7 +2008,6 @@ export function advanceClock(minutes: number, reason: string): State {
 }
 
 const OBJECTIVE_STATUSES = ["active", "blocked", "resolved"] as const;
-const THREAT_SEVERITIES = ["low", "medium", "high", "lethal"] as const;
 const ACTOR_KINDS = ["human", "outsider", "spirit", "other"] as const;
 const ROLE_KINDS = ["master", "social", "faction"] as const;
 const STANCES = ["self", "ally", "friendly", "neutral", "wary", "hostile", "unknown"] as const;

@@ -101,6 +101,10 @@ export const MANA_SUPPLIES = ["sufficient", "strained", "starved"] as const;
 export const MANA_SUPPLY_SCHEMA = stringEnumSchema(MANA_SUPPLIES);
 export type ManaSupply = Static<typeof MANA_SUPPLY_SCHEMA>;
 
+export const SCENE_THREAT_SEVERITIES = ["low", "medium", "high", "lethal"] as const;
+export const SCENE_THREAT_SEVERITY_SCHEMA = stringEnumSchema(SCENE_THREAT_SEVERITIES);
+export type SceneThreatSeverity = Static<typeof SCENE_THREAT_SEVERITY_SCHEMA>;
+
 export const FATE_PARAM_KEYS = [
   "strength",
   "endurance",
