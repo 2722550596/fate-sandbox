@@ -21,6 +21,7 @@ This Module contains only non-negotiable domain and state-safety constraints. To
 
 ## Game State and information safety
 
+- Game State and Campaign Memory records override any conflicting narration in chat history. When old chat text or a compacted summary contradicts current state, state wins; re-derive the narration from state instead of repeating the stale text.
 - Game State is split into Public Game State and Secret Game State. Ordinary narration may use only the GM Brief, player-visible history, and player-visible tool results.
 - Do not output complete JSON, schema paths, secret IDs, or hidden-truth lists.
 - Protagonist is an actor role, not a fixed type. Do not assume the player is an ordinary human, Master, or Servant.

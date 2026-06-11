@@ -41,13 +41,42 @@ function triggerFsnCompaction(ctx: ExtensionContext): void {
 }
 
 function buildCustomInstructions(ctx: ExtensionContext): string {
-  return [
+  const sections = [
     readFileSync(POLICY_PATH, "utf-8").trim(),
     "",
     "<current_state_for_exclusion>",
     JSON.stringify(readStateExclusionDigest(ctx), null, 2),
     "</current_state_for_exclusion>",
-  ].join("\n");
+  ];
+  const previousSummary = readPreviousCompactionSummary(ctx);
+  if (previousSummary !== undefined) {
+    sections.push(
+      "",
+      "<previous_compaction_summary_for_exclusion>",
+      previousSummary,
+      "</previous_compaction_summary_for_exclusion>",
+    );
+  }
+  return sections.join("\n");
+}
+
+/**
+ * 从当前 session branch 里找最近一次 compaction 的摘要，
+ * 作为增量压缩的排除参照（已记录内容只输出 delta）。
+ */
+function readPreviousCompactionSummary(ctx: ExtensionContext): string | undefined {
+  try {
+    const branch = ctx.sessionManager.getBranch();
+    for (let i = branch.length - 1; i >= 0; i--) {
+      const entry = branch[i];
+      if (entry?.type === "compaction" && entry.summary.trim() !== "") {
+        return entry.summary.trim();
+      }
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
 }
 
 /**
