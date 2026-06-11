@@ -86,6 +86,8 @@ FATE_RENDER_MODEL=provider/model-id ./start.sh
 
 例如 `FATE_RENDER_MODEL=anthropic/claude-opus-4-5`。未设置时渲染轮复用结算轮的当前模型；格式错误或模型未注册会告警并回退。结算轮吃工具调用纪律，渲染轮吃文笔——可以按需分开点菜。
 
+实测推荐搭配：结算 GPT-5.5 + 渲染 Claude Fable 5。
+
 ## Local State
 
 首次运行会在项目内创建隔离配置目录：
