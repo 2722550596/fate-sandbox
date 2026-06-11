@@ -1,21 +1,21 @@
 import type { Static } from "typebox";
 
-import type { TypeBoxValidator } from "../../engine/core/typebox-validation";
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { TypeBoxValidator } from "../../engine/core/typebox-validation.ts";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { FATE_PARAMS_SCHEMA } from "../../engine/core/actor-schema";
+import { FATE_PARAMS_SCHEMA } from "../../engine/core/actor-schema.ts";
 import {
   REVEAL_STATUS_SCHEMA,
   SERVANT_CLASS_SCHEMA,
   stringEnumSchema,
-} from "../../engine/core/state-enum-schemas";
-import { persistCurrentState, writeStateToDetails } from "../../engine/core/state-persistence";
-import { cloneState, commitState } from "../../engine/core/state-store";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../../engine/core/typebox-validation";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+} from "../../engine/core/state-enum-schemas.ts";
+import { persistCurrentState, writeStateToDetails } from "../../engine/core/state-persistence.ts";
+import { cloneState, commitState } from "../../engine/core/state-store.ts";
+import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../../engine/core/typebox-validation.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 const OVERRIDE_LOCKED_FACT_KINDS = [
   "servant-class",

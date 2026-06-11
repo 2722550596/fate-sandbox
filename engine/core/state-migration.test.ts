@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { cloneState, hydrateState, migrateState, createInitialState } from "./state-store";
+import { cloneState, hydrateState, migrateState, createInitialState } from "./state-store.ts";
 
 void test("migrateState upgrades schema v1 states to schema v3 turn log shape", () => {
   const current = createInitialState();

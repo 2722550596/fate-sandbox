@@ -1,7 +1,7 @@
-import type { TimeZoneId } from "./state";
+import type { TimeZoneId } from "./state.ts";
 
-import { formatHumanTime } from "./date-time";
-import { isRecord } from "./typebox-validation";
+import { formatHumanTime } from "./date-time.ts";
+import { isRecord } from "./typebox-validation.ts";
 
 export interface TimelineStateContext {
   currentAt: string;

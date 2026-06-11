@@ -5,9 +5,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Type } from "typebox";
 
-import { buildTimelineStateContextFromRaw } from "../../../engine/core/state-file-projection";
-export { buildTimelineStateContextFromRaw as buildTimelineStateContext } from "../../../engine/core/state-file-projection";
-import { lookupTool } from "../../../tools/lookup/lookup";
+import { buildTimelineStateContextFromRaw } from "../../../engine/core/state-file-projection.ts";
+export { buildTimelineStateContextFromRaw as buildTimelineStateContext } from "../../../engine/core/state-file-projection.ts";
+import { lookupTool } from "../../../tools/lookup/lookup.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, "..", "..", "..");

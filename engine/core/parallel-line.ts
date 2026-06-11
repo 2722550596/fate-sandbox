@@ -1,6 +1,6 @@
-import type { OffscreenEventSource, OffscreenEventVisibility } from "./state-enum-schemas";
+import type { OffscreenEventSource, OffscreenEventVisibility } from "./state-enum-schemas.ts";
 
-export type { OffscreenEventSource, OffscreenEventVisibility } from "./state-enum-schemas";
+export type { OffscreenEventSource, OffscreenEventVisibility } from "./state-enum-schemas.ts";
 
 export type ParallelLineOutcome = "no-change" | "progress" | "escalation" | "blocked";
 

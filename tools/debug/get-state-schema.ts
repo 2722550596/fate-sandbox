@@ -1,9 +1,9 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { CURRENT_STATE_SCHEMA_VERSION } from "../../engine/core/state";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { CURRENT_STATE_SCHEMA_VERSION } from "../../engine/core/state.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export function getStateSchemaTool(): ToolResult {
   const schema = {

@@ -1,12 +1,12 @@
 import type { Static } from "typebox";
 
-import type { CombatExchangeInput } from "./combat-exchange";
+import type { CombatExchangeInput } from "./combat-exchange.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { FATE_PARAM_KEY_SCHEMA, stringEnumSchema } from "./state-enum-schemas";
-import { parseTypeBoxValue, trimStringsDeep } from "./typebox-validation";
+import { FATE_PARAM_KEY_SCHEMA, stringEnumSchema } from "./state-enum-schemas.ts";
+import { parseTypeBoxValue, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * resolve_combat_exchange 工具边界 schema：单一事实来源。

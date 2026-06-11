@@ -41,7 +41,7 @@
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "test": "pnpx tsx --test 'engine/**/*.test.ts' 'tools/**/*.test.ts' 'tests/**/*.test.ts'",
+    "test": "node --test 'engine/**/*.test.ts' 'tools/**/*.test.ts' 'tests/**/*.test.ts'",
     "deadcode": "pnpx knip --include files"
   },
   "dependencies": {

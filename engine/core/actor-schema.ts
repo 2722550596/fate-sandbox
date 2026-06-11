@@ -1,7 +1,7 @@
 import type { Static } from "typebox";
 
-import type { FateRank, PublicActorState } from "./state";
-import type { TypeBoxValidator } from "./typebox-validation";
+import type { FateRank, PublicActorState } from "./state.ts";
+import type { TypeBoxValidator } from "./typebox-validation.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
@@ -12,8 +12,12 @@ import {
   REVEAL_STATUS_SCHEMA,
   SERVANT_CLASS_SCHEMA,
   stringEnumSchema,
-} from "./state-enum-schemas";
-import { parseTaggedTypeBoxUnion, parseTypeBoxValue, trimStringsDeep } from "./typebox-validation";
+} from "./state-enum-schemas.ts";
+import {
+  parseTaggedTypeBoxUnion,
+  parseTypeBoxValue,
+  trimStringsDeep,
+} from "./typebox-validation.ts";
 
 /**
  * Actor 领域工具边界 schema：单一事实来源。

@@ -1,10 +1,10 @@
-import type { ActorConditionEvent } from "./actor-condition-schema";
-import type { ActorId, PermanentEffect, PublicActorState, State } from "./state";
+import type { ActorConditionEvent } from "./actor-condition-schema.ts";
+import type { ActorId, PermanentEffect, PublicActorState, State } from "./state.ts";
 
-import { createId } from "./ids";
-import { assertNonEmptyString } from "./typebox-validation";
+import { createId } from "./ids.ts";
+import { assertNonEmptyString } from "./typebox-validation.ts";
 
-export type { ActorConditionEvent } from "./actor-condition-schema";
+export type { ActorConditionEvent } from "./actor-condition-schema.ts";
 
 export interface ActorConditionEventResult {
   message: string;

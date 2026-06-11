@@ -1,12 +1,12 @@
 import type { Static } from "typebox";
 
-import type { TypeBoxValidator } from "./typebox-validation";
+import type { TypeBoxValidator } from "./typebox-validation.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { PURSE_ACCESS_SCHEMA, stringEnumSchema } from "./state-enum-schemas";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation";
+import { PURSE_ACCESS_SCHEMA, stringEnumSchema } from "./state-enum-schemas.ts";
+import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * Economy 领域事件的工具边界 schema：单一事实来源。

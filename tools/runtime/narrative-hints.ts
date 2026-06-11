@@ -1,4 +1,4 @@
-import type { State } from "../../engine/core/state";
+import type { State } from "../../engine/core/state.ts";
 
 export function formatPressureSummary(_state: State): string {
   return "Fate 领域状态已启用：伤势、魔力、危险以 actor/scene/memory 表达。";

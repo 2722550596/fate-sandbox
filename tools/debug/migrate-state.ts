@@ -1,10 +1,10 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { cloneState, migrateState, replaceStateForDebug } from "../../engine/core/state-store";
-import { isRecord } from "../../engine/core/typebox-validation";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { cloneState, migrateState, replaceStateForDebug } from "../../engine/core/state-store.ts";
+import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 interface MigrateStateParams {
   state?: unknown;

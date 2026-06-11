@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { recordMemory } from "./memory";
-import { createInitialState } from "./state-store";
+import { recordMemory } from "./memory.ts";
+import { createInitialState } from "./state-store.ts";
 
 void test("recordMemory stores pinned facts in public campaign memory", () => {
   const draft = createInitialState();

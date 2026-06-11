@@ -1,10 +1,10 @@
-import type { State } from "./state";
+import type { State } from "./state.ts";
 
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { progressSceneBeat } from "./scene-beat-lifecycle";
-import { createInitialState } from "./state-store";
+import { progressSceneBeat } from "./scene-beat-lifecycle.ts";
+import { createInitialState } from "./state-store.ts";
 
 void test("progressSceneBeat begins a Scene Beat through the lifecycle seam", () => {
   const draft = createInitialState();

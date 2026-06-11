@@ -1,11 +1,11 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { privateResolve } from "../../engine/core/secrets";
-import { parsePrivateResolveEvent } from "../../engine/core/secrets-schema";
+import { privateResolve } from "../../engine/core/secrets.ts";
+import { parsePrivateResolveEvent } from "../../engine/core/secrets-schema.ts";
 
-import { runDomainEventTool } from "./domain-tool-runner";
+import { runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function privateResolveTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

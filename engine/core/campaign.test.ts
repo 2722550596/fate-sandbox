@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { configureCampaign } from "./campaign";
-import { commitState, exportState, createInitialState } from "./state-store";
+import { configureCampaign } from "./campaign.ts";
+import { commitState, exportState, createInitialState } from "./state-store.ts";
 
 void test("configureCampaign applies FSF Snowfield preset", () => {
   const draft = createInitialState();

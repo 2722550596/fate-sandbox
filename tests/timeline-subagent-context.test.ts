@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { configureCampaign } from "../engine/core/campaign";
-import { createInitialState } from "../engine/core/state-store";
-import { isRecord } from "../engine/core/typebox-validation";
-import { buildTimelineStateContext } from "../extensions/subagents/timeline/index";
+import { configureCampaign } from "../engine/core/campaign.ts";
+import { createInitialState } from "../engine/core/state-store.ts";
+import { isRecord } from "../engine/core/typebox-validation.ts";
+import { buildTimelineStateContext } from "../extensions/subagents/timeline/index.ts";
 
 void test("timeline subagent context renders campaign timezone local time", () => {
   const draft = createInitialState();

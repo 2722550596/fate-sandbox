@@ -1,9 +1,9 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import { patchState } from "../../engine/core/state-store";
-import { writeStateToDetails } from "../../engine/core/state-persistence";
-import { isRecord } from "../../engine/core/typebox-validation";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { patchState } from "../../engine/core/state-store.ts";
+import { writeStateToDetails } from "../../engine/core/state-persistence.ts";
+import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export function patchStateTool(params: unknown, _sessionManager: unknown): ToolResult {
   const opsRaw = isRecord(params) ? params["ops"] : undefined;

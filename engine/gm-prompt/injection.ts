@@ -2,15 +2,15 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { buildGmBrief } from "../core/public-projection";
-import { getPublicState } from "../core/state-store";
-import { isRecord } from "../core/typebox-validation";
+import { buildGmBrief } from "../core/public-projection.ts";
+import { getPublicState } from "../core/state-store.ts";
+import { isRecord } from "../core/typebox-validation.ts";
 import {
   loadPromptPreset,
   type PromptPreset,
   type PromptPresetModule,
   type PromptSlot,
-} from "./preset";
+} from "./preset.ts";
 
 export interface TextMessage {
   role: "user";

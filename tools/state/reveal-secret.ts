@@ -1,22 +1,22 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import type {
   ConfigureActorSecretsResult,
   ConfigureServantSecretsResult,
   RevealSecretResult,
   RevealSecretToolInput,
-} from "../../engine/core/secrets";
-import type { ToolResult } from "../runtime/tool-result";
+} from "../../engine/core/secrets.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
 import {
   configureActorSecrets,
   configureServantSecrets,
   revealSecret,
-} from "../../engine/core/secrets";
-import type { State } from "../../engine/core/state";
-import { parseRevealSecretToolInput } from "../../engine/core/secrets-schema";
+} from "../../engine/core/secrets.ts";
+import type { State } from "../../engine/core/state.ts";
+import { parseRevealSecretToolInput } from "../../engine/core/secrets-schema.ts";
 
-import { runDomainEventTool } from "./domain-tool-runner";
+import { runDomainEventTool } from "./domain-tool-runner.ts";
 
 type RevealSecretToolResult =
   | { kind: "configure"; result: ConfigureActorSecretsResult | ConfigureServantSecretsResult }

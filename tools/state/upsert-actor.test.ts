@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { upsertActorTool } from "./upsert-actor";
-import { getState, resetState } from "../../engine/core/state-store";
+import { upsertActorTool } from "./upsert-actor.ts";
+import { getState, resetState } from "../../engine/core/state-store.ts";
 
 void test("upsertActorTool accepts omitted master fields for masterless servants", () => {
   resetState();

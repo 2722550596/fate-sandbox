@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import test from "node:test";
 
-import { resetState } from "../core/state-store";
-import { buildSystemPrompt, injectGmPromptMessages } from "./injection";
+import { resetState } from "../core/state-store.ts";
+import { buildSystemPrompt, injectGmPromptMessages } from "./injection.ts";
 
 interface UserMessage {
   role: "user";

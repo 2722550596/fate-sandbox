@@ -1,4 +1,4 @@
-import type { TimeZoneId } from "./state";
+import type { TimeZoneId } from "./state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 

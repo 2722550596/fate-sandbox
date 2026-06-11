@@ -10,9 +10,9 @@ import {
   SITUATION_KIND_SCHEMA,
   TIMELINE_ID_SCHEMA,
   TIMEZONE_ID_SCHEMA,
-} from "./state-enum-schemas";
-import { LOCATION_STATE_SCHEMA } from "./turn-time-schema";
-import { parseTypeBoxValue, trimStringsDeep } from "./typebox-validation";
+} from "./state-enum-schemas.ts";
+import { LOCATION_STATE_SCHEMA } from "./turn-time-schema.ts";
+import { parseTypeBoxValue, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * configure_campaign 工具边界 schema：单一事实来源。

@@ -1,30 +1,30 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-import type { FsnToolDefinition } from "./runtime/tool-definition";
+import type { FsnToolDefinition } from "./runtime/tool-definition.ts";
 
-import { exportStateToolDefinition } from "./debug/export-state";
-import { getStateSchemaToolDefinition } from "./debug/get-state-schema";
-import { migrateStateToolDefinition } from "./debug/migrate-state";
-import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact";
-import { resetStateToolDefinition } from "./debug/reset-state";
-import { lookupToolDefinition } from "./lookup/lookup";
-import { commitTurnToolDefinition } from "./state/commit-turn";
-import { configureCampaignToolDefinition } from "./state/configure-campaign";
-import { getStatusToolDefinition } from "./state/get-status";
-import { initializeNewGameToolDefinition } from "./state/initialize-new-game";
-import { patchStateToolDefinition } from "./state/patch-state";
-import { privateResolveToolDefinition } from "./state/private-resolve";
-import { progressSceneBeatToolDefinition } from "./state/progress-scene-beat";
-import { recordMemoryToolDefinition } from "./state/record-memory";
-import { recordOffscreenEventToolDefinition } from "./state/record-offscreen-event";
-import { resolveCombatExchangeToolDefinition } from "./state/resolve-combat-exchange";
-import { retireActorToolDefinition } from "./state/retire-actor";
-import { revealSecretToolDefinition } from "./state/reveal-secret";
-import { setScenePresenceToolDefinition } from "./state/set-scene-presence";
-import { updateActorConditionToolDefinition } from "./state/update-actor-condition";
-import { updateEconomyToolDefinition } from "./state/update-economy";
-import { updateServantFormToolDefinition } from "./state/update-servant-form";
-import { upsertActorToolDefinition } from "./state/upsert-actor";
+import { exportStateToolDefinition } from "./debug/export-state.ts";
+import { getStateSchemaToolDefinition } from "./debug/get-state-schema.ts";
+import { migrateStateToolDefinition } from "./debug/migrate-state.ts";
+import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact.ts";
+import { resetStateToolDefinition } from "./debug/reset-state.ts";
+import { lookupToolDefinition } from "./lookup/lookup.ts";
+import { commitTurnToolDefinition } from "./state/commit-turn.ts";
+import { configureCampaignToolDefinition } from "./state/configure-campaign.ts";
+import { getStatusToolDefinition } from "./state/get-status.ts";
+import { initializeNewGameToolDefinition } from "./state/initialize-new-game.ts";
+import { patchStateToolDefinition } from "./state/patch-state.ts";
+import { privateResolveToolDefinition } from "./state/private-resolve.ts";
+import { progressSceneBeatToolDefinition } from "./state/progress-scene-beat.ts";
+import { recordMemoryToolDefinition } from "./state/record-memory.ts";
+import { recordOffscreenEventToolDefinition } from "./state/record-offscreen-event.ts";
+import { resolveCombatExchangeToolDefinition } from "./state/resolve-combat-exchange.ts";
+import { retireActorToolDefinition } from "./state/retire-actor.ts";
+import { revealSecretToolDefinition } from "./state/reveal-secret.ts";
+import { setScenePresenceToolDefinition } from "./state/set-scene-presence.ts";
+import { updateActorConditionToolDefinition } from "./state/update-actor-condition.ts";
+import { updateEconomyToolDefinition } from "./state/update-economy.ts";
+import { updateServantFormToolDefinition } from "./state/update-servant-form.ts";
+import { upsertActorToolDefinition } from "./state/upsert-actor.ts";
 
 /** 全部 Domain Event Tool 契约清单；契约本体与实现同文件维护。 */
 const TOOL_DEFINITIONS: readonly FsnToolDefinition[] = [

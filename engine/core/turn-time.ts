@@ -1,10 +1,10 @@
-import type { SceneEventResult } from "./scene";
-import type { State, TurnTimePolicy } from "./state";
+import type { SceneEventResult } from "./scene.ts";
+import type { State, TurnTimePolicy } from "./state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 
-import { pruneExpiredParamModifiers } from "./servant";
-import { assertNonEmptyString, assertNonNegativeInteger } from "./typebox-validation";
+import { pruneExpiredParamModifiers } from "./servant.ts";
+import { assertNonEmptyString, assertNonNegativeInteger } from "./typebox-validation.ts";
 
 /** 不经过 Scene Beat/Turn Commit 的裸时钟推进，供初始化与测试准备使用。 */
 export function advanceClock(draft: State, minutes: number, reason: string): void {

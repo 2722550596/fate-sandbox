@@ -1,8 +1,8 @@
-import type { State } from "./state";
+import type { State } from "./state.ts";
 
-import { CURRENT_STATE_SCHEMA_VERSION } from "./state";
-import { getState } from "./state-store";
-import { isRecord } from "./typebox-validation";
+import { getState } from "./state-store.ts";
+import { CURRENT_STATE_SCHEMA_VERSION } from "./state.ts";
+import { isRecord } from "./typebox-validation.ts";
 
 const SESSION_KEY = "fsn-state";
 

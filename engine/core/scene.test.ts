@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene";
-import { createInitialState } from "./state-store";
+import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene.ts";
+import { createInitialState } from "./state-store.ts";
 
 void test("updateScene can correct current location without advancing time", () => {
   const draft = createInitialState();

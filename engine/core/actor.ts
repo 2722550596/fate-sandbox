@@ -5,10 +5,10 @@ import type {
   RetireActorInput,
   ScenePresenceInput,
   ServantInput,
-} from "./actor-schema";
-import type { ActorId, PublicActorState, PublicGameState, State } from "./state";
+} from "./actor-schema.ts";
+import type { ActorId, PublicActorState, PublicGameState, State } from "./state.ts";
 
-import { assertNonEmptyString } from "./typebox-validation";
+import { assertNonEmptyString } from "./typebox-validation.ts";
 
 export interface UpsertActorInput {
   actor: PublicActorState;
@@ -20,7 +20,7 @@ export type {
   PublicNpcInput,
   PublicNpcSkeletonInput,
   ServantInput,
-} from "./actor-schema";
+} from "./actor-schema.ts";
 
 export interface UpsertActorResult {
   message: string;
@@ -35,13 +35,13 @@ export function setScenePresence(draft: State, input: ScenePresenceInput): Scene
   return { message: "场景在场 actor 已更新。" };
 }
 
-export type { ScenePresenceInput } from "./actor-schema";
+export type { ScenePresenceInput } from "./actor-schema.ts";
 
 export interface ScenePresenceResult {
   message: string;
 }
 
-export type { RetireActorInput } from "./actor-schema";
+export type { RetireActorInput } from "./actor-schema.ts";
 
 export interface RetireActorResult {
   message: string;

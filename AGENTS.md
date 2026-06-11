@@ -292,7 +292,7 @@ function handleTurn(state: State, _turnIndex: number): void {
 
 ### 零副作用导入
 
-`import "./side-effects"` 不存在于本项目中。pi 用 jiti/tsx 加载，模块初始化顺序不可靠。
+`import "./side-effects"` 不存在于本项目中。pi 用 jiti 加载、测试用 node 原生 type stripping 运行，模块初始化顺序不可靠。相对导入必须带 `.ts` 后缀（node 原生运行的硬性要求）。
 
 ### type import 必须显式
 

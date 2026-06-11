@@ -7,15 +7,15 @@ import {
   hydrateStateFromSessionEntries,
   syncStateFromSessionEntries,
   syncStateFromSessionManager,
-} from "../../engine/core/session-hydration";
-import { cloneState, resetState } from "../../engine/core/state-store";
-import { sessionKey } from "../../engine/core/state-persistence";
-import { commitTurnTool } from "./commit-turn";
-import { getStatusTool } from "./get-status";
-import { upsertActorTool } from "./upsert-actor";
-import { setScenePresenceTool } from "./set-scene-presence";
-import { updateActorConditionTool } from "./update-actor-condition";
-import { updateEconomyTool } from "./update-economy";
+} from "../../engine/core/session-hydration.ts";
+import { cloneState, resetState } from "../../engine/core/state-store.ts";
+import { sessionKey } from "../../engine/core/state-persistence.ts";
+import { commitTurnTool } from "./commit-turn.ts";
+import { getStatusTool } from "./get-status.ts";
+import { upsertActorTool } from "./upsert-actor.ts";
+import { setScenePresenceTool } from "./set-scene-presence.ts";
+import { updateActorConditionTool } from "./update-actor-condition.ts";
+import { updateEconomyTool } from "./update-economy.ts";
 
 describe("Fate state tool-level smoke flow", () => {
   it("persists state details that can hydrate a later session", () => {

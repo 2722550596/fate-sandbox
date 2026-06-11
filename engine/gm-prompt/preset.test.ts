@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parsePromptPreset } from "./preset";
+import { parsePromptPreset } from "./preset.ts";
 
 void test("parsePromptPreset accepts file and runtime sources", () => {
   const preset = parsePromptPreset(

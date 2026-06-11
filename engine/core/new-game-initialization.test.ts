@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { initializeNewGame } from "./new-game-initialization";
-import { createInitialState } from "./state-store";
+import { initializeNewGame } from "./new-game-initialization.ts";
+import { createInitialState } from "./state-store.ts";
 
 const PLAIN_OUTFIT = { label: "日常服装", details: "便于行动的普通衣物。" };
 

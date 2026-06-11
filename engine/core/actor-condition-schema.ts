@@ -1,11 +1,11 @@
 import type { Static } from "typebox";
 
-import type { TypeBoxValidator } from "./typebox-validation";
+import type { TypeBoxValidator } from "./typebox-validation.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { FATE_RANK_OR_NONE_SCHEMA, OUTFIT_STATE_SCHEMA } from "./actor-schema";
+import { FATE_RANK_OR_NONE_SCHEMA, OUTFIT_STATE_SCHEMA } from "./actor-schema.ts";
 import {
   CIRCUIT_STATUS_SCHEMA,
   stringEnumSchema,
@@ -13,8 +13,8 @@ import {
   TRACKED_ITEM_KIND_SCHEMA,
   TRACKED_ITEM_VISIBILITY_SCHEMA,
   WOUND_SEVERITY_SCHEMA,
-} from "./state-enum-schemas";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation";
+} from "./state-enum-schemas.ts";
+import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * Actor condition 领域事件（update_actor_condition 工具 / commit_turn 子事件）

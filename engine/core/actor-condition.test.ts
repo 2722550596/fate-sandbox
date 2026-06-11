@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { upsertActor } from "./actor";
-import { updateActorCondition } from "./actor-condition";
-import { createInitialState } from "./state-store";
+import { updateActorCondition } from "./actor-condition.ts";
+import { upsertActor } from "./actor.ts";
+import { createInitialState } from "./state-store.ts";
 
 void test("updateActorCondition records discrete wounds", () => {
   const draft = createInitialState();

@@ -1,8 +1,8 @@
 import type { TLocalizedValidationError } from "typebox/error";
 
-import type { Percent } from "./state";
+import type { Percent } from "./state.ts";
 
-import { normalizeIsoInstant } from "./date-time";
+import { normalizeIsoInstant } from "./date-time.ts";
 
 const MIN_PERCENT = 0;
 const MAX_PERCENT = 100;

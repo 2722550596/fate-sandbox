@@ -1,7 +1,7 @@
-import type { PublicNpcSkeletonInput, ServantInput } from "./actor";
-import type { ConfigureCampaignInput } from "./campaign";
-import type { MemoryClaim } from "./memory";
-import type { ServantSecretNoblePhantasmInput, ServantSecretStringInput } from "./secrets";
+import type { PublicNpcSkeletonInput, ServantInput } from "./actor.ts";
+import type { ConfigureCampaignInput } from "./campaign.ts";
+import type { MemoryClaim } from "./memory.ts";
+import type { ServantSecretNoblePhantasmInput, ServantSecretStringInput } from "./secrets.ts";
 import type {
   ActorId,
   ActorRole,
@@ -14,13 +14,13 @@ import type {
   ServantClass,
   ServantSkill,
   State,
-} from "./state";
+} from "./state.ts";
 
-import { setScenePresence, upsertActor } from "./actor";
-import { configureCampaign } from "./campaign";
-import { recordMemory } from "./memory";
-import { configureServantSecrets } from "./secrets";
-import { createInitialState } from "./state-store";
+import { setScenePresence, upsertActor } from "./actor.ts";
+import { configureCampaign } from "./campaign.ts";
+import { recordMemory } from "./memory.ts";
+import { configureServantSecrets } from "./secrets.ts";
+import { createInitialState } from "./state-store.ts";
 
 export type NewGameInitializationInput = HumanNewGameInput | ServantNewGameInput;
 

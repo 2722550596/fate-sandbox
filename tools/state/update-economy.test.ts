@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state-store";
-import { updateEconomyTool } from "./update-economy";
+import { getState, resetState } from "../../engine/core/state-store.ts";
+import { updateEconomyTool } from "./update-economy.ts";
 
 void test("updateEconomy reports available purse ids for an unknown purse", () => {
   resetState();

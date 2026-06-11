@@ -1,10 +1,10 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import { updateActorCondition } from "../../engine/core/actor-condition";
-import type { ToolResult } from "../runtime/tool-result";
+import { updateActorCondition } from "../../engine/core/actor-condition.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
-import { normalizeActorConditionEvent } from "./actor-condition-normalizer";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { normalizeActorConditionEvent } from "./actor-condition-normalizer.ts";
 
 export function updateActorConditionTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

@@ -1,9 +1,9 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { exportState, writeDebugStateFile } from "../../engine/core/state-store";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { exportState, writeDebugStateFile } from "../../engine/core/state-store.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export function exportStateTool(): ToolResult {
   const path = writeDebugStateFile();

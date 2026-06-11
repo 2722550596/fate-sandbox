@@ -1,12 +1,12 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { recordOffscreenEvent } from "../../engine/core/offscreen-event";
-import { parseRecordOffscreenEventInput } from "../../engine/core/offscreen-event-schema";
+import { recordOffscreenEvent } from "../../engine/core/offscreen-event.ts";
+import { parseRecordOffscreenEventInput } from "../../engine/core/offscreen-event-schema.ts";
 
-import { runDomainEventTool } from "./domain-tool-runner";
-import { isRecord } from "../../engine/core/typebox-validation";
+import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { isRecord } from "../../engine/core/typebox-validation.ts";
 
 export function recordOffscreenEventTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

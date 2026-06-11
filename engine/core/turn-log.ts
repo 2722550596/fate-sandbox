@@ -1,4 +1,4 @@
-import type { State, TurnLogEntry } from "./state";
+import type { State, TurnLogEntry } from "./state.ts";
 
 export function appendTurnLogEntry(draft: State, input: Omit<TurnLogEntry, "id">): TurnLogEntry {
   const entry: TurnLogEntry = {

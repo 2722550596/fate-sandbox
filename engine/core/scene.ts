@@ -1,5 +1,5 @@
-import type { SceneBeatThreatInput } from "./scene-beat-schema";
-import type { SceneEvent } from "./scene-schema";
+import type { SceneBeatThreatInput } from "./scene-beat-schema.ts";
+import type { SceneEvent } from "./scene-schema.ts";
 import type {
   ActorId,
   SceneObjectiveId,
@@ -8,12 +8,12 @@ import type {
   State,
   StoryBeatId,
   StoryWindowState,
-} from "./state";
+} from "./state.ts";
 
-import { createId } from "./ids";
-import { assertNonEmptyString } from "./typebox-validation";
+import { createId } from "./ids.ts";
+import { assertNonEmptyString } from "./typebox-validation.ts";
 
-export type { SceneEvent } from "./scene-schema";
+export type { SceneEvent } from "./scene-schema.ts";
 
 const MIN_BEAT_OBJECTIVES = 1;
 const MAX_BEAT_OBJECTIVES = 5;
@@ -32,7 +32,7 @@ export interface SceneBeatInput {
   reason: string;
 }
 
-export type { SceneBeatThreatInput } from "./scene-beat-schema";
+export type { SceneBeatThreatInput } from "./scene-beat-schema.ts";
 
 export interface SceneBeatTransitionInput {
   completedBeatId: StoryBeatId;

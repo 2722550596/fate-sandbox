@@ -1,10 +1,10 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { assertNonEmptyString, isRecord } from "../../engine/core/typebox-validation";
-import { lookupWorldData } from "../../engine/world-data/lookup";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { assertNonEmptyString, isRecord } from "../../engine/core/typebox-validation.ts";
+import { lookupWorldData } from "../../engine/world-data/lookup.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export function lookupTool(params: unknown): ToolResult {
   const query = assertNonEmptyString(isRecord(params) ? params["query"] : undefined, "query");

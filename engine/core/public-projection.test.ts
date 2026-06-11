@@ -1,10 +1,10 @@
-import type { TrackedItemState } from "./state";
+import type { TrackedItemState } from "./state.ts";
 
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildGmBrief, buildInventoryMarkdown, buildStatusMarkdown } from "./public-projection";
-import { createInitialState } from "./state-store";
+import { buildGmBrief, buildInventoryMarkdown, buildStatusMarkdown } from "./public-projection.ts";
+import { createInitialState } from "./state-store.ts";
 
 void test("buildGmBrief throws when protagonist is missing", () => {
   const draft = createInitialState();

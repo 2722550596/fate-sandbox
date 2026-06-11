@@ -1,7 +1,7 @@
 import type { Static, TSchema } from "typebox";
 
-import type { State } from "./state";
-import type { TypeBoxValidator } from "./typebox-validation";
+import type { State } from "./state.ts";
+import type { TypeBoxValidator } from "./typebox-validation.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
@@ -14,9 +14,9 @@ import {
   OUTFIT_STATE_SCHEMA,
   RELATIONSHIP_STATE_SCHEMA,
   SERVANT_SKILL_SCHEMA,
-} from "./actor-schema";
-import { normalizeIsoInstant } from "./date-time";
-import { STORY_WINDOW_STATE_SCHEMA } from "./scene-schema";
+} from "./actor-schema.ts";
+import { normalizeIsoInstant } from "./date-time.ts";
+import { STORY_WINDOW_STATE_SCHEMA } from "./scene-schema.ts";
 import {
   CIRCUIT_STATUS_SCHEMA,
   CONTRACT_STATUS_SCHEMA,
@@ -40,9 +40,9 @@ import {
   TRACKED_ITEM_KIND_SCHEMA,
   TRACKED_ITEM_VISIBILITY_SCHEMA,
   WOUND_SEVERITY_SCHEMA,
-} from "./state-enum-schemas";
-import { LOCATION_STATE_SCHEMA } from "./turn-time-schema";
-import { isRecord, parseTypeBoxValue, trimStringsDeep } from "./typebox-validation";
+} from "./state-enum-schemas.ts";
+import { LOCATION_STATE_SCHEMA } from "./turn-time-schema.ts";
+import { isRecord, parseTypeBoxValue, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * State 反序列化边界 schema：与 state.ts 的手写接口一一对应。

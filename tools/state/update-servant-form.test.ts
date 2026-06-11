@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { updateServantFormTool } from "./update-servant-form";
+import { updateServantFormTool } from "./update-servant-form.ts";
 
 void test("updateServantForm reports locked-field attempts clearly", () => {
   assert.throws(

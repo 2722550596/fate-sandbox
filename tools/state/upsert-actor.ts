@@ -1,14 +1,14 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { PublicActorState } from "../../engine/core/state";
-import type { ToolResult } from "../runtime/tool-result";
+import type { PublicActorState } from "../../engine/core/state.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { upsertActor } from "../../engine/core/actor";
-import { parseActorRegistryInput } from "../../engine/core/actor-schema";
-import { ACTOR_KINDS } from "../../engine/core/state-enum-schemas";
+import { upsertActor } from "../../engine/core/actor.ts";
+import { parseActorRegistryInput } from "../../engine/core/actor-schema.ts";
+import { ACTOR_KINDS } from "../../engine/core/state-enum-schemas.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
-import { isRecord } from "../../engine/core/typebox-validation";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { isRecord } from "../../engine/core/typebox-validation.ts";
 
 /**
  * upsert_actor 边界：结构校验交给 actor-schema；这里只保留领域归一化——

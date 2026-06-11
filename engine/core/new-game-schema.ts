@@ -1,13 +1,13 @@
-import type { NewGameInitializationInput } from "./new-game-initialization";
-import type { TypeBoxValidator } from "./typebox-validation";
+import type { NewGameInitializationInput } from "./new-game-initialization.ts";
+import type { TypeBoxValidator } from "./typebox-validation.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { FATE_PARAMS_SCHEMA, OUTFIT_STATE_SCHEMA } from "./actor-schema";
-import { SERVANT_SECRET_STRING_INPUT_SCHEMA } from "./secrets-schema";
-import { SERVANT_CLASS_SCHEMA, stringEnumSchema } from "./state-enum-schemas";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation";
+import { FATE_PARAMS_SCHEMA, OUTFIT_STATE_SCHEMA } from "./actor-schema.ts";
+import { SERVANT_SECRET_STRING_INPUT_SCHEMA } from "./secrets-schema.ts";
+import { SERVANT_CLASS_SCHEMA, stringEnumSchema } from "./state-enum-schemas.ts";
+import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * initialize_new_game 工具边界 schema。

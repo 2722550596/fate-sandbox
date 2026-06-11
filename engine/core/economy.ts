@@ -1,7 +1,7 @@
-import type { ActorId, MoneyPurse, State } from "./state";
+import type { ActorId, MoneyPurse, State } from "./state.ts";
 
-import { createId } from "./ids";
-import { assertNonEmptyString, assertNonNegativeInteger } from "./typebox-validation";
+import { createId } from "./ids.ts";
+import { assertNonEmptyString, assertNonNegativeInteger } from "./typebox-validation.ts";
 
 function assertPositiveInteger(value: unknown, fieldName: string): number {
   const amount = assertNonNegativeInteger(value, fieldName);
@@ -11,9 +11,9 @@ function assertPositiveInteger(value: unknown, fieldName: string): number {
   return amount;
 }
 
-import type { EconomyEvent } from "./economy-schema";
+import type { EconomyEvent } from "./economy-schema.ts";
 
-export type { EconomyEvent, MoneyGainSource } from "./economy-schema";
+export type { EconomyEvent, MoneyGainSource } from "./economy-schema.ts";
 
 export interface EconomyEventResult {
   message: string;

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { parseTurnTimePolicySchema } from "./turn-time-schema";
+import { parseTurnTimePolicySchema } from "./turn-time-schema.ts";
 
 void describe("parseTurnTimePolicySchema", () => {
   void test("reports invalid kind as enum choices instead of anyOf noise", () => {

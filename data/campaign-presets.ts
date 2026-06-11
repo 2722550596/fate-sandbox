@@ -6,7 +6,7 @@ import type {
   SituationKind,
   TimelineId,
   TimeZoneId,
-} from "../engine/core/state";
+} from "../engine/core/state.ts";
 
 export interface CampaignPreset {
   id: string;

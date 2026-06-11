@@ -1,6 +1,6 @@
-import type { PublicGameState } from "./state";
+import type { PublicGameState } from "./state.ts";
 
-import { formatHumanTime } from "./date-time";
+import { formatHumanTime } from "./date-time.ts";
 
 export function buildGmBrief(publicState: PublicGameState): string {
   const protagonist = publicState.actors[publicState.protagonistActorId];

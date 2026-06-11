@@ -1,12 +1,12 @@
-import type { ServantFormEvent } from "./servant-schema";
-import type { ActorId, ResourceTrack, ServantCoreState, State } from "./state";
+import type { ServantFormEvent } from "./servant-schema.ts";
+import type { ActorId, ResourceTrack, ServantCoreState, State } from "./state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 
-import { createId } from "./ids";
-import { assertNonEmptyString, assertPercent } from "./typebox-validation";
+import { createId } from "./ids.ts";
+import { assertNonEmptyString, assertPercent } from "./typebox-validation.ts";
 
-export type { ServantFormEvent } from "./servant-schema";
+export type { ServantFormEvent } from "./servant-schema.ts";
 
 export interface ServantFormEventResult {
   message: string;

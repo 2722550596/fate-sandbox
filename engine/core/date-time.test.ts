@@ -2,7 +2,7 @@ import assert from "node:assert";
 // oxlint-disable typescript/no-floating-promises -- node:test 的 it()/describe() 同步重载返回 void，oxlint 类型感知无法区分同步与异步重载。
 import { describe, it } from "node:test";
 
-import { advanceIsoTime, diffMinutes, formatHumanTime, isDifferentGameDate } from "./date-time";
+import { advanceIsoTime, diffMinutes, formatHumanTime, isDifferentGameDate } from "./date-time.ts";
 
 describe("date-time", () => {
   it("formats game time with weekday in Asia/Tokyo", () => {

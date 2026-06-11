@@ -1,11 +1,11 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { setScenePresence } from "../../engine/core/actor";
-import { parseScenePresenceInput } from "../../engine/core/actor-schema";
+import { setScenePresence } from "../../engine/core/actor.ts";
+import { parseScenePresenceInput } from "../../engine/core/actor-schema.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function setScenePresenceTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

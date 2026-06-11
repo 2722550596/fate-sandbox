@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { isRecord } from "../core/typebox-validation";
+import { isRecord } from "../core/typebox-validation.ts";
 
 export type PromptSlot = "pre-history" | "pre-response" | "final-contract";
 export type RuntimePromptSource = "state-brief";

@@ -1,17 +1,17 @@
-import type { State } from "./state";
+import type { State } from "./state.ts";
 
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { retireActor, setScenePresence, upsertActor } from "./actor";
-import { buildGmBrief } from "./public-projection";
+import { retireActor, setScenePresence, upsertActor } from "./actor.ts";
+import { buildGmBrief } from "./public-projection.ts";
 import {
   configureActorSecrets,
   configureServantSecrets,
   privateResolve,
   revealSecret,
-} from "./secrets";
-import { createInitialState } from "./state-store";
+} from "./secrets.ts";
+import { createInitialState } from "./state-store.ts";
 
 void test("upsertActor adds an entered NPC from safe public projection", () => {
   const draft = createInitialState();

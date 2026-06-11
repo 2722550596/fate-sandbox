@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseStateSchema } from "./state-schema";
-import { createInitialState } from "./state-store";
-import { isRecord } from "./typebox-validation";
+import { parseStateSchema } from "./state-schema.ts";
+import { createInitialState } from "./state-store.ts";
+import { isRecord } from "./typebox-validation.ts";
 
 void test("parseStateSchema round-trips a freshly initialized state", () => {
   const draft = createInitialState();

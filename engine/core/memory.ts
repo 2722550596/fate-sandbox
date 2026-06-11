@@ -1,16 +1,21 @@
-import type { MemoryClaim, MemoryEvent } from "./memory-schema";
+import type { MemoryClaim, MemoryEvent } from "./memory-schema.ts";
 import type {
   DailySummaryMemoryId,
   MajorEventMemoryId,
   MemoryFactId,
   SecretSlot,
   State,
-} from "./state";
+} from "./state.ts";
 
-import { createId } from "./ids";
-import { assertIsoDateString, assertNonEmptyString } from "./typebox-validation";
+import { createId } from "./ids.ts";
+import { assertIsoDateString, assertNonEmptyString } from "./typebox-validation.ts";
 
-export type { MemoryCertainty, MemoryClaim, MemoryClaimKind, MemoryEvent } from "./memory-schema";
+export type {
+  MemoryCertainty,
+  MemoryClaim,
+  MemoryClaimKind,
+  MemoryEvent,
+} from "./memory-schema.ts";
 
 export interface MemoryEventResult {
   factId?: MemoryFactId;

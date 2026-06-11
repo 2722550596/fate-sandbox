@@ -1,5 +1,5 @@
-import type { NoblePhantasm } from "./actor-schema";
-import type { OffscreenEvent } from "./parallel-line";
+import type { NoblePhantasm } from "./actor-schema.ts";
+import type { OffscreenEvent } from "./parallel-line.ts";
 import type {
   ActorKind,
   ActorStance,
@@ -22,9 +22,9 @@ import type {
   TrackedItemKind,
   TrackedItemVisibility,
   WoundSeverity,
-} from "./state-enum-schemas";
+} from "./state-enum-schemas.ts";
 
-export type { NoblePhantasm } from "./actor-schema";
+export type { NoblePhantasm } from "./actor-schema.ts";
 
 export type {
   ActorKind,
@@ -48,7 +48,7 @@ export type {
   TrackedItemKind,
   TrackedItemVisibility,
   WoundSeverity,
-} from "./state-enum-schemas";
+} from "./state-enum-schemas.ts";
 
 export type {
   OffscreenEvent,
@@ -58,7 +58,7 @@ export type {
   ParallelLineOutput,
   ParallelLineOutcome,
   ParallelLineTimeWindow,
-} from "./parallel-line";
+} from "./parallel-line.ts";
 
 export type ActorId = string;
 export type ItemId = string;

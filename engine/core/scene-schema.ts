@@ -1,6 +1,6 @@
 import type { Static } from "typebox";
 
-import type { TypeBoxValidator } from "./typebox-validation";
+import type { TypeBoxValidator } from "./typebox-validation.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
@@ -9,9 +9,9 @@ import {
   SCENE_THREAT_SEVERITY_SCHEMA,
   SITUATION_KIND_SCHEMA,
   stringEnumSchema,
-} from "./state-enum-schemas";
-import { LOCATION_STATE_SCHEMA } from "./turn-time-schema";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation";
+} from "./state-enum-schemas.ts";
+import { LOCATION_STATE_SCHEMA } from "./turn-time-schema.ts";
+import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * Scene 领域事件的工具边界 schema：单一事实来源。

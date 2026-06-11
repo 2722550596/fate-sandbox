@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { buildStateExclusionDigestFromRaw } from "../../engine/core/state-file-projection";
+import { buildStateExclusionDigestFromRaw } from "../../engine/core/state-file-projection.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, "..", "..");

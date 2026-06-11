@@ -1,12 +1,12 @@
-import type { ConfigureCampaignInput } from "./campaign-schema";
-import type { State } from "./state";
+import type { ConfigureCampaignInput } from "./campaign-schema.ts";
+import type { State } from "./state.ts";
 
-import { getCampaignPreset } from "../../data/campaign-presets";
-import { normalizeIsoInstant } from "./date-time";
-import { createId } from "./ids";
-import { assertNonEmptyString } from "./typebox-validation";
+import { getCampaignPreset } from "../../data/campaign-presets.ts";
+import { normalizeIsoInstant } from "./date-time.ts";
+import { createId } from "./ids.ts";
+import { assertNonEmptyString } from "./typebox-validation.ts";
 
-export type { ConfigureCampaignInput } from "./campaign-schema";
+export type { ConfigureCampaignInput } from "./campaign-schema.ts";
 
 export interface ConfigureCampaignResult {
   message: string;

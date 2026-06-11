@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { compareFateRanks, assertFateRank } from "./fate-rank";
+import { compareFateRanks, assertFateRank } from "./fate-rank.ts";
 
 void test("Fate rank comparison treats two main ranks as overwhelming", () => {
   const result = compareFateRanks("A", "C");

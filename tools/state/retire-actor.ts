@@ -1,11 +1,11 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { retireActor } from "../../engine/core/actor";
-import { parseRetireActorInput } from "../../engine/core/actor-schema";
+import { retireActor } from "../../engine/core/actor.ts";
+import { parseRetireActorInput } from "../../engine/core/actor-schema.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function retireActorTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

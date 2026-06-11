@@ -1,8 +1,8 @@
 import type { CompactionEntry, SessionEntry } from "@earendil-works/pi-coding-agent";
 
-import { sessionKey } from "./state-persistence";
-import { hydrateState, resetState } from "./state-store";
-import { isRecord } from "./typebox-validation";
+import { sessionKey } from "./state-persistence.ts";
+import { hydrateState, resetState } from "./state-store.ts";
+import { isRecord } from "./typebox-validation.ts";
 
 export function hydrateStateFromSessionEntries(entries: readonly SessionEntry[]): boolean {
   for (let index = entries.length - 1; index >= 0; index--) {

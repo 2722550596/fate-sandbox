@@ -1,16 +1,16 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { ServantFormEvent } from "../../engine/core/servant";
-import type { ToolResult } from "../runtime/tool-result";
+import type { ServantFormEvent } from "../../engine/core/servant.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { updateServantForm } from "../../engine/core/servant";
+import { updateServantForm } from "../../engine/core/servant.ts";
 import {
   parseServantFormEvent,
   SERVANT_FORM_EVENT_KINDS,
-} from "../../engine/core/servant-schema";
+} from "../../engine/core/servant-schema.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
-import { isRecord } from "../../engine/core/typebox-validation";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { isRecord } from "../../engine/core/typebox-validation.ts";
 
 /** 锁定字段的 kind 有专属指引（指向 override_locked_fact），必须先于 schema 枚举报错。 */
 const LOCKED_FIELD_KINDS = [

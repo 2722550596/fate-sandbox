@@ -1,12 +1,12 @@
-import type { State } from "./state";
+import type { State } from "./state.ts";
 
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { upsertActor } from "./actor";
-import { updateServantForm } from "./servant";
-import { createInitialState } from "./state-store";
-import { advanceClock } from "./turn-time";
+import { upsertActor } from "./actor.ts";
+import { updateServantForm } from "./servant.ts";
+import { createInitialState } from "./state-store.ts";
+import { advanceClock } from "./turn-time.ts";
 
 void test("advanceClock removes expired servant parameter modifiers", () => {
   const draft = createInitialState();

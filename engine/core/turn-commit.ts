@@ -1,26 +1,26 @@
-import type { ScenePresenceInput, ScenePresenceResult } from "./actor";
-import type { ActorConditionEvent, ActorConditionEventResult } from "./actor-condition";
-import type { EconomyEvent, EconomyEventResult } from "./economy";
-import type { MemoryEvent, MemoryEventResult } from "./memory";
+import type { ActorConditionEvent, ActorConditionEventResult } from "./actor-condition.ts";
+import type { ScenePresenceInput, ScenePresenceResult } from "./actor.ts";
+import type { EconomyEvent, EconomyEventResult } from "./economy.ts";
+import type { MemoryEvent, MemoryEventResult } from "./memory.ts";
 import type {
   SceneBeatResult,
   SceneBeatTransitionResult,
   SceneBeatTurnEvent,
   SceneEvent,
   SceneEventResult,
-} from "./scene";
-import type { ServantFormEvent, ServantFormEventResult } from "./servant";
-import type { State, TurnTimePolicy } from "./state";
+} from "./scene.ts";
+import type { ServantFormEvent, ServantFormEventResult } from "./servant.ts";
+import type { State, TurnTimePolicy } from "./state.ts";
 
-import { setScenePresence } from "./actor";
-import { updateActorCondition } from "./actor-condition";
-import { updateEconomy } from "./economy";
-import { recordMemory } from "./memory";
-import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene";
-import { updateServantForm } from "./servant";
-import { appendTurnLogEntry } from "./turn-log";
-import { applyTurnTime } from "./turn-time";
-import { assertNonEmptyString } from "./typebox-validation";
+import { updateActorCondition } from "./actor-condition.ts";
+import { setScenePresence } from "./actor.ts";
+import { updateEconomy } from "./economy.ts";
+import { recordMemory } from "./memory.ts";
+import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene.ts";
+import { updateServantForm } from "./servant.ts";
+import { appendTurnLogEntry } from "./turn-log.ts";
+import { applyTurnTime } from "./turn-time.ts";
+import { assertNonEmptyString } from "./typebox-validation.ts";
 
 export type TurnCommitEvent =
   | { kind: "scene"; event: SceneEvent }

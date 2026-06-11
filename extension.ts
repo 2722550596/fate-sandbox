@@ -9,9 +9,9 @@ import type { ContextEvent, ExtensionAPI } from "@earendil-works/pi-coding-agent
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { syncStateFromSessionManager } from "./engine/core/session-hydration";
-import { buildSystemPrompt, injectGmPromptMessages } from "./engine/gm-prompt/injection";
-import { registerAllTools } from "./tools/registry";
+import { syncStateFromSessionManager } from "./engine/core/session-hydration.ts";
+import { buildSystemPrompt, injectGmPromptMessages } from "./engine/gm-prompt/injection.ts";
+import { registerAllTools } from "./tools/registry.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

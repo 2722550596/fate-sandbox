@@ -1,4 +1,4 @@
-import type { FateRank } from "./state";
+import type { FateRank } from "./state.ts";
 
 export type FateRankComparisonBand = "same-tier" | "edge" | "advantage" | "overwhelming";
 

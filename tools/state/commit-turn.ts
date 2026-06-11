@@ -1,11 +1,11 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import { timePolicySchema } from "./time-policy-tool-schema";
-import { commitTurn } from "../../engine/core/turn-commit";
-import type { ToolResult } from "../runtime/tool-result";
+import { timePolicySchema } from "./time-policy-tool-schema.ts";
+import { commitTurn } from "../../engine/core/turn-commit.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
-import { normalizeTurnCommitInput } from "./commit-turn-normalizer";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { normalizeTurnCommitInput } from "./commit-turn-normalizer.ts";
 
 export function commitTurnTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

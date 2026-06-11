@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { recordOffscreenEvent } from "./offscreen-event";
-import { getOffscreenEventsForDebug } from "./secrets";
-import { createInitialState } from "./state-store";
+import { recordOffscreenEvent } from "./offscreen-event.ts";
+import { getOffscreenEventsForDebug } from "./secrets.ts";
+import { createInitialState } from "./state-store.ts";
 
 const INITIAL_TIME = "2004-01-30T07:00:00.000Z";
 

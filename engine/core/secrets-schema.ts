@@ -1,13 +1,13 @@
 import type { Static } from "typebox";
 
-import type { TypeBoxValidator } from "./typebox-validation";
+import type { TypeBoxValidator } from "./typebox-validation.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { NOBLE_PHANTASM_SCHEMA } from "./actor-schema";
-import { stringEnumSchema } from "./state-enum-schemas";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation";
+import { NOBLE_PHANTASM_SCHEMA } from "./actor-schema.ts";
+import { stringEnumSchema } from "./state-enum-schemas.ts";
+import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * Secrets 领域（reveal_secret 工具）边界 schema：单一事实来源。

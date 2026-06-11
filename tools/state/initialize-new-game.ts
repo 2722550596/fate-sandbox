@@ -1,11 +1,11 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { ToolResult } from "../runtime/tool-result";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { initializeNewGame } from "../../engine/core/new-game-initialization";
-import { parseNewGameInitializationInput } from "../../engine/core/new-game-schema";
+import { initializeNewGame } from "../../engine/core/new-game-initialization.ts";
+import { parseNewGameInitializationInput } from "../../engine/core/new-game-schema.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function initializeNewGameTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

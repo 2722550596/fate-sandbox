@@ -1,17 +1,17 @@
-import type { State } from "./state";
+import type { State } from "./state.ts";
 
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { upsertActor } from "./actor";
-import { buildGmBrief, buildStatusMarkdown } from "./public-projection";
+import { upsertActor } from "./actor.ts";
+import { buildGmBrief, buildStatusMarkdown } from "./public-projection.ts";
 import {
   configureActorSecrets,
   configureServantSecrets,
   privateResolve,
   revealSecret,
-} from "./secrets";
-import { createInitialState } from "./state-store";
+} from "./secrets.ts";
+import { createInitialState } from "./state-store.ts";
 
 const TRUE_NAME = "美狄亚";
 const NP_NAME = "Rule Breaker";

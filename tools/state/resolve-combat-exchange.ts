@@ -1,4 +1,4 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import { randomInt } from "node:crypto";
 
@@ -8,12 +8,12 @@ import {
   type CombatExchangeResult,
   type CombatStateLanding,
   type CombatSwing,
-} from "../../engine/core/combat-exchange";
-import { parseCombatExchangeInput } from "../../engine/core/combat-exchange-schema";
-import { getState } from "../../engine/core/state-store";
-import { writeStateToDetails } from "../../engine/core/state-persistence";
-import { noNumberNarrativeHint } from "../runtime/narrative-hints";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+} from "../../engine/core/combat-exchange.ts";
+import { parseCombatExchangeInput } from "../../engine/core/combat-exchange-schema.ts";
+import { getState } from "../../engine/core/state-store.ts";
+import { writeStateToDetails } from "../../engine/core/state-persistence.ts";
+import { noNumberNarrativeHint } from "../runtime/narrative-hints.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export function resolveCombatExchangeTool(params: unknown, _sessionManager: unknown): ToolResult {
   const input = parseCombatExchangeInput(params, "resolve_combat_exchange 参数");

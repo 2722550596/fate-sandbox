@@ -1,7 +1,7 @@
-import type { ActorConditionEvent } from "../../engine/core/actor-condition";
+import type { ActorConditionEvent } from "../../engine/core/actor-condition.ts";
 
-import { parseActorConditionEvent } from "../../engine/core/actor-condition-schema";
-import { isRecord } from "../../engine/core/typebox-validation";
+import { parseActorConditionEvent } from "../../engine/core/actor-condition-schema.ts";
+import { isRecord } from "../../engine/core/typebox-validation.ts";
 
 /**
  * update_actor_condition / commit_turn 子事件的领域归一化层。

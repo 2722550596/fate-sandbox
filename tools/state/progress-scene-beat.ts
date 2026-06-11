@@ -1,12 +1,12 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import { timePolicySchema } from "./time-policy-tool-schema";
-import type { ToolResult } from "../runtime/tool-result";
+import { timePolicySchema } from "./time-policy-tool-schema.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { progressSceneBeat } from "../../engine/core/scene-beat-lifecycle";
-import { parseSceneBeatProgressInput } from "../../engine/core/scene-beat-schema";
+import { progressSceneBeat } from "../../engine/core/scene-beat-lifecycle.ts";
+import { parseSceneBeatProgressInput } from "../../engine/core/scene-beat-schema.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function progressSceneBeatTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

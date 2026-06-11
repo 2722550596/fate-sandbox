@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state-store";
-import { normalizeActorConditionEvent } from "./actor-condition-normalizer";
-import { commitTurnTool } from "./commit-turn";
-import { updateActorConditionTool } from "./update-actor-condition";
+import { getState, resetState } from "../../engine/core/state-store.ts";
+import { normalizeActorConditionEvent } from "./actor-condition-normalizer.ts";
+import { commitTurnTool } from "./commit-turn.ts";
+import { updateActorConditionTool } from "./update-actor-condition.ts";
 
 void test("normalizeActorConditionEvent accepts update-outfit alias", () => {
   const event = normalizeActorConditionEvent({

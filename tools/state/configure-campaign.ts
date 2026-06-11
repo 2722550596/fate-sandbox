@@ -1,13 +1,13 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { CurrencyCode } from "../../engine/core/state";
-import type { ToolResult } from "../runtime/tool-result";
+import type { CurrencyCode } from "../../engine/core/state.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { configureCampaign } from "../../engine/core/campaign";
-import { parseConfigureCampaignInput } from "../../engine/core/campaign-schema";
+import { configureCampaign } from "../../engine/core/campaign.ts";
+import { parseConfigureCampaignInput } from "../../engine/core/campaign-schema.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner";
-import { isRecord } from "../../engine/core/typebox-validation";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { isRecord } from "../../engine/core/typebox-validation.ts";
 
 /** Moon Cell 等时间线的货币别名归一化——这是领域归一化，不是校验。 */
 const CURRENCY_ALIASES: Readonly<Record<string, CurrencyCode>> = {

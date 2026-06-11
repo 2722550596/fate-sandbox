@@ -2,16 +2,16 @@ import type {
   CombatExchangeTactic,
   CombatRiskTolerance,
   CombatSwing,
-} from "./combat-exchange-schema";
-import type { FateParams, FateRank, NoblePhantasm, PublicActorState, State } from "./state";
+} from "./combat-exchange-schema.ts";
+import type { FateParams, FateRank, NoblePhantasm, PublicActorState, State } from "./state.ts";
 
-import { compareFateRanks, type FateRankComparison } from "./fate-rank";
+import { compareFateRanks, type FateRankComparison } from "./fate-rank.ts";
 
 export type {
   CombatExchangeTactic,
   CombatRiskTolerance,
   CombatSwing,
-} from "./combat-exchange-schema";
+} from "./combat-exchange-schema.ts";
 
 export type CombatOutcomeBand =
   | "clean-advantage"

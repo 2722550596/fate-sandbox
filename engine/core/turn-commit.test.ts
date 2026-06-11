@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createInitialState } from "./state-store";
-import { commitTurn } from "./turn-commit";
+import { createInitialState } from "./state-store.ts";
+import { commitTurn } from "./turn-commit.ts";
 
 const MIN_TIME = { kind: "elapsed", elapsedMinutes: 1, reason: "推进一个最小时间单位。" } as const;
 

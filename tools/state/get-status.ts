@@ -1,9 +1,9 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import { buildGmBrief } from "../../engine/core/public-projection";
-import { hydrateStateFromSessionManager } from "../../engine/core/session-hydration";
-import { getState } from "../../engine/core/state-store";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { buildGmBrief } from "../../engine/core/public-projection.ts";
+import { hydrateStateFromSessionManager } from "../../engine/core/session-hydration.ts";
+import { getState } from "../../engine/core/state-store.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 const lastStatusRevisionBySession = new WeakMap<object, string>();
 let lastGlobalStatusRevision: string | null = null;

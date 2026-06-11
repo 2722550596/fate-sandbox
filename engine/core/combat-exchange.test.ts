@@ -1,11 +1,11 @@
-import type { FateParams, NoblePhantasm, PublicActorState, State } from "./state";
+import type { FateParams, NoblePhantasm, PublicActorState, State } from "./state.ts";
 
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { resolveCombatExchange } from "./combat-exchange";
-import { parseCombatExchangeInput } from "./combat-exchange-schema";
-import { createInitialState } from "./state-store";
+import { parseCombatExchangeInput } from "./combat-exchange-schema.ts";
+import { resolveCombatExchange } from "./combat-exchange.ts";
+import { createInitialState } from "./state-store.ts";
 
 void test("resolveCombatExchange gives a superior servant local advantage without HP math", () => {
   const draft = createInitialState();

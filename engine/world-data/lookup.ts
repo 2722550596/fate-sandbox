@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { isRecord } from "../core/typebox-validation";
+import { isRecord } from "../core/typebox-validation.ts";
 
 export type LookupKind = "角色" | "地点" | "设定" | "时间线";
 

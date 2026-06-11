@@ -1,8 +1,8 @@
-import { cloneState, commitState } from "../../engine/core/state-store";
-import { writeStateToDetails } from "../../engine/core/state-persistence";
-import type { State } from "../../engine/core/state";
-import { persistCurrentState } from "../../engine/core/state-persistence";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { cloneState, commitState } from "../../engine/core/state-store.ts";
+import { writeStateToDetails } from "../../engine/core/state-persistence.ts";
+import type { State } from "../../engine/core/state.ts";
+import { persistCurrentState } from "../../engine/core/state-persistence.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export interface DomainToolRunInput<Result> {
   sessionManager: unknown;

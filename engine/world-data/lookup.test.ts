@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { lookupWorldData } from "./lookup";
+import { lookupWorldData } from "./lookup.ts";
 
 void test("lookupWorldData searches across all data without category", () => {
   const result = lookupWorldData({ query: "冬木 教会" });

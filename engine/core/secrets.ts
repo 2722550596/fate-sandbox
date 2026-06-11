@@ -5,7 +5,7 @@ import type {
   RevealSecretEvent,
   ServantSecretNoblePhantasmInput,
   ServantSecretStringInput,
-} from "./secrets-schema";
+} from "./secrets-schema.ts";
 import type {
   ActorId,
   ActorSecretSlots,
@@ -13,11 +13,11 @@ import type {
   OffscreenEvent,
   SecretSlot,
   State,
-} from "./state";
+} from "./state.ts";
 
-import { recordMemory } from "./memory";
-import { recordOffscreenEvent } from "./offscreen-event";
-import { assertNonEmptyString } from "./typebox-validation";
+import { recordMemory } from "./memory.ts";
+import { recordOffscreenEvent } from "./offscreen-event.ts";
+import { assertNonEmptyString } from "./typebox-validation.ts";
 
 export type {
   ConfigureActorSecretsInput,
@@ -27,7 +27,7 @@ export type {
   RevealSecretToolInput,
   ServantSecretNoblePhantasmInput,
   ServantSecretStringInput,
-} from "./secrets-schema";
+} from "./secrets-schema.ts";
 
 export interface ConfigureServantSecretsResult {
   message: string;

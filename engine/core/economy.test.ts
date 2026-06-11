@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { updateEconomy } from "./economy";
-import { createInitialState } from "./state-store";
+import { updateEconomy } from "./economy.ts";
+import { createInitialState } from "./state-store.ts";
 
 void test("updateEconomy spends money from a named purse", () => {
   const draft = createInitialState();

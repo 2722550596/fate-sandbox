@@ -1,21 +1,23 @@
-import type { HumanActorState, PublicGameState, State, StateExport } from "./state";
+import type { HumanActorState, PublicGameState, State, StateExport } from "./state.ts";
 
 import { mkdirSync, writeFileSync } from "node:fs";
 
-import { formatHumanTime, nowIso } from "./date-time";
-import { pruneExpiredParamModifiers } from "./servant";
-import { CURRENT_STATE_SCHEMA_VERSION } from "./state";
-import { parseStateSchema } from "./state-schema";
-import { assertInteger, formatUnknown, isRecord } from "./typebox-validation";
+import { formatHumanTime, nowIso } from "./date-time.ts";
+import { pruneExpiredParamModifiers } from "./servant.ts";
+import { parseStateSchema } from "./state-schema.ts";
+import { CURRENT_STATE_SCHEMA_VERSION } from "./state.ts";
+import { assertInteger, formatUnknown, isRecord } from "./typebox-validation.ts";
 
 const DEBUG_STATE_PATH = "state/state.json";
 const INITIAL_CURRENT_TIME = "2004-01-30T07:00:00.000Z";
 const PROTAGONIST_ACTOR_ID = "protagonist";
 
-declare global {
-  // eslint-disable-next-line no-var -- jiti/tsx may instantiate modules more than once; global store keeps one runtime state.
-  var __fsn_state_store__: State | undefined;
-}
+/**
+ * 模块级单例。状态在每个入口（context / tool_call / session_start / 面板命令）
+ * 都会先从 session entries 重新 hydrate，因此即使模块被重复实例化，
+ * 各实例也会从同一份 session 数据收敛，无需跨实例共享 globalThis。
+ */
+let store: State | undefined;
 
 export function getState(): State {
   return cloneState();
@@ -79,15 +81,15 @@ export function writeDebugStateFile(): string {
 }
 
 function getStore(): State {
-  if (!globalThis.__fsn_state_store__) {
-    globalThis.__fsn_state_store__ = createInitialState();
+  if (!store) {
+    store = createInitialState();
   }
-  return globalThis.__fsn_state_store__;
+  return store;
 }
 
 function setStore(state: State): void {
   const normalizedState = pruneExpiredParamModifiers(structuredClone(state));
-  globalThis.__fsn_state_store__ = normalizedState;
+  store = normalizedState;
   writeStateDebugSnapshot(normalizedState);
 }
 

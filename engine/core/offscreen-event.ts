@@ -3,16 +3,16 @@ import type {
   OffscreenEventSource,
   OffscreenEventVisibility,
   State,
-} from "./state";
+} from "./state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 
-import { createId } from "./ids";
-import { OFFSCREEN_EVENT_SOURCES, OFFSCREEN_EVENT_VISIBILITIES } from "./state-enum-schemas";
-import { assertOneOfString } from "./string-enum";
-import { assertIsoDateString, assertNonEmptyString } from "./typebox-validation";
+import { createId } from "./ids.ts";
+import { OFFSCREEN_EVENT_SOURCES, OFFSCREEN_EVENT_VISIBILITIES } from "./state-enum-schemas.ts";
+import { assertOneOfString } from "./string-enum.ts";
+import { assertIsoDateString, assertNonEmptyString } from "./typebox-validation.ts";
 
-export type { OffscreenEventSource, OffscreenEventVisibility } from "./state";
+export type { OffscreenEventSource, OffscreenEventVisibility } from "./state.ts";
 
 export type RecordOffscreenEventInput = Omit<OffscreenEvent, "id">;
 

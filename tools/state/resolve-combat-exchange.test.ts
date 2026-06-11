@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { FateParams, PublicActorState } from "../../engine/core/state";
+import type { FateParams, PublicActorState } from "../../engine/core/state.ts";
 
-import { cloneState, commitState, resetState } from "../../engine/core/state-store";
-import { resolveCombatExchangeTool } from "./resolve-combat-exchange";
+import { cloneState, commitState, resetState } from "../../engine/core/state-store.ts";
+import { resolveCombatExchangeTool } from "./resolve-combat-exchange.ts";
 
 void test("resolveCombatExchangeTool returns player-safe constraints and state details", () => {
   resetState();

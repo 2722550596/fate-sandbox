@@ -1,18 +1,18 @@
-import type { ScenePresenceResult } from "./actor";
-import type { MemoryEvent, MemoryEventResult } from "./memory";
-import type {
-  SceneBeatInput,
-  SceneBeatResult,
-  SceneBeatTransitionResult,
-  SceneEventResult,
-} from "./scene";
+import type { ScenePresenceResult } from "./actor.ts";
+import type { MemoryEvent, MemoryEventResult } from "./memory.ts";
 import type {
   SceneBeatBeginInput,
   SceneBeatCompleteInput,
   SceneBeatMemoryInput,
   SceneBeatProgressInput,
-} from "./scene-beat-schema";
-import type { SituationKind, State } from "./state";
+} from "./scene-beat-schema.ts";
+import type {
+  SceneBeatInput,
+  SceneBeatResult,
+  SceneBeatTransitionResult,
+  SceneEventResult,
+} from "./scene.ts";
+import type { SituationKind, State } from "./state.ts";
 
 export type {
   SceneBeatActionPolicy,
@@ -22,14 +22,14 @@ export type {
   SceneBeatNextBeatInput,
   SceneBeatPresenceInput,
   SceneBeatProgressInput,
-} from "./scene-beat-schema";
+} from "./scene-beat-schema.ts";
 
-import { setScenePresence } from "./actor";
-import { createId } from "./ids";
-import { recordMemory } from "./memory";
-import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene";
-import { appendTurnLogEntry } from "./turn-log";
-import { applyTurnTime } from "./turn-time";
+import { setScenePresence } from "./actor.ts";
+import { createId } from "./ids.ts";
+import { recordMemory } from "./memory.ts";
+import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene.ts";
+import { appendTurnLogEntry } from "./turn-log.ts";
+import { applyTurnTime } from "./turn-time.ts";
 
 export type SceneBeatProgressResult =
   | {

@@ -1,11 +1,11 @@
-import type { FsnToolDefinition } from "../runtime/tool-definition";
+import type { FsnToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { persistCurrentState, writeStateToDetails } from "../../engine/core/state-persistence";
-import { resetState } from "../../engine/core/state-store";
-import { assertNonEmptyString, isRecord } from "../../engine/core/typebox-validation";
-import { textResult, type ToolResult } from "../runtime/tool-result";
+import { persistCurrentState, writeStateToDetails } from "../../engine/core/state-persistence.ts";
+import { resetState } from "../../engine/core/state-store.ts";
+import { assertNonEmptyString, isRecord } from "../../engine/core/typebox-validation.ts";
+import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export function resetStateTool(params: unknown, sessionManager: unknown): ToolResult {
   const reason = assertNonEmptyString(isRecord(params) ? params["reason"] : undefined, "reason");

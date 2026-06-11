@@ -1,19 +1,19 @@
 import type { Static } from "typebox";
 
-import type { TurnTimePolicy } from "./state";
-import type { TypeBoxValidator } from "./typebox-validation";
+import type { TurnTimePolicy } from "./state.ts";
+import type { TypeBoxValidator } from "./typebox-validation.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { MEMORY_CLAIM_SCHEMA } from "./memory-schema";
+import { MEMORY_CLAIM_SCHEMA } from "./memory-schema.ts";
 import {
   SCENE_THREAT_SEVERITY_SCHEMA,
   SITUATION_KIND_SCHEMA,
   stringEnumSchema,
-} from "./state-enum-schemas";
-import { parseTurnTimePolicySchema } from "./turn-time-schema";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation";
+} from "./state-enum-schemas.ts";
+import { parseTurnTimePolicySchema } from "./turn-time-schema.ts";
+import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * Scene Beat lifecycle（progress_scene_beat 工具）边界 schema：单一事实来源。

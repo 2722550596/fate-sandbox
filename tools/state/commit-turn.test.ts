@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state-store";
-import { commitTurnTool } from "./commit-turn";
+import { getState, resetState } from "../../engine/core/state-store.ts";
+import { commitTurnTool } from "./commit-turn.ts";
 
 void test("commitTurnTool requires top-level time", () => {
   resetState();

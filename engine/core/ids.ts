@@ -1,6 +1,6 @@
-import type { State } from "./state";
+import type { State } from "./state.ts";
 
-import { assertNonEmptyString, isRecord } from "./typebox-validation";
+import { assertNonEmptyString, isRecord } from "./typebox-validation.ts";
 
 /**
  * 在给定 Game State draft 内分配确定性递增 ID。
