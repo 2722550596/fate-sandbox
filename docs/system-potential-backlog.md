@@ -4,14 +4,15 @@
 原则轴：把还停留在 prompt 里的纪律下沉为结构；把 GM 手工装配的活变成 engine 自动供给。
 每项做完勾掉，动手前先重读对应小节，按当时代码现状校正方案。
 
-优先级总览：
+优先级总览（2026-06-11 修订：#12 是重大架构改动，决定后续多项的接线方式，提前到最前面）：
 
-1. ✅ 高性价比先做：#1 输出 lint（含真名泄漏阻断）、#8 JSONL 审计脚本
-2. 叙事上限主解锁：#2 hook 状态化、#3 阵营时钟与到期义务
-3. 吃 #3 结构红利：#4 裁决落地账本、#5 parallel-line 工具化
-4. 长跑差距项：#6 NPC 卡片 + 记忆检索、#7 canon 研究缓存
-5. 小件随手做：#9 确定性随机源、#10 玩家侧命令、#11 preset 顺序微优化
-6. 大型架构项（单独立项，吸收 #1 部分价值、与 #6 #11 协同）：#12 结算/渲染双 pass 分离
+1. 先行：#8 JSONL 审计脚本——它是 #12 spike 的验收仪器，go/no-go 需要 before/after 度量
+2. 架构先行项：#12 spike → #12 全量（被它重塑的项不得提前接线）
+3. 被 #12 重塑、必须等它：#1 的接线位置（规则集本体是纯函数，可提前写）、#6 的注入路由、#11（被吸收，不单独做）
+4. 与 #12 正交、可随时穿插（engine/state 层，在接缝之下）：#2 hook 状态化、#3 阵营时钟、#4 义务账本、#9 RNG
+5. 后置：#5 parallel-line 工具化（吃 #3 红利）、#6 #7 长跑项、#10 玩家侧小件
+
+若 #12 spike 判定 no-go：退回原优先级（#1 #8 先行，#1 按单 pass 接线在 turn_end），只损失 spike 成本。
 
 ---
 
@@ -237,18 +238,18 @@ interface DirectionPacket {
 
 pi 架构可行性验证结论（pi 0.79.1）：
 
-| 设计需求 | pi 原语 | 先例 |
-| --- | --- | --- |
-| 结算器 per-call history 投影 | `context` 事件返回过滤 messages | 本项目 injection.ts 已在用 |
-| 每轮替换 system prompt | `before_agent_start` 返回 `systemPrompt` | examples/pirate.ts |
-| 扩展内第二 LLM pass | `complete()`/`stream()` + `modelRegistry.getApiKeyAndHeaders` | 本项目 compaction 扩展同模式 |
-| 结算器不出正文收尾 | 工具返回 `terminate: true` 直接停在工具调用 | examples/structured-output.ts |
-| prose 落 session + markdown 显示 | `sendMessage({customType, display:true})` + `registerMessageRenderer` | examples/message-renderer.ts |
-| packet 持久化但不进 LLM 上下文 | `appendEntry()`（文档明示 not in LLM context） | extensions.md |
-| 渲染 pass 去工具 schema | `setActiveTools([])` / 手工装配 history | examples/plan-mode |
-| 替换最终 assistant 消息（备选接线） | `message_end` 返回替换消息（同 role） | extensions.md |
-| pass 期间等待 UX | `setWorkingMessage`/`setStatus`/`setWidget` | 多个 examples |
-| /fuck 兼容 | custom message 是普通 entry，prune 一起删 | 现有 rewind |
+| 设计需求                            | pi 原语                                                               | 先例                          |
+| ----------------------------------- | --------------------------------------------------------------------- | ----------------------------- |
+| 结算器 per-call history 投影        | `context` 事件返回过滤 messages                                       | 本项目 injection.ts 已在用    |
+| 每轮替换 system prompt              | `before_agent_start` 返回 `systemPrompt`                              | examples/pirate.ts            |
+| 扩展内第二 LLM pass                 | `complete()`/`stream()` + `modelRegistry.getApiKeyAndHeaders`         | 本项目 compaction 扩展同模式  |
+| 结算器不出正文收尾                  | 工具返回 `terminate: true` 直接停在工具调用                           | examples/structured-output.ts |
+| prose 落 session + markdown 显示    | `sendMessage({customType, display:true})` + `registerMessageRenderer` | examples/message-renderer.ts  |
+| packet 持久化但不进 LLM 上下文      | `appendEntry()`（文档明示 not in LLM context）                        | extensions.md                 |
+| 渲染 pass 去工具 schema             | `setActiveTools([])` / 手工装配 history                               | examples/plan-mode            |
+| 替换最终 assistant 消息（备选接线） | `message_end` 返回替换消息（同 role）                                 | extensions.md                 |
+| pass 期间等待 UX                    | `setWorkingMessage`/`setStatus`/`setWidget`                           | 多个 examples                 |
+| /fuck 兼容                          | custom message 是普通 entry，prune 一起删                             | 现有 rewind                   |
 
 接线方案：
 
