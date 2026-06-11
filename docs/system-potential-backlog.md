@@ -184,8 +184,9 @@ pre-response 槽里 `mechanical_state`（每轮变，priority 10）排在 tool-p
 
 ## 12. 结算/渲染双 pass 分离（工具调用与叙事完全隔离）
 
-- [ ] 状态：未开始（大型架构项，先做 spike 验证接缝质量）
+- [ ] 状态：spike 已完成且判定 GO，全量实施待启动（从实施路线步骤 2 开始）
 - [x] pi 架构可行性已验证（2026-06-11，对照 pi 0.79.1 extensions.md 全文 + 官方 examples）
+- [x] Spike 已完成（2026-06-11，`docs/spike-two-pass/`）：取 2026-06-08 session 的 turn 52/55/57（对白揭示/战斗裁决/宝具高潮三类），手工构造 packet 喂洁净室渲染器。结论 GO：resolvedChanges 全部落地、refusesToSay 防线成立、endWindow 全命中、声音一致性不丢，渲染质量持平或优于单 pass 基线（heavy 轮基线有 2 处 blacklist 违规，渲染版更干净）。已确认的真风险：生产中 packet 由结算器生成，其信息密度未验证；渲染器会自行补充 packet 外的 canon，两道 lint 关卡不可省。
 
 动机：现在单个 GM 上下文同时承载 23 个工具 schema、机械规则、style 黑名单和散文史，两种任务抢同一份注意力预算；散文史里混着工具调用噪音；secret 隔离依赖 prompt 自觉。
 
