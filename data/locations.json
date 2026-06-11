@@ -425,6 +425,204 @@
         "迷宫地形反映心象与欲望，可探索但绝不安全。",
         "仅 CCC 线使用。"
       ]
+    },
+    {
+      "id": "misaki-town",
+      "name": "三咲市",
+      "category": "地点",
+      "summary": "月姬与魔法使之夜共用的地方都市：山手的旧宅区与平地的新兴市街对照，夜晚的街道在猎奇事件流言中变得空旷。",
+      "stateLocation": {
+        "region": "三咲市",
+        "site": "全域",
+        "detail": "未指定",
+        "boundary": "normal"
+      },
+      "notes": [
+        "月姬2000 时点流传连续猎奇杀人事件",
+        "魔夜时点（1980年代末）是现代化浪潮与神秘退潮的交界"
+      ]
+    },
+    {
+      "id": "tohno-mansion",
+      "name": "远野邸",
+      "category": "地点",
+      "summary": "山手高级住宅区深处的西式大宅，远野家本邸。规矩森严，女仆翡翠、琥珀维持运转，当主秋叶坐镇。",
+      "stateLocation": {
+        "region": "三咲市",
+        "site": "山手住宅区",
+        "detail": "远野邸",
+        "boundary": "normal"
+      },
+      "notes": ["宅内多处房间对客人禁入；地下与离屋藏有远野家血统的秘密", "志贵八年ぶり回归的起点"]
+    },
+    {
+      "id": "misaki-high-school",
+      "name": "三咲高中",
+      "category": "地点",
+      "summary": "志贵、五月就读的普通公立高中，希耶尔以学姐身份潜伏于此。日常戏的主舞台。",
+      "stateLocation": {
+        "region": "三咲市",
+        "site": "学园区",
+        "detail": "三咲高中",
+        "boundary": "normal"
+      },
+      "notes": ["茶道部活动室是希耶尔的据点", "放学后到日落是日常与异变的切换窗口"]
+    },
+    {
+      "id": "souya-city",
+      "name": "总谷市",
+      "category": "地点",
+      "summary": "月姬重制版的现代都市舞台：高层公寓、轻轨与繁华商圈，连续猎奇杀人被新闻称为「吸血鬼出没」。",
+      "stateLocation": {
+        "region": "总谷市",
+        "site": "全域",
+        "detail": "未指定",
+        "boundary": "normal"
+      },
+      "notes": ["重制版世界观：都市化程度高于旧三咲", "代行者与埋葬机关的活动更贴近市街"]
+    },
+    {
+      "id": "kuonji-mansion",
+      "name": "久远寺邸",
+      "category": "地点",
+      "summary": "三咲市山上的洋馆，魔女久远寺有珠的居城，青子与草十郎同居于此。整座宅邸被童话使魔与结界守护。",
+      "stateLocation": {
+        "region": "三咲市",
+        "site": "山上",
+        "detail": "久远寺邸",
+        "boundary": "bounded-field"
+      },
+      "notes": ["未经许可的闯入者会先遇到使魔而非主人", "魔夜沙盒的安全屋兼最危险的地方"]
+    },
+    {
+      "id": "mifune-city",
+      "name": "观布子市",
+      "category": "地点",
+      "summary": "空之境界的舞台都市：1990年代末的地方都市，超常事件以都市怪谈形态零星发生。",
+      "stateLocation": {
+        "region": "观布子市",
+        "site": "全域",
+        "detail": "未指定",
+        "boundary": "normal"
+      },
+      "notes": ["巫条大厦跳楼、痛觉残留杀人等事件按时序散布", "表层治安正常，神秘被日常噪音掩盖"]
+    },
+    {
+      "id": "garan-no-dou",
+      "name": "伽蓝堂",
+      "category": "地点",
+      "summary": "苍崎橙子的事务所，挂着倒闭公司招牌的杂居楼层。接受「常人无法处理」的委托，式与干也在此打工。",
+      "stateLocation": {
+        "region": "观布子市",
+        "site": "市区",
+        "detail": "伽蓝堂事务所",
+        "boundary": "normal"
+      },
+      "notes": ["橙子的工房在楼内另设结界层", "委托简报是空境沙盒天然的任务发放口"]
+    },
+    {
+      "id": "fujou-building",
+      "name": "巫条大厦",
+      "category": "地点",
+      "summary": "市区边缘的高层公寓，「俯瞰风景」事件现场：少女们相继从顶楼坠落，顶层空中漂浮着不可视的存在。",
+      "stateLocation": {
+        "region": "观布子市",
+        "site": "市区边缘",
+        "detail": "巫条大厦",
+        "boundary": "bounded-field"
+      },
+      "notes": ["夜间顶层接近二重存在的领域", "事件是否已收束由开局确认"]
+    },
+    {
+      "id": "ogawa-apartment",
+      "name": "小川公寓",
+      "category": "地点",
+      "summary": "荒耶宗莲的实验装置：外观普通的复合公寓，内部是循环的矛盾螺旋结界。",
+      "stateLocation": {
+        "region": "观布子市",
+        "site": "新兴区",
+        "detail": "小川公寓",
+        "boundary": "bounded-field"
+      },
+      "notes": ["进入者会在重复的楼层结构中迷失", "空境后期事件的核心舞台，沙盒中慎重投放"]
+    },
+    {
+      "id": "reien-girls-academy",
+      "name": "礼园女学院",
+      "category": "地点",
+      "summary": "全寄宿制名门女校，鲜花与藤乃就读。外界联络受限的封闭环境本身就是事件温床。",
+      "stateLocation": {
+        "region": "观布子市",
+        "site": "郊外",
+        "detail": "礼园女学院",
+        "boundary": "normal"
+      },
+      "notes": ["对外通讯管制：学生卷入异变时求援困难", "学院怪谈系事件的天然舞台"]
+    },
+    {
+      "id": "london-clock-tower",
+      "name": "时钟塔",
+      "category": "地点",
+      "summary": "魔术协会本部：大英博物馆地下与周边街区延展的魔术师都市。十二学科与君主派阀的政治场。",
+      "stateLocation": {
+        "region": "伦敦",
+        "site": "时钟塔",
+        "detail": "本部回廊",
+        "boundary": "normal"
+      },
+      "notes": ["地下越深神秘越古老，许可区域与身份挂钩", "派阀礼仪失误的代价可能高过决斗"]
+    },
+    {
+      "id": "el-melloi-classroom",
+      "name": "埃尔梅罗教室",
+      "category": "地点",
+      "summary": "现代魔术科的讲堂：二世以平民出身讲师身份执教，门下聚集各科问题儿与天才。",
+      "stateLocation": {
+        "region": "伦敦",
+        "site": "时钟塔",
+        "detail": "现代魔术科讲堂",
+        "boundary": "normal"
+      },
+      "notes": ["事件簿沙盒的据点与情报枢纽", "学生人脉是玩家最易获得的资源网"]
+    },
+    {
+      "id": "trifas",
+      "name": "特里凡",
+      "category": "地点",
+      "summary": "罗马尼亚外西凡尼亚的小城，千界树一族的领地。表面是宁静东欧小镇，实际整城处于黑阵营管理之下。",
+      "stateLocation": {
+        "region": "特里凡",
+        "site": "镇区",
+        "detail": "未指定",
+        "boundary": "normal"
+      },
+      "notes": ["居民对「城堡的主人们」保持着被暗示强化的不关心", "红阵营进入此地即是深入敌境"]
+    },
+    {
+      "id": "yggdmillennia-fortress",
+      "name": "千界树之城",
+      "category": "地点",
+      "summary": "特里凡郊外山上的中世城塞，黑阵营大本营。大圣杯安置于地下，全城要塞化结界。",
+      "stateLocation": {
+        "region": "特里凡",
+        "site": "郊外山地",
+        "detail": "千界树城塞",
+        "boundary": "bounded-field"
+      },
+      "notes": ["魔像与强化吸血鬼卫兵巡逻", "大圣杯所在的地下大空洞是战争的最终目标"]
+    },
+    {
+      "id": "hanging-gardens-apo",
+      "name": "虚荣的空中庭园",
+      "category": "地点",
+      "summary": "赛米拉米斯的宝具要塞：建造完成后浮空移动的巴比伦式大结界，红阵营后期大本营。",
+      "stateLocation": {
+        "region": "特里凡上空",
+        "site": "空中庭园",
+        "detail": "未指定",
+        "boundary": "otherworld"
+      },
+      "notes": ["建造需要材料与仪式时间——进度本身是剧情时钟", "庭园内赛米拉米斯能力全面跃升"]
     }
   ]
 }

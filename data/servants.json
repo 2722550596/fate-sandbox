@@ -1162,6 +1162,504 @@
         "不要把 FGO SE.RA.PH 的经历、恋爱线或能力状态自动套回 CCC 本篇。",
         "本地条目只作 CCC 索引；精确参数、技能、宝具效果、职阶细节和路线表现需要外部检索 TYPE-MOON Wiki JP / TMdict / 官方资料。"
       ]
+    },
+    {
+      "id": "siegfried-black-saber-apo",
+      "name": "齐格飞",
+      "aliases": ["黑Saber", "屠龙者", "荷兰德的英雄"],
+      "className": "Saber",
+      "trueName": "齐格飞",
+      "parameters": {
+        "strength": "B+",
+        "endurance": "A",
+        "agility": "B",
+        "mana": "C",
+        "luck": "E",
+        "noblePhantasm": "A+"
+      },
+      "noblePhantasms": [
+        {
+          "name": "Balmung",
+          "rank": "A+",
+          "kind": "对军宝具",
+          "summary": "幻想大剑·天魔失坠。魔力放出的蓝光半月斩击，对龙之血脉者威力上升。"
+        },
+        {
+          "name": "恶龙之血铠",
+          "rank": "B+",
+          "kind": "结界宝具",
+          "summary": "龙血浴身的不死性：B 以下攻击无效化，弱点在背部一片菩提叶的位置。"
+        }
+      ],
+      "notes": [
+        "生前因「被人请求才行动」而抱憾，强烈渴望一场为自己而战的战争。",
+        "沉默寡言，第一人称谢罪癖（对不起）。",
+        "背部弱点是 hidden-canonical 级情报。"
+      ]
+    },
+    {
+      "id": "vlad-iii-black-lancer-apo",
+      "name": "弗拉德三世",
+      "aliases": ["黑Lancer", "串刺公", "护国的鬼将"],
+      "className": "Lancer",
+      "trueName": "弗拉德三世",
+      "parameters": {
+        "strength": "A",
+        "endurance": "A",
+        "agility": "B",
+        "mana": "B",
+        "luck": "D",
+        "noblePhantasm": "A"
+      },
+      "noblePhantasms": [
+        {
+          "name": "极刑王",
+          "rank": "A",
+          "kind": "对军结界宝具",
+          "summary": "Kazikli Bey。领土内展开无数杭桩穿刺敌人；在罗马尼亚本土召唤获得大幅强化。"
+        },
+        {
+          "name": "鲜血传承",
+          "rank": "A+",
+          "kind": "对己宝具",
+          "summary": "强制变化为吸血鬼形态的封印宝具；本人极度厌恶，使用等于人格背叛。"
+        }
+      ],
+      "notes": [
+        "在罗马尼亚本土是接近顶级的从者，护国意识极强。",
+        "对「德古拉=吸血鬼」的污名暴怒；这是可利用的精神弱点。",
+        "黑阵营名义上的王牌与精神领袖。"
+      ]
+    },
+    {
+      "id": "chiron-black-archer-apo",
+      "name": "喀戎",
+      "aliases": ["黑Archer", "贤者", "大贤者肯陶洛斯"],
+      "className": "Archer",
+      "trueName": "喀戎",
+      "parameters": {
+        "strength": "B",
+        "endurance": "B",
+        "agility": "A",
+        "mana": "B",
+        "luck": "B",
+        "noblePhantasm": "B"
+      },
+      "noblePhantasms": [
+        {
+          "name": "天蝎一射",
+          "rank": "B",
+          "kind": "对人宝具",
+          "summary": "Antares Snipe。借天蝎座星光的必中狙击，夜间限定。"
+        }
+      ],
+      "notes": [
+        "众英雄之师：阿喀琉斯、赫拉克勒斯等皆出门下。",
+        "以人形现界掩盖肯陶洛斯本相；体术格斗同样顶级。",
+        "战术参谋型从者，冷静温和但战斗判断毫不留情。"
+      ]
+    },
+    {
+      "id": "astolfo-black-rider-apo",
+      "name": "阿斯托尔福",
+      "aliases": ["黑Rider", "查理曼十二勇士", "骏鹰骑手"],
+      "className": "Rider",
+      "trueName": "阿斯托尔福",
+      "parameters": {
+        "strength": "D",
+        "endurance": "D",
+        "agility": "B",
+        "mana": "C",
+        "luck": "A+",
+        "noblePhantasm": "C"
+      },
+      "noblePhantasms": [
+        {
+          "name": "破却的魔笛",
+          "rank": "C",
+          "kind": "对军宝具",
+          "summary": "La Black Luna。强制退散的魔音号角。"
+        },
+        {
+          "name": "触碰即坠的幻马",
+          "rank": "B",
+          "kind": "骑乘宝具",
+          "summary": "Hippogriff。骏鹰；短距离跳跃可滑入幻想侧回避攻击。"
+        },
+        {
+          "name": "绝赞夺理的书",
+          "rank": "C",
+          "kind": "对魔宝具",
+          "summary": "Casseur de Logistille。破解魔术的理性之书——代价是本人理性蒸发。"
+        }
+      ],
+      "notes": [
+        "外貌少女化的少年从者，自称「人妖」级混乱可爱担当。",
+        "理性蒸发：会把真名、宝具性能当闲聊讲出去——对秘密管理是灾难。",
+        "对霍蒙克鲁斯的同情心是黑阵营内部裂痕的引线。"
+      ]
+    },
+    {
+      "id": "avicebron-black-caster-apo",
+      "name": "阿维斯布隆",
+      "aliases": ["黑Caster", "所罗门·伊本·盖比鲁勒", "魔像师"],
+      "className": "Caster",
+      "trueName": "阿维斯布隆",
+      "parameters": {
+        "strength": "E",
+        "endurance": "E",
+        "agility": "E",
+        "mana": "A",
+        "luck": "B",
+        "noblePhantasm": "A+"
+      },
+      "noblePhantasms": [
+        {
+          "name": "王冠：睿智之光",
+          "rank": "A+",
+          "kind": "对军宝具",
+          "summary": "Golem Keter Malkuth。原初亚当巨人魔像；需要核心——以人为核时接近神造兵器。"
+        }
+      ],
+      "notes": [
+        "魔像（Golem）军团的量产与指挥是主力。",
+        "面具下的功利主义者：为完成毕生大业可以背叛阵营。",
+        "千界树的魔术工房与他的工作高度耦合。"
+      ]
+    },
+    {
+      "id": "frankenstein-black-berserker-apo",
+      "name": "弗兰肯斯坦",
+      "aliases": ["黑Berserker", "弗兰肯斯坦的怪物", "花嫁"],
+      "className": "Berserker",
+      "trueName": "弗兰肯斯坦",
+      "parameters": {
+        "strength": "C",
+        "endurance": "C",
+        "agility": "D",
+        "mana": "B",
+        "luck": "D",
+        "noblePhantasm": "C"
+      },
+      "noblePhantasms": [
+        {
+          "name": "磔刑之雷树",
+          "rank": "C~B+",
+          "kind": "对军宝具",
+          "summary": "Blasted Tree。自身为避雷针的过载雷击，全力解放等于自毁。"
+        }
+      ],
+      "notes": [
+        "狂化等级低，能进行简单意思疎通；少女人格，渴望伴侣与被承认。",
+        "雷击系魔力放出；持锤状礼装战斗。",
+        "自毁宝具的使用判定必须由剧情与她自身意志确认。"
+      ]
+    },
+    {
+      "id": "jack-the-ripper-black-assassin-apo",
+      "name": "开膛手杰克",
+      "aliases": ["黑Assassin", "雾都的杀人鬼", "切り裂きジャック"],
+      "className": "Assassin",
+      "trueName": "开膛手杰克",
+      "parameters": {
+        "strength": "C",
+        "endurance": "C",
+        "agility": "A",
+        "mana": "C",
+        "luck": "E",
+        "noblePhantasm": "C"
+      },
+      "noblePhantasms": [
+        {
+          "name": "解体圣母",
+          "rank": "D",
+          "kind": "对人宝具",
+          "summary": "Maria the Ripper。满足黑夜/雾/女性等条件时将杀害升格为「仪式」，无视防御取走心脏。"
+        },
+        {
+          "name": "暗夜雾都",
+          "rank": "B",
+          "kind": "结界宝具",
+          "summary": "The Mist。硫酸雾结界，视界与生命的双重剥夺。"
+        }
+      ],
+      "notes": [
+        "以「被堕胎儿们的集合怨念」少女形态现界。",
+        "称御主为「妈妈」；母性依恋与残虐杀意并存。",
+        "在 Apocrypha 中与原阵营关系由开局确认，不必绑定原作雇主。"
+      ]
+    },
+    {
+      "id": "mordred-red-saber-apo",
+      "name": "莫德雷德",
+      "aliases": ["红Saber", "叛逆的骑士", "不列颠的小狮子"],
+      "className": "Saber",
+      "trueName": "莫德雷德",
+      "parameters": {
+        "strength": "B",
+        "endurance": "A",
+        "agility": "B",
+        "mana": "B",
+        "luck": "D",
+        "noblePhantasm": "A+"
+      },
+      "noblePhantasms": [
+        {
+          "name": "燃烧吧，我的反逆之剑",
+          "rank": "A+",
+          "kind": "对城宝具",
+          "summary": "Clarent Blood Arthur。怨念染红的魔剑光束，对亚瑟王血统特攻。"
+        },
+        {
+          "name": "我父之御旗",
+          "rank": "C",
+          "kind": "对己宝具",
+          "summary": "全身甲胄隐匿真名与素颜；解除前职阶探知只能看到 Saber。"
+        }
+      ],
+      "notes": [
+        "严禁称她为「女人」或「亚瑟王之子以外的什么」——逆鳞双重设定。",
+        "御主狮子劫界离与她是契合度极高的雇佣兵搭档。",
+        "战斗风格粗暴直接，但骑士剑术根基是圆桌级。"
+      ]
+    },
+    {
+      "id": "karna-red-lancer-apo",
+      "name": "迦尔纳",
+      "aliases": ["红Lancer", "施舍的英雄", "太阳之子"],
+      "className": "Lancer",
+      "trueName": "迦尔纳",
+      "parameters": {
+        "strength": "B",
+        "endurance": "C",
+        "agility": "A",
+        "mana": "B",
+        "luck": "A",
+        "noblePhantasm": "EX"
+      },
+      "noblePhantasms": [
+        {
+          "name": "日轮啊，化为铠甲",
+          "rank": "A",
+          "kind": "对己宝具",
+          "summary": "Kavacha & Kundala。太阳神授的黄金铠，九成伤害削减的概念防御。"
+        },
+        {
+          "name": "梵天啊，诅咒我吧",
+          "rank": "A",
+          "kind": "对人宝具",
+          "summary": "Brahmastra Kundala。火神之矛的炎之必灭一击。"
+        },
+        {
+          "name": "日轮啊，化作死亡吧",
+          "rank": "EX",
+          "kind": "对神宝具",
+          "summary": "Vasavi Shakti。舍弃黄金铠换取的一击必杀之枪，对神性特攻。"
+        }
+      ],
+      "notes": [
+        "话少且措辞过于直接，常被误解为傲慢——实际是看穿本质后的诚实。",
+        "施舍之魂：对御主的愿望几乎无条件尊重。",
+        "红阵营最强战力，与黑阵营齐格飞的对决是经典战争轴。"
+      ]
+    },
+    {
+      "id": "atalanta-red-archer-apo",
+      "name": "阿塔兰忒",
+      "aliases": ["红Archer", "狩猎的处女", "月女神的猎手"],
+      "className": "Archer",
+      "trueName": "阿塔兰忒",
+      "parameters": {
+        "strength": "D",
+        "endurance": "E",
+        "agility": "A+",
+        "mana": "B",
+        "luck": "C",
+        "noblePhantasm": "B"
+      },
+      "noblePhantasms": [
+        {
+          "name": "诉状之矢文",
+          "rank": "B",
+          "kind": "对军宝具",
+          "summary": "Phoebus Catastrophe。向两位月神借力的广域箭雨，先发制人与面杀伤。"
+        },
+        {
+          "name": "天穹之兽",
+          "rank": "A+",
+          "kind": "对己封印宝具",
+          "summary": "Agrius Metamorphosis。披上卡吕冬大猪皮化身魔兽，理性磨损为代价的力量。"
+        }
+      ],
+      "notes": [
+        "儿童的守护者：对伤害孩子的存在会失去冷静。",
+        "猫科竖瞳与兽耳的猎手形象，独行倾向强。",
+        "封印宝具的使用是她堕落线的开关，剧情慎用。"
+      ]
+    },
+    {
+      "id": "achilles-red-rider-apo",
+      "name": "阿喀琉斯",
+      "aliases": ["红Rider", "希腊最速英雄", "佩琉斯之子"],
+      "className": "Rider",
+      "trueName": "阿喀琉斯",
+      "parameters": {
+        "strength": "B+",
+        "endurance": "A",
+        "agility": "A+",
+        "mana": "C",
+        "luck": "D",
+        "noblePhantasm": "A+"
+      },
+      "noblePhantasms": [
+        {
+          "name": "彗星走法",
+          "rank": "A+",
+          "kind": "对己宝具",
+          "summary": "Troias Tragōidia。骏足疾驰；只有持神性者能与其交锋。"
+        },
+        {
+          "name": "宇宙尽头的单独决斗",
+          "rank": "B",
+          "kind": "结界宝具",
+          "summary": "Amarantos。邀对手进入一对一决斗结界。"
+        },
+        {
+          "name": "勇者的不凋花",
+          "rank": "B",
+          "kind": "对己宝具",
+          "summary": "不死身体；脚踝弱点与放弃不死换全力的选项并存。"
+        }
+      ],
+      "notes": [
+        "豪爽好战的英雄气质，尊重强敌；与喀戎的师徒对决是宿命线。",
+        "战车、长枪、盾三套战法切换。",
+        "不死与脚踝弱点是 hidden-canonical 级情报。"
+      ]
+    },
+    {
+      "id": "shakespeare-red-caster-apo",
+      "name": "威廉·莎士比亚",
+      "aliases": ["红Caster", "剧作家", "吟游诗人之王"],
+      "className": "Caster",
+      "trueName": "威廉·莎士比亚",
+      "parameters": {
+        "strength": "E",
+        "endurance": "E",
+        "agility": "D",
+        "mana": "C",
+        "luck": "B",
+        "noblePhantasm": "C"
+      },
+      "noblePhantasms": [
+        {
+          "name": "开演之时已至，此处即为千变万化之世界",
+          "rank": "B",
+          "kind": "对人宝具",
+          "summary": "First Folio。将对象拖入舞台幻境，以其人生最痛处编成戏剧逼迫直面——精神攻击特化。"
+        }
+      ],
+      "notes": [
+        "毫无战斗力的观剧者：兴趣只有「见证有趣的故事」，会为戏剧性煽动事态。",
+        "附魔（Enchant）魔术为同伴武器赋予强化。",
+        "忠诚不可靠：他效忠的是剧情高潮，不是阵营。"
+      ]
+    },
+    {
+      "id": "spartacus-red-berserker-apo",
+      "name": "斯巴达克斯",
+      "aliases": ["红Berserker", "剑奴叛将", "反逆的剑斗士"],
+      "className": "Berserker",
+      "trueName": "斯巴达克斯",
+      "parameters": {
+        "strength": "A",
+        "endurance": "A",
+        "agility": "D",
+        "mana": "E",
+        "luck": "E",
+        "noblePhantasm": "C"
+      },
+      "noblePhantasms": [
+        {
+          "name": "疵獸的咆哮",
+          "rank": "C~A+",
+          "kind": "对己宝具",
+          "summary": "Crying Warmonger。承受的伤害转化为魔力与再生，越打越强直至爆发。"
+        }
+      ],
+      "notes": [
+        "行动原理只有一条：永远向「压迫者」反逆——指挥几乎不可能。",
+        "笑容温和语气崇高，内容全是反逆诗篇。",
+        "他认定谁是压迫者由当下情境决定，是阵营内的不定时炸弹。"
+      ]
+    },
+    {
+      "id": "semiramis-red-assassin-apo",
+      "name": "赛米拉米斯",
+      "aliases": ["红Assassin", "毒杀的女帝", "空中庭园的主人"],
+      "className": "Assassin",
+      "trueName": "赛米拉米斯",
+      "parameters": {
+        "strength": "E",
+        "endurance": "D",
+        "agility": "C",
+        "mana": "A",
+        "luck": "A",
+        "noblePhantasm": "EX"
+      },
+      "noblePhantasms": [
+        {
+          "name": "虚荣的空中庭园",
+          "rank": "EX",
+          "kind": "对界宝具",
+          "summary": "Hanging Gardens of Babylon。移动要塞级大结界；庭园内她的能力全面跃升至准 Caster 双职阶水准。"
+        },
+        {
+          "name": "毒蛇双牙",
+          "rank": "C",
+          "kind": "对人宝具",
+          "summary": "Sikera Ušum。毒与锁的概念攻击，庭园内可扩展为空间投毒。"
+        }
+      ],
+      "notes": [
+        "双重召唤（Assassin+Caster）特性；正面战弱、据点战极强。",
+        "女帝人格：傲慢、毒舌，但对真正陪伴者会缓慢敞开。",
+        "空中庭园的建造需要材料与时间——它的进度本身适合做 faction clock。"
+      ]
+    },
+    {
+      "id": "jeanne-darc-ruler-apo",
+      "name": "贞德",
+      "aliases": ["Ruler", "圣女", "奥尔良的少女"],
+      "className": "Ruler",
+      "trueName": "贞德",
+      "parameters": {
+        "strength": "B",
+        "endurance": "B",
+        "agility": "A",
+        "mana": "A",
+        "luck": "C",
+        "noblePhantasm": "A++"
+      },
+      "noblePhantasms": [
+        {
+          "name": "吾神在此",
+          "rank": "A++",
+          "kind": "对军宝具",
+          "summary": "Luminosité Eternelle。神明在此·光辉的大旗，概念防御的极致，旗在阵地在。"
+        },
+        {
+          "name": "红莲的圣女",
+          "rank": "C",
+          "kind": "对己宝具",
+          "summary": "La Pucelle。以自身现界为代价的火焰自爆礼装——真正的切札。"
+        }
+      ],
+      "notes": [
+        "大圣杯战争的裁定者：真名看破、特权令咒、对违规者的裁决权。",
+        "信仰不是狂信：她以「见证人们的选择」为本分，倾向不干预。",
+        "对圣堂教会/言峰四郎侧的异常保持警惕是原作主线，沙盒中由剧情重新确认。"
+      ]
     }
   ]
 }
