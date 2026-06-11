@@ -9,8 +9,19 @@ import { parseDirectionPacket } from "./packet-schema.ts";
 export const PROSE_CUSTOM_TYPE = "fsn-prose";
 export const SUBMIT_DIRECTION_PACKET_TOOL = "submit_direction_packet";
 
-/** 渲染器散文史上限（轮数），防止 Pass B 上下文无界增长。 */
-const MAX_PROSE_HISTORY_TURNS = 8;
+/**
+ * 散文史分层窗口（缓存友好：高低水位滞回，边界只在跨过高水位时
+ * 按步长跳动，绝大多数轮次历史前缀字节级不变，provider 前缀缓存可逐轮命中）。
+ *
+ * - 全文层：最近 FULL_LOW..FULL_HIGH 轮的完整正文，语感连续性载体。
+ * - 摘要层：更早轮次每轮一行，从该轮 direction packet 提取（零 LLM 成本）。
+ */
+const FULL_TURNS_HIGH = 12;
+const FULL_TURNS_LOW = 6;
+/** 全文层字符预算；heavy 轮堆积时按步长提前把旧转降级进摘要层。 */
+const FULL_LAYER_CHAR_BUDGET = 30_000;
+const DIGEST_TURNS_HIGH = 32;
+const DIGEST_TURNS_LOW = 16;
 
 export interface PendingDirectionPacket {
   packet: DirectionPacket;
@@ -41,44 +52,57 @@ export function findPendingDirectionPacket(
   return undefined;
 }
 
+/** 渲染器输入消息：扩展层映射成 pi-ai 消息后走 stream()。 */
+export interface RendererMessage {
+  role: "user" | "assistant";
+  text: string;
+}
+
+interface RenderedTurn {
+  /** 绝对轮号（1 起）；永不重编，保证摘要行字节稳定 */
+  turn: number;
+  playerInput: string;
+  prose: string;
+  digest: string;
+}
+
 /**
- * 装配渲染器（Pass B）的单条 user prompt：散文史 + 玩家本轮输入 +
- * direction packet。与 spike 验证过的输入形态一致（docs/spike-two-pass/）。
+ * 装配渲染器（Pass B）输入：append-only 的多消息对话形。
+ *
+ * [user 摘要层?] + (user 玩家输入 / assistant 旧正文) \xd7 全文层
+ * + user(本轮输入 + packet)。旧正文放 assistant 位：前缀逐轮可缓存，
+ * 且模型把它们当「自己写的」，文风延续更自然。
  */
-export function buildRendererPrompt(
+export function buildRendererMessages(
   messages: ReadonlyArray<unknown>,
   packet: DirectionPacket,
-): string {
-  const proseHistory: string[] = [];
-  let currentInputs: string[] = [];
-  for (const message of messages) {
-    if (isProseMessage(message)) {
-      proseHistory.push(customMessageText(message));
-      currentInputs = [];
-      continue;
-    }
-    const userText = playerInputText(message);
-    if (userText !== undefined) {
-      currentInputs.push(userText);
-    }
+): RendererMessage[] {
+  const { turns, currentInputs } = collectRenderedTurns(messages);
+  const fullStart = resolveFullLayerStart(turns);
+  const digestStart = hysteresisStart(fullStart, DIGEST_TURNS_HIGH, DIGEST_TURNS_LOW);
+
+  const result: RendererMessage[] = [];
+  const digestTurns = turns.slice(digestStart, fullStart);
+  if (digestTurns.length > 0) {
+    result.push({
+      role: "user",
+      text: [
+        "# 早期轮次摘要（事件连续性参考，非文风样本）",
+        "",
+        ...digestTurns.map((turn) => turn.digest),
+      ].join("\n"),
+    });
+  }
+  for (const turn of turns.slice(fullStart)) {
+    result.push({ role: "user", text: turn.playerInput });
+    result.push({ role: "assistant", text: turn.prose });
   }
 
-  const sections: string[] = [];
-  const recentProse = proseHistory.slice(-MAX_PROSE_HISTORY_TURNS);
-  if (recentProse.length > 0) {
-    sections.push(
-      "# 散文史（之前轮次的最终正文）",
-      "",
-      recentProse
-        .map((prose, index) => `【前 ${recentProse.length - index} 轮】\n\n${prose}`)
-        .join("\n\n"),
-      "",
-    );
-  }
+  const finalSections: string[] = [];
   if (currentInputs.length > 0) {
-    sections.push("# 玩家本轮输入", "", currentInputs.join("\n\n"), "");
+    finalSections.push("# 玩家本轮输入", "", currentInputs.join("\n\n"), "");
   }
-  sections.push(
+  finalSections.push(
     "# Direction Packet",
     "",
     "```json",
@@ -87,7 +111,78 @@ export function buildRendererPrompt(
     "",
     "请按 system prompt 的契约渲染本轮正文。只输出正文。",
   );
-  return sections.join("\n");
+  result.push({ role: "user", text: finalSections.join("\n") });
+  return result;
+}
+
+function collectRenderedTurns(messages: ReadonlyArray<unknown>): {
+  turns: RenderedTurn[];
+  currentInputs: string[];
+} {
+  const turns: RenderedTurn[] = [];
+  let currentInputs: string[] = [];
+  let pendingPacketArgs: Record<string, unknown> | undefined;
+  for (const message of messages) {
+    const call = findSubmitPacketCall(message);
+    if (call !== undefined) {
+      pendingPacketArgs = call.args;
+    }
+    if (isProseMessage(message)) {
+      const turn = turns.length + 1;
+      turns.push({
+        turn,
+        playerInput: currentInputs.join("\n\n") || "（本轮无玩家输入）",
+        prose: customMessageText(message),
+        digest: buildTurnDigest(turn, pendingPacketArgs),
+      });
+      currentInputs = [];
+      pendingPacketArgs = undefined;
+      continue;
+    }
+    const userText = playerInputText(message);
+    if (userText !== undefined) {
+      currentInputs.push(userText);
+    }
+  }
+  return { turns, currentInputs };
+}
+
+/** 从该轮 packet 参数提取一行摘要；旧 packet 不重新验证，防御式读取。 */
+function buildTurnDigest(turn: number, args: Record<string, unknown> | undefined): string {
+  const playerAction =
+    typeof args?.["playerAction"] === "string" ? args["playerAction"] : "（未知行动）";
+  const changes = Array.isArray(args?.["resolvedChanges"])
+    ? args["resolvedChanges"].filter((entry): entry is string => typeof entry === "string")
+    : [];
+  const changeText = changes.length > 0 ? `→ ${changes.join("；")}` : "";
+  return `第${turn}轮：${playerAction}${changeText}`;
+}
+
+/**
+ * 滞回起点：total ≤ high 时全部保留；超出后边界按 step=high-low 对齐跳动，
+ * 窗口在 (low, high] 间振荡，每 step 轮才作废一次前缀。
+ */
+function hysteresisStart(total: number, high: number, low: number): number {
+  if (total <= high) return 0;
+  const step = high - low;
+  return Math.ceil((total - high) / step) * step;
+}
+
+/** 全文层起点：轮数滞回 + 字符预算（超预算时按同一步长继续前移）。 */
+function resolveFullLayerStart(turns: readonly RenderedTurn[]): number {
+  const step = FULL_TURNS_HIGH - FULL_TURNS_LOW;
+  let start = hysteresisStart(turns.length, FULL_TURNS_HIGH, FULL_TURNS_LOW);
+  while (
+    turns.length - start > FULL_TURNS_LOW &&
+    totalProseChars(turns, start) > FULL_LAYER_CHAR_BUDGET
+  ) {
+    start = Math.min(start + step, turns.length - FULL_TURNS_LOW);
+  }
+  return start;
+}
+
+function totalProseChars(turns: readonly RenderedTurn[], start: number): number {
+  return turns.slice(start).reduce((chars, turn) => chars + turn.prose.length, 0);
 }
 
 export interface ProseLintReport {
@@ -116,26 +211,25 @@ export function redactSecrets(prose: string, secrets: readonly string[]): string
   return redacted;
 }
 
-/** 重试 prompt：把首次产出与违规清单回喂渲染器重写全文。 */
-export function buildLintRetryPrompt(
-  basePrompt: string,
+/** 重试输入：原消息序列 + 首稿（assistant 位） + 违规清单；前缀与首次调用完全一致，缓存可复用。 */
+export function buildLintRetryMessages(
+  baseMessages: readonly RendererMessage[],
   firstProse: string,
   findings: readonly LintFinding[],
-): string {
+): RendererMessage[] {
   return [
-    basePrompt,
-    "",
-    "---",
-    "",
-    "你刚才的产出如下：",
-    "",
-    firstProse,
-    "",
-    "它违反了以下输出契约条目，请重写全文修正（保持事件与对白语义不变）：",
-    ...findings.map((finding) => `- [${finding.ruleId}] ${finding.match}`),
-    "",
-    "只输出修正后的正文。",
-  ].join("\n");
+    ...baseMessages,
+    { role: "assistant", text: firstProse },
+    {
+      role: "user",
+      text: [
+        "你刚才的产出违反了以下输出契约条目，请重写全文修正（保持事件、对白语义与篇幅不变）：",
+        ...findings.map((finding) => `- [${finding.ruleId}] ${finding.match}`),
+        "",
+        "只输出修正后的正文。",
+      ].join("\n"),
+    },
+  ];
 }
 
 function isProseMessage(message: unknown): message is Record<string, unknown> {

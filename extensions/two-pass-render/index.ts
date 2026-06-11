@@ -14,13 +14,14 @@ import { collectUnrevealedSecretStrings } from "../../engine/audit/lint-rules.ts
 import { syncStateFromSessionManager } from "../../engine/core/session-hydration.ts";
 import { getState } from "../../engine/core/state-store.ts";
 import {
-  buildLintRetryPrompt,
-  buildRendererPrompt,
+  buildLintRetryMessages,
+  buildRendererMessages,
   findPendingDirectionPacket,
   lintRenderedProse,
   type PendingDirectionPacket,
   PROSE_CUSTOM_TYPE,
   redactSecrets,
+  type RendererMessage,
 } from "../../engine/direction/render-turn.ts";
 import { buildRendererSystemPrompt } from "../../engine/gm-prompt/injection.ts";
 
@@ -122,11 +123,11 @@ async function renderProse(
   }
 
   const systemPrompt = buildRendererSystemPrompt();
-  const prompt = buildRendererPrompt(loopMessages, packet);
+  const baseMessages = buildRendererMessages(loopMessages, packet);
 
   try {
     setWorking(ctx, "渲染本轮正文…");
-    const first = await streamProse(ctx, model, auth, systemPrompt, prompt, "渲染中");
+    const first = await streamProse(ctx, model, auth, systemPrompt, baseMessages, "渲染中");
     const firstReport = lintRenderedProse(first, unrevealedSecrets);
     if (firstReport.findings.length === 0) {
       return { text: first, lintRuleIds: [] };
@@ -139,7 +140,7 @@ async function renderProse(
       model,
       auth,
       systemPrompt,
-      buildLintRetryPrompt(prompt, first, firstReport.findings),
+      buildLintRetryMessages(baseMessages, first, firstReport.findings),
       "重写中",
     );
     const secondReport = lintRenderedProse(second, unrevealedSecrets);
@@ -170,16 +171,14 @@ async function streamProse(
   model: NonNullable<ExtensionContext["model"]>,
   auth: { apiKey?: string; headers?: Record<string, string> },
   systemPrompt: string,
-  prompt: string,
+  rendererMessages: readonly RendererMessage[],
   label: string,
 ): Promise<string> {
   const events = stream(
     model,
     {
       systemPrompt,
-      messages: [
-        { role: "user", content: [{ type: "text", text: prompt }], timestamp: Date.now() },
-      ],
+      messages: rendererMessages.map((message) => toStreamMessage(message, model)),
     },
     { apiKey: auth.apiKey, headers: auth.headers, maxTokens: RENDERER_MAX_TOKENS },
   );
@@ -203,6 +202,35 @@ async function streamProse(
     throw new Error("renderer returned empty prose");
   }
   return text;
+}
+
+type StreamMessage = Parameters<typeof stream>[1]["messages"][number];
+
+/** RendererMessage → pi-ai 消息；assistant 位需要补齐元数据字段（历史正文伪装成模型旧产出）。 */
+function toStreamMessage(
+  message: RendererMessage,
+  model: NonNullable<ExtensionContext["model"]>,
+): StreamMessage {
+  if (message.role === "user") {
+    return { role: "user", content: [{ type: "text", text: message.text }], timestamp: 0 };
+  }
+  return {
+    role: "assistant",
+    content: [{ type: "text", text: message.text }],
+    api: model.api,
+    provider: model.provider,
+    model: model.id,
+    usage: {
+      input: 0,
+      output: 0,
+      cacheRead: 0,
+      cacheWrite: 0,
+      totalTokens: 0,
+      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+    },
+    stopReason: "stop",
+    timestamp: 0,
+  };
 }
 
 function updateRenderWidget(ctx: ExtensionContext, label: string, draft: string): void {
