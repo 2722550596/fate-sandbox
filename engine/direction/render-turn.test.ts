@@ -31,12 +31,12 @@ function proseMessage(text: string): Record<string, unknown> {
   return { role: "custom", customType: PROSE_CUSTOM_TYPE, content: text, display: true };
 }
 
-function packetCallMessage(args: Record<string, unknown>): Record<string, unknown> {
+function packetCallMessage(args: Record<string, unknown>, id = "tc-1"): Record<string, unknown> {
   return {
     role: "assistant",
     content: [
       { type: "text", text: "结算完成" },
-      { type: "toolCall", id: "tc-1", name: SUBMIT_DIRECTION_PACKET_TOOL, arguments: args },
+      { type: "toolCall", id, name: SUBMIT_DIRECTION_PACKET_TOOL, arguments: args },
     ],
     timestamp: 0,
   };
@@ -104,13 +104,31 @@ function turnsFixture(total: number): Record<string, unknown>[] {
   for (let turn = 1; turn <= total; turn++) {
     messages.push(
       userMessage(`输入 ${turn}`),
-      packetCallMessage({ ...PACKET_ARGS, playerAction: `行动 ${turn}` }),
+      packetCallMessage({ ...PACKET_ARGS, playerAction: `行动 ${turn}` }, `tc-${turn}`),
       proseMessage(`正文 ${turn}。`),
     );
   }
   messages.push(userMessage("最新输入"));
   return messages;
 }
+
+void test("buildRendererMessages prefers writer digests and falls back to packet digests", () => {
+  const overrides = new Map([
+    ["tc-2", "凛面对质问退让，同盟出现裂痕"],
+    ["tc-99", "不存在的轮次"],
+  ]);
+  const messages = buildRendererMessages(
+    turnsFixture(13),
+    parseDirectionPacket(PACKET_ARGS, "packet"),
+    overrides,
+  );
+  const digest = messages[0]?.text ?? "";
+  // 第 2 轮用 writer 摘要，其余轮回退机械 packet 摘要
+  assert.match(digest, /第2轮：凛面对质问退让，同盟出现裂痕/);
+  assert.doesNotMatch(digest, /第2轮：行动 2/);
+  assert.match(digest, /第1轮：行动 1/);
+  assert.match(digest, /第6轮：行动 6/);
+});
 
 void test("buildRendererMessages keeps all turns full below the high-water mark", () => {
   const messages = buildRendererMessages(

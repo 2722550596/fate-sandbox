@@ -13,6 +13,7 @@ import { Markdown } from "@earendil-works/pi-tui";
 import { collectUnrevealedSecretStrings } from "../../engine/audit/lint-rules.ts";
 import { syncStateFromSessionManager } from "../../engine/core/session-hydration.ts";
 import { getState } from "../../engine/core/state-store.ts";
+import { loadProseDigests, saveProseDigest } from "../../engine/direction/prose-digest-store.ts";
 import {
   buildLintRetryMessages,
   buildRendererMessages,
@@ -66,6 +67,9 @@ export default function twoPassRenderExtension(pi: ExtensionAPI): void {
       return;
     }
     sendProseWhenIdle(pi, ctx, prose.text, { kind: "rendered", lintRuleIds: prose.lintRuleIds });
+    // backlog #13：独立 writer 异步产出本轮高质量摘要，供后续轮次的摘要层使用。
+    // 失败静默——机械 packet 摘要永远是兜底。
+    void writeTurnDigest(ctx, pending, prose.text);
   });
 }
 
@@ -123,7 +127,7 @@ async function renderProse(
   }
 
   const systemPrompt = buildRendererSystemPrompt();
-  const baseMessages = buildRendererMessages(loopMessages, packet);
+  const baseMessages = buildRendererMessages(loopMessages, packet, loadProseDigests());
 
   try {
     setWorking(ctx, "渲染本轮正文…");
@@ -245,6 +249,60 @@ function updateRenderWidget(ctx: ExtensionContext, label: string, draft: string)
 function clearRenderWidget(ctx: ExtensionContext): void {
   if (ctx.hasUI) {
     ctx.ui.setWidget(RENDER_WIDGET_KEY, undefined);
+  }
+}
+
+/** writer 摘要输出上限：单行摘要，给推理余量。 */
+const DIGEST_MAX_TOKENS = 512;
+
+/**
+ * 独立 digest writer（backlog #13）：渲染完成后异步把本轮压成一行摘要
+ * 写入 prose-digest store。不阻塞主循环，失败静默（机械摘要兑底）。
+ */
+async function writeTurnDigest(
+  ctx: ExtensionContext,
+  pending: PendingDirectionPacket,
+  prose: string,
+): Promise<void> {
+  try {
+    const model = resolveRendererModel(ctx);
+    if (model === undefined) {
+      return;
+    }
+    const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
+    if (!auth.ok || auth.apiKey === undefined) {
+      return;
+    }
+    const { packet } = pending;
+    const prompt = [
+      "用一行中文（≤80 字，不换行）概括这一轮：发生的关键事件、人物关系/态度的变化、新出现或收束的悬念。",
+      "这行摘要供后续渲染做事件连续性参考，只要事实不要文采，不要前缀标号。",
+      "",
+      `玩家行动：${packet.needsRender ? packet.playerAction : "（meta 轮）"}`,
+      `已结算事实：${packet.needsRender ? packet.resolvedChanges.join("；") : "无"}`,
+      "",
+      "本轮正文：",
+      prose,
+    ].join("\n");
+    const events = stream(
+      model,
+      {
+        systemPrompt: "你是叙事存档员，只输出一行事实摘要。",
+        messages: [{ role: "user", content: [{ type: "text", text: prompt }], timestamp: 0 }],
+      },
+      { apiKey: auth.apiKey, headers: auth.headers, maxTokens: DIGEST_MAX_TOKENS },
+    );
+    let digest = "";
+    for await (const event of events) {
+      if (event.type === "text_delta") {
+        digest += event.delta;
+      } else if (event.type === "error") {
+        return;
+      }
+    }
+    saveProseDigest(pending.toolCallId, digest);
+  } catch {
+    // 静默：摘要缺位时渲染自动回退机械 packet 摘要。
   }
 }
 

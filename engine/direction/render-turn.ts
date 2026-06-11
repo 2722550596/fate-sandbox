@@ -66,6 +66,9 @@ interface RenderedTurn {
   digest: string;
 }
 
+/** writer 产出的高质量摘要，按 submit_direction_packet 的 toolCallId 索引。 */
+export type ProseDigestOverrides = ReadonlyMap<string, string>;
+
 /**
  * 装配渲染器（Pass B）输入：append-only 的多消息对话形。
  *
@@ -76,8 +79,9 @@ interface RenderedTurn {
 export function buildRendererMessages(
   messages: ReadonlyArray<unknown>,
   packet: DirectionPacket,
+  digestOverrides?: ProseDigestOverrides,
 ): RendererMessage[] {
-  const { turns, currentInputs } = collectRenderedTurns(messages);
+  const { turns, currentInputs } = collectRenderedTurns(messages, digestOverrides);
   const fullStart = resolveFullLayerStart(turns);
   const digestStart = hysteresisStart(fullStart, DIGEST_TURNS_HIGH, DIGEST_TURNS_LOW);
 
@@ -115,28 +119,36 @@ export function buildRendererMessages(
   return result;
 }
 
-function collectRenderedTurns(messages: ReadonlyArray<unknown>): {
+function collectRenderedTurns(
+  messages: ReadonlyArray<unknown>,
+  digestOverrides?: ProseDigestOverrides,
+): {
   turns: RenderedTurn[];
   currentInputs: string[];
 } {
   const turns: RenderedTurn[] = [];
   let currentInputs: string[] = [];
-  let pendingPacketArgs: Record<string, unknown> | undefined;
+  let pendingPacket: { args: Record<string, unknown>; toolCallId: string } | undefined;
   for (const message of messages) {
     const call = findSubmitPacketCall(message);
     if (call !== undefined) {
-      pendingPacketArgs = call.args;
+      pendingPacket = call;
     }
     if (isProseMessage(message)) {
       const turn = turns.length + 1;
+      const writerDigest =
+        pendingPacket === undefined ? undefined : digestOverrides?.get(pendingPacket.toolCallId);
       turns.push({
         turn,
         playerInput: currentInputs.join("\n\n") || "（本轮无玩家输入）",
         prose: customMessageText(message),
-        digest: buildTurnDigest(turn, pendingPacketArgs),
+        digest:
+          writerDigest !== undefined
+            ? `第${turn}轮：${writerDigest}`
+            : buildTurnDigest(turn, pendingPacket?.args),
       });
       currentInputs = [];
-      pendingPacketArgs = undefined;
+      pendingPacket = undefined;
       continue;
     }
     const userText = playerInputText(message);
