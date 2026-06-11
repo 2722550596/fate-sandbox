@@ -106,7 +106,7 @@ async function renderProse(
   packet: RenderDirectionPacket,
   unrevealedSecrets: readonly string[],
 ): Promise<RenderedProse | undefined> {
-  const model = ctx.model;
+  const model = resolveRendererModel(ctx);
   if (model === undefined) {
     notify(ctx, "two-pass render: no active model, falling back to packet digest", "warning");
     return undefined;
@@ -218,6 +218,28 @@ function clearRenderWidget(ctx: ExtensionContext): void {
   if (ctx.hasUI) {
     ctx.ui.setWidget(RENDER_WIDGET_KEY, undefined);
   }
+}
+
+/**
+ * 渲染轮可以跑在与结算轮不同的模型上：`FSN_RENDER_MODEL=provider/model-id`。
+ * 未设置或找不到时回退到结算轮的当前模型。
+ */
+function resolveRendererModel(ctx: ExtensionContext): ExtensionContext["model"] {
+  const override = process.env["FSN_RENDER_MODEL"]?.trim();
+  if (override === undefined || override === "") {
+    return ctx.model;
+  }
+  const slash = override.indexOf("/");
+  if (slash <= 0 || slash === override.length - 1) {
+    notify(ctx, `FSN_RENDER_MODEL 格式应为 provider/model-id，得到：${override}`, "warning");
+    return ctx.model;
+  }
+  const model = ctx.modelRegistry.find(override.slice(0, slash), override.slice(slash + 1));
+  if (model === undefined) {
+    notify(ctx, `FSN_RENDER_MODEL 未命中任何已注册模型：${override}，回退结算模型`, "warning");
+    return ctx.model;
+  }
+  return model;
 }
 
 function setWorking(ctx: ExtensionContext, message: string | undefined): void {
