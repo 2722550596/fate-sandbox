@@ -267,6 +267,22 @@ pi 架构可行性验证结论（pi 0.79.1）：
 6. 跑通后把 #1 的 lint 移到 packet + 渲染输出两道关卡
 7. 可选：`stream()` + `setWidget` 伪流式显示渲染中的 prose
 
+## 13. 散文史 writer 化（渲染侧 compaction，取代 8 轮硬截断）
+
+- [ ] 状态：未开始（灵感：MiMo Code long-horizon 博文的 checkpoint-writer 架构，2026-06）
+
+渲染器的散文史现为「最近 8 轮硬截断」，早期轮次的声音/关系连续性直接丢失。拆解 MiMo 的方案：
+
+- 独立 writer（subagent 或纯函数 + 廉价模型调用）**增量**维护早期轮次的 digest（每轮一行：事件 + 关系变化），不在渲染时一次性总结。关键论据：提取要趁早（低利用率时模型压缩能力完好），不要拖到快满才压。
+- 渲染器输入变为：digest（事件连续性，非文风样本）+ 最近 N 轮全文（文风连续性）+ 本轮 packet。gm-render-system.md 的输入契约已预留了 digest 位置（「Optionally, a digest of early turns」），只差生产它的机制。
+- single-writer 不变量：digest 文件只许 writer 写，渲染器/结算器只读。
+
+## 14. heavy 轮并行渲染选优（Max Mode 歪用）
+
+- [ ] 状态：未开始（灵感：同上，Max Mode 并行采样 + judge 选优，SWE-Bench +10-20%）
+
+仅在 `eventWeight: heavy` 轮（战斗高潮/重大揭示/关系转折）：渲染器并行采样 2-3 版正文（temperature 拉高），低温 judge 按 packet 落地完整度 + blacklist 违规数 + endWindow 命中选一版。token 代价只发生在最值得的回合；lint 本身就是现成的机械 judge 第一道筛（违规版直接淘汰，可能不需要模型 judge）。顺便覆盖现有「lint 不过重试一次」路径：重试变成从备选里挑。
+
 ---
 
 ## 实施纪律提醒
