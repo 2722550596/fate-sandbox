@@ -75,6 +75,13 @@ else
   echo "✓ 玩家模式：已禁用 pi-subagents 内置 coding agents（开发模式: TAVERN2AGENT_DEV=1 ./start.sh）"
 fi
 
+# 双模型：渲染轮（玩家可见正文）可与结算轮用不同模型，详见 README “Model Notes”。
+if [ -n "${FATE_RENDER_MODEL:-}" ]; then
+  echo "✓ 渲染轮模型覆盖：FATE_RENDER_MODEL=$FATE_RENDER_MODEL（未命中会回退结算模型）"
+else
+  echo "ℹ 渲染轮复用结算模型（可用 FATE_RENDER_MODEL=provider/model-id 单独指定文笔模型）"
+fi
+
 export PI_CODING_AGENT_DIR=".pi/agent"
 export PI_CLAUDE_OAUTH_REINJECT_SCOPE=never
 
