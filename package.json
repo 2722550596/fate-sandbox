@@ -2,7 +2,7 @@
   "name": "fate-sandbox",
   "version": "0.1.0",
   "private": true,
-  "description": "Fate/strange Fake Snowfield sandbox — pi coding agent interactive card",
+  "description": "Fate sandbox — pi coding agent experimental interactive narrative card",
   "keywords": [
     "interactive-fiction",
     "pi-card",
