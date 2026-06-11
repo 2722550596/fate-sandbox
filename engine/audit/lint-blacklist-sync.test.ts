@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import test from "node:test";
 
 import { lintFinalProse } from "./lint-rules.ts";
@@ -11,6 +11,7 @@ import { lintFinalProse } from "./lint-rules.ts";
  */
 
 const blacklist = readFileSync("agents/gm-style-blacklist.md", "utf-8");
+const localLintPath = "agents/user/prose-lint.json";
 
 function hardBanPhrases(): string[] {
   const section = blacklist.split(/## Hard bans[^\n]*\n/u)[1]?.split(/\n## /u)[0] ?? "";
@@ -54,3 +55,28 @@ void test("markdown headings and dividers inside narration are linted", () => {
   assert.ok(lintFinalProse("正文。\n# 标题\n正文。").some((f) => f.ruleId === "markdown-heading"));
   assert.ok(lintFinalProse("正文。\n---\n正文。").some((f) => f.ruleId === "markdown-divider"));
 });
+
+void test("players can add local prose lint regex rules", () => {
+  withLocalLintFile(
+    JSON.stringify({ rules: [{ id: "local-cliche", scope: "anywhere", pattern: "月光如水" }] }),
+    () => {
+      const findings = lintFinalProse("月光如水，落在窗边。");
+      assert.ok(findings.some((finding) => finding.ruleId === "local-cliche"));
+    },
+  );
+});
+
+function withLocalLintFile(content: string, run: () => void): void {
+  const original = existsSync(localLintPath) ? readFileSync(localLintPath, "utf-8") : undefined;
+  mkdirSync("agents/user", { recursive: true });
+  writeFileSync(localLintPath, content, "utf-8");
+  try {
+    run();
+  } finally {
+    if (original === undefined) {
+      rmSync(localLintPath, { force: true });
+    } else {
+      writeFileSync(localLintPath, original, "utf-8");
+    }
+  }
+}

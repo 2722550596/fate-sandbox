@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+
 /**
  * 叙事输出契约 / style blacklist 的机械可检测子集（纯函数规则集）。
  *
@@ -22,6 +24,12 @@ export interface LintFinding {
 
 type RuleScope = "opening" | "ending" | "anywhere" | "per-line";
 
+interface LocalProseRule {
+  id: string;
+  scope: RuleScope;
+  pattern: string;
+}
+
 interface ProseRule {
   id: string;
   scope: RuleScope;
@@ -32,6 +40,8 @@ interface ProseRule {
 /** ending scope 检查的结尾窗口长度（字符） */
 const ENDING_WINDOW_CHARS = 160;
 const EXCERPT_RADIUS = 24;
+
+const LOCAL_PROSE_LINT_PATH = "agents/user/prose-lint.json";
 
 const PROSE_RULES: readonly ProseRule[] = [
   {
@@ -90,6 +100,67 @@ function makeExcerpt(text: string, index: number, matchLength: number): string {
   return `${start > 0 ? "…" : ""}${text.slice(start, end)}${end < text.length ? "…" : ""}`;
 }
 
+function loadLocalProseRules(): ProseRule[] {
+  if (!existsSync(LOCAL_PROSE_LINT_PATH)) {
+    return [];
+  }
+  const raw = parseLocalProseLintFile();
+  if (!isRecord(raw) || !Array.isArray(raw["rules"])) {
+    throw new Error(`${LOCAL_PROSE_LINT_PATH}: root must be { rules: [...] }`);
+  }
+  return raw["rules"].map(parseLocalProseRule);
+}
+
+function parseLocalProseLintFile(): unknown {
+  try {
+    return JSON.parse(readFileSync(LOCAL_PROSE_LINT_PATH, "utf-8"));
+  } catch (error) {
+    throw new Error(`${LOCAL_PROSE_LINT_PATH}: invalid JSON or unreadable file`, { cause: error });
+  }
+}
+
+function parseLocalProseRule(raw: unknown, index: number): ProseRule {
+  if (!isRecord(raw)) {
+    throw new Error(`${LOCAL_PROSE_LINT_PATH}: rules[${index}] must be an object`);
+  }
+  const rule = readLocalProseRule(raw, index);
+  return { id: rule.id, scope: rule.scope, pattern: compileLocalPattern(rule, index) };
+}
+
+function readLocalProseRule(raw: Record<string, unknown>, index: number): LocalProseRule {
+  const id = raw["id"];
+  const scope = raw["scope"];
+  const pattern = raw["pattern"];
+  if (typeof id !== "string" || !/^[a-z][a-z0-9_-]*$/u.test(id)) {
+    throw new Error(`${LOCAL_PROSE_LINT_PATH}: rules[${index}].id must be tag-safe`);
+  }
+  if (typeof scope !== "string" || !isRuleScope(scope)) {
+    throw new Error(`${LOCAL_PROSE_LINT_PATH}: rules[${index}].scope is unknown`);
+  }
+  if (typeof pattern !== "string" || pattern.length === 0) {
+    throw new Error(`${LOCAL_PROSE_LINT_PATH}: rules[${index}].pattern must be non-empty`);
+  }
+  return { id, scope, pattern };
+}
+
+function compileLocalPattern(rule: LocalProseRule, index: number): RegExp {
+  try {
+    return new RegExp(rule.pattern, "gu");
+  } catch (error) {
+    throw new Error(`${LOCAL_PROSE_LINT_PATH}: rules[${index}].pattern is invalid`, {
+      cause: error,
+    });
+  }
+}
+
+function isRuleScope(value: string): value is RuleScope {
+  return value === "opening" || value === "ending" || value === "anywhere" || value === "per-line";
+}
+
+function allProseRules(): ProseRule[] {
+  return [...PROSE_RULES, ...loadLocalProseRules()];
+}
+
 function matchRule(rule: ProseRule, text: string): LintFinding[] {
   rule.pattern.lastIndex = 0;
   const findings: LintFinding[] = [];
@@ -122,7 +193,7 @@ export function lintFinalProse(prose: string): LintFinding[] {
   const ending = prose.slice(Math.max(0, prose.length - ENDING_WINDOW_CHARS));
   const lines = prose.split("\n");
 
-  for (const rule of PROSE_RULES) {
+  for (const rule of allProseRules()) {
     switch (rule.scope) {
       case "opening":
         findings.push(...matchRule(rule, opening));

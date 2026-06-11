@@ -98,6 +98,46 @@ FATE_RENDER_MODEL=provider/model-id ./start.sh
 
 实测推荐搭配：结算 GPT-5.5 + 渲染 Claude Fable 5。
 
+### 自定义正文 lint 规则
+
+渲染轮结束后会跑一层正则 lint，拦截泄密、Markdown、AI 腔开场白、空泛氛围词、报告句等。默认规则在：
+
+```txt
+engine/audit/lint-rules.ts
+```
+
+默认规则对应的提示词说明在：
+
+```txt
+agents/gm-style-blacklist.md
+agents/gm-output-contract.md
+```
+
+如果只是玩家本地想加自己的禁词/禁句，不要改源码，建这个文件即可（`agents/user/` 已被 gitignore）：
+
+```txt
+agents/user/prose-lint.json
+```
+
+示例：
+
+```json
+{
+  "rules": [
+    { "id": "local-cliche", "scope": "anywhere", "pattern": "月光如水" },
+    { "id": "no-opening-ah", "scope": "opening", "pattern": "^啊" }
+  ]
+}
+```
+
+字段说明：
+
+- `id`：小写字母开头，只用小写字母、数字、`-`、`_`。
+- `scope`：`opening`（首个非空行）、`ending`（结尾窗口）、`anywhere`（全文）、`per-line`（逐行）。
+- `pattern`：JavaScript 正则字符串；运行时自动加 `g`/`u` flag。
+
+规则命中后渲染器会重写一次；重写后仍命中会在 UI 里告警。未揭示真名/宝具泄密是内置 block 规则，不能用本地配置关闭。
+
 ## Local State
 
 首次运行会在项目内创建隔离配置目录：
