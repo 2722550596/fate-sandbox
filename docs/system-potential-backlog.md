@@ -67,7 +67,7 @@ interface HookState {
 
 ## 3. 阵营时钟与到期义务（faction clock / scheduled obligation）
 
-- [ ] 状态：未开始
+- [x] 状态：已完成（2026-06-11，schema v5）。`secrets.factionClocks`（id/factionId/label/filled/size 2-12/visibility hidden|leaked，不变量 filled≤size）+ `secrets.scheduledEvents`（dueAt/summary）；`engine/core/faction-clock.ts` 提供 upsert/advance（封顶+becameFull）/reset（outcomeSummary 强制留痕 secretEventLog）/retire/schedule（拒绝过去时刻）/resolve-due/extend-due；`manage_faction_clock` 单工具七动作已注册。催账：`collectBackstageDueNotices` 在 commit_turn warnings 与 progress_scene_beat 返回值里列出到期事件/填满时钟（提醒不硬拒，区别于 #4：叙事义务不可机械验证落地），出口只有 resolve-due 兑现或 extend-due 显式展期。迁移 v4→v5 补空账本。后续：#5 parallel-line 工具化时输出契约加结构化 clockAdvance；timeline-showrunner 审计可读时钟数字
 
 「世界不为玩家暂停」「每 2-3 次后台推进要有一次格局变化」「倒计时」目前全靠 GM 与 parallel-line 自觉。引入 BITD 进度钟思路：
 

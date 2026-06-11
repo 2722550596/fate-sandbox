@@ -65,7 +65,7 @@ function nullable<T extends TSchema>(schema: T) {
 }
 
 export const STATE_META_SCHEMA = Type.Object({
-  schemaVersion: Type.Literal(4),
+  schemaVersion: Type.Literal(5),
   createdAt: ISO_INSTANT_SCHEMA,
   updatedAt: ISO_INSTANT_SCHEMA,
 });
@@ -455,11 +455,30 @@ const OFFSCREEN_EVENT_SCHEMA = Type.Object({
   createdFrom: OFFSCREEN_EVENT_SOURCE_SCHEMA,
 });
 
+export const FACTION_CLOCK_VISIBILITIES = ["hidden", "leaked"] as const;
+
+const FACTION_CLOCK_SCHEMA = Type.Object({
+  id: NON_EMPTY_STRING_SCHEMA,
+  factionId: NON_EMPTY_STRING_SCHEMA,
+  label: NON_EMPTY_STRING_SCHEMA,
+  filled: NON_NEGATIVE_INTEGER_SCHEMA,
+  size: Type.Integer({ minimum: 2, maximum: 12 }),
+  visibility: stringEnumSchema(FACTION_CLOCK_VISIBILITIES),
+});
+
+const SCHEDULED_EVENT_SCHEMA = Type.Object({
+  id: NON_EMPTY_STRING_SCHEMA,
+  dueAt: ISO_INSTANT_SCHEMA,
+  summary: NON_EMPTY_STRING_SCHEMA,
+});
+
 export const SECRET_GAME_STATE_SCHEMA = Type.Object({
   actorSecrets: Type.Record(Type.String(), ACTOR_SECRET_SLOTS_SCHEMA),
   campaignSecrets: Type.Array(SECRET_CAMPAIGN_FACT_SCHEMA),
   secretEventLog: Type.Array(SECRET_EVENT_MEMORY_SCHEMA),
   offscreenEventLog: Type.Array(OFFSCREEN_EVENT_SCHEMA),
+  factionClocks: Type.Array(FACTION_CLOCK_SCHEMA),
+  scheduledEvents: Type.Array(SCHEDULED_EVENT_SCHEMA),
 });
 
 export const STATE_SCHEMA = Type.Object({
@@ -571,6 +590,17 @@ function assertStateInvariants(state: State): void {
   assertTrackedItemInvariants(state, actors);
   assertEconomyActorReferences(state, actors);
   assertActorSecretsInvariants(state, actors);
+  assertFactionClockInvariants(state);
+}
+
+function assertFactionClockInvariants(state: State): void {
+  for (const clock of state.secrets.factionClocks) {
+    if (clock.filled > clock.size) {
+      throw new Error(
+        `非法 faction clock ${clock.id}: filled(${clock.filled}) 不能大于 size(${clock.size})。`,
+      );
+    }
+  }
 }
 
 function assertActorRegistryInvariants(actors: ActorRegistry): void {

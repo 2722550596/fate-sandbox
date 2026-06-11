@@ -90,7 +90,7 @@ export interface GameState {
 }
 
 export interface StateMeta {
-  schemaVersion: 4;
+  schemaVersion: 5;
   createdAt: string;
   updatedAt: string;
 }
@@ -133,6 +133,28 @@ export interface SecretGameState {
   campaignSecrets: SecretCampaignFact[];
   secretEventLog: SecretEventMemory[];
   offscreenEventLog: OffscreenEvent[];
+  /** BITD 式阵营进度钟：世界不为玩家暂停的机械载体 */
+  factionClocks: FactionClock[];
+  /** 到期义务：越过 dueAt 后 canonical commit 会在返回值里催账 */
+  scheduledEvents: ScheduledEvent[];
+}
+
+export interface FactionClock {
+  id: string;
+  /** 阵营/势力标识，自由字符串（尚无阵营 registry） */
+  factionId: string;
+  label: string;
+  filled: number;
+  size: number;
+  /** hidden = 玩家完全不知；leaked = 玩家已感知到征兆 */
+  visibility: "hidden" | "leaked";
+}
+
+export interface ScheduledEvent {
+  id: string;
+  /** 游戏内时钟 ISO；currentAt 越过即到期 */
+  dueAt: string;
+  summary: string;
 }
 
 export interface CampaignState {
@@ -540,4 +562,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 4;
+export const CURRENT_STATE_SCHEMA_VERSION = 5;

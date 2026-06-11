@@ -12,6 +12,7 @@ import { commitTurnToolDefinition } from "./state/commit-turn.ts";
 import { configureCampaignToolDefinition } from "./state/configure-campaign.ts";
 import { getStatusToolDefinition } from "./state/get-status.ts";
 import { initializeNewGameToolDefinition } from "./state/initialize-new-game.ts";
+import { manageFactionClockToolDefinition } from "./state/manage-faction-clock.ts";
 import { patchStateToolDefinition } from "./state/patch-state.ts";
 import { privateResolveToolDefinition } from "./state/private-resolve.ts";
 import { progressSceneBeatToolDefinition } from "./state/progress-scene-beat.ts";
@@ -36,6 +37,7 @@ const TOOL_DEFINITIONS: readonly FsnToolDefinition[] = [
   getStatusToolDefinition,
   recordMemoryToolDefinition,
   recordOffscreenEventToolDefinition,
+  manageFactionClockToolDefinition,
   retireActorToolDefinition,
   updateActorConditionToolDefinition,
   setScenePresenceToolDefinition,

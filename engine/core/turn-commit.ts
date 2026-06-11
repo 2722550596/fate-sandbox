@@ -15,6 +15,7 @@ import type { State, TurnTimePolicy } from "./state.ts";
 import { updateActorCondition } from "./actor-condition.ts";
 import { setScenePresence } from "./actor.ts";
 import { updateEconomy } from "./economy.ts";
+import { collectBackstageDueNotices } from "./faction-clock.ts";
 import { recordMemory } from "./memory.ts";
 import { assertNoOpenObligations } from "./obligations.ts";
 import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene.ts";
@@ -148,6 +149,8 @@ function collectWarnings(draft: State, input: TurnCommitInput): string[] {
     }
   }
   warnings.push(...collectPacingWarnings(input));
+  // 幕后催账：时间推进越过 dueAt / 时钟填满时，engine 直接在返回值里提醒（backlog #3）
+  warnings.push(...collectBackstageDueNotices(draft));
   return warnings;
 }
 

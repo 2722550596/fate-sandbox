@@ -3,11 +3,12 @@ import { Type } from "typebox";
 import { timePolicySchema } from "./time-policy-tool-schema.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
+import { collectBackstageDueNotices } from "../../engine/core/faction-clock.ts";
 import { assertNoOpenObligations } from "../../engine/core/obligations.ts";
 import { progressSceneBeat } from "../../engine/core/scene-beat-lifecycle.ts";
 import { parseSceneBeatProgressInput } from "../../engine/core/scene-beat-schema.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function progressSceneBeatTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
@@ -19,10 +20,12 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
       );
       // canonical commit 对账点：裁决义务未清账则拒绝提交（backlog #4）
       assertNoOpenObligations(draft);
-      return result;
+      // 幕后催账：到期义务/填满时钟随返回值提醒（backlog #3）
+      return { result, dueNotices: collectBackstageDueNotices(draft) };
     },
-    details: resultDetails,
-    message: (result) => result.message,
+    details: ({ result }) => ({ result }),
+    message: ({ result, dueNotices }) =>
+      dueNotices.length === 0 ? result.message : [result.message, ...dueNotices].join("\n"),
   });
 }
 

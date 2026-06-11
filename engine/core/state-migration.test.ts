@@ -14,7 +14,7 @@ void test("migrateState upgrades schema v1 states to current turn log shape", ()
 
   const migrated = migrateState(rawV1);
 
-  assert.equal(migrated.meta.schemaVersion, 4);
+  assert.equal(migrated.meta.schemaVersion, 5);
   assert.deepEqual(migrated.public.turnLog, []);
   assert.deepEqual(migrated.public.obligations, []);
   assert.equal(migrated.public.clock.currentAt, current.public.clock.currentAt);
@@ -53,7 +53,7 @@ void test("migrateState drops schema v2 non-advancing turn log entries", () => {
 
   const migrated = migrateState(rawV2);
 
-  assert.equal(migrated.meta.schemaVersion, 4);
+  assert.equal(migrated.meta.schemaVersion, 5);
   assert.equal(migrated.public.turnLog.length, 1);
   assert.equal(migrated.public.turnLog[0]?.id, "turn-2");
 });
@@ -70,7 +70,7 @@ void test("hydrateState accepts session-wrapped schema v1 states through migrati
   hydrateState({ v: 1, turn: 0, state: rawV1 });
 
   const hydrated = cloneState();
-  assert.equal(hydrated.meta.schemaVersion, 4);
+  assert.equal(hydrated.meta.schemaVersion, 5);
   assert.deepEqual(hydrated.public.turnLog, []);
   assert.deepEqual(hydrated.public.obligations, []);
 });
@@ -86,6 +86,24 @@ void test("migrateState upgrades schema v3 states with an empty obligations ledg
 
   const migrated = migrateState(rawV3);
 
-  assert.equal(migrated.meta.schemaVersion, 4);
+  assert.equal(migrated.meta.schemaVersion, 5);
   assert.deepEqual(migrated.public.obligations, []);
+  assert.deepEqual(migrated.secrets.factionClocks, []);
+  assert.deepEqual(migrated.secrets.scheduledEvents, []);
+});
+
+void test("migrateState upgrades schema v4 states with empty clock ledgers", () => {
+  const current = createInitialState();
+  const { factionClocks: _clocks, scheduledEvents: _events, ...secretsV4 } = current.secrets;
+  const rawV4 = {
+    ...current,
+    meta: { ...current.meta, schemaVersion: 4 },
+    secrets: secretsV4,
+  };
+
+  const migrated = migrateState(rawV4);
+
+  assert.equal(migrated.meta.schemaVersion, 5);
+  assert.deepEqual(migrated.secrets.factionClocks, []);
+  assert.deepEqual(migrated.secrets.scheduledEvents, []);
 });

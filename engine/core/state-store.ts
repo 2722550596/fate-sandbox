@@ -208,6 +208,8 @@ export function createInitialState(): State {
       campaignSecrets: [],
       secretEventLog: [],
       offscreenEventLog: [],
+      factionClocks: [],
+      scheduledEvents: [],
     },
   };
 }
@@ -270,6 +272,8 @@ function migrateOneSchemaVersion(
       return migrateGameStateV2ToV3(raw);
     case 3:
       return migrateGameStateV3ToV4(raw);
+    case 4:
+      return migrateGameStateV4ToV5(raw);
     default:
       throw new Error(
         `不支持的 state schemaVersion: ${version}。当前支持逐步迁移到 ${CURRENT_STATE_SCHEMA_VERSION}。`,
@@ -304,9 +308,19 @@ function migrateGameStateV2ToV3(raw: Record<string, unknown>): Record<string, un
 function migrateGameStateV3ToV4(raw: Record<string, unknown>): Record<string, unknown> {
   const next = structuredClone(raw);
   const meta = assertRecordForMigration(next["meta"], "meta");
-  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  meta["schemaVersion"] = 4;
   const publicState = assertRecordForMigration(next["public"], "public");
   publicState["obligations"] = [];
+  return next;
+}
+
+function migrateGameStateV4ToV5(raw: Record<string, unknown>): Record<string, unknown> {
+  const next = structuredClone(raw);
+  const meta = assertRecordForMigration(next["meta"], "meta");
+  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  const secrets = assertRecordForMigration(next["secrets"], "secrets");
+  secrets["factionClocks"] = [];
+  secrets["scheduledEvents"] = [];
   return next;
 }
 
