@@ -267,11 +267,12 @@ function captureUsage(ctx: ExtensionContext, kind: RenderCallKind, usage: DoneUs
       return;
     }
     const cost = usageTotals.costTotal > 0 ? ` · $${usageTotals.costTotal.toFixed(4)}` : "";
-    ctx.ui.setWidget(USAGE_WIDGET_KEY, [
+    const line =
       `Pass B 用量 · 本轮 ${usageTotals.lastTurnTokens} tok · 累计 ${usageTotals.totalTokens} tok` +
-        `（in ${usageTotals.input} / out ${usageTotals.output} / cache ${usageTotals.cacheRead}）` +
-        ` · ${usageTotals.calls} 次调用${cost}`,
-    ]);
+      `（in ${usageTotals.input} / out ${usageTotals.output} / cache ${usageTotals.cacheRead}）` +
+      ` · ${usageTotals.calls} 次调用${cost}`;
+    // dim + 暗灰：用量是背景信息，不该和正文争视线。
+    ctx.ui.setWidget(USAGE_WIDGET_KEY, [`\u001B[2;90m${line}\u001B[0m`]);
   } catch {
     // 静默：widget 展示问题不阻塞渲染。
   }
