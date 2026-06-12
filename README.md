@@ -102,7 +102,7 @@ FATE_RENDER_MODEL=provider/model-id ./start.sh
 
 - `FATE_RENDER_TEMPERATURE=0.9`：只作用于渲染/重写调用（结算轮不受影响）。默认不传——部分模型拒绝该参数，会导致每轮渲染回退机械摘要；确认你的渲染模型支持后再开。
 - digest writer（前情提要写手）在推理模型上自动降到 `minimal` 档思考：压缩摘要不需要推理，省 token 也更快。
-- `FATE_RENDER_CACHE=short|none`：渲染轮的 prompt cache 保留档。默认 `long`（Anthropic 1h TTL，写价 2× 但命中免费续期）——RP 节奏两轮间隔常超过默认 5 分钟缓存，过期重写比差价贵得多。连续快节奏可改 `short`。
+- `FATE_RENDER_CACHE=long|none`：渲染轮的 prompt cache 保留档，默认 `short`（Anthropic 5m TTL，命中免费续期）。实测 Claude OAuth 渠道不 honor 1h TTL，`long` 档只多付 2× 写价不换保留；走 API key 且渠道支持时再开。
 
 ### 自定义正文 lint 规则
 

@@ -201,7 +201,8 @@ async function streamProse(
       temperature: resolveRenderTemperature(ctx),
       // 渲染器有自己的稳定前缀（分层散文史），独立缓存分区提升命中率。
       sessionId: rendererSessionId(ctx, "render"),
-      // RP 节奏两轮间隔常超 5 分钟：默认 1h TTL（2× 写价），避免反复冷启动全量重写。
+      // 实测 OAuth 渠道不 honor 1h TTL（静默按 5m 处理），默认 short 免付 2× 写价；
+      // 渠道哪天生效了可用 FATE_RENDER_CACHE=long 打开。
       cacheRetention: resolveRenderCacheRetention(ctx),
     },
   );
@@ -425,20 +426,21 @@ function rendererSessionId(ctx: ExtensionContext, suffix: string): string {
 type CacheRetention = "none" | "short" | "long";
 
 /**
- * 渲染器缓存保留档：默认 long（Anthropic 1h TTL，命中免费续期）；
- * `FATE_RENDER_CACHE=short|none` 可改回。不支持长保留的模型/provider
- * 由 pi-ai compat 自动降级，误设无风险。digest writer 前缀不复用，不走这个档。
+ * 渲染器缓存保留档：默认 short（Anthropic 5m，写价 1.25×）。
+ * 实测 Claude OAuth 渠道不 honor `ttl: "1h"`，静默按 5m 处理——long 档
+ * 只多付 2× 写价不换任何保留；`FATE_RENDER_CACHE=long|none` 可覆盖。
+ * digest writer 前缀不复用，不走这个档。
  */
 function resolveRenderCacheRetention(ctx: ExtensionContext): CacheRetention {
   const raw = process.env["FATE_RENDER_CACHE"]?.trim();
   if (raw === undefined || raw === "") {
-    return "long";
+    return "short";
   }
   if (raw === "none" || raw === "short" || raw === "long") {
     return raw;
   }
-  notify(ctx, `FATE_RENDER_CACHE 应为 none|short|long，得到：${raw}，已回退 long`, "warning");
-  return "long";
+  notify(ctx, `FATE_RENDER_CACHE 应为 none|short|long，得到：${raw}，已回退 short`, "warning");
+  return "short";
 }
 
 /**
