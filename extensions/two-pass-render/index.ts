@@ -252,6 +252,7 @@ const usageTotals = {
   totalTokens: 0,
   costTotal: 0,
   lastTurnTokens: 0,
+  lastTurnDetail: "",
   /** 某些中转渠道明细字段失真，明细对不上 total。 */
   detailsUnreliable: false,
 };
@@ -277,7 +278,10 @@ function captureUsage(ctx: ExtensionContext, kind: RenderCallKind, usage: DoneUs
     usageTotals.cacheWrite += usage.cacheWrite;
     usageTotals.totalTokens += usage.totalTokens;
     usageTotals.costTotal += usage.cost.total;
-    usageTotals.lastTurnTokens = kind === "digest" ? usageTotals.lastTurnTokens : usage.totalTokens;
+    if (kind !== "digest") {
+      usageTotals.lastTurnTokens = usage.totalTokens;
+      usageTotals.lastTurnDetail = `in ${usage.input} / out ${usage.output} / cacheR ${usage.cacheRead} / cacheW ${usage.cacheWrite}`;
+    }
     if (!usageDetailsConsistent(usage)) {
       usageTotals.detailsUnreliable = true;
     }
@@ -286,11 +290,12 @@ function captureUsage(ctx: ExtensionContext, kind: RenderCallKind, usage: DoneUs
     }
     const cost = usageTotals.costTotal > 0 ? ` · $${usageTotals.costTotal.toFixed(4)}` : "";
     // 明细不可信时只展示 total（total_tokens 始终由 provider 直报，可信）。
+    const turnDetail = usageTotals.detailsUnreliable ? "" : `（${usageTotals.lastTurnDetail}）`;
     const breakdown = usageTotals.detailsUnreliable
       ? "（明细略：渠道报数不全）"
       : `（in ${usageTotals.input} / out ${usageTotals.output} / cacheR ${usageTotals.cacheRead} / cacheW ${usageTotals.cacheWrite}）`;
     const line =
-      `Pass B 用量 · 本轮 ${usageTotals.lastTurnTokens} tok · 累计 ${usageTotals.totalTokens} tok` +
+      `Pass B 用量 · 本轮 ${usageTotals.lastTurnTokens} tok${turnDetail} · 累计 ${usageTotals.totalTokens} tok` +
       `${breakdown} · ${usageTotals.calls} 次调用${cost}`;
     // 与内置状态提示（如 Navigated to selected point）同源的质感：
     // 主题 dim 色 + 斜体，随主题切换，不和正文争视线。
