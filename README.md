@@ -96,7 +96,9 @@ FATE_RENDER_MODEL=provider/model-id ./start.sh
 
 例如 `FATE_RENDER_MODEL=anthropic/claude-opus-4-5`。未设置时渲染轮复用结算轮的当前模型；格式错误或模型未注册会告警并回退。结算轮吃工具调用纪律，渲染轮吃文笔——可以按需分开点菜。
 
-实测推荐搭配：结算 GPT-5.5 + 渲染 Claude Fable 5。
+实测推荐搭配：结算 GPT-5.5 + 渲染 Claude Fable 5；渲染 DeepSeek V4 Pro 也达标，且自动持久缓存让单轮成本低一个量级。
+
+双 pass 拆分后，两侧模型的思维链都可以直接开 `minimal`：结算的推理已被外化进工具序列与 packet schema，渲染的决策已由 packet 做完——省 token，首 token 延迟也更短。若发现 heavy 轮（战斗高潮、重大揭示）的 packet 质量下降，单独给结算侧升档即可，渲染侧保持 minimal 不动。
 
 渲染轮另有几个可选旋钮：
 
