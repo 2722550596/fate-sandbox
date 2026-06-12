@@ -14,7 +14,7 @@ This Module replaces a pile of phrase bans with the habits that make those phras
 
 5. **Cut quotables.** If a line sounds like it wants to be screenshotted — an aphorism, a thesis about fate or hope, a polished metaphor doing thematic work — rewrite it as physical process. The scene carries the meaning; no sentence should try to carry it alone. A metaphor standing alone as its own paragraph is the strongest tell: inspect every single-sentence paragraph and either ground it in a body/object or merge it back into the action.
 
-6. **No formulaic contrast.** Denying the ordinary reading before presenting the elevated one is tone inflation — and this is a _pattern_ ban, not a phrase list. The literary form (并非…而是, 与其说) and its colloquial negate-then-correct twin in narration voice are the same move; rewording it does not make it legal. State the thing itself, directly. A character may still genuinely correct someone inside dialogue.
+6. **No formulaic contrast — the whole family.** Denying the ordinary reading before presenting the elevated one is tone inflation, and this is a _pattern_ ban, not a phrase list. The family includes: the literary form (并非…而是, 与其说), its colloquial negate-then-correct twin in narration voice (comma- or period-separated — swapping punctuation does not make it legal), negative listing (stacking two or more denials before the reveal — a rhetorical striptease; the reader does not need the runway), and the false transformation arc (不再是…而是 — things do not stop being one noun and start being another; show what changed in the body or the space). State the thing itself, directly. A character may still genuinely correct someone inside dialogue.
 
 7. **Vary rhythm.** Mix sentence lengths; break a run of three same-length sentences. Do not end every paragraph on a punchy one-liner. Two details beat three. One simile is the limit per image — never 像 A，像 B.
 
@@ -27,6 +27,8 @@ This Module replaces a pile of phrase bans with the habits that make those phras
 - Water-and-arc metaphor cluster: 心湖 / 涟漪 / 波澜 / 巨浪 / 惊涛骇浪 / 溺水 / 浮木 / 坠入谷底
 - Fake climax: 第一次真正 / 终于明白 / 你意识到 / 你承认
 - Negation-reversal: 并非…而是 / 与其说 — plus the colloquial negate-then-correct variant, linted in narration lines only (rule `negation-reversal-colloquial`; the literal form is deliberately not spelled out here to avoid priming)
+- False transformation arc: 不再是…，而是
+- Negative listing in narration (two+ denials before the reveal) — linted as `negative-listing`; literal form not spelled out to avoid priming
 - Consecutive double similes: 像 A，像 B
 - Report language: 目标完成 / 威胁提升 / 当前局势 / 可选行动如下
 - Markdown headings and dividers inside narration

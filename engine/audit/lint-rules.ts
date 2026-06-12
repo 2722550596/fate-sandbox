@@ -86,6 +86,20 @@ const PROSE_RULES: readonly ProseRule[] = [
       /^(?!.*[「『"])[^\n]*?不是[^。！？，,\n]{1,20}(?:[，,]\s*而?是|。\s*是[^。！？\n]{1,12}。)/g,
   },
   {
+    // 否定排比抬升（stop-slop: negative listing）：「不是X。不是Y。是Z。」
+    // 逗号分隔变体已由 negation-reversal-colloquial 覆盖；这里攐句号/分号版。
+    id: "negative-listing",
+    scope: "per-line",
+    pattern:
+      /^(?!.*[「『"])[^\n]*?不是[^。！？\n]{1,16}[。；;][^\n]{0,30}?不是[^。！？\n]{1,16}[。；;]\s*[而只]?是/g,
+  },
+  {
+    // 伪转变弧（stop-slop: false transformation arc）：「不再是A，而是B」。
+    id: "false-transformation",
+    scope: "per-line",
+    pattern: /^(?!.*[「『"])[^\n]*?不再是[^。！？，,\n]{1,20}[，,。]\s*而?是/g,
+  },
+  {
     id: "empty-atmosphere",
     scope: "anywhere",
     pattern: /空气中弥漫|显得格外|某种说不出的|难以言喻/g,

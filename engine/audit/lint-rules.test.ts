@@ -75,6 +75,14 @@ void test("negation-reversal-colloquial hits narration variants but spares dialo
   );
 });
 
+void test("negative-listing and false-transformation hit narration, spare dialogue", () => {
+  assert.ok(ruleIds("这不是侦察。不是巡逻。是围猎。").includes("negative-listing"));
+  assert.ok(!ruleIds("「不是侦察。不是巡逻。是围猎。」").includes("negative-listing"));
+  assert.ok(ruleIds("那道视线不再是稳定的指节，而是折碎的冷意。").includes("false-transformation"));
+  assert.ok(!ruleIds("「我不再是从者，而是你的剑。」").includes("false-transformation"));
+  assert.ok(!ruleIds("他不再说话。是雨声盖过了一切吗。").includes("false-transformation"));
+});
+
 function endingProse(line: string): string {
   return "正文铺垫。".repeat(30) + "\n" + line;
 }
