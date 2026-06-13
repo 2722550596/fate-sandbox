@@ -31,6 +31,14 @@ function proseMessage(text: string): Record<string, unknown> {
   return { role: "custom", customType: PROSE_CUSTOM_TYPE, content: text, display: true };
 }
 
+function injectedPromptMessage(header: string): Record<string, unknown> {
+  return {
+    role: "user",
+    content: [{ type: "text", text: `<${header}>\ninternal prompt\n</${header}>` }],
+    timestamp: 0,
+  };
+}
+
 function packetCallMessage(args: Record<string, unknown>, id = "tc-1"): Record<string, unknown> {
   return {
     role: "assistant",
@@ -92,11 +100,29 @@ void test("buildRendererMessages builds an append-only conversation shape", () =
   assert.equal(messages[0]?.text, "第一轮输入");
   assert.equal(messages[1]?.text, "第一轮正文。");
   const final = messages[2]?.text ?? "";
-  assert.match(final, /# 玩家本轮输入/);
+  assert.match(final, /# Current Player Input/);
   assert.match(final, /贴上去！/);
   assert.match(final, /# Direction Packet/);
   assert.match(final, /Saber 突进受阻/);
-  assert.match(final, /只输出正文/);
+  assert.match(final, /Output only Chinese body prose/);
+});
+
+void test("buildRendererMessages keeps player input and filters injected settlement prompts", () => {
+  const messages = buildRendererMessages(
+    [
+      injectedPromptMessage("settlement_principles"),
+      userMessage("这是玩家真实输入。"),
+      injectedPromptMessage("mechanical_state"),
+      packetCallMessage(PACKET_ARGS),
+    ],
+    parseDirectionPacket(PACKET_ARGS, "packet"),
+  );
+
+  const final = messages.at(-1)?.text ?? "";
+  assert.match(final, /# Current Player Input/);
+  assert.match(final, /这是玩家真实输入。/);
+  assert.doesNotMatch(final, /internal prompt/);
+  assert.doesNotMatch(final, /mechanical_state/);
 });
 
 function turnsFixture(total: number): Record<string, unknown>[] {
@@ -124,10 +150,10 @@ void test("buildRendererMessages prefers writer digests and falls back to packet
   );
   const digest = messages[0]?.text ?? "";
   // 第 2 轮用 writer 摘要，其余轮回退机械 packet 摘要
-  assert.match(digest, /第2轮：凛面对质问退让，同盟出现裂痕/);
-  assert.doesNotMatch(digest, /第2轮：行动 2/);
-  assert.match(digest, /第1轮：行动 1/);
-  assert.match(digest, /第6轮：行动 6/);
+  assert.match(digest, /Turn 2: 凛面对质问退让，同盟出现裂痕/);
+  assert.doesNotMatch(digest, /Turn 2: 行动 2/);
+  assert.match(digest, /Turn 1: 行动 1/);
+  assert.match(digest, /Turn 6: 行动 6/);
 });
 
 void test("buildRendererMessages keeps all turns full below the high-water mark", () => {
@@ -148,10 +174,10 @@ void test("buildRendererMessages cuts to the low-water mark with a digest layer"
   // 越过高水位：边界跳到 6，全文层 = 第 7-17 轮（11 轮），前 6 轮进摘要层
   const digest = messages[0]?.text ?? "";
   assert.equal(messages[0]?.role, "user");
-  assert.match(digest, /# 前情提要/);
-  assert.match(digest, /第1轮：行动 1/);
-  assert.match(digest, /第6轮：行动 6/);
-  assert.doesNotMatch(digest, /第7轮/);
+  assert.match(digest, /# Early Turn Digest/);
+  assert.match(digest, /Turn 1: 行动 1/);
+  assert.match(digest, /Turn 6: 行动 6/);
+  assert.doesNotMatch(digest, /Turn 7:/);
   // 摘要 1 + 全文 11×2 + 末尾 1
   assert.equal(messages.length, 24);
   assert.equal(messages[1]?.text, "输入 7");
@@ -177,7 +203,7 @@ void test("buildRendererMessages demotes turns to digest when prose exceeds the 
   const result = buildRendererMessages(messages, parseDirectionPacket(PACKET_ARGS, "packet"));
   // 12×5000 字超 45k 预算：前 2 轮降级进摘要，全文层保留 10 轮
   const digest = result[0]?.text ?? "";
-  assert.match(digest, /第2轮：行动 2/);
+  assert.match(digest, /Turn 2: 行动 2/);
   assert.equal(result[1]?.text, "输入 3");
 });
 

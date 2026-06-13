@@ -91,7 +91,7 @@ export function buildRendererMessages(
     result.push({
       role: "user",
       text: [
-        "# 前情提要（早期轮次，仅供事件连续性参考）",
+        "# Early Turn Digest (event continuity reference only)",
         "",
         ...digestTurns.map((turn) => turn.digest),
       ].join("\n"),
@@ -102,10 +102,11 @@ export function buildRendererMessages(
     result.push({ role: "assistant", text: turn.prose });
   }
 
-  const finalSections: string[] = [];
-  if (currentInputs.length > 0) {
-    finalSections.push("# 玩家本轮输入", "", currentInputs.join("\n\n"), "");
-  }
+  const currentPlayerInput =
+    currentInputs.length > 0
+      ? currentInputs.join("\n\n")
+      : "(No current player input was captured. Use packet.playerAction only.)";
+  const finalSections: string[] = ["# Current Player Input", "", currentPlayerInput, ""];
   finalSections.push(
     "# Direction Packet",
     "",
@@ -113,7 +114,7 @@ export function buildRendererMessages(
     JSON.stringify(packet, null, 2),
     "```",
     "",
-    "请按 system prompt 的契约渲染本轮正文。只输出正文。",
+    "Render this turn under the system-prompt contract. Output only Chinese body prose.",
   );
   result.push({ role: "user", text: finalSections.join("\n") });
   return result;
@@ -140,11 +141,11 @@ function collectRenderedTurns(
         pendingPacket === undefined ? undefined : digestOverrides?.get(pendingPacket.toolCallId);
       turns.push({
         turn,
-        playerInput: currentInputs.join("\n\n") || "（本轮无玩家输入）",
+        playerInput: currentInputs.join("\n\n") || "(No player input captured for this turn.)",
         prose: customMessageText(message),
         digest:
           writerDigest !== undefined
-            ? `第${turn}轮：${writerDigest}`
+            ? `Turn ${turn}: ${writerDigest}`
             : buildTurnDigest(turn, pendingPacket?.args),
       });
       currentInputs = [];
@@ -171,7 +172,7 @@ function buildTurnDigest(turn: number, args: Record<string, unknown> | undefined
     ? args["resolvedChanges"].filter((entry): entry is string => typeof entry === "string")
     : [];
   const changeText = changes.length > 0 ? `。${changes.join("，")}` : "";
-  return `第${turn}轮：${playerAction}${changeText}`;
+  return `Turn ${turn}: ${playerAction}${changeText}`;
 }
 
 /**
@@ -268,8 +269,30 @@ function playerInputText(message: unknown): string | undefined {
     return undefined;
   }
   const content = message["content"];
-  const text = typeof content === "string" ? content : joinTextParts(content);
-  return text.length > 0 ? text : undefined;
+  const text = (typeof content === "string" ? content : joinTextParts(content)).trim();
+  if (text.length === 0 || isInjectedPromptText(text)) {
+    return undefined;
+  }
+  return text;
+}
+
+const INJECTED_PROMPT_HEADERS = [
+  "settlement_principles",
+  "world_context",
+  "input_guide",
+  "social_guide",
+  "tool_policy",
+  "hard_rules",
+  "story_driver",
+  "mechanical_state",
+  "turn_reminder",
+  "direction_contract",
+] as const;
+
+function isInjectedPromptText(text: string): boolean {
+  const match = /^<([a-z][a-z0-9_-]*)>\n[\s\S]*\n<\/\1>$/u.exec(text.trim());
+  const header = match?.[1];
+  return header !== undefined && INJECTED_PROMPT_HEADERS.some((value) => value === header);
 }
 
 function joinTextParts(content: unknown): string {
