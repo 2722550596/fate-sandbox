@@ -8,7 +8,6 @@
 
 1. 已完成地基：#8 JSONL 审计脚本、#12 双 pass、#1 输出契约机械执法、#15 NPC agenda/knowledge lens、#16 关系信号账本、#17 pressure palette、#18 Windows 启动 parity、#5 parallel-line 调用工具化、#6 上下文经济、#9 Seeded RNG、#10 玩家侧小件（/relations /hooks /journal /recap）
 2. 建议下一批：#14 heavy 轮并行渲染选优、#7 canon 研究缓存
-3. 待定增强：#10 分支书签 / 成书导出
 
 ---
 
@@ -181,10 +180,11 @@ AGENTS.md 说「先写 JSONL 统计复现」，但没有现成统计工具。建
 - [x] `/hooks`：展示 player-safe 悬念账本；active/parked/paid/escalated/retired 分组显示，带表情标签。已完成（2026-06-14）。
 - [x] `/journal`：turnLog + eventLog + dailySummaries 渲染时间线。已完成（2026-06-14）。
 - [x] `/recap`：从 Campaign Memory（player-safe）生成前情提要（战役、主角、关键事实、最近事件、悬念、当前场景）。已完成（2026-06-14）。
-- [ ] 分支书签：session tree 已支持分叉，加 `/bookmark` 命名存档点，配合 `/fuck` 形成 what-if 工作流
-- [ ] 成书导出：session → 去掉工具调用的纯正文 HTML/EPUB
+- [x] 分支书签：pi 原生 `ctx.fork` + `ctx.navigateTree` + `pi.setLabel` 已覆盖，不需要额外实现。
+- [x] 成书导出：`pnpm export:book` / `pnpm export:book:html`。已完成（2026-06-14）。
 
 落地清单（2026-06-14）：
+
 - 投影函数在 `engine/core/player-widgets.ts`（纯 PublicGameState → Markdown，不泄露 secrets）。
 - 四个 `/` 命令注册在 `extensions/player-panel/index.ts`（复用已有 `showPanel` TUI 框架）。
 - 7 新测试覆盖四个投影函数。

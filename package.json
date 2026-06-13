@@ -43,6 +43,8 @@
     "format:check": "oxfmt --check",
     "test": "node --test 'engine/**/*.test.ts' 'tools/**/*.test.ts' 'tests/**/*.test.ts' 'extensions/**/*.test.ts'",
     "audit:session": "node scripts/audit-session.ts",
+    "export:book": "node scripts/export-book.ts",
+    "export:book:html": "node scripts/export-book.ts --html",
     "deadcode": "pnpx knip --include files"
   },
   "dependencies": {
