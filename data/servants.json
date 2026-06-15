@@ -3,7 +3,12 @@
     {
       "id": "artoria-pendragon-saber",
       "name": "阿尔托莉雅·潘德拉贡",
-      "aliases": ["Saber", "骑士王", "亚瑟王", "Artoria Pendragon"],
+      "aliases": [
+        "Saber",
+        "骑士王",
+        "亚瑟王",
+        "Artoria Pendragon"
+      ],
       "className": "Saber",
       "trueName": "阿尔托莉雅·潘德拉贡",
       "parameters": {
@@ -37,7 +42,11 @@
     {
       "id": "emiya-archer",
       "name": "卫宫",
-      "aliases": ["Archer", "红衣弓兵", "EMIYA"],
+      "aliases": [
+        "Archer",
+        "红衣弓兵",
+        "EMIYA"
+      ],
       "className": "Archer",
       "trueName": "卫宫",
       "parameters": {
@@ -56,12 +65,19 @@
           "summary": "无限剑制。展开需要精神世界、魔力与战术条件，不是普通技能。"
         }
       ],
-      "notes": ["真实身份属于重大隐藏事实。", "投影、战术经验和相性常比参数更关键。"]
+      "notes": [
+        "真实身份属于重大隐藏事实。",
+        "投影、战术经验和相性常比参数更关键。"
+      ]
     },
     {
       "id": "cu-chulainn-lancer",
       "name": "库丘林",
-      "aliases": ["Lancer", "蓝色枪兵", "Cu Chulainn"],
+      "aliases": [
+        "Lancer",
+        "蓝色枪兵",
+        "Cu Chulainn"
+      ],
       "className": "Lancer",
       "trueName": "库丘林",
       "parameters": {
@@ -80,12 +96,18 @@
           "summary": "刺穿死棘之枪。发动条件、距离、幸运与防御手段共同决定结果。"
         }
       ],
-      "notes": ["敏捷、战斗经验和生存能力极高。", "御主命令常限制发挥。"]
+      "notes": [
+        "敏捷、战斗经验和生存能力极高。",
+        "御主命令常限制发挥。"
+      ]
     },
     {
       "id": "medusa-rider",
       "name": "美杜莎",
-      "aliases": ["Rider", "Medusa"],
+      "aliases": [
+        "Rider",
+        "Medusa"
+      ],
       "className": "Rider",
       "trueName": "美杜莎",
       "parameters": {
@@ -104,12 +126,18 @@
           "summary": "骑英之缰绳。高速突击威力巨大，但需要坐骑、展开空间与魔力。"
         }
       ],
-      "notes": ["魔眼、机动与突袭强。", "供魔不足会显著压低表现。"]
+      "notes": [
+        "魔眼、机动与突袭强。",
+        "供魔不足会显著压低表现。"
+      ]
     },
     {
       "id": "heracles-berserker",
       "name": "赫拉克勒斯",
-      "aliases": ["Berserker", "Heracles"],
+      "aliases": [
+        "Berserker",
+        "Heracles"
+      ],
       "className": "Berserker",
       "trueName": "赫拉克勒斯",
       "parameters": {
@@ -128,12 +156,18 @@
           "summary": "十二试炼。低等级攻击无效并具备多重生命，必须按神秘与等级处理。"
         }
       ],
-      "notes": ["参数压制极强。", "狂化限制交流与技巧表达。"]
+      "notes": [
+        "参数压制极强。",
+        "狂化限制交流与技巧表达。"
+      ]
     },
     {
       "id": "medea-caster",
       "name": "美狄亚",
-      "aliases": ["Caster", "Medea"],
+      "aliases": [
+        "Caster",
+        "Medea"
+      ],
       "className": "Caster",
       "trueName": "美狄亚",
       "parameters": {
@@ -152,12 +186,19 @@
           "summary": "破戒应为全てを。能切断契约与魔术效果，但需要接触和明确对象。"
         }
       ],
-      "notes": ["阵地作成与高速神言是核心优势。", "近战脆弱但准备充分时极危险。"]
+      "notes": [
+        "阵地作成与高速神言是核心优势。",
+        "近战脆弱但准备充分时极危险。"
+      ]
     },
     {
       "id": "hassan-cursed-arm-assassin",
       "name": "咒腕哈桑",
-      "aliases": ["Assassin", "Cursed Arm Hassan", "真Assassin"],
+      "aliases": [
+        "Assassin",
+        "Cursed Arm Hassan",
+        "真Assassin"
+      ],
       "className": "Assassin",
       "trueName": "哈桑·萨巴赫",
       "parameters": {
@@ -176,12 +217,18 @@
           "summary": "妄想心音。对心脏的诅咒性暗杀，需满足距离与目标条件。"
         }
       ],
-      "notes": ["气息遮断与御主暗杀威胁高。", "正面对从者战不是优势。"]
+      "notes": [
+        "气息遮断与御主暗杀威胁高。",
+        "正面对从者战不是优势。"
+      ]
     },
     {
       "id": "sasaki-kojiro-assassin",
       "name": "佐佐木小次郎",
-      "aliases": ["Assassin", "小次郎"],
+      "aliases": [
+        "Assassin",
+        "小次郎"
+      ],
       "className": "Assassin",
       "trueName": "佐佐木小次郎",
       "parameters": {
@@ -200,12 +247,19 @@
           "summary": "燕返。以纯剑技抵达近似第二魔法的多重斩击，不是宝具真名解放。"
         }
       ],
-      "notes": ["被柳洞寺山门等召唤条件限制。", "剑技极端强但机动与现界条件受限。"]
+      "notes": [
+        "被柳洞寺山门等召唤条件限制。",
+        "剑技极端强但机动与现界条件受限。"
+      ]
     },
     {
       "id": "gilgamesh-archer",
       "name": "吉尔伽美什",
-      "aliases": ["Archer", "英雄王", "Gilgamesh"],
+      "aliases": [
+        "Archer",
+        "英雄王",
+        "Gilgamesh"
+      ],
       "className": "Archer",
       "trueName": "吉尔伽美什",
       "parameters": {
@@ -239,7 +293,11 @@
     {
       "id": "iskandar-rider",
       "name": "伊斯坎达尔",
-      "aliases": ["Rider", "征服王", "Iskandar"],
+      "aliases": [
+        "Rider",
+        "征服王",
+        "Iskandar"
+      ],
       "className": "Rider",
       "trueName": "伊斯坎达尔",
       "parameters": {
@@ -264,12 +322,18 @@
           "summary": "王之军势。展开消耗巨大，需要明确高潮窗口。"
         }
       ],
-      "notes": ["气魄、机动和军势压迫强。", "常把战斗转化为王道与选择的对话。"]
+      "notes": [
+        "气魄、机动和军势压迫强。",
+        "常把战斗转化为王道与选择的对话。"
+      ]
     },
     {
       "id": "diarmuid-lancer",
       "name": "迪尔姆德·奥迪那",
-      "aliases": ["Lancer", "Diarmuid"],
+      "aliases": [
+        "Lancer",
+        "Diarmuid"
+      ],
       "className": "Lancer",
       "trueName": "迪尔姆德·奥迪那",
       "parameters": {
@@ -294,12 +358,18 @@
           "summary": "必灭的黄蔷薇。造成难以治愈的伤口。"
         }
       ],
-      "notes": ["骑士道强，但御主关系会严重影响战术。"]
+      "notes": [
+        "骑士道强，但御主关系会严重影响战术。"
+      ]
     },
     {
       "id": "gilles-caster",
       "name": "吉尔·德·雷",
-      "aliases": ["Caster", "Gilles de Rais", "蓝胡子"],
+      "aliases": [
+        "Caster",
+        "Gilles de Rais",
+        "蓝胡子"
+      ],
       "className": "Caster",
       "trueName": "吉尔·德·雷",
       "parameters": {
@@ -318,12 +388,18 @@
           "summary": "螺湮城教本。召唤海魔与异端魔术，极易造成公共灾害。"
         }
       ],
-      "notes": ["FZ 中普通社会暴露风险极高。", "不应美化其暴行。"]
+      "notes": [
+        "FZ 中普通社会暴露风险极高。",
+        "不应美化其暴行。"
+      ]
     },
     {
       "id": "hundred-face-hassan-assassin",
       "name": "百貌哈桑",
-      "aliases": ["Assassin", "Hundred Personas"],
+      "aliases": [
+        "Assassin",
+        "Hundred Personas"
+      ],
       "className": "Assassin",
       "trueName": "哈桑·萨巴赫",
       "parameters": {
@@ -342,12 +418,19 @@
           "summary": "妄想幻像。多重人格分割成多个个体，适合侦察、扰乱和暗杀。"
         }
       ],
-      "notes": ["数量优势不等于正面战强。", "适合情报战和诱敌。"]
+      "notes": [
+        "数量优势不等于正面战强。",
+        "适合情报战和诱敌。"
+      ]
     },
     {
       "id": "lancelot-berserker",
       "name": "兰斯洛特",
-      "aliases": ["Berserker", "湖上骑士", "Lancelot"],
+      "aliases": [
+        "Berserker",
+        "湖上骑士",
+        "Lancelot"
+      ],
       "className": "Berserker",
       "trueName": "兰斯洛特",
       "parameters": {
@@ -372,12 +455,21 @@
           "summary": "不为一己之荣光。隐藏身份与能力。"
         }
       ],
-      "notes": ["与阿尔托莉雅的因缘是核心压力。", "狂化供魔代价极高。"]
+      "notes": [
+        "与阿尔托莉雅的因缘是核心压力。",
+        "狂化供魔代价极高。"
+      ]
     },
     {
       "id": "richard-i-saber-fsf",
       "name": "理查一世",
-      "aliases": ["Richard I", "Richard the Lionheart", "狮心王", "FSF Saber", "真实Saber"],
+      "aliases": [
+        "Richard I",
+        "Richard the Lionheart",
+        "狮心王",
+        "FSF Saber",
+        "真实Saber"
+      ],
       "className": "Saber",
       "trueName": "理查一世",
       "parameters": {
@@ -404,7 +496,11 @@
     {
       "id": "enkidu-false-lancer-fsf",
       "name": "恩奇都",
-      "aliases": ["False Lancer", "Enkidu", "银狼从者"],
+      "aliases": [
+        "False Lancer",
+        "Enkidu",
+        "银狼从者"
+      ],
       "className": "Lancer",
       "trueName": "恩奇都",
       "parameters": {
@@ -423,12 +519,19 @@
           "summary": "人子啊，紧系神明。与吉尔伽美什的乖离剑形成神话级对照。"
         }
       ],
-      "notes": ["FSF 中由合成兽银狼召唤。", "与吉尔伽美什重逢会迅速提升战场规模。"]
+      "notes": [
+        "FSF 中由合成兽银狼召唤。",
+        "与吉尔伽美什重逢会迅速提升战场规模。"
+      ]
     },
     {
       "id": "jack-the-ripper-false-berserker-fsf",
       "name": "杰克开膛手",
-      "aliases": ["False Berserker", "Jack the Ripper", "杰克"],
+      "aliases": [
+        "False Berserker",
+        "Jack the Ripper",
+        "杰克"
+      ],
       "className": "Berserker",
       "trueName": "杰克开膛手",
       "parameters": {
@@ -447,12 +550,18 @@
           "summary": "与“杰克开膛手”传说的不定形身份相关，具体表现需按 FSF 情境处理。"
         }
       ],
-      "notes": ["FSF 中由弗拉特召唤。", "身份不定性和现代都市传说感是核心，不要写成单一固定怪物。"]
+      "notes": [
+        "FSF 中由弗拉特召唤。",
+        "身份不定性和现代都市传说感是核心，不要写成单一固定怪物。"
+      ]
     },
     {
       "id": "pale-rider-false-rider-fsf",
       "name": "苍白骑手",
-      "aliases": ["False Rider", "Pale Rider"],
+      "aliases": [
+        "False Rider",
+        "Pale Rider"
+      ],
       "className": "Rider",
       "trueName": "苍白骑手",
       "parameters": {
@@ -471,12 +580,19 @@
           "summary": "以疾病、梦境和城市规模异常体现存在；不适合用普通单挑参数处理。"
         }
       ],
-      "notes": ["FSF 中与病童椿相关。", "压力应体现公共卫生、梦境和不可见传播，而非普通骑乘战。"]
+      "notes": [
+        "FSF 中与病童椿相关。",
+        "压力应体现公共卫生、梦境和不可见传播，而非普通骑乘战。"
+      ]
     },
     {
       "id": "alcides-true-archer-fsf",
       "name": "阿尔喀德斯",
-      "aliases": ["True Archer", "Alcides", "被污染的赫拉克勒斯"],
+      "aliases": [
+        "True Archer",
+        "Alcides",
+        "被污染的赫拉克勒斯"
+      ],
       "className": "Archer",
       "trueName": "阿尔喀德斯",
       "parameters": {
@@ -495,12 +611,19 @@
           "summary": "十二荣光。与赫拉克勒斯十二功业相关的复合能力，需逐项确认表现。"
         }
       ],
-      "notes": ["由巴兹迪洛特污染后的真实 Archer。", "不要提前让玩家知道全部能力清单。"]
+      "notes": [
+        "由巴兹迪洛特污染后的真实 Archer。",
+        "不要提前让玩家知道全部能力清单。"
+      ]
     },
     {
       "id": "dumas-false-caster-fsf",
       "name": "大仲马",
-      "aliases": ["False Caster", "Alexandre Dumas", "亚历山大·仲马"],
+      "aliases": [
+        "False Caster",
+        "Alexandre Dumas",
+        "亚历山大·仲马"
+      ],
       "className": "Caster",
       "trueName": "亚历山大·仲马",
       "parameters": {
@@ -527,7 +650,11 @@
     {
       "id": "prelati-true-caster-fsf",
       "name": "弗朗索瓦·普雷拉蒂",
-      "aliases": ["True Caster", "Francesca Prelati", "弗兰切斯卡·普雷拉蒂"],
+      "aliases": [
+        "True Caster",
+        "Francesca Prelati",
+        "弗兰切斯卡·普雷拉蒂"
+      ],
       "className": "Caster",
       "trueName": "弗朗索瓦·普雷拉蒂",
       "parameters": {
@@ -546,12 +673,18 @@
           "summary": "与吉尔·德·雷、异端魔术和观察娱乐相关；具体表现按剧情证据推进。"
         }
       ],
-      "notes": ["FSF 中更偏旁观、搅局和制造戏剧性。", "不要让她过早抢占主线。"]
+      "notes": [
+        "FSF 中更偏旁观、搅局和制造戏剧性。",
+        "不要让她过早抢占主线。"
+      ]
     },
     {
       "id": "watcher-fsf",
       "name": "Watcher",
-      "aliases": ["特殊职阶Watcher", "观察者"],
+      "aliases": [
+        "特殊职阶Watcher",
+        "观察者"
+      ],
       "className": "Watcher",
       "trueName": "未公开",
       "parameters": {
@@ -570,7 +703,10 @@
           "summary": "通过多个影子引导西格玛走向真 Lancer 路径；不按常规七职阶处理。"
         }
       ],
-      "notes": ["FSF 特殊职阶。", "必须保留信息缺口，不要把全部影子和目的一次性讲明。"]
+      "notes": [
+        "FSF 特殊职阶。",
+        "必须保留信息缺口，不要把全部影子和目的一次性讲明。"
+      ]
     },
     {
       "id": "nero-claudius-saber-extra",
@@ -612,7 +748,13 @@
     {
       "id": "nameless-archer-extra",
       "name": "无铭",
-      "aliases": ["Archer (EXTRA)", "Nameless", "No Name", "無銘", "红衣Archer"],
+      "aliases": [
+        "Archer (EXTRA)",
+        "Nameless",
+        "No Name",
+        "無銘",
+        "红衣Archer"
+      ],
       "className": "Archer",
       "trueName": "无铭",
       "parameters": {
@@ -641,7 +783,13 @@
     {
       "id": "tamamo-no-mae-caster-extra",
       "name": "玉藻前",
-      "aliases": ["Caster (EXTRA)", "Tamamo-no-Mae", "玉藻の前", "キャス狐", "Casko"],
+      "aliases": [
+        "Caster (EXTRA)",
+        "Tamamo-no-Mae",
+        "玉藻の前",
+        "キャス狐",
+        "Casko"
+      ],
       "className": "Caster",
       "trueName": "玉藻前",
       "parameters": {
@@ -670,7 +818,12 @@
     {
       "id": "francis-drake-rider-extra",
       "name": "弗朗西斯·德雷克",
-      "aliases": ["Rider (EXTRA)", "Francis Drake", "フランシス・ドレイク", "德雷克船长"],
+      "aliases": [
+        "Rider (EXTRA)",
+        "Francis Drake",
+        "フランシス・ドレイク",
+        "德雷克船长"
+      ],
       "className": "Rider",
       "trueName": "弗朗西斯·德雷克",
       "parameters": {
@@ -698,7 +851,12 @@
     {
       "id": "robin-hood-archer-extra",
       "name": "罗宾汉",
-      "aliases": ["Archer (EXTRA)", "Robin Hood", "ロビンフッド", "绿衣Archer"],
+      "aliases": [
+        "Archer (EXTRA)",
+        "Robin Hood",
+        "ロビンフッド",
+        "绿衣Archer"
+      ],
       "className": "Archer",
       "trueName": "罗宾汉",
       "parameters": {
@@ -727,7 +885,13 @@
     {
       "id": "nursery-rhyme-caster-extra",
       "name": "童谣",
-      "aliases": ["Caster (EXTRA)", "Nursery Rhyme", "ナーサリー・ライム", "アリス", "黑い少女"],
+      "aliases": [
+        "Caster (EXTRA)",
+        "Nursery Rhyme",
+        "ナーサリー・ライム",
+        "アリス",
+        "黑い少女"
+      ],
       "className": "Caster",
       "trueName": "童谣",
       "parameters": {
@@ -755,7 +919,12 @@
     {
       "id": "vlad-iii-lancer-extra",
       "name": "弗拉德三世（EXTRA）",
-      "aliases": ["Lancer (EXTRA)", "Vlad III (EXTRA)", "ヴラド三世 (EXTRA)", "黑铠Lancer"],
+      "aliases": [
+        "Lancer (EXTRA)",
+        "Vlad III (EXTRA)",
+        "ヴラド三世 (EXTRA)",
+        "黑铠Lancer"
+      ],
       "className": "Lancer",
       "trueName": "弗拉德三世",
       "parameters": {
@@ -823,7 +992,12 @@
     {
       "id": "lu-bu-berserker-extra",
       "name": "吕布奉先",
-      "aliases": ["Berserker (EXTRA)", "Lu Bu", "吕布", "呂布奉先"],
+      "aliases": [
+        "Berserker (EXTRA)",
+        "Lu Bu",
+        "吕布",
+        "呂布奉先"
+      ],
       "className": "Berserker",
       "trueName": "吕布奉先",
       "parameters": {
@@ -851,7 +1025,12 @@
     {
       "id": "li-shuwen-assassin-extra",
       "name": "李书文",
-      "aliases": ["Assassin (EXTRA)", "Li Shuwen", "李書文", "无二打"],
+      "aliases": [
+        "Assassin (EXTRA)",
+        "Li Shuwen",
+        "李書文",
+        "无二打"
+      ],
       "className": "Assassin",
       "trueName": "李书文",
       "parameters": {
@@ -880,7 +1059,12 @@
     {
       "id": "gawain-saber-extra",
       "name": "高文",
-      "aliases": ["Saber (EXTRA)", "Gawain", "ガウェイン", "太阳骑士"],
+      "aliases": [
+        "Saber (EXTRA)",
+        "Gawain",
+        "ガウェイン",
+        "太阳骑士"
+      ],
       "className": "Saber",
       "trueName": "高文",
       "parameters": {
@@ -909,7 +1093,12 @@
     {
       "id": "cu-chulainn-lancer-extra",
       "name": "库丘林（EXTRA）",
-      "aliases": ["Lancer (EXTRA)", "Cu Chulainn (EXTRA)", "クー・フーリン", "凛的Lancer"],
+      "aliases": [
+        "Lancer (EXTRA)",
+        "Cu Chulainn (EXTRA)",
+        "クー・フーリン",
+        "凛的Lancer"
+      ],
       "className": "Lancer",
       "trueName": "库丘林",
       "parameters": {
@@ -937,7 +1126,13 @@
     {
       "id": "saver-buddha-extra",
       "name": "觉者",
-      "aliases": ["Saver", "セイヴァー", "Buddha", "救世者", "トワイスのサーヴァント"],
+      "aliases": [
+        "Saver",
+        "セイヴァー",
+        "Buddha",
+        "救世者",
+        "トワイスのサーヴァント"
+      ],
       "className": "Saver",
       "trueName": "觉者",
       "parameters": {
@@ -1000,7 +1195,12 @@
     {
       "id": "karna-servant-ccc",
       "name": "迦尔纳（CCC）",
-      "aliases": ["Karna (CCC)", "カルナ", "ジナコのサーヴァント", "金色铠甲的白发青年"],
+      "aliases": [
+        "Karna (CCC)",
+        "カルナ",
+        "ジナコのサーヴァント",
+        "金色铠甲的白发青年"
+      ],
       "className": "Custom",
       "trueName": "迦尔纳",
       "parameters": {
@@ -1166,7 +1366,11 @@
     {
       "id": "siegfried-black-saber-apo",
       "name": "齐格飞",
-      "aliases": ["黑Saber", "屠龙者", "荷兰德的英雄"],
+      "aliases": [
+        "黑Saber",
+        "屠龙者",
+        "荷兰德的英雄"
+      ],
       "className": "Saber",
       "trueName": "齐格飞",
       "parameters": {
@@ -1200,7 +1404,11 @@
     {
       "id": "vlad-iii-black-lancer-apo",
       "name": "弗拉德三世",
-      "aliases": ["黑Lancer", "串刺公", "护国的鬼将"],
+      "aliases": [
+        "黑Lancer",
+        "串刺公",
+        "护国的鬼将"
+      ],
       "className": "Lancer",
       "trueName": "弗拉德三世",
       "parameters": {
@@ -1234,7 +1442,11 @@
     {
       "id": "chiron-black-archer-apo",
       "name": "喀戎",
-      "aliases": ["黑Archer", "贤者", "大贤者肯陶洛斯"],
+      "aliases": [
+        "黑Archer",
+        "贤者",
+        "大贤者肯陶洛斯"
+      ],
       "className": "Archer",
       "trueName": "喀戎",
       "parameters": {
@@ -1262,7 +1474,11 @@
     {
       "id": "astolfo-black-rider-apo",
       "name": "阿斯托尔福",
-      "aliases": ["黑Rider", "查理曼十二勇士", "骏鹰骑手"],
+      "aliases": [
+        "黑Rider",
+        "查理曼十二勇士",
+        "骏鹰骑手"
+      ],
       "className": "Rider",
       "trueName": "阿斯托尔福",
       "parameters": {
@@ -1302,7 +1518,11 @@
     {
       "id": "avicebron-black-caster-apo",
       "name": "阿维斯布隆",
-      "aliases": ["黑Caster", "所罗门·伊本·盖比鲁勒", "魔像师"],
+      "aliases": [
+        "黑Caster",
+        "所罗门·伊本·盖比鲁勒",
+        "魔像师"
+      ],
       "className": "Caster",
       "trueName": "阿维斯布隆",
       "parameters": {
@@ -1330,7 +1550,11 @@
     {
       "id": "frankenstein-black-berserker-apo",
       "name": "弗兰肯斯坦",
-      "aliases": ["黑Berserker", "弗兰肯斯坦的怪物", "花嫁"],
+      "aliases": [
+        "黑Berserker",
+        "弗兰肯斯坦的怪物",
+        "花嫁"
+      ],
       "className": "Berserker",
       "trueName": "弗兰肯斯坦",
       "parameters": {
@@ -1358,7 +1582,11 @@
     {
       "id": "jack-the-ripper-black-assassin-apo",
       "name": "开膛手杰克",
-      "aliases": ["黑Assassin", "雾都的杀人鬼", "切り裂きジャック"],
+      "aliases": [
+        "黑Assassin",
+        "雾都的杀人鬼",
+        "切り裂きジャック"
+      ],
       "className": "Assassin",
       "trueName": "开膛手杰克",
       "parameters": {
@@ -1392,7 +1620,11 @@
     {
       "id": "mordred-red-saber-apo",
       "name": "莫德雷德",
-      "aliases": ["红Saber", "叛逆的骑士", "不列颠的小狮子"],
+      "aliases": [
+        "红Saber",
+        "叛逆的骑士",
+        "不列颠的小狮子"
+      ],
       "className": "Saber",
       "trueName": "莫德雷德",
       "parameters": {
@@ -1426,7 +1658,11 @@
     {
       "id": "karna-red-lancer-apo",
       "name": "迦尔纳",
-      "aliases": ["红Lancer", "施舍的英雄", "太阳之子"],
+      "aliases": [
+        "红Lancer",
+        "施舍的英雄",
+        "太阳之子"
+      ],
       "className": "Lancer",
       "trueName": "迦尔纳",
       "parameters": {
@@ -1466,7 +1702,11 @@
     {
       "id": "atalanta-red-archer-apo",
       "name": "阿塔兰忒",
-      "aliases": ["红Archer", "狩猎的处女", "月女神的猎手"],
+      "aliases": [
+        "红Archer",
+        "狩猎的处女",
+        "月女神的猎手"
+      ],
       "className": "Archer",
       "trueName": "阿塔兰忒",
       "parameters": {
@@ -1500,7 +1740,11 @@
     {
       "id": "achilles-red-rider-apo",
       "name": "阿喀琉斯",
-      "aliases": ["红Rider", "希腊最速英雄", "佩琉斯之子"],
+      "aliases": [
+        "红Rider",
+        "希腊最速英雄",
+        "佩琉斯之子"
+      ],
       "className": "Rider",
       "trueName": "阿喀琉斯",
       "parameters": {
@@ -1540,7 +1784,11 @@
     {
       "id": "shakespeare-red-caster-apo",
       "name": "威廉·莎士比亚",
-      "aliases": ["红Caster", "剧作家", "吟游诗人之王"],
+      "aliases": [
+        "红Caster",
+        "剧作家",
+        "吟游诗人之王"
+      ],
       "className": "Caster",
       "trueName": "威廉·莎士比亚",
       "parameters": {
@@ -1568,7 +1816,11 @@
     {
       "id": "spartacus-red-berserker-apo",
       "name": "斯巴达克斯",
-      "aliases": ["红Berserker", "剑奴叛将", "反逆的剑斗士"],
+      "aliases": [
+        "红Berserker",
+        "剑奴叛将",
+        "反逆的剑斗士"
+      ],
       "className": "Berserker",
       "trueName": "斯巴达克斯",
       "parameters": {
@@ -1596,7 +1848,11 @@
     {
       "id": "semiramis-red-assassin-apo",
       "name": "赛米拉米斯",
-      "aliases": ["红Assassin", "毒杀的女帝", "空中庭园的主人"],
+      "aliases": [
+        "红Assassin",
+        "毒杀的女帝",
+        "空中庭园的主人"
+      ],
       "className": "Assassin",
       "trueName": "赛米拉米斯",
       "parameters": {
@@ -1630,7 +1886,11 @@
     {
       "id": "jeanne-darc-ruler-apo",
       "name": "贞德",
-      "aliases": ["Ruler", "圣女", "奥尔良的少女"],
+      "aliases": [
+        "Ruler",
+        "圣女",
+        "奥尔良的少女"
+      ],
       "className": "Ruler",
       "trueName": "贞德",
       "parameters": {
@@ -1659,6 +1919,416 @@
         "大圣杯战争的裁定者：真名看破、特权令咒、对违规者的裁决权。",
         "信仰不是狂信：她以「见证人们的选择」为本分，倾向不干预。",
         "对圣堂教会/言峰四郎侧的异常保持警惕是原作主线，沙盒中由剧情重新确认。"
+      ]
+    },
+    {
+      "id": "asterios-berserker-labyrinth",
+      "name": "阿斯忒里奥斯",
+      "aliases": [
+        "Berserker (Labyrinth)",
+        "Asterios",
+        "アステリオス",
+        "弥诺陶洛斯"
+      ],
+      "className": "Berserker",
+      "trueName": "阿斯忒里奥斯",
+      "parameters": {
+        "strength": "A",
+        "endurance": "A+",
+        "agility": "C",
+        "mana": "D",
+        "luck": "E",
+        "noblePhantasm": "C"
+      },
+      "noblePhantasms": [
+        {
+          "name": "万古不灭的迷宫（Chaos Labyrinthos）",
+          "rank": "EX",
+          "kind": "对阵宝具",
+          "summary": "展开克里特迷宫的固有结界，封锁对手行动并削弱能力值；在迷宫环境中效果可能叠加。"
+        }
+      ],
+      "notes": [
+        "Labyrinth 中由沃尔夫冈以异常方式召唤，以血之浊流构成的异形姿态现界。",
+        "非通常的阿斯忒里奥斯状态——本来温顺的性格被扭曲为纯粹的战斗兵器。",
+        "作为迷宫主的尖兵袭击英灵队伍，战力定位为中 Boss。",
+        "参数基于 FGO 通行资料做 Labyrinth 异常召唤调整；具体战斗表现需查源。"
+      ]
+    },
+    {
+      "id": "arthur-pendragon-saber-prototype",
+      "name": "亚瑟·潘德拉贡",
+      "aliases": [
+        "Saber (Prototype)",
+        "Arthur Pendragon",
+        "アーサー・ペンドラゴン",
+        "男性亚瑟王"
+      ],
+      "className": "Saber",
+      "trueName": "亚瑟·潘德拉贡",
+      "parameters": {
+        "strength": "A",
+        "endurance": "B",
+        "agility": "B",
+        "mana": "A",
+        "luck": "A+",
+        "noblePhantasm": "A++"
+      },
+      "noblePhantasms": [
+        {
+          "name": "约束胜利之剑（Excalibur）",
+          "rank": "A++",
+          "kind": "对城宝具",
+          "summary": "与阿尔托莉雅同质的圣剑，但施加了双重封印；完全解放需满足两个条件。"
+        }
+      ],
+      "notes": [
+        "Prototype 世界线的 Saber，男性版亚瑟王。サーヴァント階位第一位。",
+        "第一次战争御主为沙条爱歌，第二次为沙条绫香。",
+        "高剑技+冷静判断力；与 FSN 阿尔托莉雅是平行存在但非同一人。",
+        "参数来源：FGO / Prototype material 通行资料。"
+      ]
+    },
+    {
+      "id": "brynhildr-lancer-prototype",
+      "name": "布伦希尔德",
+      "aliases": [
+        "Lancer (蒼銀)",
+        "Brynhildr",
+        "ブリュンヒルデ"
+      ],
+      "className": "Lancer",
+      "trueName": "布伦希尔德",
+      "parameters": {
+        "strength": "B+",
+        "endurance": "A",
+        "agility": "A",
+        "mana": "C",
+        "luck": "E",
+        "noblePhantasm": "B"
+      },
+      "noblePhantasms": [
+        {
+          "name": "死亡之爱（Brynhildr Romantia）",
+          "rank": "B",
+          "kind": "对人宝具",
+          "summary": "以爱之深度决定威力的魔枪；对「所爱之人」的特攻效果极高，条件契合时可触及冥界。"
+        }
+      ],
+      "notes": [
+        "蒼銀のフラグメンツ Lancer。サーヴァント階位第四位。口调温和，长枪轻挥。",
+        "御主为玲珑馆美沙夜。",
+        "爱与悲剧的瓦尔基里；行动受北欧宿命观影响。",
+        "参数来源：FGO / 蒼銀 material。"
+      ]
+    },
+    {
+      "id": "ozymandias-rider-prototype",
+      "name": "奥兹曼迪亚斯",
+      "aliases": [
+        "Rider (蒼銀)",
+        "Ozymandias",
+        "オジマンディアス",
+        "太阳王",
+        "拉美西斯二世"
+      ],
+      "className": "Rider",
+      "trueName": "奥兹曼迪亚斯",
+      "parameters": {
+        "strength": "C",
+        "endurance": "C",
+        "agility": "B",
+        "mana": "A",
+        "luck": "A+",
+        "noblePhantasm": "EX"
+      },
+      "noblePhantasms": [
+        {
+          "name": "光辉的大复合神殿（Ramesseum Tentyris）",
+          "rank": "EX",
+          "kind": "对城宝具",
+          "summary": "展开固有结界——巨大神殿复合体；三骑士联手仍互角。附带军船梅塞克忒特与神兽斯芬克斯召唤。"
+        }
+      ],
+      "notes": [
+        "蒼銀のフラグメンツ Rider。サーヴァント階位第五位。自称王中之王。",
+        "傲岸不逊但认可有王者气度之人；在美沙夜面前展现了罕见的尊重。",
+        "规格外的战力：三骑士联手方能对抗。",
+        "御主为仁贺征尔。参数来源：FGO / 蒼銀。"
+      ]
+    },
+    {
+      "id": "arash-archer-prototype",
+      "name": "阿拉什",
+      "aliases": [
+        "Archer (蒼銀)",
+        "Arash",
+        "アーラシュ",
+        "弓兵"
+      ],
+      "className": "Archer",
+      "trueName": "阿拉什",
+      "parameters": {
+        "strength": "B",
+        "endurance": "A",
+        "agility": "B+",
+        "mana": "E",
+        "luck": "D",
+        "noblePhantasm": "B++"
+      },
+      "noblePhantasms": [
+        {
+          "name": "流星一条（Stella）",
+          "rank": "B++",
+          "kind": "对国宝具",
+          "summary": "以自身生命为代价的极大射程宝具；一矢足以改变战争地形。发动后弓兵消灭。"
+        }
+      ],
+      "notes": [
+        "蒼銀のフラグメンツ Archer。波斯传说的大英雄。",
+        "御主为伊势三盈莉。",
+        "正直、温和、舍身为人的品格；与其他从者关系良好。",
+        "Stella 是最终手段——发动 = 从者消灭，不可轻易使用。"
+      ]
+    },
+    {
+      "id": "yamato-takeru-saber-sr",
+      "name": "ヤマトタケル",
+      "aliases": [
+        "Saber (Samurai Remnant)",
+        "Yamato Takeru",
+        "日本武尊"
+      ],
+      "className": "Saber",
+      "trueName": "ヤマトタケル",
+      "parameters": {
+        "strength": "B+",
+        "endurance": "B",
+        "agility": "A",
+        "mana": "C",
+        "luck": "A",
+        "noblePhantasm": "A"
+      },
+      "noblePhantasms": [
+        {
+          "name": "草薙剑",
+          "rank": "A",
+          "kind": "对人/对军宝具",
+          "summary": "日本神话三神器之一的神剑；具备火焰属性与风操作能力。"
+        }
+      ],
+      "notes": [
+        "Samurai Remnant 主角从者。古风装束，波浪剑。",
+        "起初看不起伊织（「弱い、剑以外の能はないのか？」），后逐渐认可。",
+        "对平和的江户街景充满好奇。",
+        "参数为根据游戏表现和 FGO 参考的合理估算。"
+      ]
+    },
+    {
+      "id": "musashi-berserker-sr",
+      "name": "宫本武藏",
+      "aliases": [
+        "Berserker (Samurai Remnant)",
+        "Miyamoto Musashi",
+        "宮本武蔵"
+      ],
+      "className": "Berserker",
+      "trueName": "宫本武藏",
+      "parameters": {
+        "strength": "B",
+        "endurance": "C",
+        "agility": "A+",
+        "mana": "E",
+        "luck": "B",
+        "noblePhantasm": "A"
+      },
+      "noblePhantasms": [
+        {
+          "name": "天下无双·零之位",
+          "rank": "A",
+          "kind": "对人宝具",
+          "summary": "二天一流奥义的从者化体现；以无拍子斩击跨越对手防御。"
+        }
+      ],
+      "notes": [
+        "高尾太夫召唤的 Berserker。与伊织的养父同名但是平行存在（FGO系女性武藏）。",
+        "Berserker 职阶但保留一定理性；战斗风格为二天一流。",
+        "与伊织在师徒与对手之间的微妙关系是叙事张力点。",
+        "参数为合理估算。"
+      ]
+    },
+    {
+      "id": "okita-souji-saber-redline",
+      "name": "冲田总司",
+      "aliases": [
+        "Saber (Redline)",
+        "Okita Souji",
+        "沖田総司",
+        "樱Saber"
+      ],
+      "className": "Saber",
+      "trueName": "冲田总司",
+      "parameters": {
+        "strength": "C",
+        "endurance": "E",
+        "agility": "A+",
+        "mana": "E",
+        "luck": "D",
+        "noblePhantasm": "C"
+      },
+      "noblePhantasms": [
+        {
+          "name": "誓之羽织（Flag of Sincerity）",
+          "rank": "B",
+          "kind": "对人宝具",
+          "summary": "新选组诚旗所化；强化自身全参数。"
+        },
+        {
+          "name": "无明三段突",
+          "rank": "N/A",
+          "kind": "对人奥义",
+          "summary": "三段刺突同时命中同一点的绝技；无法以技术或速度回避。"
+        }
+      ],
+      "notes": [
+        "type Redline Saber。新选组一番队组长。",
+        "极高的敏捷但耐久极低（肺病体质）；短期爆发力超强但长期战不利。",
+        "御主为赤城奏丈。",
+        "参数来源：FGO / KOHA-ACE 通行资料。"
+      ]
+    },
+    {
+      "id": "oda-nobunaga-archer-redline",
+      "name": "织田信长",
+      "aliases": [
+        "Archer (Redline)",
+        "Oda Nobunaga",
+        "織田信長",
+        "魔人Archer"
+      ],
+      "className": "Archer",
+      "trueName": "织田信长",
+      "parameters": {
+        "strength": "B",
+        "endurance": "B",
+        "agility": "B",
+        "mana": "A",
+        "luck": "A-",
+        "noblePhantasm": "E~EX"
+      },
+      "noblePhantasms": [
+        {
+          "name": "三千世界（Three Thousand Worlds）",
+          "rank": "E~EX",
+          "kind": "对军宝具",
+          "summary": "三千挺火绳铳的三段射击；对神性与神秘越高的对手威力越大。"
+        }
+      ],
+      "notes": [
+        "type Redline Archer / 魔人アーチャー。第六天魔王。",
+        "对「神秘」有特攻：神性、魔术、信仰越强的对手越脆弱。",
+        "御主为浅间要。",
+        "参数来源：FGO / KOHA-ACE。"
+      ]
+    },
+    {
+      "id": "li-shuwen-lancer-redline",
+      "name": "李书文",
+      "aliases": [
+        "Lancer (Redline)",
+        "Li Shuwen",
+        "李書文",
+        "一击必杀"
+      ],
+      "className": "Lancer",
+      "trueName": "李书文",
+      "parameters": {
+        "strength": "B",
+        "endurance": "C",
+        "agility": "A",
+        "mana": "E",
+        "luck": "E",
+        "noblePhantasm": "N/A"
+      },
+      "noblePhantasms": [
+        {
+          "name": "无二打",
+          "rank": "N/A",
+          "kind": "对人宝具(非宝具)",
+          "summary": "八极拳极意——一击必杀。非正式宝具但达到宝具级威力。"
+        }
+      ],
+      "notes": [
+        "type Redline Lancer。青年体（EXTRA版为老年体）。",
+        "纯粹武术家——与 EXTRA 版同一英灵但召唤时期不同导致外观年龄差异。",
+        "参数来源：FGO / Redline / EXTRA。"
+      ]
+    },
+    {
+      "id": "okada-izo-assassin-redline",
+      "name": "冈田以藏",
+      "aliases": [
+        "Assassin (Redline)",
+        "Okada Izo",
+        "岡田以蔵",
+        "人斩以藏"
+      ],
+      "className": "Assassin",
+      "trueName": "冈田以藏",
+      "parameters": {
+        "strength": "C",
+        "endurance": "D",
+        "agility": "B",
+        "mana": "E",
+        "luck": "D",
+        "noblePhantasm": "C"
+      },
+      "noblePhantasms": [
+        {
+          "name": "开辟随所（Settle it in the Mountains）",
+          "rank": "C",
+          "kind": "对人宝具",
+          "summary": "习合所见剑技的瞬间再现——可复制目睹过的任何剑术流派一招。"
+        }
+      ],
+      "notes": [
+        "type Redline Assassin。幕末四大人斩之一。",
+        "技术天才但教养不足；剑技模仿能力出色但有心理脆弱面。",
+        "参数来源：FGO。"
+      ]
+    },
+    {
+      "id": "mori-nagayoshi-berserker-redline",
+      "name": "森长可",
+      "aliases": [
+        "Berserker (Redline)",
+        "Mori Nagayoshi",
+        "森長可",
+        "鬼武蔵"
+      ],
+      "className": "Berserker",
+      "trueName": "森长可",
+      "parameters": {
+        "strength": "A",
+        "endurance": "B",
+        "agility": "C",
+        "mana": "D",
+        "luck": "C",
+        "noblePhantasm": "C+"
+      },
+      "noblePhantasms": [
+        {
+          "name": "人间无骨（Ningen Mukotsu）",
+          "rank": "C+",
+          "kind": "对人宝具",
+          "summary": "魔枪人间无骨——以暴力碾压为本质的突贯攻击。"
+        }
+      ],
+      "notes": [
+        "type Redline Berserker。织田家臣·鬼武蔵。",
+        "御主为真经津征尔少佐，通过 IV型英灵拘束具控制。",
+        "典型的暴走型 Berserker 但保留战斗本能。",
+        "参数来源：FGO。"
       ]
     }
   ]
