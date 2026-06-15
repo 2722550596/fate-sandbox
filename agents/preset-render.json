@@ -18,6 +18,14 @@
       "source": "agents/gm-style-blacklist.md"
     },
     {
+      "id": "style-engineering",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 48,
+      "header": "style_engineering",
+      "source": "agents/gm-style-engineering.md"
+    },
+    {
       "id": "writing-guide",
       "enabled": true,
       "slot": "pre-history",
