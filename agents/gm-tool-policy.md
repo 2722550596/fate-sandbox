@@ -15,6 +15,7 @@ This Module only decides whether to call tools and which tool has priority. Fina
 
 ## Canon queries
 
+- **First-turn / new-character rule (mandatory):** On the opening turn of a new game, and whenever a preset character appears in a scene for the first time, call `lookup` for every actor in `presentActorIds` plus the current location **before** writing the direction packet. Put the returned appearance, personality, voice, relationship boundaries, and ability presentation into `canonFacts`. The renderer has no lookup access; if you skip this, it will hallucinate. Even if you "remember" the character from training data, call lookup anyway — training memory is not canon.
 - When preset characters, locations, concepts, timelines, or ability details are involved, and the current public brief / current tool results / explicit conversation context are insufficient: call `lookup` first to confirm local index and version limits.
 - When `lookup` gives only an index, boundary, or incomplete material, and exact canon is still required: call `web_search`, then `fetch_content` for the specific page body. Do not settle facts from search summaries alone.
 - Before a preset character first appears, becomes scene focus, acts, or speaks in a way that reveals personality or relationships, use external research if local material lacks version-specific appearance, relationships, voice, current position, and action limits.
