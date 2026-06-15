@@ -398,7 +398,7 @@ export const CAMPAIGN_PRESETS = {
     timeline: "labyrinth",
     openingMode: "selected",
     premise:
-      "冬木大圣杯内部展开的异常迷宫空间；从者与迷途者被困其中，层层深入面对守卫与谜题。诺玛·古德费洛等角色的身份与入迷宫方式由开局确认。",
+      "科巴克·阿尔卡特拉斯的第七迷宫中的亚种圣杯战争。无御主体制——亚种圣杯直接将英灵拉入迷宫实体化，无召唤阵、无仪式、无御主契约。从者醒来时已身处迷宫某处，仅凭亚种圣杯维持灵基的最低限度现界。玩家可扮演四骑中任一或诺玛，扮演从者时开场为在迷宫入口层的渐次苏醒。",
     activeRuleSetIds: ["fate-worldview-filter", "fate-rank-combat", "custom"],
     timezone: "Asia/Tokyo",
     startedAt: "2004-02-01T00:00:00.000Z",
