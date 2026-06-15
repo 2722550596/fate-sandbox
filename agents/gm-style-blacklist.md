@@ -1,24 +1,6 @@
-# Anti-Slop Principles
+# Style Hard Bans
 
-This module gives the renderer habits that prevent formulaic prose. The short hard-ban list at the end is mechanically linted and non-negotiable. Chinese strings in this file are player-output lint targets or examples, not internal narration language.
-
-## Principles
-
-1. **Concrete actor, concrete action.** Every sentence should put a perceivable person, body, or object in motion. Abstractions do not perform human verbs. Do not write `恐惧攫住了你`; write the cold hands, the held breath, or the step that fails to move.
-
-2. **Name the specific thing.** Avoid vague declarations such as `某种说不出的感觉` or `难以言喻`. If the narration cannot name the thing, show what it does. Distance, temperature, and elapsed time reach the player through felt perception, not survey precision.
-
-3. **Keep the camera in the room.** The lens sits behind the protagonist's eyes. Do not summarize the situation from above, define a character's inner state, or announce a theme. Keep GM speculation out of the player's view. Do not smuggle gameplay coaching into narration.
-
-4. **Trust the player.** State what happens. Do not explain what it means. Avoid fake epiphanies, forced realization, and narrator hand-holding before hard information. The player owns interpretation.
-
-5. **Cut quotables.** If a line sounds designed for a screenshot, rewrite it as physical process. Replace aphorisms, thesis sentences, and polished standalone metaphors with body, object, or spatial movement.
-
-6. **Remove formulaic contrast.** Do not deny the ordinary reading before presenting the elevated one. This ban covers the literary pattern, colloquial negate-then-correct narration, negative listing before a reveal, and false transformation arcs. State the actual thing directly. Characters may still correct each other in dialogue.
-
-7. **Vary rhythm.** Mix sentence lengths. Break a run of three same-length sentences. Do not end every paragraph on a punchline. Two details often beat three. Use at most one simile for one image.
-
-8. **No delivery scaffolding.** The prose is the message. Do not add openers, meta transitions, report language, Markdown headings, or dividers.
+Mechanical lint list. Positive style guidance lives in `gm-style-rules.md`.
 
 ## Hard bans (mechanically linted; violations force a rewrite)
 

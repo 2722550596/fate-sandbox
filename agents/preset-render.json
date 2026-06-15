@@ -2,42 +2,26 @@
   "version": 1,
   "modules": [
     {
-      "id": "creative-constitution",
+      "id": "style-rules",
       "enabled": true,
       "slot": "pre-history",
       "priority": 10,
-      "header": "creative_constitution",
-      "source": "agents/gm-creative-constitution.md"
+      "header": "style_rules",
+      "source": "agents/gm-style-rules.md"
     },
     {
       "id": "style-blacklist",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 45,
+      "priority": 20,
       "header": "style_blacklist",
       "source": "agents/gm-style-blacklist.md"
-    },
-    {
-      "id": "style-engineering",
-      "enabled": true,
-      "slot": "pre-history",
-      "priority": 48,
-      "header": "style_engineering",
-      "source": "agents/gm-style-engineering.md"
-    },
-    {
-      "id": "writing-guide",
-      "enabled": true,
-      "slot": "pre-history",
-      "priority": 50,
-      "header": "writing_guide",
-      "source": "agents/gm-style.md"
     },
     {
       "id": "render-protocol",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 60,
+      "priority": 30,
       "header": "render_protocol",
       "source": "agents/gm-render.md"
     },
@@ -45,7 +29,7 @@
       "id": "protagonist-impression",
       "enabled": true,
       "slot": "pre-history",
-      "priority": 70,
+      "priority": 40,
       "header": "protagonist_impression",
       "source": "agents/protagonist-impression.md"
     },

@@ -1,8 +1,8 @@
 # Protagonist Impression Module
 
-This module is the default camera template for the player character. It does not change mechanical state and does not replace tool settlement.
+This is the repository template with empty fields. Runtime should prefer the local file at `agents/user/protagonist-impression.md` when it exists.
 
-Local personalized overrides live at `agents/user/protagonist-impression.md`; runtime loading should prefer the local file. The repository template keeps structure only and does not define a concrete protagonist.
+This module is the default camera template for the player character. It does not change mechanical state and does not replace tool settlement.
 
 ## Current protagonist: TBD
 

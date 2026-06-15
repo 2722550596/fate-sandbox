@@ -37,7 +37,7 @@ const PROJECT_ROOT = join(__dirname, "..", "..");
 
 export function buildSystemPrompt(baseSystemPrompt: string): string {
   return (
-    baseSystemPrompt + "\n" + readFileSync(join(PROJECT_ROOT, "agents", "gm-system.md"), "utf-8")
+    baseSystemPrompt + "\n" + readFileSync(join(PROJECT_ROOT, "agents", "system-settlement.md"), "utf-8")
   );
 }
 
@@ -62,7 +62,7 @@ export function injectGmPromptMessages<TMessage>(
  * + 全部 render/both 模块，按 slot 顺序与 priority 拼接。零工具 schema、零机械规则。
  */
 export function buildRendererSystemPrompt(): string {
-  const sections = [readPromptFile("agents/gm-render-system.md").trim()];
+  const sections = [readPromptFile("agents/system-render.md").trim()];
   for (const slot of ["pre-history", "pre-response", "final-contract"] as const) {
     for (const module of promptModulesForSlot(slot, "render")) {
       sections.push(`<${module.header}>\n${module.body.trim()}\n</${module.header}>`);
