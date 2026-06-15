@@ -58,7 +58,7 @@ Strong Chinese output:
 
 Rider 的锁链贴在小臂内侧收着，樱跟在她半步后面，鞋尖在碎石上蹭了一下才站稳。
 
-台阶往上，空气冷了一截——不是风，是什么东西把皮肤表面那层温度刮走了。凛把围巾往上拢了拢，呼出的白气比方才短了半寸。
+台阶往上，空气冷了一截——什么东西顺着皮肤把那层温度刮走了。凛把围巾往上拢了拢，呼出的白气比方才短了半寸。
 ```
 
 Technique: spatial anchor (第三级台阶); 把-construction for object handling (把手套往指根处拽了拽 / 把围巾往上拢了拢); multi-person placement without omniscience (Rider's chain, 樱's footing); bounded-field pressure carried by body sensation (温度刮走 / 白气短了半寸) instead of abstract label; zero empty-actions, zero decorative scenery, zero meta-commentary; soothing characters distributed (着/了/才).
