@@ -118,6 +118,24 @@ void test("revealSecret marks foreshadowed when evidence matches but claim does 
   assert.equal(draft.public.actors["caster"]?.servantForm?.identity.trueName.status, "hidden");
 });
 
+void test("observed reveal may satisfy a configured condition through the scene trigger", () => {
+  const draft = createInitialState();
+  upsertTestCaster(draft);
+  configureCasterSecrets(draft);
+
+  const result = revealSecret(draft, {
+    kind: "observed-reveal",
+    actorId: "caster",
+    trigger: "她引用了科尔基斯与金羊皮的逸话。",
+    evidence: "玩家在场听见这句识别线索。",
+  });
+
+  assert.equal(result.outcome, "revealed");
+  const caster = draft.public.actors["caster"];
+  assert.equal(caster?.servantForm?.identity.trueName.status, "revealed");
+  assert.equal(caster?.servantForm?.identity.trueName.display, TRUE_NAME);
+});
+
 void test("revealSecret does not re-reveal an already revealed slot", () => {
   const draft = createInitialState();
   upsertTestCaster(draft);

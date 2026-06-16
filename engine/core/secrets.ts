@@ -320,7 +320,7 @@ function slugifySecretIdPart(value: string): string {
 function canRevealStringSlot(event: RevealSecretEvent, slot: SecretSlot<string>): boolean {
   if (slot.revealState === "revealed") return false;
   const needle = event.kind === "claim-reveal" ? event.claim : event.trigger;
-  return slotMatches(slot, needle) && evidenceMatches(slot, event.evidence);
+  return slotMatches(slot, needle) && evidenceMatches(slot, revealEvidenceText(event));
 }
 
 function canRevealNoblePhantasmSlot(
@@ -329,7 +329,12 @@ function canRevealNoblePhantasmSlot(
 ): boolean {
   if (slot.revealState === "revealed") return false;
   const needle = event.kind === "claim-reveal" ? event.claim : event.trigger;
-  return slotMatches(slot, needle) && evidenceMatches(slot, event.evidence);
+  return slotMatches(slot, needle) && evidenceMatches(slot, revealEvidenceText(event));
+}
+
+function revealEvidenceText(event: RevealSecretEvent): string {
+  const needle = event.kind === "claim-reveal" ? event.claim : event.trigger;
+  return `${needle}\n${event.evidence}`;
 }
 
 function slotMatches<T>(slot: SecretSlot<T>, text: string): boolean {
