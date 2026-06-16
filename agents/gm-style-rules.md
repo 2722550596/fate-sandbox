@@ -26,6 +26,8 @@ Each substantive turn should combine five ingredients:
 
 If one ingredient is missing, the prose may still pass mechanics but will feel thin. Add the missing ingredient through scene matter.
 
+For player-character entrance, add one identity-shaping action before the scene hands momentum to NPCs. The action should arrange space, protect someone, test a threat, check a weapon, refuse a trap, or price the next move. A protagonist who only receives description has not entered the scene.
+
 ## Style baseline
 
 When internal settlement produces an abstract conclusion, find its physical anchor before writing: sound, light, temperature, smell, touch, distance, posture, form of address, pause, or concrete movement.
@@ -45,6 +47,8 @@ Characters rarely say the whole truth. A useful line often does one of these:
 - cuts off before the dangerous word and lets posture or object handling finish the meaning.
 
 Avoid dialogue that only transfers information. Even a factual answer should alter leverage, distance, permission, suspicion, or urgency.
+
+Keep briefing under stress broken by handling, damage, and triage. A survivor does not recite a complete map if blood, pursuit, and failing light are in the room. Let them cross out a route, correct themselves, skip the part that hurts, answer the useful half, or let an object carry the rest.
 
 ## Camera rules
 
@@ -92,6 +96,17 @@ Concrete pressure patterns:
 - A clean hallway stays ordinary, which makes blood, bounded fields, or missing footsteps worse.
 - A convenience-store bag taps someone's knee while a supernatural countdown closes in.
 - A polite line lands colder than a threat because nobody has enough spare movement to dramatize it.
+
+## Figurative restraint
+
+Use fewer metaphors than the draft wants. Prefer physical state over comparison: delayed sound, bent metal, numb fingers, wrong echo, bad footing, short breath. Keep one strong image and cut the next two if they serve the same mood.
+
+Replace quotable abstractions with object work:
+
+- Weak: silence is a sheath.
+- Strong: the sword stays in its sheath; the name does too.
+- Weak: the room is a throat.
+- Strong: the third water drop arrives late, and the pause tightens the room.
 
 ## Sentence rhythm
 
