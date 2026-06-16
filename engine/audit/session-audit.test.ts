@@ -298,6 +298,31 @@ void test("measureLint reports prose violations and secret leaks", () => {
   assert.equal(lint.blockFindings[0]?.finding.match, "两仪式");
 });
 
+void test("measureLint reports underlength two-pass prose from packet context", () => {
+  const jsonl = buildJsonl([
+    { kind: "user", text: "玩家行动" },
+    {
+      kind: "assistant",
+      toolCalls: [
+        {
+          id: "p1",
+          name: "submit_direction_packet",
+          args: {
+            needsRender: true,
+            eventWeight: "normal",
+            resolvedChanges: ["她抵达门前"],
+            npcStances: [],
+          },
+        },
+      ],
+    },
+    { kind: "toolResult", toolCallId: "p1" },
+    { kind: "prose", text: "她抵达门前。" },
+  ]);
+  const lint = measureLint(groupTurns(reconstructActivePath(parseSessionJsonl(jsonl))));
+  assert.equal(lint.findingsByRule["underlength-prose"], 1);
+});
+
 void test("measureLint uses latest secrets snapshot inside the turn", () => {
   const secrets = {
     actorSecrets: { a: { trueName: { value: "美狄亚", revealState: "hidden" } } },

@@ -8,9 +8,15 @@
  * CLI 薄壳在 `scripts/audit-session.ts`。
  */
 
-import type { LintFinding } from "./lint-rules.ts";
+import type { LintFinding, ProseLengthContext } from "./lint-rules.ts";
 
-import { collectUnrevealedSecretStrings, findSecretLeaks, lintFinalProse } from "./lint-rules.ts";
+import {
+  collectUnrevealedSecretStrings,
+  findSecretLeaks,
+  lintFinalProse,
+  lintProseLength,
+  proseLengthContextFromPacket,
+} from "./lint-rules.ts";
 
 // ---------- JSONL entry 解析 ----------
 
@@ -400,7 +406,13 @@ export function measureLint(turns: readonly AuditTurn[]): LintReport {
 
   for (const turn of turns) {
     const findings: LintFinding[] = [];
-    if (turn.finalProse.trim().length > 0) findings.push(...lintFinalProse(turn.finalProse));
+    if (turn.finalProse.trim().length > 0) {
+      findings.push(...lintFinalProse(turn.finalProse));
+      const lengthContext = proseLengthContextForTurn(turn);
+      if (lengthContext !== undefined) {
+        findings.push(...lintProseLength(turn.finalProse, lengthContext));
+      }
+    }
     // 秘密泄漏扫全轮文本：中间叙述泄漏同样致命
     findings.push(...findSecretLeaks(turn.fullText, turn.unrevealedSecrets));
 
@@ -411,6 +423,20 @@ export function measureLint(turns: readonly AuditTurn[]): LintReport {
     }
   }
   return { findingsByRule, turnsWithFindings, blockFindings };
+}
+
+function proseLengthContextForTurn(turn: AuditTurn): ProseLengthContext | undefined {
+  for (let index = turn.toolCalls.length - 1; index >= 0; index--) {
+    const call = turn.toolCalls[index];
+    if (call?.accepted !== true || call.name !== "submit_direction_packet") {
+      continue;
+    }
+    const context = proseLengthContextFromPacket(call.args);
+    if (context !== undefined) {
+      return context;
+    }
+  }
+  return undefined;
 }
 
 /** parallel-line 触发条件（gm-tool-policy）：>=30min 推进 / beat complete / 连续 2 轮无代价 */

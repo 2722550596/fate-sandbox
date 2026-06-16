@@ -216,6 +216,12 @@ void test("lintRenderedProse flags secret leaks as block findings", () => {
   assert.ok(report.findings.length >= 1);
 });
 
+void test("lintRenderedProse flags underlength prose when packet context is present", () => {
+  const packet = parseDirectionPacket(PACKET_ARGS, "packet");
+  const report = lintRenderedProse("她抬头。雨还在下。", [], packet);
+  assert.ok(report.findings.some((finding) => finding.ruleId === "underlength-prose"));
+});
+
 void test("redactSecrets masks unrevealed secret strings", () => {
   const redacted = redactSecrets("两仪式出刀，两仪式收刀。", ["两仪式"]);
   assert.doesNotMatch(redacted, /两仪式/);
@@ -231,5 +237,16 @@ void test("buildLintRetryMessages appends draft and violations after the base pr
   assert.equal(retry[0]?.text, "BASE");
   assert.equal(retry[1]?.role, "assistant");
   assert.equal(retry[1]?.text, "首稿正文");
-  assert.match(retry[2]?.text ?? "", /fake-climax/);
+  const retryPrompt = retry[2]?.text ?? "";
+  assert.match(retryPrompt, /fake-climax/);
+  assert.match(retryPrompt, /篇幅不变/);
+});
+
+void test("buildLintRetryMessages tells renderer to grow underlength drafts", () => {
+  const retry = buildLintRetryMessages([], "短。", [
+    { ruleId: "underlength-prose", severity: "warn", match: "3/295 字", excerpt: "x" },
+  ]);
+  const prompt = retry[1]?.text ?? "";
+  assert.match(prompt, /补足必要过程与篇幅/);
+  assert.doesNotMatch(prompt, /篇幅不变/);
 });

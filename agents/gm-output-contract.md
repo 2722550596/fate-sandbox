@@ -4,7 +4,7 @@ This module constrains the current final reply. Do not write this contract, labe
 
 - Output only Chinese narrative body text and necessary dialogue.
 - Do not explain tools, rules, state fields, internal judgment, or English packet labels.
-- Length is driven by required scene elements, not character count or paragraph quota. Classify the current turn into one of three weight tiers, then write until every required element is on page — then stop.
+- Length is driven by required scene elements, not character count or paragraph quota. Classify the current turn into one of three weight tiers, then write until every required element is on page — then stop. A renderer underlength lint enforces a minimum floor for each tier; satisfy it by unfolding real action, reaction, cost, object/space change, and ending pressure, never by padding.
 
   **Light** (transition, simple movement, brief exchange, short wait):
   Required on page: rendered player action + at least 1 environment signal or NPC signal.

@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { collectUnrevealedSecretStrings, findSecretLeaks, lintFinalProse } from "./lint-rules.ts";
+import {
+  collectUnrevealedSecretStrings,
+  findSecretLeaks,
+  lintFinalProse,
+  lintProseLength,
+  proseLengthContextFromPacket,
+} from "./lint-rules.ts";
 
 function ruleIds(prose: string): string[] {
   return lintFinalProse(prose).map((f) => f.ruleId);
@@ -126,6 +132,36 @@ void test("clean prose produces zero findings", () => {
   const prose =
     "刀锋擦着她的肩头掠过，木门在背后裂开一道缝。楼上传来第二声脚步——比第一声更近。她攥紧了袖中的令咒，掌心全是汗。";
   assert.deepEqual(lintFinalProse(prose), []);
+});
+
+void test("lintProseLength flags render drafts below the event-weight floor", () => {
+  const findings = lintProseLength("她点头。门外雨声近了一点。", {
+    eventWeight: "normal",
+    resolvedChangeCount: 1,
+    npcStanceCount: 0,
+  });
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0]?.ruleId, "underlength-prose");
+  assert.match(findings[0]?.match ?? "", /\d+\/295 字/u);
+});
+
+void test("lintProseLength accepts long enough prose", () => {
+  const prose = "她把伞沿着门缝收拢。".repeat(40);
+  assert.deepEqual(
+    lintProseLength(prose, { eventWeight: "light", resolvedChangeCount: 1, npcStanceCount: 0 }),
+    [],
+  );
+});
+
+void test("proseLengthContextFromPacket reads render packet weight and counts", () => {
+  const context = proseLengthContextFromPacket({
+    needsRender: true,
+    eventWeight: "heavy",
+    resolvedChanges: ["伤口裂开", "敌人逼近"],
+    npcStances: [{ actorId: "rin" }],
+  });
+  assert.deepEqual(context, { eventWeight: "heavy", resolvedChangeCount: 2, npcStanceCount: 1 });
+  assert.equal(proseLengthContextFromPacket({ needsRender: false }), undefined);
 });
 
 void test("findSecretLeaks flags unrevealed true name as block", () => {

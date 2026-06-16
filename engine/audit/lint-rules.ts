@@ -23,6 +23,13 @@ export interface LintFinding {
 }
 
 type RuleScope = "opening" | "ending" | "anywhere" | "per-line";
+export type ProseLengthTier = "light" | "normal" | "heavy";
+
+export interface ProseLengthContext {
+  eventWeight: ProseLengthTier;
+  resolvedChangeCount: number;
+  npcStanceCount: number;
+}
 
 interface LocalProseRule {
   id: string;
@@ -42,6 +49,19 @@ const ENDING_WINDOW_CHARS = 160;
 const EXCERPT_RADIUS = 24;
 
 const LOCAL_PROSE_LINT_PATH = "agents/user/prose-lint.json";
+
+interface ProseLengthPolicy {
+  base: number;
+  perResolvedChange: number;
+  perNpcStance: number;
+  maximum: number;
+}
+
+const PROSE_LENGTH_POLICIES: Record<ProseLengthTier, ProseLengthPolicy> = {
+  light: { base: 120, perResolvedChange: 20, perNpcStance: 20, maximum: 220 },
+  normal: { base: 260, perResolvedChange: 35, perNpcStance: 30, maximum: 520 },
+  heavy: { base: 520, perResolvedChange: 45, perNpcStance: 35, maximum: 900 },
+};
 
 const PROSE_RULES: readonly ProseRule[] = [
   {
@@ -191,6 +211,63 @@ function isRuleScope(value: string): value is RuleScope {
 
 function allProseRules(): ProseRule[] {
   return [...PROSE_RULES, ...loadLocalProseRules()];
+}
+
+function minimumProseUnits(context: ProseLengthContext): number {
+  const policy = PROSE_LENGTH_POLICIES[context.eventWeight];
+  const resolvedChangeCount = Math.max(0, context.resolvedChangeCount);
+  const npcStanceCount = Math.max(0, context.npcStanceCount);
+  return Math.min(
+    policy.maximum,
+    policy.base +
+      resolvedChangeCount * policy.perResolvedChange +
+      npcStanceCount * policy.perNpcStance,
+  );
+}
+
+function countReadableUnits(prose: string): number {
+  const cjk =
+    prose.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu)
+      ?.length ?? 0;
+  const latinWords = prose.match(/[A-Za-z0-9]+(?:[-_][A-Za-z0-9]+)*/gu)?.length ?? 0;
+  return cjk + latinWords;
+}
+
+export function lintProseLength(prose: string, context: ProseLengthContext): LintFinding[] {
+  const actual = countReadableUnits(prose);
+  const minimum = minimumProseUnits(context);
+  if (actual >= minimum) {
+    return [];
+  }
+  return [
+    {
+      ruleId: "underlength-prose",
+      severity: "warn",
+      match: `${actual}/${minimum} 字`,
+      excerpt: `eventWeight=${context.eventWeight}; resolvedChanges=${context.resolvedChangeCount}; npcStances=${context.npcStanceCount}`,
+    },
+  ];
+}
+
+export function proseLengthContextFromPacket(packet: unknown): ProseLengthContext | undefined {
+  if (!isRecord(packet) || packet["needsRender"] !== true) {
+    return undefined;
+  }
+  const eventWeight = packet["eventWeight"];
+  if (!isProseLengthTier(eventWeight)) {
+    return undefined;
+  }
+  return {
+    eventWeight,
+    resolvedChangeCount: Array.isArray(packet["resolvedChanges"])
+      ? packet["resolvedChanges"].length
+      : 0,
+    npcStanceCount: Array.isArray(packet["npcStances"]) ? packet["npcStances"].length : 0,
+  };
+}
+
+function isProseLengthTier(value: unknown): value is ProseLengthTier {
+  return value === "light" || value === "normal" || value === "heavy";
 }
 
 function matchRule(rule: ProseRule, text: string): LintFinding[] {

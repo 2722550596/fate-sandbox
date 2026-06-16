@@ -140,7 +140,7 @@ async function renderProse(
       "渲染中",
       "render",
     );
-    const firstReport = lintRenderedProse(first, unrevealedSecrets);
+    const firstReport = lintRenderedProse(first, unrevealedSecrets, packet);
     if (firstReport.findings.length === 0) {
       return { text: first, lintRuleIds: [] };
     }
@@ -156,7 +156,7 @@ async function renderProse(
       "重写中",
       "lint-retry",
     );
-    const secondReport = lintRenderedProse(second, unrevealedSecrets);
+    const secondReport = lintRenderedProse(second, unrevealedSecrets, packet);
     const lintRuleIds = secondReport.findings.map((finding) => finding.ruleId);
     if (secondReport.leaks.length > 0) {
       notify(ctx, "two-pass render: secret leak persisted after retry, redacted", "error");

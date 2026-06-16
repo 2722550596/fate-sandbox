@@ -1,7 +1,12 @@
 import type { LintFinding } from "../audit/lint-rules.ts";
 import type { DirectionPacket } from "./packet-schema.ts";
 
-import { findSecretLeaks, lintFinalProse } from "../audit/lint-rules.ts";
+import {
+  findSecretLeaks,
+  lintFinalProse,
+  lintProseLength,
+  proseLengthContextFromPacket,
+} from "../audit/lint-rules.ts";
 import { isRecord } from "../core/typebox-validation.ts";
 import { parseDirectionPacket } from "./packet-schema.ts";
 
@@ -211,9 +216,12 @@ export interface ProseLintReport {
 export function lintRenderedProse(
   prose: string,
   unrevealedSecrets: readonly string[],
+  packet?: DirectionPacket,
 ): ProseLintReport {
   const leaks = findSecretLeaks(prose, unrevealedSecrets);
-  return { findings: [...lintFinalProse(prose), ...leaks], leaks };
+  const lengthContext = proseLengthContextFromPacket(packet);
+  const lengthFindings = lengthContext === undefined ? [] : lintProseLength(prose, lengthContext);
+  return { findings: [...lintFinalProse(prose), ...lengthFindings, ...leaks], leaks };
 }
 
 /** 终防线：重试后仍泄漏时遮蔽秘密字符串，保证正文可发而秘密不可读。 */
@@ -234,15 +242,19 @@ export function buildLintRetryMessages(
   firstProse: string,
   findings: readonly LintFinding[],
 ): RendererMessage[] {
+  const rewriteInstruction = findings.some((finding) => finding.ruleId === "underlength-prose")
+    ? "保持事件与对白语义不变，但补足必要过程与篇幅：把玩家行动、每条已结算变化、NPC 反应、空间或物件变化、结尾风险锚写到页面上。不要用空镜、复述、报告句或废话填字数。"
+    : "保持事件、对白语义与篇幅不变。";
   return [
     ...baseMessages,
     { role: "assistant", text: firstProse },
     {
       role: "user",
       text: [
-        "你刚才的产出违反了以下输出契约条目，请重写全文修正（保持事件、对白语义与篇幅不变）：",
+        "你刚才的产出违反了以下输出契约条目，请重写全文修正：",
         ...findings.map((finding) => `- [${finding.ruleId}] ${finding.match}`),
         "",
+        rewriteInstruction,
         "只输出修正后的正文。",
       ].join("\n"),
     },

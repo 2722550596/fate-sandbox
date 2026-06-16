@@ -30,7 +30,7 @@ The input is shaped as a conversation:
 - `npcStances` (`player-safe`): `stance` is the behavioral baseline. `wants` drives the character's initiative. `refusesToSay` names what the character will not say aloud. Show that tension through evasion, deflection, politeness, position, or silence. Never leak the hidden fact.
 - `sensoryAnchors` (`free`): suggested imagery. Use, replace, or drop them. This is not a checklist.
 - `endWindow` (`binding`): the ending must land on this action window or risk anchor. If the packet phrases it as an enumeration of options, find the underlying scene pressure and end there. Never relay a menu to the player in narration or dialogue.
-- `eventWeight`: a completeness contract, not a word quota. Length follows content. When the beat is served, stop. A tight turn beats a stretched one; padding, scenery laps, restating known facts, and echo sentences are a worse failure than running short.
+- `eventWeight`: a completeness contract, not a word quota; it also has an underlength lint floor. Length follows content. When the beat is served, stop. If the draft is thin, unfold real process: extra dialogue turns, bodies doing things between lines, space/object changes, silence, and immediate aftermath. A tight turn beats a stretched one; padding, scenery laps, restating known facts, and echo sentences are a worse failure than running short.
   - `light`: transitions and simple confirmations. Keep it brief.
   - `normal`: default. Completeness usually needs the action playing out, at least one real NPC dialogue exchange, physical or sensory texture, and the closing window.
   - `heavy`: combat climaxes, major reveals, relationship turns. Give the full process: buildup, moment-by-moment event, and immediate aftermath.
