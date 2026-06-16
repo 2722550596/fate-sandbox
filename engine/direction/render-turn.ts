@@ -9,6 +9,7 @@ import {
   proseLengthContextFromPacket,
 } from "../audit/lint-rules.ts";
 import { isRecord } from "../core/typebox-validation.ts";
+import { resolveCanonicalCharacterName } from "../world-data/character-name.ts";
 import { parseDirectionPacket } from "./packet-schema.ts";
 
 /** 渲染产物落 session 的 customType；结算投影按它过滤，渲染史按它装配。 */
@@ -113,6 +114,7 @@ export function buildRendererMessages(
       ? currentInputs.join("\n\n")
       : "(No current player input was captured. Use packet.playerAction only.)";
   const finalSections: string[] = ["# Current Player Input", "", currentPlayerInput, ""];
+  finalSections.push(...buildNameContinuitySection(packet));
   finalSections.push(
     "# Direction Packet",
     "",
@@ -125,6 +127,54 @@ export function buildRendererMessages(
   );
   result.push({ role: "user", text: finalSections.join("\n") });
   return result;
+}
+
+function buildNameContinuitySection(packet: DirectionPacket): string[] {
+  if (!packet.needsRender) {
+    return [];
+  }
+  const entries: string[] = [];
+  const seen = new Set<string>();
+  for (const displayName of actorDisplayNamesFromPacket(packet)) {
+    if (seen.has(displayName)) {
+      continue;
+    }
+    seen.add(displayName);
+    const canonicalName = resolveCanonicalCharacterName(displayName);
+    if (canonicalName !== undefined && canonicalName !== displayName) {
+      entries.push(`- ${displayName} -> ${canonicalName}`);
+    }
+  }
+  if (entries.length === 0) {
+    return [];
+  }
+  return [
+    "# Canonical Name Lock (binding)",
+    "",
+    "When rendering Chinese prose, use these canonical Chinese names exactly. Do not transliterate, translate, or invent homophones.",
+    ...entries,
+    "",
+  ];
+}
+
+function actorDisplayNamesFromPacket(packet: DirectionPacket): string[] {
+  if (!packet.needsRender) {
+    return [];
+  }
+  return [
+    ...packet.canonFacts.flatMap(extractDisplayNamesFromText),
+    packet.playerAction,
+    ...packet.resolvedChanges,
+    ...packet.npcStances.flatMap((stance) => [stance.stance, stance.wants, stance.refusesToSay]),
+    ...packet.sensoryAnchors,
+    packet.endWindow,
+  ].flatMap(extractDisplayNamesFromText);
+}
+
+const DISPLAY_NAME_PATTERN = /\b[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)+\b/gu;
+
+function extractDisplayNamesFromText(text: string): string[] {
+  return Array.from(text.matchAll(DISPLAY_NAME_PATTERN), (match) => match[0] ?? "");
 }
 
 function buildLengthFloorSection(packet: DirectionPacket): string[] {

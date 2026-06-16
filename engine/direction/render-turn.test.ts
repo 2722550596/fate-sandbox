@@ -145,6 +145,26 @@ void test("buildRendererMessages includes persisted custom_message prose history
   assert.match(messages[2]?.text ?? "", /继续。/);
 });
 
+void test("buildRendererMessages injects canonical Chinese names for Latin packet names", () => {
+  const messages = buildRendererMessages(
+    [userMessage("继续。")],
+    parseDirectionPacket(
+      {
+        ...PACKET_ARGS,
+        playerAction: "Saber keeps Manaka Sajyou within reach.",
+        resolvedChanges: ["Manaka Sajyou follows Saber through the route."],
+        canonFacts: ["Manaka presentation: blonde, princess-like acting Master."],
+      },
+      "packet",
+    ),
+  );
+
+  const final = messages.at(-1)?.text ?? "";
+  assert.match(final, /# Canonical Name Lock \(binding\)/);
+  assert.match(final, /Manaka Sajyou -> 沙条爱歌/);
+  assert.match(final, /Do not transliterate, translate, or invent homophones/);
+});
+
 void test("buildRendererMessages keeps player input and filters injected settlement prompts", () => {
   const messages = buildRendererMessages(
     [
