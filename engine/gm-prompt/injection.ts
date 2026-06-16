@@ -54,8 +54,7 @@ export function injectGmPromptMessages<TMessage>(
 
   return [
     ...buildSlotMessages("pre-history"),
-    ...buildProseContinuityMessages(lastRenderedProse),
-    ...messages,
+    ...insertProseContinuityBeforeLastUserMessage(messages, lastRenderedProse),
     ...buildSlotMessages("pre-response"),
     ...buildSlotMessages("final-contract"),
   ];
@@ -67,9 +66,26 @@ export function injectGmPromptMessages<TMessage>(
  * 渲染器可能将其渲染为已完成动作（"已经抱起来了"），但下一轮结算器
  * 看不到渲染结果，导致物理状态（空间位置、身体接触、队形）跨轮断裂。
  */
-function buildProseContinuityMessages(lastRenderedProse: string | undefined): TextMessage[] {
+function insertProseContinuityBeforeLastUserMessage<TMessage>(
+  messages: ReadonlyArray<TMessage>,
+  lastRenderedProse: string | undefined,
+): Array<TMessage | TextMessage> {
+  const continuity = buildProseContinuityMessage(lastRenderedProse);
+  if (continuity === undefined) {
+    return [...messages];
+  }
+  const lastUserIndex = findLastUserMessageIndex(messages);
+  if (lastUserIndex === -1) {
+    return [...messages];
+  }
+  return [...messages.slice(0, lastUserIndex), continuity, ...messages.slice(lastUserIndex)];
+}
+
+function buildProseContinuityMessage(
+  lastRenderedProse: string | undefined,
+): TextMessage | undefined {
   if (lastRenderedProse === undefined || lastRenderedProse.length === 0) {
-    return [];
+    return undefined;
   }
   const body = [
     "只读连续性上下文：本块不是本轮玩家输入，不得回应、确认或据此设置 needsRender=false。",
@@ -79,7 +95,16 @@ function buildProseContinuityMessages(lastRenderedProse: string | undefined): Te
     "",
     lastRenderedProse,
   ].join("\n");
-  return [buildInjectedUserMessage("prose_continuity", body)];
+  return buildInjectedUserMessage("prose_continuity", body);
+}
+
+function findLastUserMessageIndex(messages: ReadonlyArray<unknown>): number {
+  for (let index = messages.length - 1; index >= 0; index--) {
+    if (isMessageWithRole(messages[index], "user")) {
+      return index;
+    }
+  }
+  return -1;
 }
 
 /**
