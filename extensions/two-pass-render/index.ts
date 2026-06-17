@@ -28,6 +28,10 @@ import {
   redactSecrets,
   type RendererMessage,
 } from "../../engine/direction/render-turn.ts";
+import {
+  stripThinkingResidue,
+  THINKING_PREFILL_TEXT,
+} from "../../engine/direction/strip-thinking.ts";
 import { buildRendererSystemPrompt } from "../../engine/gm-prompt/injection.ts";
 import { setChoiceWidget } from "../player-choices/index.ts";
 import { registerRerollCommand } from "./reroll.ts";
@@ -268,11 +272,19 @@ async function streamProse(
   label: string,
   usageKind: RenderCallKind,
 ): Promise<string> {
+  // 卡掉原生思维链（参 strip-thinking.ts 文档头）：在最终送入 stream() 前追加一条
+  // assistant prefill。三条调用路径（首写、lint 重写、reroll 变体）都收敛在这里，
+  // 避免多处分别维护。不动 buildRendererMessages 原件：reroll 路径会在后面接 user
+  // 请求，在那边插 prefill 会被后续 user 消息顶掉。
+  const streamMessages = [
+    ...rendererMessages.map((message) => toStreamMessage(message, model)),
+    toStreamMessage({ role: "assistant", text: THINKING_PREFILL_TEXT }, model),
+  ];
   const events = stream(
     model,
     {
       systemPrompt,
-      messages: rendererMessages.map((message) => toStreamMessage(message, model)),
+      messages: streamMessages,
     },
     {
       apiKey: auth.apiKey,
@@ -302,7 +314,9 @@ async function streamProse(
     clearRenderWidget(ctx);
     throw error instanceof Error ? error : new Error(String(error));
   }
-  const text = draft.trim();
+  // 后置剥离：prefill 被某些中转吞掉时的兜底，同时清掉模型自己写在中间的闭合
+  // <think>…</think> 段。必须在 trim 前跳过：变成空串走上面的 empty 分支触发重试。
+  const text = stripThinkingResidue(draft);
   if (text === "") {
     clearRenderWidget(ctx);
     throw new Error("renderer returned empty prose");
