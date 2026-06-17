@@ -8,6 +8,28 @@ if (-not (Get-Command pi -ErrorAction SilentlyContinue)) {
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ProjectRoot
 
+function Write-Utf8NoBomFile {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$Content
+  )
+
+  $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($Path, $Content, $Utf8NoBom)
+}
+
+function Remove-Utf8BomIfPresent {
+  param([Parameter(Mandatory = $true)][string]$Path)
+
+  if (-not (Test-Path $Path)) {
+    return
+  }
+  $Bytes = [System.IO.File]::ReadAllBytes($Path)
+  if ($Bytes.Length -ge 3 -and $Bytes[0] -eq 0xEF -and $Bytes[1] -eq 0xBB -and $Bytes[2] -eq 0xBF) {
+    [System.IO.File]::WriteAllBytes($Path, $Bytes[3..($Bytes.Length - 1)])
+  }
+}
+
 Write-Host "Starting $(Split-Path -Leaf $ProjectRoot)..."
 
 New-Item -ItemType Directory -Force -Path ".\sessions" | Out-Null
@@ -23,14 +45,16 @@ if ((-not (Test-Path $ProjectAuth)) -and (Test-Path $GlobalAuth)) {
 
 $SettingsPath = ".\.pi\agent\settings.json"
 if (-not (Test-Path $SettingsPath)) {
-  @"
+  $InitialSettings = @"
 {
-  "theme": "dark"
+  ""theme"": ""dark""
 }
-"@ | Set-Content -Path $SettingsPath -Encoding UTF8
+"@
+  Write-Utf8NoBomFile -Path $SettingsPath -Content $InitialSettings
   Write-Host "Created project-local pi settings: .pi/agent/settings.json"
   Write-Host "Set defaultProvider/defaultModel there if needed."
 }
+Remove-Utf8BomIfPresent -Path $SettingsPath
 
 $DevMode = $env:TAVERN2AGENT_DEV -eq "1"
 $Settings = @{}
@@ -51,7 +75,7 @@ if (-not $Settings.ContainsKey("subagents")) {
 }
 $Settings["subagents"]["disableBuiltins"] = -not $DevMode
 
-$Settings | ConvertTo-Json -Depth 20 | Set-Content -Path $SettingsPath -Encoding UTF8
+Write-Utf8NoBomFile -Path $SettingsPath -Content (($Settings | ConvertTo-Json -Depth 20) + [Environment]::NewLine)
 
 if ($DevMode) {
   Write-Host "Dev mode: pi-subagents builtin agents are enabled."
