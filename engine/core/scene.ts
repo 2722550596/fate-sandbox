@@ -316,14 +316,89 @@ function clearThreat(
   draft: State,
   event: Extract<SceneEvent, { kind: "clear-threat" }>,
 ): SceneEventResult {
+  const threatId = resolveSingleThreatId(
+    draft.public.scene.threats,
+    event.threatId,
+    event.threatSummary,
+  );
   const before = draft.public.scene.threats.length;
   draft.public.scene.threats = draft.public.scene.threats.filter(
-    (threat) => threat.id !== event.threatId,
+    (threat) => threat.id !== threatId,
   );
   if (draft.public.scene.threats.length === before) {
-    throw new Error(`威胁不存在: ${event.threatId}`);
+    throw new Error(formatThreatIdNotFoundError(threatId, draft.public.scene.threats));
   }
-  return { message: `威胁已清除：${event.threatId}。` };
+  return { message: `威胁已清除：${threatId}。` };
+}
+
+/**
+ * 解析要清除的威胁 id：threatId 优先，其次 threatSummary 按文本匹配。
+ * 与 resolveSingleObjectiveId 同构——threatId 是服务端生成的，模型从 GM Brief
+ * 复制 summary 比背 id 更可靠，所以 summary 是主路径。
+ */
+function resolveSingleThreatId(
+  threats: ReadonlyArray<{ id: SceneThreatId; summary: string }>,
+  threatId: SceneThreatId | undefined,
+  threatSummary: string | undefined,
+): SceneThreatId {
+  if (threatId !== undefined) {
+    return assertNonEmptyString(threatId, "threatId");
+  }
+  if (threatSummary !== undefined) {
+    const normalizedSummary = assertNonEmptyString(threatSummary, "threatSummary");
+    const threat = findThreatBySummary(threats, normalizedSummary);
+    if (threat === undefined) {
+      throw new Error(formatThreatSummaryNotFoundError(normalizedSummary, threats));
+    }
+    return threat.id;
+  }
+  throw new Error(formatMissingThreatSelectorError(threats));
+}
+
+function findThreatBySummary(
+  threats: ReadonlyArray<{ id: SceneThreatId; summary: string }>,
+  summary: string,
+): { id: SceneThreatId; summary: string } | undefined {
+  const exact = threats.find((entry) => entry.summary === summary);
+  if (exact !== undefined) {
+    return exact;
+  }
+  return threats.find(
+    (entry) => entry.summary.includes(summary) || summary.includes(entry.summary),
+  );
+}
+
+function formatThreatIdNotFoundError(
+  threatId: SceneThreatId,
+  threats: ReadonlyArray<{ id: SceneThreatId; summary: string }>,
+): string {
+  return [
+    `威胁不存在: ${threatId}`,
+    "可用 threatId / threatSummary：",
+    ...threats.map((threat) => `- ${threat.id}: ${threat.summary}`),
+  ].join("\n");
+}
+
+function formatMissingThreatSelectorError(
+  threats: ReadonlyArray<{ id: SceneThreatId; summary: string }>,
+): string {
+  return [
+    "clear-threat 必须提供 threatId 或 threatSummary。",
+    "优先用 threatSummary 逐字复制 GM Brief「当前威胁」里的 summary。",
+    "可用 threatId / threatSummary：",
+    ...threats.map((threat) => `- ${threat.id}: ${threat.summary}`),
+  ].join("\n");
+}
+
+function formatThreatSummaryNotFoundError(
+  summary: string,
+  threats: ReadonlyArray<{ id: SceneThreatId; summary: string }>,
+): string {
+  return [
+    `威胁摘要不存在: ${summary}`,
+    "可用威胁摘要：",
+    ...threats.map((threat) => `- ${threat.summary}`),
+  ].join("\n");
 }
 
 function resolveObjectiveIds(

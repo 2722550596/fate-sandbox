@@ -411,3 +411,106 @@ void test("transitionSceneBeat clears completed window and can open next beat", 
   assert.equal(state.public.scene.objectives[0]?.summary, "整理情报");
   assert.equal(result.memoryPrompt, "如果侦察结果有长期影响，调用 record_memory。");
 });
+
+void test("updateScene clear-threat removes a threat by id", () => {
+  const draft = createInitialState();
+
+  updateScene(draft, {
+    kind: "add-threat",
+    summary: "黑水中抬升的庞然大物",
+    severity: "high",
+    reason: "群兽逼近",
+  });
+  const threatId = draft.public.scene.threats[0]?.id ?? "";
+  assert.match(threatId, /^threat-\d+$/);
+
+  const result = updateScene(draft, {
+    kind: "clear-threat",
+    threatId,
+    reason: "庞然大物被击退",
+  });
+
+  assert.equal(draft.public.scene.threats.length, 0);
+  assert.match(result.message, new RegExp(threatId));
+});
+
+void test("updateScene clear-threat removes a threat by summary (objectiveSummary-style fallback)", () => {
+  const draft = createInitialState();
+
+  updateScene(draft, {
+    kind: "add-threat",
+    summary: "黑水中抬升的庞然大物",
+    severity: "high",
+    reason: "群兽逼近",
+  });
+
+  updateScene(draft, {
+    kind: "clear-threat",
+    threatSummary: "黑水中抬升的庞然大物",
+    reason: "庞然大物被击退",
+  });
+
+  assert.equal(draft.public.scene.threats.length, 0);
+});
+
+void test("updateScene clear-threat matches a threat by partial summary", () => {
+  const draft = createInitialState();
+
+  updateScene(draft, {
+    kind: "add-threat",
+    summary: "黑水中抬升的庞然大物",
+    severity: "high",
+    reason: "群兽逼近",
+  });
+
+  // 模型从 GM Brief 复制 summary 时偶有截断；substring 双向匹配兜住。
+  updateScene(draft, {
+    kind: "clear-threat",
+    threatSummary: "庞然大物",
+    reason: "击退",
+  });
+
+  assert.equal(draft.public.scene.threats.length, 0);
+});
+
+void test("updateScene clear-threat without selector throws an actionable error", () => {
+  const draft = createInitialState();
+
+  updateScene(draft, {
+    kind: "add-threat",
+    summary: "黑水中抬升的庞然大物",
+    severity: "high",
+    reason: "群兽逼近",
+  });
+
+  assert.throws(
+    () => updateScene(draft, { kind: "clear-threat", reason: "缺少选择器" }),
+    (error) => {
+      const message = String(error);
+      assert.match(message, /必须提供 threatId 或 threatSummary/);
+      assert.match(message, /黑水中抬升的庞然大物/);
+      return true;
+    },
+  );
+});
+
+void test("updateScene clear-threat by unknown summary lists available summaries", () => {
+  const draft = createInitialState();
+
+  updateScene(draft, {
+    kind: "add-threat",
+    summary: "黑水中抬升的庞然大物",
+    severity: "high",
+    reason: "群兽逼近",
+  });
+
+  assert.throws(
+    () => updateScene(draft, { kind: "clear-threat", threatSummary: "不存在的威胁", reason: "x" }),
+    (error) => {
+      const message = String(error);
+      assert.match(message, /威胁摘要不存在/);
+      assert.match(message, /黑水中抬升的庞然大物/);
+      return true;
+    },
+  );
+});

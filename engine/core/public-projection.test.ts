@@ -55,19 +55,30 @@ void test("GM brief lists only unresolved objectives", () => {
   assert.match(buildGmBrief(publicState), /当前目标：无/);
 });
 
-void test("scene threats render severity-prefixed in brief and status markdown", () => {
+void test("scene threats render id + severity in brief and status markdown", () => {
   const draft = createInitialState();
   const publicState = draft.public;
 
   assert.match(buildGmBrief(publicState), /当前威胁：无/);
   assert.match(buildStatusMarkdown(publicState), /- 威胁：无/);
+  // 无威胁时路由提示明确禁用 clear-threat。
+  assert.match(buildGmBrief(publicState), /威胁清除规则：[^\n]*不要使用 clear-threat/);
 
   publicState.scene.threats = [
     { id: "threat-1", summary: "影子在街区徘徊", severity: "high" },
     { id: "threat-2", summary: "魔力反应残留", severity: "low" },
   ];
-  assert.match(buildGmBrief(publicState), /当前威胁：high:影子在街区徘徊；low:魔力反应残留/);
-  assert.match(buildStatusMarkdown(publicState), /- 威胁：high: 影子在街区徘徊；low: 魔力反应残留/);
+  // id 露出（跟 objective 一致），供 clear-threat 用 threatId / threatSummary 寻址。
+  assert.match(
+    buildGmBrief(publicState),
+    /当前威胁：threat-1 \[high\]:影子在街区徘徊；threat-2 \[low\]:魔力反应残留/,
+  );
+  assert.match(
+    buildStatusMarkdown(publicState),
+    /- 威胁：threat-1 \[high\]: 影子在街区徘徊；threat-2 \[low\]: 魔力反应残留/,
+  );
+  // 有威胁时路由提示教模型用 threatSummary 逐字复制。
+  assert.match(buildGmBrief(publicState), /威胁清除规则：[^\n]*threatSummary/);
 });
 
 void test("GM brief objective routing covers all three branches", () => {

@@ -23,6 +23,7 @@ export function buildGmBrief(publicState: PublicGameState): string {
     `当前目标：${formatActiveObjectives(publicState, { separator: "；" })}`,
     `目标推进规则：${formatObjectiveRouting(publicState)}`,
     `当前威胁：${formatSceneThreats(publicState, { separator: "；", colon: ":" })}`,
+    `威胁清除规则：${formatThreatRouting(publicState)}`,
     ...formatOpenObligationLines(publicState),
     ...formatHookLedgerLines(publicState),
     `最近关系信号：${formatRecentRelationshipSignals(publicState)}`,
@@ -122,8 +123,15 @@ function formatSceneThreats(
   return publicState.scene.threats.length === 0
     ? "无"
     : publicState.scene.threats
-        .map((threat) => `${threat.severity}${options.colon}${threat.summary}`)
+        .map((threat) => `${threat.id} [${threat.severity}]${options.colon}${threat.summary}`)
         .join(options.separator);
+}
+
+function formatThreatRouting(publicState: PublicGameState): string {
+  if (publicState.scene.threats.length === 0) {
+    return "当前没有可清除的威胁；不要使用 clear-threat。";
+  }
+  return "用 commit_turn 局部清除威胁时，scene event 用 clear-threat，并用 threatSummary 逐字复制上方威胁的 summary（或用上方方括号前的 threatId）。";
 }
 
 function actorDisplayName(publicState: PublicGameState, actorId: string): string {

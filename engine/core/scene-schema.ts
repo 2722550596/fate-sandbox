@@ -84,7 +84,11 @@ export const ADD_THREAT_EVENT_SCHEMA = Type.Object({
 
 export const CLEAR_THREAT_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("clear-threat"),
-  threatId: Type.String({ minLength: 1 }),
+  // 二选一：threatSummary 逐字复制 GM Brief「当前威胁」里的 summary（推荐，
+  // 与 resolve-objective 的 objectiveSummary 兜底对称），或 threatId 直引投影出的 id。
+  // 两者都缺时 clearThreat 抛带可用清单的错误，引导模型补齐。
+  threatId: Type.Optional(Type.String({ minLength: 1 })),
+  threatSummary: Type.Optional(Type.String({ minLength: 1 })),
   reason: Type.String({ minLength: 1 }),
 });
 
