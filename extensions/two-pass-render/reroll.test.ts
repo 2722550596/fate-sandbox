@@ -1,5 +1,6 @@
 import type { AssistantMessage, UserMessage } from "@earendil-works/pi-ai";
 import type {
+  CustomEntry,
   CustomMessageEntry,
   SessionEntry,
   SessionMessageEntry,
@@ -90,6 +91,17 @@ function proseEntry(id: string, parentId: string | null): CustomMessageEntry {
   };
 }
 
+function hiddenStateEntry(id: string, parentId: string | null): CustomEntry {
+  return {
+    type: "custom",
+    id,
+    parentId,
+    timestamp: new Date().toISOString(),
+    customType: "fsn-state",
+    data: { state: {} },
+  };
+}
+
 void test("findRerollTarget 定位最后正文与对应结算包", () => {
   const branch: SessionEntry[] = [
     userEntry("u1", null, "调查祭坛"),
@@ -109,6 +121,24 @@ void test("findRerollTarget 定位最后正文与对应结算包", () => {
   assert.equal(target.renderMessages.length, 2);
 });
 
+void test("findRerollTarget 允许正文后的隐藏非消息 entry", () => {
+  const branch: SessionEntry[] = [
+    userEntry("u1", null, "调查祭坛"),
+    assistantPacketEntry("a1", "u1"),
+    proseEntry("p1", "a1"),
+    hiddenStateEntry("s1", "p1"),
+  ];
+
+  const target = findRerollTarget(branch);
+  assert.equal(target.kind, "ready");
+  if (target.kind !== "ready") {
+    assert.fail("expected ready reroll target");
+  }
+  assert.equal(target.proseEntry.id, "p1");
+  assert.equal(target.parentId, "a1");
+  assert.equal(target.pending.toolCallId, "call-a1");
+});
+
 void test("findRerollTarget 拒绝没有正文的分支", () => {
   const target = findRerollTarget([
     userEntry("u1", null, "调查祭坛"),
@@ -118,7 +148,7 @@ void test("findRerollTarget 拒绝没有正文的分支", () => {
   assert.deepEqual(target, { kind: "no-prose" });
 });
 
-void test("findRerollTarget 只允许替换当前 leaf 正文", () => {
+void test("findRerollTarget 拒绝正文后的新消息", () => {
   const target = findRerollTarget([
     userEntry("u1", null, "调查祭坛"),
     assistantPacketEntry("a1", "u1"),

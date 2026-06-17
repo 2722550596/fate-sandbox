@@ -79,9 +79,9 @@ export function findRerollTarget(branch: readonly SessionEntry[]): RerollTarget 
     return { kind: "no-prose" };
   }
 
-  const leafId = branch[branch.length - 1]?.id ?? null;
-  if (leafId !== proseEntry.id) {
-    return { kind: "not-leaf", proseEntryId: proseEntry.id, leafId };
+  const blockingEntry = branch.slice(proseIndex + 1).find(isMessageEntry);
+  if (blockingEntry !== undefined) {
+    return { kind: "not-leaf", proseEntryId: proseEntry.id, leafId: blockingEntry.id };
   }
   if (proseEntry.parentId === null) {
     return { kind: "root-prose", proseEntryId: proseEntry.id };
@@ -207,6 +207,10 @@ function findLastProseIndex(branch: readonly SessionEntry[]): number | undefined
 
 function isProseEntry(entry: SessionEntry): entry is CustomMessageEntry {
   return entry.type === "custom_message" && entry.customType === PROSE_CUSTOM_TYPE;
+}
+
+function isMessageEntry(entry: SessionEntry): boolean {
+  return entry.type === "message";
 }
 
 function customEntryToMessage(entry: CustomMessageEntry): Record<string, unknown> {
