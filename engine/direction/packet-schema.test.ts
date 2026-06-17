@@ -36,15 +36,15 @@ void test("parseDirectionPacket accepts suggested UI actions", () => {
     {
       ...VALID_RENDER_PACKET,
       suggestedActions: [
-        { label: "追上去", submitText: "我追上去，先观察对方路线。" },
-        { label: "检查现场", submitText: "我先检查刚才留下的痕迹。" },
+        { submitText: "我追上去，先观察对方路线。" },
+        { submitText: "我先检查刚才留下的痕迹。" },
       ],
     },
     "packet",
   );
   assert.equal(packet.needsRender, true);
   if (packet.needsRender) {
-    assert.equal(packet.suggestedActions?.[0]?.label, "追上去");
+    assert.equal(packet.suggestedActions?.[0]?.submitText, "我追上去，先观察对方路线。");
   }
 });
 
@@ -55,11 +55,11 @@ void test("parseDirectionPacket rejects too many suggested UI actions", () => {
         {
           ...VALID_RENDER_PACKET,
           suggestedActions: [
-            { label: "A", submitText: "A" },
-            { label: "B", submitText: "B" },
-            { label: "C", submitText: "C" },
-            { label: "D", submitText: "D" },
-            { label: "E", submitText: "E" },
+            { submitText: "A" },
+            { submitText: "B" },
+            { submitText: "C" },
+            { submitText: "D" },
+            { submitText: "E" },
           ],
         },
         "packet",
@@ -72,7 +72,7 @@ void test("scanDirectionPacket blocks secret in suggested action submitText", ()
   const packet = parseDirectionPacket(
     {
       ...VALID_RENDER_PACKET,
-      suggestedActions: [{ label: "说破", submitText: "我说出两仪式的名字。" }],
+      suggestedActions: [{ submitText: "我说出两仪式的名字。" }],
     },
     "packet",
   );

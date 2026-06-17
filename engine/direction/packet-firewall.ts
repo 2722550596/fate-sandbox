@@ -39,7 +39,6 @@ function* packetStrings(packet: DirectionPacket): Generator<[path: string, text:
     yield [`canonFacts[${i}]`, text];
   }
   for (const [i, action] of packet.suggestedActions?.entries() ?? []) {
-    yield [`suggestedActions[${i}].label`, action.label];
     yield [`suggestedActions[${i}].submitText`, action.submitText];
   }
   for (const [i, stance] of packet.npcStances.entries()) {

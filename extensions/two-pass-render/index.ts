@@ -624,10 +624,9 @@ function readSuggestedActionsFromDetails(details: Record<string, unknown>): Sugg
     if (!isRecord(action)) {
       continue;
     }
-    const label = action["label"];
     const submitText = action["submitText"];
-    if (typeof label === "string" && typeof submitText === "string") {
-      actions.push({ label, submitText });
+    if (typeof submitText === "string") {
+      actions.push({ submitText });
     }
   }
   return actions;

@@ -56,7 +56,7 @@ export function clearChoiceWidget(ctx: ExtensionContext): void {
 export function buildChoiceWidgetLines(actions: readonly SuggestedAction[]): string[] {
   return [
     "── 可选行动（可忽略，直接手打也可以）──",
-    ...actions.map((action, index) => `/choice ${index + 1}  ${action.label}`),
+    ...actions.map((action, index) => `/choice ${index + 1}  ${action.submitText}`),
   ];
 }
 
@@ -161,10 +161,9 @@ function readSuggestedActions(details: unknown): SuggestedAction[] {
     if (!isRecord(action)) {
       continue;
     }
-    const label = action["label"];
     const submitText = action["submitText"];
-    if (typeof label === "string" && typeof submitText === "string") {
-      out.push({ label, submitText });
+    if (typeof submitText === "string") {
+      out.push({ submitText });
     }
   }
   return out;

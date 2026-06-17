@@ -29,7 +29,6 @@ export const NPC_STANCE_SCHEMA = Type.Object({
 export type NpcStance = Static<typeof NPC_STANCE_SCHEMA>;
 
 export const SUGGESTED_ACTION_SCHEMA = Type.Object({
-  label: Type.String({ minLength: 1 }),
   submitText: Type.String({ minLength: 1 }),
 });
 export type SuggestedAction = Static<typeof SUGGESTED_ACTION_SCHEMA>;

@@ -56,7 +56,7 @@ export const submitDirectionPacketToolDefinition: FsnToolDefinition = {
     "- 在调用前后输出叙事正文（玩家看不到，渲染器也看不到）\n" +
     "- 把未揭示真名/隐藏宝具名写进任何字段（防火墙会整包拒绝）\n" +
     "- 用它替代领域工具落账：时间/伤势/金钱/揭示必须先用对应工具结算\n" +
-    "- 把 UI 候选行动写进 endWindow 或正文；候选只能放 suggestedActions，且 submitText 必须像玩家自然输入",
+    "- 把 UI 候选行动写进 endWindow 或正文；候选只能放 suggestedActions，且 submitText 必须是给玩家完整显示的自然输入，不得压缩",
   parameters: Type.Object({
     needsRender: Type.Boolean({
       description: "true=叙事轮（渲染器产出正文）；false=meta/OOC 直答轮",
@@ -93,17 +93,16 @@ export const submitDirectionPacketToolDefinition: FsnToolDefinition = {
     suggestedActions: Type.Optional(
       Type.Array(
         Type.Object({
-          label: Type.String({ description: "UI 显示短标签，2-12 字为宜" }),
           submitText: Type.String({
             description:
-              "作为真正 user message 发送的自然玩家输入；必须是玩家可说/可做的一句话，不是机械选项标签",
+              "作为真正 user message 发送并完整显示给玩家的自然玩家输入；不得压缩、不得写机械编号文本",
           }),
         }),
         {
           minItems: 1,
           maxItems: 4,
           description:
-            "可选：玩家下一步候选行动。只给 UI 使用，不进入正文；禁止把菜单写进 endWindow 或正文",
+            "可选：玩家下一步候选行动。只给 UI 使用，不进入正文；候选显示 submitText 全文，禁止压缩",
         },
       ),
     ),
