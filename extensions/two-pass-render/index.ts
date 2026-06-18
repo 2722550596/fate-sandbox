@@ -272,6 +272,20 @@ function buildRerollRendererMessages(
  * 正文在生长；最终文本仍走 lint 门禁后以 fsn-prose 消息落地。
  * widget 在 prose 送达时清除（sendProse），失败路径在这里自清。
  */
+/**
+ * Anthropic/Claude 渠道拒绝以 assistant 消息结尾的 prefill（400 "does not support
+ * assistant message prefill"）。优先查模型名含 claude（覆盖 Claude 经 OpenRouter /
+ * 其他代理的情况，此时 provider 未必是 anthropic），再补 provider==anthropic 兑底。
+ * Claude 原生 thinking 走独立通道、不污染 text_delta，本就不需 prefill；后置
+ * stripThinkingResidue 仍是兜底。
+ */
+export function supportsAssistantPrefill(model: { id: string; provider: string }): boolean {
+  if (model.id.toLowerCase().includes("claude")) {
+    return false;
+  }
+  return model.provider !== "anthropic";
+}
+
 async function streamProse(
   ctx: ExtensionContext,
   model: NonNullable<ExtensionContext["model"]>,
@@ -285,10 +299,15 @@ async function streamProse(
   // assistant prefill。三条调用路径（首写、lint 重写、reroll 变体）都收敛在这里，
   // 避免多处分别维护。不动 buildRendererMessages 原件：reroll 路径会在后面接 user
   // 请求，在那边插 prefill 会被后续 user 消息顶掉。
-  const streamMessages = [
-    ...rendererMessages.map((message) => toStreamMessage(message, model)),
-    toStreamMessage({ role: "assistant", text: THINKING_PREFILL_TEXT }, model),
-  ];
+  //
+  // Anthropic/Claude 渠道（尤其 OAuth 适配器）拒绝以 assistant 消息结尾的 prefill
+  // （400 "does not support assistant message prefill"）。Claude 原生 thinking 走
+  // 独立通道、不会污染 text_delta，本就不需要这条 prefill；后置 stripThinkingResidue
+  // 仍是兜底。故 anthropic 直接跳过 prefill，让对话以 user 消息结尾。
+  const baseStreamMessages = rendererMessages.map((message) => toStreamMessage(message, model));
+  const streamMessages = supportsAssistantPrefill(model)
+    ? [...baseStreamMessages, toStreamMessage({ role: "assistant", text: THINKING_PREFILL_TEXT }, model)]
+    : baseStreamMessages;
   const events = stream(
     model,
     {
