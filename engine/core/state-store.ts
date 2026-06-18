@@ -76,11 +76,6 @@ export function migrateState(raw: unknown): State {
   return assertState(raw);
 }
 
-export function writeDebugStateFile(): string {
-  writeStateDebugSnapshot(getStore());
-  return DEBUG_STATE_PATH;
-}
-
 function getStore(): State {
   if (!store) {
     store = createInitialState();

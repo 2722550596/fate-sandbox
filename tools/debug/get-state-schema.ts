@@ -33,7 +33,6 @@ export function getStateSchemaTool(): ToolResult {
       "private_resolve",
     ],
     debugOnly: [
-      "export_state",
       "get_state_schema",
       "migrate_state",
       "override_locked_fact",

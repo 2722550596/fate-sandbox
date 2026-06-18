@@ -235,7 +235,6 @@ const READ_ONLY_TOOLS = new Set([
   "fetch_content",
   "get_search_content",
   "subagent",
-  "export_state",
   "get_state_schema",
 ]);
 

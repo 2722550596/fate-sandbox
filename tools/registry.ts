@@ -2,7 +2,6 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 import type { FsnToolDefinition } from "./runtime/tool-definition.ts";
 
-import { exportStateToolDefinition } from "./debug/export-state.ts";
 import { getStateSchemaToolDefinition } from "./debug/get-state-schema.ts";
 import { migrateStateToolDefinition } from "./debug/migrate-state.ts";
 import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact.ts";
@@ -68,7 +67,6 @@ const TOOL_DEFINITIONS: readonly FsnToolDefinition[] = [
   migrateStateToolDefinition,
   resetStateToolDefinition,
   getStateSchemaToolDefinition,
-  exportStateToolDefinition,
 ];
 
 export function registerAllTools(pi: ExtensionAPI): void {
