@@ -28,6 +28,7 @@ import {
   redactSecrets,
   type RendererMessage,
 } from "../../engine/direction/render-turn.ts";
+import { stripLeakedSettlementProse } from "../../engine/direction/settlement-prose-firewall.ts";
 import {
   stripThinkingResidue,
   THINKING_PREFILL_TEXT,
@@ -70,6 +71,14 @@ export default function twoPassRenderExtension(pi: ExtensionAPI): void {
       void writeTurnDigest(ctx, pending, prose);
     },
     cleanup: clearRenderWidget,
+  });
+
+  // Pass A 漏稿源头收口：结算回合的 assistant 消息只该带工具调用，模型偶尔在
+  // 旁边漏出正文（玩家从未看到、却会落史回喂并与 canonical prose 分叉）。在消息
+  // 定稿时剥掉这类 text 部件。渲染器 Pass B 走裸 stream()，不触发本钩子。
+  pi.on("message_end", async (event) => {
+    const stripped = stripLeakedSettlementProse(event.message);
+    return stripped === undefined ? undefined : { message: stripped };
   });
 
   const renderedToolCallIds = new Set<string>();
