@@ -49,7 +49,7 @@ export interface CampaignPreset {
 export const CAMPAIGN_PRESETS = {
   fsn_2004_fuyuki: {
     id: "fsn_2004_fuyuki",
-    title: "Fate/stay night 沙盒",
+    title: "Fate/stay night 叙事",
     timeline: "fsn",
     openingMode: "selected",
     premise: "2004 年冬木，圣杯战争即将开幕；玩家角色身份与卷入方式由开局确认。",
@@ -75,7 +75,7 @@ export const CAMPAIGN_PRESETS = {
   },
   fsf_2008_snowfield: {
     id: "fsf_2008_snowfield",
-    title: "Fate/strange Fake 沙盒",
+    title: "Fate/strange Fake 叙事",
     timeline: "fsf",
     openingMode: "selected",
     premise:
@@ -103,11 +103,11 @@ export const CAMPAIGN_PRESETS = {
   },
   extra_2032_seraph: {
     id: "extra_2032_seraph",
-    title: "Fate/EXTRA 沙盒",
+    title: "Fate/EXTRA 叙事",
     timeline: "extra",
     openingMode: "selected",
     premise:
-      "2032 年，Moon Cell 内部的霊子虚构世界 SE.RA.PH 举行月之圣杯战争；日期是沙盒启动占位，具体回合与对手由开局确认。",
+      "2032 年，Moon Cell 内部的霊子虚构世界 SE.RA.PH 举行月之圣杯战争；日期是开局占位，具体回合与对手由开局确认。",
     openingHooks: {
       master:
         "方才还在教室里上课，下一秒视野剥离成纯白——SE.RA.PH 的走廊在脚下重新构筑，手背多了三划令咒。公告栏弹出第一轮对阵表，对手的名字亮了。",
@@ -130,11 +130,11 @@ export const CAMPAIGN_PRESETS = {
   },
   extra_ccc_2032_far_side: {
     id: "extra_ccc_2032_far_side",
-    title: "Fate/EXTRA CCC 沙盒",
+    title: "Fate/EXTRA CCC 叙事",
     timeline: "extra-ccc",
     openingMode: "selected",
     premise:
-      "2032 年，Moon Cell 月之裏側出现致命异常；旧校舍成为安全据点，Sakura Labyrinth 与 BB 侧压力包围被卷入者。日期是沙盒启动占位，具体 Servant、路线与卷入时点由开局确认。",
+      "2032 年，Moon Cell 月之裏側出现致命异常；旧校舍成为安全据点，Sakura Labyrinth 与 BB 侧压力包围被卷入者。日期是开局占位，具体 Servant、路线与卷入时点由开局确认。",
     openingHooks: {
       master:
         "旧校舍的门在身后关上，SE.RA.PH 表侧的信号断了。走廊的墙壁在脉动，拐角处 Sakura Labyrinth 的入口张着一个人形大小的口子，里面传出心跳一样的低频。",
@@ -163,7 +163,7 @@ export const CAMPAIGN_PRESETS = {
   },
   fz_1994_fuyuki: {
     id: "fz_1994_fuyuki",
-    title: "Fate/Zero 沙盒",
+    title: "Fate/Zero 叙事",
     timeline: "fz",
     openingMode: "selected",
     premise:
@@ -190,7 +190,7 @@ export const CAMPAIGN_PRESETS = {
   },
   ha_2004_fuyuki: {
     id: "ha_2004_fuyuki",
-    title: "Fate/hollow ataraxia 沙盒",
+    title: "Fate/hollow ataraxia 叙事",
     timeline: "fsn",
     openingMode: "selected",
     premise:
@@ -216,11 +216,11 @@ export const CAMPAIGN_PRESETS = {
   },
   apocrypha_2004_trifas: {
     id: "apocrypha_2004_trifas",
-    title: "Fate/Apocrypha 沙盒",
+    title: "Fate/Apocrypha 叙事",
     timeline: "apocrypha",
     openingMode: "selected",
     premise:
-      "2000 年代罗马尼亚特里凡，大圣杯被千界树阵营夺取，红黑两阵营各七骑的大圣杯战争即将开打。阵营归属、裁定者与具体参战者由开局确认；日期是沙盒启动占位。",
+      "2000 年代罗马尼亚特里凡，大圣杯被千界树阵营夺取，红黑两阵营各七骑的大圣杯战争即将开打。阵营归属、裁定者与具体参战者由开局确认；日期是开局占位。",
     openingHooks: {
       master:
         "罗马尼亚千界树城塞的灯火在山脊上闪动。令咒发烫，阵营的颜色印在手背——红或者黑。身边的空气沉了一截，从者正在实体化。",
@@ -244,7 +244,7 @@ export const CAMPAIGN_PRESETS = {
   },
   case_files_2003_london: {
     id: "case_files_2003_london",
-    title: "君主·埃尔梅罗二世事件簿 沙盒",
+    title: "君主·埃尔梅罗二世事件簿 叙事",
     timeline: "case-files",
     openingMode: "selected",
     premise:
@@ -269,11 +269,11 @@ export const CAMPAIGN_PRESETS = {
   },
   tsukihime_2000_misaki: {
     id: "tsukihime_2000_misaki",
-    title: "月姬（原作）沙盒",
+    title: "月姬（原作）叙事",
     timeline: "tsukihime-2000",
     openingMode: "selected",
     premise:
-      "世纪之交的三咲市，连续猞取事件流言四起，夜晚的街道不再安全。死徒、真祖与退魔世家的阴影在日常之下涌动；玩家身份与卷入方式由开局确认。日期是沙盒启动占位。",
+      "世纪之交的三咲市，连续猞取事件流言四起，夜晚的街道不再安全。死徒、真祖与退魔世家的阴影在日常之下涌动；玩家身份与卷入方式由开局确认。日期是开局占位。",
     openingHooks: {
       human:
         "回三咲的末班公交上，窗外的月亮把整条河照成白的。下车时站台路灯灭了一盏——灯罩内侧沾了一片半干的黑色粘液。",
@@ -293,11 +293,11 @@ export const CAMPAIGN_PRESETS = {
   },
   tsukihime_2021_souya: {
     id: "tsukihime_2021_souya",
-    title: "月姬 -A piece of blue glass moon- 沙盒",
+    title: "月姬 -A piece of blue glass moon- 叙事",
     timeline: "tsukihime-2021",
     openingMode: "selected",
     premise:
-      "现代都市总谷，连续猞取事件登上新闻，城市的夜被戏称为「吸血鬼出没」。重制版世界观：场景更都市化，代行者与埋葬机关的压力更近。玩家身份由开局确认；日期是沙盒启动占位。",
+      "现代都市总谷，连续猞取事件登上新闻，城市的夜被戏称为「吸血鬼出没」。重制版世界观：场景更都市化，代行者与埋葬机关的压力更近。玩家身份由开局确认；日期是开局占位。",
     openingHooks: {
       human:
         "总谷市的地铁早高峰，手机推送了第三条「夜间袭击事件」。出站后人行道上有一小片被围起来的深色痕迹，清洁车已经到了但迟迟不动手。",
@@ -317,7 +317,7 @@ export const CAMPAIGN_PRESETS = {
   },
   knk_1998_mifune: {
     id: "knk_1998_mifune",
-    title: "空之境界 沙盒",
+    title: "空之境界 叙事",
     timeline: "kara-no-kyoukai",
     openingMode: "selected",
     premise:
@@ -341,7 +341,7 @@ export const CAMPAIGN_PRESETS = {
   },
   mahoyo_1989_misaki: {
     id: "mahoyo_1989_misaki",
-    title: "魔法使之夜 沙盒",
+    title: "魔法使之夜 叙事",
     timeline: "mahoyo",
     openingMode: "selected",
     premise:
@@ -365,7 +365,7 @@ export const CAMPAIGN_PRESETS = {
   },
   prototype_fragments_1991_tokyo: {
     id: "prototype_fragments_1991_tokyo",
-    title: "Fate/Prototype 蒼銀のフラグメンツ 沙盒",
+    title: "Fate/Prototype 蒼銀のフラグメンツ 叙事",
     timeline: "prototype",
     openingMode: "selected",
     premise:
@@ -391,7 +391,7 @@ export const CAMPAIGN_PRESETS = {
   },
   prototype_199x_tokyo: {
     id: "prototype_199x_tokyo",
-    title: "Fate/Prototype 沙盒",
+    title: "Fate/Prototype 叙事",
     timeline: "prototype",
     openingMode: "selected",
     premise:
@@ -419,7 +419,7 @@ export const CAMPAIGN_PRESETS = {
   },
   samurai_1651_edo: {
     id: "samurai_1651_edo",
-    title: "Fate/Samurai Remnant 沙盒",
+    title: "Fate/Samurai Remnant 叙事",
     timeline: "samurai-remnant",
     openingMode: "selected",
     premise:
@@ -447,7 +447,7 @@ export const CAMPAIGN_PRESETS = {
   },
   redline_1945_teito: {
     id: "redline_1945_teito",
-    title: "Fate/type Redline 帝都圣杯奇谭 沙盒",
+    title: "Fate/type Redline 帝都圣杯奇谭 叙事",
     timeline: "redline",
     openingMode: "selected",
     premise:
@@ -475,7 +475,7 @@ export const CAMPAIGN_PRESETS = {
   },
   prisma_2004_fuyuki: {
     id: "prisma_2004_fuyuki",
-    title: "Fate/kaleid liner 魔法少女伊莉雅 沙盒",
+    title: "Fate/kaleid liner 魔法少女伊莉雅 叙事",
     timeline: "prisma-illya",
     openingMode: "selected",
     premise:
@@ -499,7 +499,7 @@ export const CAMPAIGN_PRESETS = {
   },
   carnival_phantasm: {
     id: "carnival_phantasm",
-    title: "幻想嘉年华 沙盒",
+    title: "幻想嘉年华 叙事",
     timeline: "carnival-phantasm",
     openingMode: "selected",
     premise:
@@ -523,7 +523,7 @@ export const CAMPAIGN_PRESETS = {
   },
   labyrinth_fuyuki_grail: {
     id: "labyrinth_fuyuki_grail",
-    title: "Fate/Labyrinth 沙盒",
+    title: "Fate/Labyrinth 叙事",
     timeline: "labyrinth",
     openingMode: "selected",
     premise:
@@ -549,7 +549,7 @@ export const CAMPAIGN_PRESETS = {
   },
   custom_worldline: {
     id: "custom_worldline",
-    title: "自定义世界线沙盒",
+    title: "自定义世界线叙事",
     timeline: "custom",
     openingMode: "custom",
     premise:

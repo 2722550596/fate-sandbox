@@ -141,7 +141,7 @@ export function createInitialState(): State {
     },
     public: {
       campaign: {
-        title: "Fate 沙盒",
+        title: "Fate 叙事",
         timeline: "fsn",
         openingMode: "selected",
         premise: "2004 年冬木，玩家角色的身份与卷入方式尚待开局确认。",

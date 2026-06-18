@@ -21,7 +21,7 @@ interface ChoiceSet {
 
 export default function playerChoicesExtension(pi: ExtensionAPI): void {
   pi.registerCommand("choice", {
-    description: "Submit one suggested Fate sandbox action as a real user message: /choice 1",
+    description: "Submit one suggested Fate narrative action as a real user message: /choice 1",
     handler: async (args, ctx) => {
       await handleChoiceCommand(pi, ctx, args);
     },

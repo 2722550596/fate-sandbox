@@ -71,6 +71,6 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
 
 export function registerAllTools(pi: ExtensionAPI): void {
   for (const definition of TOOL_DEFINITIONS) {
-    pi.registerTool({ label: "FSN 沙盒", ...definition });
+    pi.registerTool({ label: "FSN 叙事", ...definition });
   }
 }

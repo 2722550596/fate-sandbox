@@ -20,16 +20,20 @@ import { getPublicState } from "../../engine/core/state-store.ts";
 
 export default function playerPanelExtension(pi: ExtensionAPI): void {
   pi.registerCommand("status", {
-    description: "Show player-visible Fate sandbox status without adding chat context",
+    description: "Show player-visible Fate narrative status without adding chat context",
     handler: async (_args, ctx) => {
-      await showPanel(ctx, "Fate Sandbox Status", buildStatusMarkdown(readPublicState(ctx)));
+      await showPanel(ctx, "Fate Narrative Status", buildStatusMarkdown(readPublicState(ctx)));
     },
   });
 
   pi.registerCommand("inventory", {
     description: "Show player-visible money and inventory without adding chat context",
     handler: async (_args, ctx) => {
-      await showPanel(ctx, "Fate Sandbox Inventory", buildInventoryMarkdown(readPublicState(ctx)));
+      await showPanel(
+        ctx,
+        "Fate Narrative Inventory",
+        buildInventoryMarkdown(readPublicState(ctx)),
+      );
     },
   });
 
