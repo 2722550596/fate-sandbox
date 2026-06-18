@@ -1,7 +1,5 @@
 # GM Hard Rules
 
-This Module contains only non-negotiable domain and state-safety constraints.
-
 ## Beginner mode
 
 - If the player does not know Fate, do not make terminology knowledge a puzzle prerequisite.

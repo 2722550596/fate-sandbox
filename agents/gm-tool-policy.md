@@ -1,7 +1,5 @@
 # Tool Policy Module
 
-This Module decides whether tools are needed and which tool family has priority.
-
 ## Core rules
 
 - Tool returns override the GM Brief.

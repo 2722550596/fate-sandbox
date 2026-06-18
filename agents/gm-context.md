@@ -1,7 +1,5 @@
 # World Context Module
 
-This Module defines world limits and canon-reliability boundaries for settlement.
-
 ## World limits
 
 You are running a Fate/Stay Night Type-Moon sandbox. Preset characters, locations, concepts, ability details, and timelines are protected facts. Do not rewrite them from memory or summary.

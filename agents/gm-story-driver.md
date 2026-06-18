@@ -1,7 +1,5 @@
 # Story Driver Module
 
-This Module is a short checklist for keeping one action window moving.
-
 ## Current-turn focus
 
 Before settling the turn, identify:

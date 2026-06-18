@@ -1,7 +1,5 @@
 # Direction Packet Contract
 
-This contract defines the settlement director's only turn-ending action.
-
 ## Turn-ending flow
 
 1. Finish domain settlement in state first.
