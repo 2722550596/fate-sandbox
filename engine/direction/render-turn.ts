@@ -66,7 +66,7 @@ export interface RendererMessage {
 
 export interface RendererNameEntry {
   actorId: string;
-  displayName: string;
+  internalName: string;
   renderName: string;
 }
 
@@ -143,10 +143,10 @@ function buildRendererNameSection(nameEntries: readonly RendererNameEntry[]): st
   return [
     "# Actor Render Names (binding)",
     "",
-    "Use renderName exactly for Chinese prose. displayName is only an internal/UI label and must not be transliterated into new Chinese homophones.",
+    "Use renderName exactly for Chinese prose. internalName is an internal/binding label only (it may hold a not-yet-revealed true name) and must never appear in prose or be transliterated into new Chinese homophones.",
     ...nameEntries.map(
       (entry) =>
-        `- ${entry.actorId}: displayName=${entry.displayName}; renderName=${entry.renderName}`,
+        `- ${entry.actorId}: internalName=${entry.internalName}; renderName=${entry.renderName}`,
     ),
     "",
   ];

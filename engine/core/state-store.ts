@@ -231,7 +231,7 @@ function createInitialProtagonist(): HumanActorState {
       lockedFacts: [],
     },
     presentation: {
-      displayName: "你",
+      internalName: "你",
       renderName: "你",
       apparentAge: "未确认",
       outfit: { label: "日常服装", details: "开局尚未细化。" },
@@ -291,6 +291,8 @@ function migrateOneSchemaVersion(
       return migrateGameStateV9ToV10(raw);
     case 10:
       return migrateGameStateV10ToV11(raw);
+    case 11:
+      return migrateGameStateV11ToV12(raw);
     default:
       throw new Error(
         `不支持的 state schemaVersion: ${version}。当前支持逐步迁移到 ${CURRENT_STATE_SCHEMA_VERSION}。`,
@@ -392,7 +394,7 @@ function migrateGameStateV9ToV10(raw: Record<string, unknown>): Record<string, u
 function migrateGameStateV10ToV11(raw: Record<string, unknown>): Record<string, unknown> {
   const next = structuredClone(raw);
   const meta = assertRecordForMigration(next["meta"], "meta");
-  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  meta["schemaVersion"] = 11;
   const publicState = assertRecordForMigration(next["public"], "public");
   const actors = assertRecordForMigration(publicState["actors"], "public.actors");
   for (const [actorId, actorValue] of Object.entries(actors)) {
@@ -405,6 +407,28 @@ function migrateGameStateV10ToV11(raw: Record<string, unknown>): Record<string, 
       presentation["displayName"],
       `public.actors.${actorId}.presentation.displayName`,
     );
+  }
+  return next;
+}
+
+// v11→v12: presentation.displayName 改名为 internalName（内部/绑定层标签，可含未公开真名）。
+function migrateGameStateV11ToV12(raw: Record<string, unknown>): Record<string, unknown> {
+  const next = structuredClone(raw);
+  const meta = assertRecordForMigration(next["meta"], "meta");
+  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  const publicState = assertRecordForMigration(next["public"], "public");
+  const actors = assertRecordForMigration(publicState["actors"], "public.actors");
+  for (const [actorId, actorValue] of Object.entries(actors)) {
+    const actor = assertRecordForMigration(actorValue, `public.actors.${actorId}`);
+    const presentation = assertRecordForMigration(
+      actor["presentation"],
+      `public.actors.${actorId}.presentation`,
+    );
+    presentation["internalName"] = assertStringForMigration(
+      presentation["displayName"],
+      `public.actors.${actorId}.presentation.displayName`,
+    );
+    delete presentation["displayName"];
   }
   return next;
 }

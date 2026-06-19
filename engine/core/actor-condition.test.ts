@@ -38,7 +38,7 @@ void test("updateActorCondition updates non-servant magecraft circuits", () => {
       servantForm: null,
       identity: { publicIdentity: "测试魔术师", background: "测试", lockedFacts: [] },
       presentation: {
-        displayName: "测试魔术师",
+        internalName: "测试魔术师",
         renderName: "测试魔术师",
         apparentAge: "17岁",
         outfit: { label: "制服", details: "测试" },
@@ -162,7 +162,7 @@ void test("updateActorCondition points to the actor that owns the missing condit
     npc: {
       actorId: "ayaka-sajyou",
       npcKind: "human",
-      displayName: "绫香·沙条",
+      internalName: "绫香·沙条",
       publicIdentity: "绫香·沙条",
       relationshipToProtagonist: { stance: "ally", summary: "测试" },
     },
@@ -228,7 +228,7 @@ void test("add-tracked-item creates item in trackedItems map", () => {
         lockedFacts: [],
       },
       presentation: {
-        displayName: "测试",
+        internalName: "测试",
         renderName: "测试",
         apparentAge: "20",
         outfit: { label: "测试", details: "测试" },

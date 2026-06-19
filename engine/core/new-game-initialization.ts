@@ -50,7 +50,7 @@ export interface ServantNewGameInput {
 }
 
 export interface HumanProtagonistOpeningInput {
-  displayName: string;
+  internalName: string;
   renderName?: string;
   publicIdentity: string;
   background: string;
@@ -64,7 +64,7 @@ export interface HumanProtagonistOpeningInput {
 }
 
 export interface ServantProtagonistOpeningInput {
-  displayName: string;
+  internalName: string;
   renderName?: string;
   publicIdentity: string;
   apparentAge: string;
@@ -206,8 +206,8 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
       lockedFacts: [],
     },
     presentation: {
-      displayName: input.displayName,
-      renderName: input.renderName ?? input.displayName,
+      internalName: input.internalName,
+      renderName: input.renderName ?? input.internalName,
       apparentAge: input.apparentAge,
       outfit: input.outfit,
       demeanor: input.demeanor,
@@ -226,7 +226,7 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
 function buildServantProtagonist(input: ServantProtagonistOpeningInput): ServantInput {
   return {
     id: PROTAGONIST_ACTOR_ID,
-    displayName: input.displayName,
+    internalName: input.internalName,
     renderName: input.renderName,
     publicIdentity: input.publicIdentity,
     apparentAge: input.apparentAge,

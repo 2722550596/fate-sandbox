@@ -25,7 +25,7 @@ function addTestNpc(
     servantForm: null,
     identity: { publicIdentity: actorId, background: "", lockedFacts: [] },
     presentation: {
-      displayName: actorId.charAt(0).toUpperCase() + actorId.slice(1),
+      internalName: actorId.charAt(0).toUpperCase() + actorId.slice(1),
       renderName: actorId.charAt(0).toUpperCase() + actorId.slice(1),
       apparentAge: "20s",
       outfit: { label: "default", details: "" },

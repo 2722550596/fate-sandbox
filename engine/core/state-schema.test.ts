@@ -253,7 +253,7 @@ void test("parseStateSchema rejects dangling servant contract masterActorId", ()
     kind: "upsert-servant",
     servant: {
       id: "caster",
-      displayName: "Caster",
+      internalName: "Caster",
       publicIdentity: "柳洞寺驻留的从者",
       apparentAge: "不明",
       outfit: { label: "深紫色长袍与兜帽", details: "遮住面容" },

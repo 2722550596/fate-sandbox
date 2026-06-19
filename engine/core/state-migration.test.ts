@@ -4,13 +4,25 @@ import test from "node:test";
 import { cloneState, hydrateState, migrateState, createInitialState } from "./state-store.ts";
 import { CURRENT_STATE_SCHEMA_VERSION } from "./state.ts";
 
+// pre-v11 存档的 presentation 只有 displayName（无 renderName / internalName）。
+// 这些测试从 createInitialState()（当前形态）派生，需要把名字字段降级回旧形态，
+// 才能忠实驱动 v10→v11→v12 迁移链。
+function legacyActors(current: ReturnType<typeof createInitialState>): Record<string, unknown> {
+  const actors: Record<string, unknown> = {};
+  for (const [id, actor] of Object.entries(current.public.actors)) {
+    const { renderName: _renderName, internalName, ...rest } = actor.presentation;
+    actors[id] = { ...actor, presentation: { ...rest, displayName: internalName } };
+  }
+  return actors;
+}
+
 void test("migrateState upgrades schema v1 states to current turn log shape", () => {
   const current = createInitialState();
   const { turnLog: _turnLog, obligations: _obligations, ...publicV1 } = current.public;
   const rawV1 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 1 },
-    public: publicV1,
+    public: { ...publicV1, actors: legacyActors(current) },
   };
 
   const migrated = migrateState(rawV1);
@@ -29,6 +41,7 @@ void test("migrateState drops schema v2 non-advancing turn log entries", () => {
     meta: { ...current.meta, schemaVersion: 2 },
     public: {
       ...publicV2,
+      actors: legacyActors(current),
       turnLog: [
         {
           id: "turn-1",
@@ -65,7 +78,7 @@ void test("hydrateState accepts session-wrapped schema v1 states through migrati
   const rawV1 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 1 },
-    public: publicV1,
+    public: { ...publicV1, actors: legacyActors(current) },
   };
 
   hydrateState({ v: 1, turn: 0, state: rawV1 });
@@ -82,7 +95,7 @@ void test("migrateState upgrades schema v3 states with an empty obligations ledg
   const rawV3 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 3 },
-    public: publicV3,
+    public: { ...publicV3, actors: legacyActors(current) },
   };
 
   const migrated = migrateState(rawV3);
@@ -99,6 +112,7 @@ void test("migrateState upgrades schema v4 states with empty clock ledgers", () 
   const rawV4 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 4 },
+    public: { ...current.public, actors: legacyActors(current) },
     secrets: secretsV4,
   };
 
@@ -116,7 +130,7 @@ void test("migrateState upgrades schema v5 states with an empty hook ledger", ()
   const rawV5 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 5 },
-    public: publicV5,
+    public: { ...publicV5, actors: legacyActors(current) },
   };
 
   const migrated = migrateState(rawV5);
@@ -133,6 +147,7 @@ void test("migrateState upgrades schema v6 states with empty actor autonomy ledg
   const rawV6 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 6 },
+    public: { ...current.public, actors: legacyActors(current) },
     secrets: secretsV6,
   };
 
@@ -152,7 +167,7 @@ void test("migrateState upgrades schema v7 states with empty relationship signal
   const rawV7 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 7 },
-    public: publicV7,
+    public: { ...publicV7, actors: legacyActors(current) },
     secrets: secretsV7,
   };
 
@@ -169,7 +184,7 @@ void test("migrateState upgrades v8 to v9 with actorImpressions", () => {
   const rawV8 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 8 },
-    public: publicV8,
+    public: { ...publicV8, actors: legacyActors(current) },
   };
 
   const migrated = migrateState(rawV8);
@@ -178,13 +193,14 @@ void test("migrateState upgrades v8 to v9 with actorImpressions", () => {
   assert.deepEqual(migrated.public.actorImpressions, []);
 });
 
-void test("migrateState upgrades v10 to v11 with renderName copied from displayName", () => {
+void test("migrateState upgrades v10 through v12: renderName copied, displayName renamed to internalName", () => {
   const current = createInitialState();
   const actor = current.public.actors.protagonist;
   if (actor === undefined) {
     throw new Error("expected protagonist");
   }
-  const { renderName: _renderName, ...presentationV10 } = actor.presentation;
+  const { renderName: _renderName, internalName, ...rest } = actor.presentation;
+  const presentationV10 = { ...rest, displayName: internalName };
   const rawV10 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 10 },
@@ -201,7 +217,43 @@ void test("migrateState upgrades v10 to v11 with renderName copied from displayN
   };
 
   const migrated = migrateState(rawV10);
+  const presentation = migrated.public.actors.protagonist?.presentation;
+  assert.ok(presentation);
 
   assert.equal(migrated.meta.schemaVersion, CURRENT_STATE_SCHEMA_VERSION);
-  assert.equal(migrated.public.actors.protagonist?.presentation.renderName, "你");
+  assert.equal(presentation.renderName, "你");
+  assert.equal(presentation.internalName, "你");
+  assert.ok(!Object.hasOwn(presentation, "displayName"));
+});
+
+void test("migrateState upgrades v11 to v12 by renaming displayName to internalName", () => {
+  const current = createInitialState();
+  const actor = current.public.actors.protagonist;
+  if (actor === undefined) {
+    throw new Error("expected protagonist");
+  }
+  const { internalName, ...rest } = actor.presentation;
+  const presentationV11 = { ...rest, displayName: internalName };
+  const rawV11 = {
+    ...current,
+    meta: { ...current.meta, schemaVersion: 11 },
+    public: {
+      ...current.public,
+      actors: {
+        ...current.public.actors,
+        protagonist: {
+          ...actor,
+          presentation: presentationV11,
+        },
+      },
+    },
+  };
+
+  const migrated = migrateState(rawV11);
+  const presentation = migrated.public.actors.protagonist?.presentation;
+  assert.ok(presentation);
+
+  assert.equal(migrated.meta.schemaVersion, CURRENT_STATE_SCHEMA_VERSION);
+  assert.equal(presentation.internalName, "你");
+  assert.ok(!Object.hasOwn(presentation, "displayName"));
 });

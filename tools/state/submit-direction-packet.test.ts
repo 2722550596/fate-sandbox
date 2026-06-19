@@ -31,7 +31,7 @@ function seedHiddenTrueName(trueName: string): void {
       kind: "upsert-servant",
       servant: {
         id: "saber_shiki",
-        displayName: "Saber",
+        internalName: "Saber",
         publicIdentity: "和服装束的女性剑士",
         apparentAge: "二十岁前后",
         outfit: { label: "和服", details: "白色和服配皮夹克。" },

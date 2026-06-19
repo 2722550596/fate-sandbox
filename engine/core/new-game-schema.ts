@@ -31,7 +31,7 @@ const NEW_GAME_PRESENCE_INPUT_SCHEMA = Type.Object({
 });
 
 const HUMAN_PROTAGONIST_OPENING_SCHEMA = Type.Object({
-  displayName: Type.String({ minLength: 1 }),
+  internalName: Type.String({ minLength: 1 }),
   renderName: Type.Optional(Type.String({ minLength: 1 })),
   publicIdentity: Type.String({ minLength: 1 }),
   background: Type.String({ minLength: 1 }),
@@ -43,7 +43,7 @@ const HUMAN_PROTAGONIST_OPENING_SCHEMA = Type.Object({
 });
 
 const SERVANT_PROTAGONIST_OPENING_SCHEMA = Type.Object({
-  displayName: Type.String({ minLength: 1 }),
+  internalName: Type.String({ minLength: 1 }),
   renderName: Type.Optional(Type.String({ minLength: 1 })),
   publicIdentity: Type.String({ minLength: 1 }),
   apparentAge: Type.String({ minLength: 1 }),

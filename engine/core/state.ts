@@ -93,7 +93,7 @@ export interface GameState {
 }
 
 export interface StateMeta {
-  schemaVersion: 11;
+  schemaVersion: 12;
   createdAt: string;
   updatedAt: string;
   /** Seeded RNG seed（backlog #9）：确定性随机源，初始化时生成 */
@@ -363,7 +363,7 @@ export interface LockedFact {
 }
 
 export interface PresentationState {
-  displayName: string;
+  internalName: string;
   /** Renderer-facing surface name; keep exact Chinese/canonical prose spelling here. */
   renderName: string;
   apparentAge: string;
@@ -644,4 +644,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 11;
+export const CURRENT_STATE_SCHEMA_VERSION = 12;

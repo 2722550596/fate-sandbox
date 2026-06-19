@@ -104,7 +104,7 @@ function upsertServant(
   assertNonEmptyString(input.reason, "reason");
   const sv = input.servant;
   assertNonEmptyString(sv.id, "servant.id");
-  assertNonEmptyString(sv.displayName, "servant.displayName");
+  assertNonEmptyString(sv.internalName, "servant.internalName");
   assertNonEmptyString(sv.publicIdentity, "servant.publicIdentity");
 
   const actor: PublicActorState = {
@@ -152,8 +152,8 @@ function upsertServant(
       lockedFacts: [],
     },
     presentation: {
-      displayName: sv.displayName,
-      renderName: sv.renderName ?? sv.displayName,
+      internalName: sv.internalName,
+      renderName: sv.renderName ?? sv.internalName,
       apparentAge: sv.apparentAge,
       outfit: sv.outfit,
       demeanor: sv.demeanor,
@@ -257,8 +257,8 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
       lockedFacts: [],
     },
     presentation: {
-      displayName: assertNonEmptyString(npc.displayName, "npc.displayName"),
-      renderName: assertNonEmptyString(npc.renderName ?? npc.displayName, "npc.renderName"),
+      internalName: assertNonEmptyString(npc.internalName, "npc.internalName"),
+      renderName: assertNonEmptyString(npc.renderName ?? npc.internalName, "npc.renderName"),
       apparentAge: assertNonEmptyString(npc.apparentAge, "npc.apparentAge"),
       outfit: npc.outfit,
       demeanor: assertNonEmptyString(npc.demeanor, "npc.demeanor"),
@@ -293,7 +293,7 @@ function toSafePublicActorFromSkeleton(npc: PublicNpcSkeletonInput): PublicActor
   return toSafePublicActor({
     id: npc.actorId,
     kind: npc.npcKind ?? "human",
-    displayName: npc.displayName,
+    internalName: npc.internalName,
     publicIdentity: npc.publicIdentity,
     apparentAge: npc.apparentAge ?? "玩家可见年龄未确认",
     outfit: npc.outfit ?? {

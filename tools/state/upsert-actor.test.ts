@@ -52,7 +52,7 @@ void test("upsertActorTool defaults omitted public NPC master role fields", () =
       kind: "ensure-public-npc",
       npc: {
         actorId: "moon-master",
-        displayName: "未知御主",
+        internalName: "未知御主",
         publicIdentity: "月之圣杯战争参赛者",
         publicRoles: [{ kind: "master" }],
       },
@@ -98,7 +98,7 @@ void test("upsertActorTool reports invalid npc relationship stance in domain lan
           kind: "ensure-public-npc",
           npc: {
             actorId: "tohsaka-rin",
-            displayName: "远坂凛",
+            internalName: "远坂凛",
             publicIdentity: "穗群原学园学生",
             relationshipToProtagonist: { stance: "close", summary: "关系尚未明确。" },
           },
@@ -195,7 +195,7 @@ function baseProtagonistActor(): Record<string, unknown> {
       lockedFacts: [],
     },
     presentation: {
-      displayName: "主人公",
+      internalName: "主人公",
       renderName: "主人公",
       apparentAge: "十几岁",
       outfit: { label: "旧校舍制服", details: "黑色学生制服。" },
@@ -211,7 +211,7 @@ function baseProtagonistActor(): Record<string, unknown> {
 function baseMasterlessServant(): Record<string, unknown> {
   return {
     id: "masterless-caster",
-    displayName: "Caster",
+    internalName: "Caster",
     publicIdentity: "身份不明的无主从者",
     apparentAge: "二十岁后半",
     outfit: { label: "长袍", details: "深蓝色连帽长袍。" },

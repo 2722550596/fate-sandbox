@@ -44,7 +44,7 @@ function insertActor(actor: PublicActorState): void {
   commitState(draft);
 }
 
-function servantActor(id: string, displayName: string, parameters: FateParams): PublicActorState {
+function servantActor(id: string, internalName: string, parameters: FateParams): PublicActorState {
   return {
     id,
     kind: "spirit",
@@ -74,10 +74,10 @@ function servantActor(id: string, displayName: string, parameters: FateParams): 
       noblePhantasms: [],
       currentOrder: "测试交锋",
     },
-    identity: { publicIdentity: displayName, background: "测试 actor", lockedFacts: [] },
+    identity: { publicIdentity: internalName, background: "测试 actor", lockedFacts: [] },
     presentation: {
-      displayName,
-      renderName: displayName,
+      internalName,
+      renderName: internalName,
       apparentAge: "未知",
       outfit: { label: "测试服装", details: "测试用。" },
       demeanor: "测试状态",

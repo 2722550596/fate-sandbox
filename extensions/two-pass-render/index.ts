@@ -148,16 +148,16 @@ interface RenderedProse {
 
 function rendererNameEntries(state: ReturnType<typeof getState>): Array<{
   actorId: string;
-  displayName: string;
+  internalName: string;
   renderName: string;
 }> {
   return Object.values(state.public.actors)
     .map((actor) => ({
       actorId: actor.id,
-      displayName: actor.presentation.displayName,
+      internalName: actor.presentation.internalName,
       renderName: actor.presentation.renderName,
     }))
-    .filter((entry) => entry.renderName !== entry.displayName);
+    .filter((entry) => entry.renderName !== entry.internalName);
 }
 
 interface RenderProseOptions {
@@ -306,7 +306,10 @@ async function streamProse(
   // 仍是兜底。故 anthropic 直接跳过 prefill，让对话以 user 消息结尾。
   const baseStreamMessages = rendererMessages.map((message) => toStreamMessage(message, model));
   const streamMessages = supportsAssistantPrefill(model)
-    ? [...baseStreamMessages, toStreamMessage({ role: "assistant", text: THINKING_PREFILL_TEXT }, model)]
+    ? [
+        ...baseStreamMessages,
+        toStreamMessage({ role: "assistant", text: THINKING_PREFILL_TEXT }, model),
+      ]
     : baseStreamMessages;
   const events = stream(
     model,

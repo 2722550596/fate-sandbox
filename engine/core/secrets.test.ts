@@ -368,7 +368,7 @@ function upsertTestCaster(draft: State): void {
     kind: "upsert-servant",
     servant: {
       id: "caster",
-      displayName: "Caster",
+      internalName: "Caster",
       publicIdentity: "柳洞寺驻留的从者",
       apparentAge: "不明",
       outfit: { label: "深紫色长袍与兜帽", details: "遮住面容" },
@@ -406,7 +406,7 @@ function upsertTestNpc(draft: State, id: string): void {
     npc: {
       id,
       kind: "human",
-      displayName: `测试NPC-${id}`,
+      internalName: `测试NPC-${id}`,
       publicIdentity: "穗群原学园学生。",
       apparentAge: "十六岁左右",
       outfit: { label: "学园制服", details: "冬季制服。" },

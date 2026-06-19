@@ -98,7 +98,7 @@ function normalizeSetupProtagonistActor(actor: unknown): PublicActorState {
   }
   const presentation = normalized["presentation"];
   if (isRecord(presentation) && presentation["renderName"] === undefined) {
-    presentation["renderName"] = presentation["displayName"];
+    presentation["renderName"] = presentation["internalName"];
   }
   assertPublicActorStateCandidate(normalized);
   return normalized;
@@ -235,8 +235,12 @@ function loosePublicNpcSchema(): ReturnType<typeof Type.Object> {
     npcKind: Type.Optional(
       Type.String({ description: "ensure-public-npc：human / outsider / spirit / other" }),
     ),
-    displayName: Type.String({ description: "玩家可见称呼/姓名" }),
-    renderName: Type.Optional(Type.String({ description: "正文固定用名" })),
+    internalName: Type.String({
+      description: "内部/绑定层用名（可含玩家尚未得知的真名）；正文不直接使用",
+    }),
+    renderName: Type.Optional(
+      Type.String({ description: "正文固定用名（玩家当前可见的称呼）；缺省时拷贝 internalName" }),
+    ),
     publicIdentity: Type.String({ description: "玩家当前可知的身份摘要" }),
     apparentAge: Type.Optional(Type.String()),
     outfit: Type.Optional(Type.Object({ label: Type.String(), details: Type.String() })),
@@ -265,8 +269,12 @@ function looseActorRoleSchema(): ReturnType<typeof Type.Object> {
 function looseServantSchema(): ReturnType<typeof Type.Object> {
   return Type.Object({
     id: Type.String({ description: "从者 actor id" }),
-    displayName: Type.String({ description: "玩家可见称呼" }),
-    renderName: Type.Optional(Type.String({ description: "正文固定用名" })),
+    internalName: Type.String({
+      description: "内部/绑定层用名（可含玩家尚未得知的真名）；正文不直接使用",
+    }),
+    renderName: Type.Optional(
+      Type.String({ description: "正文固定用名（玩家当前可见的称呼）；缺省时拷贝 internalName" }),
+    ),
     publicIdentity: Type.String({ description: "玩家当前可知的公开身份摘要" }),
     apparentAge: Type.String(),
     outfit: Type.Object({ label: Type.String(), details: Type.String() }),
@@ -344,7 +352,7 @@ function publicActorSchema(): ReturnType<typeof Type.Object> {
       lockedFacts: Type.Array(Type.Object({ id: Type.String(), text: Type.String() })),
     }),
     presentation: Type.Object({
-      displayName: Type.String(),
+      internalName: Type.String(),
       renderName: Type.Optional(Type.String()),
       apparentAge: Type.String(),
       outfit: Type.Object({ label: Type.String(), details: Type.String() }),

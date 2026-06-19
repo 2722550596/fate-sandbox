@@ -63,7 +63,7 @@ void test("overrideLockedFactTool defaults true name override to revealed", () =
 function baseServant(): Record<string, unknown> {
   return {
     id: "caster",
-    displayName: "Caster",
+    internalName: "Caster",
     publicIdentity: "身份不明的从者",
     apparentAge: "二十岁后半",
     outfit: { label: "长袍", details: "深蓝色连帽长袍。" },

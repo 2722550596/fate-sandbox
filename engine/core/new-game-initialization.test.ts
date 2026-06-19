@@ -13,7 +13,7 @@ void describe("initializeNewGame", () => {
       kind: "human-protagonist",
       campaign: { presetId: "fsn_2004_fuyuki" },
       protagonist: {
-        displayName: "你",
+        internalName: "你",
         publicIdentity: "不了解魔术的本地学生",
         background: "在冬木的异常夜晚前仍过着普通生活。",
         apparentAge: "高中生",
@@ -52,7 +52,7 @@ void describe("initializeNewGame", () => {
       kind: "servant-protagonist",
       campaign: { presetId: "fsf_2008_snowfield" },
       protagonist: {
-        displayName: "Saber",
+        internalName: "Saber",
         publicIdentity: "刚现界且真名未公开的 Saber",
         apparentAge: "青年",
         outfit: { label: "战斗礼装", details: "灵基投影出的轻甲。" },

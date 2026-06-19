@@ -21,7 +21,7 @@ void test("upsertActor adds an entered NPC from safe public projection", () => {
     npc: {
       id: "tohsaka-rin",
       kind: "human",
-      displayName: "远坂凛",
+      internalName: "远坂凛",
       publicIdentity: "穗群原学园二年A班学生，校内知名优等生。",
       apparentAge: "十七岁左右",
       outfit: { label: "穗群原学园制服", details: "红色外套与黑色长袜。" },
@@ -36,7 +36,7 @@ void test("upsertActor adds an entered NPC from safe public projection", () => {
   const publicState = draft.public;
   const actor = publicState.actors["tohsaka-rin"];
   assert.equal(result.message, "public npc 已写入：tohsaka-rin。");
-  assert.equal(actor?.presentation.displayName, "远坂凛");
+  assert.equal(actor?.presentation.internalName, "远坂凛");
   assert.equal(actor?.magecraft, null);
   assert.deepEqual(actor?.abilities, []);
   assert.deepEqual(actor?.identity.lockedFacts, []);
@@ -50,7 +50,7 @@ void test("ensurePublicNpc creates a minimal public skeleton", () => {
     kind: "ensure-public-npc",
     npc: {
       actorId: "tohsaka-rin",
-      displayName: "远坂凛",
+      internalName: "远坂凛",
       publicIdentity: "穗群原学园学生，当前与士郎同行调查的魔术师。",
     },
     reason: "确保同行 NPC 可被 scene presence 引用",
@@ -59,7 +59,7 @@ void test("ensurePublicNpc creates a minimal public skeleton", () => {
   const publicState = draft.public;
   const actor = publicState.actors["tohsaka-rin"];
   assert.equal(result.message, "public npc skeleton 已写入：tohsaka-rin。");
-  assert.equal(actor?.presentation.displayName, "远坂凛");
+  assert.equal(actor?.presentation.internalName, "远坂凛");
   assert.equal(actor?.presentation.apparentAge, "玩家可见年龄未确认");
   assert.deepEqual(actor?.inventory.ordinaryItems, []);
   assert.equal(actor?.relationshipToProtagonist.stance, "neutral");
@@ -74,7 +74,7 @@ void test("ensurePublicNpc does not overwrite an existing actor", () => {
     npc: {
       id: "tohsaka-rin",
       kind: "human",
-      displayName: "远坂凛",
+      internalName: "远坂凛",
       publicIdentity: "穗群原学园二年A班学生，校内知名优等生。",
       apparentAge: "十七岁左右",
       outfit: { label: "穗群原学园制服", details: "红色外套与黑色长袜。" },
@@ -90,7 +90,7 @@ void test("ensurePublicNpc does not overwrite an existing actor", () => {
     kind: "ensure-public-npc",
     npc: {
       actorId: "tohsaka-rin",
-      displayName: "远坂",
+      internalName: "远坂",
       publicIdentity: "不完整 skeleton 不应覆盖既有 actor。",
     },
     reason: "重复确保 actor 存在",
@@ -98,7 +98,7 @@ void test("ensurePublicNpc does not overwrite an existing actor", () => {
 
   const actor = draft.public.actors["tohsaka-rin"];
   assert.equal(result.message, "actor 已存在：tohsaka-rin。");
-  assert.equal(actor?.presentation.displayName, "远坂凛");
+  assert.equal(actor?.presentation.internalName, "远坂凛");
   assert.equal(actor?.presentation.outfit.label, "穗群原学园制服");
   assert.deepEqual(actor?.inventory.ordinaryItems, ["红色发带"]);
 });
@@ -118,7 +118,7 @@ void test("upsertActor rejects non-protagonist setup", () => {
           servantForm: null,
           identity: { publicIdentity: "远坂凛", background: "测试", lockedFacts: [] },
           presentation: {
-            displayName: "远坂凛",
+            internalName: "远坂凛",
             renderName: "远坂凛",
             apparentAge: "17岁",
             outfit: { label: "制服", details: "测试" },
@@ -161,7 +161,7 @@ void test("GM brief separates servant mana parameter from mana remaining percent
     kind: "upsert-servant",
     servant: {
       id: "protagonist",
-      displayName: "Saber",
+      internalName: "Saber",
       publicIdentity: "玩家扮演的 Saber",
       apparentAge: "不明",
       outfit: { label: "蓝银甲胄", details: "灵装显现。" },
@@ -218,7 +218,7 @@ function upsertShirouProtagonist(draft: State, od: number): void {
         lockedFacts: [{ id: "setup-identity", text: "卫宫士郎" }],
       },
       presentation: {
-        displayName: "卫宫士郎",
+        internalName: "卫宫士郎",
         renderName: "卫宫士郎",
         apparentAge: "17岁",
         outfit: { label: "穗群原学园制服", details: "冬季制服。" },
@@ -322,7 +322,7 @@ void test("reveal_secret replaces placeholder hidden noble phantasm instead of d
     kind: "upsert-servant",
     servant: {
       id: "caster",
-      displayName: "Caster",
+      internalName: "Caster",
       publicIdentity: "柳洞寺驻留的从者",
       apparentAge: "不明",
       outfit: { label: "深紫色长袍与兜帽", details: "遮住面容" },
@@ -402,7 +402,7 @@ function upsertTestCasterWithMaster(draft: State, masterActorId: string | null):
     kind: "upsert-servant",
     servant: {
       id: "caster",
-      displayName: "Caster",
+      internalName: "Caster",
       publicIdentity: "柳洞寺驻留的从者",
       apparentAge: "不明",
       outfit: { label: "深紫色长袍与兜帽", details: "遮住面容" },
@@ -441,7 +441,7 @@ void test("upsert-servant writes servant form with full parameter block", () => 
     kind: "upsert-servant",
     servant: {
       id: "caster",
-      displayName: "Caster",
+      internalName: "Caster",
       publicIdentity: "柳洞寺驻留的从者",
       apparentAge: "不明",
       outfit: { label: "深紫色长袍与兜帽", details: "遮住面容" },
@@ -521,7 +521,7 @@ void test("retireActor rejects actors referenced by master contracts", () => {
     npc: {
       id: "master",
       kind: "human",
-      displayName: "御主",
+      internalName: "御主",
       publicIdentity: "测试御主",
       apparentAge: "不明",
       outfit: { label: "便服", details: "测试" },
@@ -577,7 +577,7 @@ void test("configureActorSecrets enables hidden reactions for non-servant NPCs",
     npc: {
       id: "sakura",
       kind: "human",
-      displayName: "间桐樱",
+      internalName: "间桐樱",
       publicIdentity: "穗群原学园一年生；卫宫士郎弓道部的后辈。",
       apparentAge: "15岁",
       outfit: { label: "冬季便服", details: "浅色毛衣与长裙。" },
@@ -642,7 +642,7 @@ void test("configureServantSecrets accepts non-noble-phantasm sword techniques",
     kind: "upsert-servant",
     servant: {
       id: "assassin",
-      displayName: "Assassin",
+      internalName: "Assassin",
       publicIdentity: "柳洞寺山门守卫",
       apparentAge: "青年",
       outfit: { label: "淡紫色和服", details: "腰间佩有超长日本刀。" },

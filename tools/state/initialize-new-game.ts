@@ -44,7 +44,7 @@ export const initializeNewGameToolDefinition: FateToolDefinition = {
     }),
     protagonist: Type.Unknown({
       description:
-        "human: displayName/renderName/publicIdentity/background/apparentAge/outfit/demeanor；servant additionally className/trueNameDisplay/trueNameStatus(hidden|suspected)。renderName 是正文固定用名，中文名优先。",
+        "human: internalName/renderName/publicIdentity/background/apparentAge/outfit/demeanor；servant additionally className/trueNameDisplay/trueNameStatus(hidden|suspected)。renderName 是正文固定用名，中文名优先。",
     }),
     presence: Type.Optional(
       Type.Object({

@@ -163,8 +163,8 @@ void test("buildStatusMarkdown lists scene summary with present actor display na
 
   const markdown = buildStatusMarkdown(publicState);
   assert.match(markdown, /## 当前状态/);
-  const protagonistName = publicState.actors["protagonist"]?.presentation.displayName ?? "";
-  // 未知 actor 回退为 actor id，已知 actor 用 displayName。
+  const protagonistName = publicState.actors["protagonist"]?.presentation.internalName ?? "";
+  // 未知 actor 回退为 actor id，已知 actor 用 internalName。
   assert.match(markdown, new RegExp(`- 在场：${protagonistName}、no-such-actor`));
   assert.match(markdown, /## 资源与物品/);
 });

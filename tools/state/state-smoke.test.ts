@@ -87,7 +87,7 @@ describe("Fate state tool-level smoke flow", () => {
         kind: "ensure-public-npc",
         npc: {
           actorId: "tohsaka-rin",
-          displayName: "远坂凛",
+          internalName: "远坂凛",
           publicIdentity: "穗群原学园学生，当前与士郎同行调查的魔术师。",
         },
         reason: "tool smoke test ensures a known NPC skeleton",
@@ -97,7 +97,7 @@ describe("Fate state tool-level smoke flow", () => {
 
     assert.match(textOf(result), /public npc skeleton 已写入：tohsaka-rin/);
     const state = cloneState();
-    assert.equal(state.public.actors["tohsaka-rin"]?.presentation.displayName, "远坂凛");
+    assert.equal(state.public.actors["tohsaka-rin"]?.presentation.internalName, "远坂凛");
     assert.equal(state.public.scene.presentActorIds.includes("tohsaka-rin"), false);
     assert.equal(sessionManager.entries.length, 1);
   });
@@ -111,7 +111,7 @@ describe("Fate state tool-level smoke flow", () => {
         kind: "upsert-servant",
         servant: {
           id: "caster",
-          displayName: "Caster",
+          internalName: "Caster",
           publicIdentity: "柳洞寺驻留的从者",
           apparentAge: "不明",
           outfit: { label: "深紫色长袍与兜帽", details: "遮住面容" },
