@@ -258,6 +258,16 @@ function assertActorHasNoBlockingReferences(publicState: PublicGameState, actorI
       throw new Error(`actor ${actorId} 仍持有/拥有 tracked item ${itemId}；请先转移或结算物品。`);
     }
   }
+  for (const purse of publicState.economy.accessibleFunds) {
+    if (purse.ownerActorId === actorId) {
+      throw new Error(`actor ${actorId} 仍拥有资金账户 ${purse.id}；请先转移或结算资金。`);
+    }
+  }
+  for (const debt of publicState.economy.debts) {
+    if (debt.debtorActorId === actorId) {
+      throw new Error(`actor ${actorId} 仍背负债务 ${debt.id}；请先结算或免除债务。`);
+    }
+  }
 }
 
 function writeActor(draft: State, actor: PublicActorState): void {

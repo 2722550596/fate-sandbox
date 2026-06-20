@@ -540,6 +540,38 @@ void test("retireActor rejects actors referenced by master contracts", () => {
   );
 });
 
+void test("retireActor refuses an actor who still owns funds or holds debt", () => {
+  const draft = createInitialState();
+  upsertActor(draft, {
+    kind: "upsert-public-npc",
+    npc: {
+      id: "tohsaka-rin",
+      kind: "human",
+      internalName: "远坂凛",
+      publicIdentity: "学生。",
+      apparentAge: "十七",
+      outfit: { label: "制服", details: "红外套。" },
+      demeanor: "从容。",
+      publicRoles: [{ kind: "social", label: "学生" }],
+      relationshipToProtagonist: { stance: "friendly", summary: "同校。" },
+      ordinaryItems: [],
+    },
+    reason: "seed fund owner",
+  });
+  draft.public.economy.accessibleFunds.push({
+    id: "rin-wallet",
+    ownerActorId: "tohsaka-rin",
+    label: "凛的钱包",
+    amount: 5000,
+    access: "held",
+  });
+
+  assert.throws(
+    () => retireActor(draft, { actorId: "tohsaka-rin", reason: "资金未结算" }),
+    /资金|结算/,
+  );
+});
+
 function countActorReferences(state: State, actorId: string): Record<string, number> {
   return {
     "public.actors": state.public.actors[actorId] === undefined ? 0 : 1,
