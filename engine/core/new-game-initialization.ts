@@ -21,7 +21,7 @@ import { configureCampaign } from "./campaign.ts";
 import { recordMemory } from "./memory.ts";
 import { getActorSecretSlots } from "./secret-actor-state.ts";
 import { configureServantSecrets } from "./secrets.ts";
-import { createInitialState } from "./state-store.ts";
+import { createInitialState, PROTAGONIST_ACTOR_ID } from "./state-store.ts";
 
 export type NewGameInitializationInput = HumanNewGameInput | ServantNewGameInput;
 
@@ -108,7 +108,6 @@ export interface NewGameInitializationResult {
   steps: string[];
 }
 
-const PROTAGONIST_ACTOR_ID = "protagonist";
 const DEFAULT_FATE_PARAMS: FateParams = {
   strength: "E",
   endurance: "E",

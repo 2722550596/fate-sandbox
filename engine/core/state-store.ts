@@ -12,7 +12,13 @@ import { formatUnknown, isRecord } from "./typebox-validation.ts";
 
 const DEBUG_STATE_PATH = "state/state.json";
 const INITIAL_CURRENT_TIME = "2004-01-30T07:00:00.000Z";
-const PROTAGONIST_ACTOR_ID = "protagonist";
+
+/**
+ * 种子主角的 actor id——开局唯一真相点。“谁是主角”由 public.protagonistActorId
+ * 指针决定；这里只是初始 state 工厂播下的种子值，所有处都引用本常量，
+ * 不再各自写死字面量。未来要换种子 id，只改这一处。
+ */
+export const PROTAGONIST_ACTOR_ID = "protagonist";
 
 /**
  * 模块级单例。状态在每个入口（context / tool_call / session_start / 面板命令）
