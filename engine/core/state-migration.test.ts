@@ -137,8 +137,8 @@ void test("migrateState upgrades schema v5 states with an empty hook ledger", ()
 
   assert.equal(migrated.meta.schemaVersion, CURRENT_STATE_SCHEMA_VERSION);
   assert.deepEqual(migrated.public.hooks, []);
-  assert.deepEqual(migrated.secrets.actorAgendas, []);
-  assert.deepEqual(migrated.secrets.actorKnowledgeLenses, []);
+  assert.deepEqual(migrated.secrets.actorAgendas, {});
+  assert.deepEqual(migrated.secrets.actorKnowledgeLenses, {});
 });
 
 void test("migrateState upgrades schema v6 states with empty actor autonomy ledgers", () => {
@@ -154,8 +154,8 @@ void test("migrateState upgrades schema v6 states with empty actor autonomy ledg
   const migrated = migrateState(rawV6);
 
   assert.equal(migrated.meta.schemaVersion, CURRENT_STATE_SCHEMA_VERSION);
-  assert.deepEqual(migrated.secrets.actorAgendas, []);
-  assert.deepEqual(migrated.secrets.actorKnowledgeLenses, []);
+  assert.deepEqual(migrated.secrets.actorAgendas, {});
+  assert.deepEqual(migrated.secrets.actorKnowledgeLenses, {});
   assert.deepEqual(migrated.public.relationshipSignals, []);
   assert.deepEqual(migrated.secrets.relationshipSignals, []);
 });
@@ -190,7 +190,7 @@ void test("migrateState upgrades v8 to v9 with actorImpressions", () => {
   const migrated = migrateState(rawV8);
 
   assert.equal(migrated.meta.schemaVersion, CURRENT_STATE_SCHEMA_VERSION);
-  assert.deepEqual(migrated.public.actorImpressions, []);
+  assert.deepEqual(migrated.public.actorImpressions, {});
 });
 
 void test("migrateState upgrades v10 through v12: renderName copied, displayName renamed to internalName", () => {
@@ -256,4 +256,43 @@ void test("migrateState upgrades v11 to v12 by renaming displayName to internalN
   assert.equal(migrated.meta.schemaVersion, CURRENT_STATE_SCHEMA_VERSION);
   assert.equal(presentation.internalName, "你");
   assert.ok(!Object.hasOwn(presentation, "displayName"));
+});
+
+void test("migrateState upgrades v12 to v13 by indexing per-actor side tables on actorId", () => {
+  const current = createInitialState();
+  const agenda = {
+    actorId: "protagonist",
+    goal: "cross the gate",
+    fear: "being watched",
+    currentOrder: null,
+    lastIndependentActionAt: null,
+  };
+  const lens = {
+    actorId: "protagonist",
+    knows: ["the gate is open"],
+    suspects: [],
+    falseBeliefs: [],
+    forbiddenKnowledge: [],
+  };
+  const impression = {
+    actorId: "protagonist",
+    presence: "steady",
+    actionStyle: "direct",
+    relationshipPosture: "self",
+    voiceMaterial: "",
+    updatedAt: current.public.clock.currentAt,
+  };
+  const rawV12 = {
+    ...current,
+    meta: { ...current.meta, schemaVersion: 12 },
+    public: { ...current.public, actorImpressions: [impression] },
+    secrets: { ...current.secrets, actorAgendas: [agenda], actorKnowledgeLenses: [lens] },
+  };
+
+  const migrated = migrateState(rawV12);
+
+  assert.equal(migrated.meta.schemaVersion, CURRENT_STATE_SCHEMA_VERSION);
+  assert.deepEqual(migrated.secrets.actorAgendas, { protagonist: agenda });
+  assert.deepEqual(migrated.secrets.actorKnowledgeLenses, { protagonist: lens });
+  assert.deepEqual(migrated.public.actorImpressions, { protagonist: impression });
 });

@@ -202,7 +202,7 @@ export function createInitialState(): State {
       obligations: [],
       hooks: [],
       relationshipSignals: [],
-      actorImpressions: [],
+      actorImpressions: {},
     },
     secrets: {
       actorSecrets: {},
@@ -211,8 +211,8 @@ export function createInitialState(): State {
       offscreenEventLog: [],
       factionClocks: [],
       scheduledEvents: [],
-      actorAgendas: [],
-      actorKnowledgeLenses: [],
+      actorAgendas: {},
+      actorKnowledgeLenses: {},
       relationshipSignals: [],
     },
   };
@@ -293,6 +293,8 @@ function migrateOneSchemaVersion(
       return migrateGameStateV10ToV11(raw);
     case 11:
       return migrateGameStateV11ToV12(raw);
+    case 12:
+      return migrateGameStateV12ToV13(raw);
     default:
       throw new Error(
         `不支持的 state schemaVersion: ${version}。当前支持逐步迁移到 ${CURRENT_STATE_SCHEMA_VERSION}。`,
@@ -415,7 +417,7 @@ function migrateGameStateV10ToV11(raw: Record<string, unknown>): Record<string, 
 function migrateGameStateV11ToV12(raw: Record<string, unknown>): Record<string, unknown> {
   const next = structuredClone(raw);
   const meta = assertRecordForMigration(next["meta"], "meta");
-  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  meta["schemaVersion"] = 12;
   const publicState = assertRecordForMigration(next["public"], "public");
   const actors = assertRecordForMigration(publicState["actors"], "public.actors");
   for (const [actorId, actorValue] of Object.entries(actors)) {
@@ -431,6 +433,36 @@ function migrateGameStateV11ToV12(raw: Record<string, unknown>): Record<string, 
     delete presentation["displayName"];
   }
   return next;
+}
+
+// v13: per-actor 侧表从 Array<{actorId,...}> 改为 Record<actorId, ...>，消除手动 join 与去重。
+function migrateGameStateV12ToV13(raw: Record<string, unknown>): Record<string, unknown> {
+  const next = structuredClone(raw);
+  const meta = assertRecordForMigration(next["meta"], "meta");
+  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  const publicState = assertRecordForMigration(next["public"], "public");
+  publicState["actorImpressions"] = indexByActorId(
+    publicState["actorImpressions"],
+    "public.actorImpressions",
+  );
+  const secrets = assertRecordForMigration(next["secrets"], "secrets");
+  secrets["actorAgendas"] = indexByActorId(secrets["actorAgendas"], "secrets.actorAgendas");
+  secrets["actorKnowledgeLenses"] = indexByActorId(
+    secrets["actorKnowledgeLenses"],
+    "secrets.actorKnowledgeLenses",
+  );
+  return next;
+}
+
+function indexByActorId(value: unknown, fieldName: string): Record<string, unknown> {
+  const rows = Array.isArray(value) ? value : [];
+  const indexed: Record<string, unknown> = {};
+  for (const row of rows) {
+    const entry = assertRecordForMigration(row, `${fieldName}[]`);
+    const actorId = assertStringForMigration(entry["actorId"], `${fieldName}[].actorId`);
+    indexed[actorId] = entry;
+  }
+  return indexed;
 }
 
 function hasAdvancingTurnTime(value: unknown): boolean {

@@ -540,6 +540,115 @@ void test("retireActor rejects actors referenced by master contracts", () => {
   );
 });
 
+function countActorReferences(state: State, actorId: string): Record<string, number> {
+  return {
+    "public.actors": state.public.actors[actorId] === undefined ? 0 : 1,
+    "public.actorImpressions": state.public.actorImpressions[actorId] === undefined ? 0 : 1,
+    "public.relationshipSignals": state.public.relationshipSignals.filter(
+      (row) => row.actorId === actorId || row.targetActorId === actorId,
+    ).length,
+    "public.scene.presentActorIds": state.public.scene.presentActorIds.filter(
+      (id) => id === actorId,
+    ).length,
+    "public.allyActorIds": state.public.allyActorIds.filter((id) => id === actorId).length,
+    "secrets.actorSecrets": state.secrets.actorSecrets[actorId] === undefined ? 0 : 1,
+    "secrets.actorAgendas": state.secrets.actorAgendas[actorId] === undefined ? 0 : 1,
+    "secrets.actorKnowledgeLenses":
+      state.secrets.actorKnowledgeLenses[actorId] === undefined ? 0 : 1,
+    "secrets.relationshipSignals": state.secrets.relationshipSignals.filter(
+      (row) => row.actorId === actorId || row.targetActorId === actorId,
+    ).length,
+  };
+}
+
+// 退场必须清空一个 actor 在所有侧表里的痕迹。当前 retireActor 只清了
+// public.actors / secrets.actorSecrets / presentActorIds / allyActorIds，
+// 漏了 impressions / agendas / knowledgeLenses / 两层 relationshipSignals。
+// 这个测试故意覆盖全部侧表，应当暴露孤儿行。
+void test("retireActor leaves no orphan rows in any actor-keyed side table", () => {
+  const draft = createInitialState();
+  upsertActor(draft, {
+    kind: "upsert-public-npc",
+    npc: {
+      id: "tohsaka-rin",
+      kind: "human",
+      internalName: "远坂凛",
+      publicIdentity: "穗群原学园学生。",
+      apparentAge: "十七岁左右",
+      outfit: { label: "制服", details: "红色外套。" },
+      demeanor: "从容。",
+      publicRoles: [{ kind: "social", label: "学生" }],
+      relationshipToProtagonist: { stance: "friendly", summary: "同校学生。" },
+      ordinaryItems: [],
+    },
+    reason: "seed actor for orphan test",
+  });
+  setScenePresence(draft, {
+    presentActorIds: ["protagonist", "tohsaka-rin"],
+    allyActorIds: ["tohsaka-rin"],
+    reason: "present before retire",
+  });
+
+  draft.public.actorImpressions["tohsaka-rin"] = {
+    actorId: "tohsaka-rin",
+    presence: "清冷优等生。",
+    actionStyle: "言简意赅。",
+    relationshipPosture: "保持距离。",
+    voiceMaterial: "「哼。」",
+    updatedAt: "2004-02-01T08:00:00+09:00",
+  };
+  draft.public.relationshipSignals.push({
+    id: "sig-public-1",
+    actorId: "tohsaka-rin",
+    targetActorId: "protagonist",
+    signal: "递出一枚宝石。",
+    interpretation: "试探性的善意。",
+    boundary: "公开",
+    sourceEventId: null,
+    visibility: "player-known",
+  });
+  configureActorSecrets(draft, {
+    kind: "configure-actor-secrets",
+    actorId: "tohsaka-rin",
+    privateMotives: [{ value: "暗中保护主角。", revealConditions: [] }],
+    reason: "seed secret slot",
+  });
+  draft.secrets.actorAgendas["tohsaka-rin"] = {
+    actorId: "tohsaka-rin",
+    goal: "赢得圣杯战争。",
+    fear: "主角受伤。",
+    currentOrder: null,
+    lastIndependentActionAt: null,
+  };
+  draft.secrets.actorKnowledgeLenses["tohsaka-rin"] = {
+    actorId: "tohsaka-rin",
+    knows: ["主角是魔术师。"],
+    suspects: [],
+    falseBeliefs: [],
+    forbiddenKnowledge: [],
+  };
+  draft.secrets.relationshipSignals.push({
+    id: "sig-secret-1",
+    actorId: "protagonist",
+    targetActorId: "tohsaka-rin",
+    signal: "主角私下提防她。",
+    interpretation: "未公开的戒心。",
+    boundary: "隐藏",
+    sourceEventId: null,
+    visibility: "secret",
+  });
+
+  retireActor(draft, { actorId: "tohsaka-rin", reason: "测试退场后无孤儿行" });
+
+  const references = countActorReferences(draft, "tohsaka-rin");
+  const leftover = Object.entries(references).filter(([, count]) => count > 0);
+  assert.deepEqual(
+    leftover,
+    [],
+    `退场后仍有侧表残留 tohsaka-rin：${leftover.map(([table, count]) => `${table}=${count}`).join(", ")}`,
+  );
+});
+
 void test("setScenePresence updates current scene independently from actor registry", () => {
   const draft = createInitialState();
   upsertTestCaster(draft);

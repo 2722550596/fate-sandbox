@@ -93,7 +93,7 @@ export interface GameState {
 }
 
 export interface StateMeta {
-  schemaVersion: 12;
+  schemaVersion: 13;
   createdAt: string;
   updatedAt: string;
   /** Seeded RNG seed（backlog #9）：确定性随机源，初始化时生成 */
@@ -119,8 +119,8 @@ export interface PublicGameState {
   hooks: HookState[];
   /** 玩家已知的关系信号证据链；只记录行为证据，不写隐藏内心判词 */
   relationshipSignals: RelationshipSignal[];
-  /** NPC 印象卡：voice/posture/texture 蒸馏快照，presence 驱动注入 */
-  actorImpressions: ActorImpression[];
+  /** NPC 印象卡：voice/posture/texture 蒸馏快照，presence 驱动注入；按 actorId 聚合 */
+  actorImpressions: Record<ActorId, ActorImpression>;
 }
 
 export type HookStatus = "active" | "parked" | "paid" | "escalated" | "retired";
@@ -163,10 +163,10 @@ export interface SecretGameState {
   factionClocks: FactionClock[];
   /** 到期义务：越过 dueAt 后 canonical commit 会在返回值里催账 */
   scheduledEvents: ScheduledEvent[];
-  /** NPC 主动性账本：目标、恐惧、当前指令与最近自主行动 */
-  actorAgendas: ActorAgendaState[];
-  /** NPC 认知边界账本：已知、猜测、误信与禁止知道的事实 */
-  actorKnowledgeLenses: ActorKnowledgeLens[];
+  /** NPC 主动性账本：目标、恐惧、当前指令与最近自主行动；按 actorId 聚合 */
+  actorAgendas: Record<ActorId, ActorAgendaState>;
+  /** NPC 认知边界账本：已知、猜测、误信与禁止知道的事实；按 actorId 聚合 */
+  actorKnowledgeLenses: Record<ActorId, ActorKnowledgeLens>;
   /** 玩家未确认的关系信号与误判，只给 GM/private resolve/subagent 使用 */
   relationshipSignals: RelationshipSignal[];
 }
@@ -644,4 +644,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 12;
+export const CURRENT_STATE_SCHEMA_VERSION = 13;

@@ -210,15 +210,34 @@ export function retireActor(draft: State, input: RetireActorInput): RetireActorR
     throw new Error(`actor 不存在，无法 retire: ${actorId}。`);
   }
   assertActorHasNoBlockingReferences(draft.public, actorId);
+  removeActorEverywhere(draft, actorId);
+  return { message: `actor 已退场并从当前 registry 移除：${actorId}。` };
+}
+
+/**
+ * actor 生命周期的唯一级联出口：从所有按 actorId 聚合的状态中抹除该 actor。
+ * 独占表（actors / actorSecrets / impressions / agendas / knowledgeLenses）按 key 删除；
+ * 关系边（两层 relationshipSignals）凡是碰到该 actor 的一端就一起删。
+ * 所有退场路径必须走这里，不允许再手动逐表删除。
+ */
+export function removeActorEverywhere(draft: State, actorId: ActorId): void {
   delete draft.public.actors[actorId];
+  delete draft.public.actorImpressions[actorId];
   delete draft.secrets.actorSecrets[actorId];
+  delete draft.secrets.actorAgendas[actorId];
+  delete draft.secrets.actorKnowledgeLenses[actorId];
   draft.public.scene.presentActorIds = draft.public.scene.presentActorIds.filter(
     (presentActorId) => presentActorId !== actorId,
   );
   draft.public.allyActorIds = draft.public.allyActorIds.filter(
     (allyActorId) => allyActorId !== actorId,
   );
-  return { message: `actor 已退场并从当前 registry 移除：${actorId}。` };
+  draft.public.relationshipSignals = draft.public.relationshipSignals.filter(
+    (signal) => signal.actorId !== actorId && signal.targetActorId !== actorId,
+  );
+  draft.secrets.relationshipSignals = draft.secrets.relationshipSignals.filter(
+    (signal) => signal.actorId !== actorId && signal.targetActorId !== actorId,
+  );
 }
 
 function assertActorHasNoBlockingReferences(publicState: PublicGameState, actorId: ActorId): void {

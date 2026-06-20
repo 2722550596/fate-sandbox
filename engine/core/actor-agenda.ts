@@ -21,12 +21,7 @@ export interface UpsertActorKnowledgeLensInput {
 export function upsertActorAgenda(state: State, input: UpsertActorAgendaInput): ActorAgendaState {
   assertActorExists(state, input.actorId);
   const agenda = normalizeAgenda(input);
-  const index = state.secrets.actorAgendas.findIndex((entry) => entry.actorId === input.actorId);
-  if (index === -1) {
-    state.secrets.actorAgendas.push(agenda);
-  } else {
-    state.secrets.actorAgendas[index] = agenda;
-  }
+  state.secrets.actorAgendas[input.actorId] = agenda;
   return agenda;
 }
 
@@ -48,15 +43,11 @@ export function markActorIndependentAction(
 }
 
 export function clearActorAgenda(state: State, actorId: ActorId): ActorAgendaState {
-  const index = state.secrets.actorAgendas.findIndex((entry) => entry.actorId === actorId);
-  if (index === -1) {
+  const agenda = state.secrets.actorAgendas[actorId];
+  if (agenda === undefined) {
     throw new Error(`actor agenda ${actorId} 不存在。`);
   }
-  const agenda = state.secrets.actorAgendas[index];
-  state.secrets.actorAgendas.splice(index, 1);
-  if (agenda === undefined) {
-    throw new Error(`actor agenda ${actorId} 删除失败。`);
-  }
+  delete state.secrets.actorAgendas[actorId];
   return agenda;
 }
 
@@ -66,14 +57,7 @@ export function upsertActorKnowledgeLens(
 ): ActorKnowledgeLens {
   assertActorExists(state, input.actorId);
   const lens = normalizeKnowledgeLens(input);
-  const index = state.secrets.actorKnowledgeLenses.findIndex(
-    (entry) => entry.actorId === input.actorId,
-  );
-  if (index === -1) {
-    state.secrets.actorKnowledgeLenses.push(lens);
-  } else {
-    state.secrets.actorKnowledgeLenses[index] = lens;
-  }
+  state.secrets.actorKnowledgeLenses[input.actorId] = lens;
   return lens;
 }
 
@@ -116,15 +100,11 @@ export function removeActorKnowledgeFact(
 }
 
 export function clearActorKnowledgeLens(state: State, actorId: ActorId): ActorKnowledgeLens {
-  const index = state.secrets.actorKnowledgeLenses.findIndex((entry) => entry.actorId === actorId);
-  if (index === -1) {
+  const lens = state.secrets.actorKnowledgeLenses[actorId];
+  if (lens === undefined) {
     throw new Error(`actor knowledge lens ${actorId} 不存在。`);
   }
-  const lens = state.secrets.actorKnowledgeLenses[index];
-  state.secrets.actorKnowledgeLenses.splice(index, 1);
-  if (lens === undefined) {
-    throw new Error(`actor knowledge lens ${actorId} 删除失败。`);
-  }
+  delete state.secrets.actorKnowledgeLenses[actorId];
   return lens;
 }
 
@@ -174,16 +154,16 @@ function ensureKnowledgeLens(state: State, actorId: ActorId): ActorKnowledgeLens
     return lens;
   }
   const fresh = { actorId, knows: [], suspects: [], falseBeliefs: [], forbiddenKnowledge: [] };
-  state.secrets.actorKnowledgeLenses.push(fresh);
+  state.secrets.actorKnowledgeLenses[actorId] = fresh;
   return fresh;
 }
 
 function findActorAgenda(state: State, actorId: ActorId): ActorAgendaState | undefined {
-  return state.secrets.actorAgendas.find((entry) => entry.actorId === actorId);
+  return state.secrets.actorAgendas[actorId];
 }
 
 function findActorKnowledgeLens(state: State, actorId: ActorId): ActorKnowledgeLens | undefined {
-  return state.secrets.actorKnowledgeLenses.find((entry) => entry.actorId === actorId);
+  return state.secrets.actorKnowledgeLenses[actorId];
 }
 
 function lensEntries(lens: ActorKnowledgeLens, category: KnowledgeLensCategory): string[] {

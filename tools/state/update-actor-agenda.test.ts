@@ -23,7 +23,7 @@ void test("updateActorAgendaTool upserts and marks independent action", () => {
     undefined,
   );
 
-  const agenda = cloneState().secrets.actorAgendas[0];
+  const agenda = cloneState().secrets.actorAgendas["protagonist"];
   assert.equal(agenda?.actorId, "protagonist");
   assert.equal(agenda?.currentOrder, "circle the gate");
   assert.equal(agenda?.lastIndependentActionAt, cloneState().public.clock.currentAt);
@@ -47,5 +47,5 @@ void test("updateActorAgendaTool clears agenda with an audit reason", () => {
   );
 
   assert.match(result.content[0]?.text ?? "", /已移除/);
-  assert.deepEqual(cloneState().secrets.actorAgendas, []);
+  assert.deepEqual(cloneState().secrets.actorAgendas, {});
 });

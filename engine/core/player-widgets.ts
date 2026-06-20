@@ -51,7 +51,7 @@ export function buildRelationsMarkdown(publicState: PublicGameState): string {
   }
 
   // 3. Impression cards for present actors
-  const presentImpressions = publicState.actorImpressions.filter((card) =>
+  const presentImpressions = Object.values(publicState.actorImpressions).filter((card) =>
     publicState.scene.presentActorIds.includes(card.actorId),
   );
   if (presentImpressions.length > 0) {

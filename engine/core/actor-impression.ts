@@ -33,12 +33,7 @@ export function upsertActorImpression(
     voiceMaterial: assertNonEmptyString(input.voiceMaterial, "voiceMaterial"),
     updatedAt: draft.public.clock.currentAt,
   };
-  const index = draft.public.actorImpressions.findIndex((existing) => existing.actorId === actorId);
-  if (index >= 0) {
-    draft.public.actorImpressions[index] = card;
-  } else {
-    draft.public.actorImpressions.push(card);
-  }
+  draft.public.actorImpressions[actorId] = card;
   return card;
 }
 
@@ -46,8 +41,9 @@ export function upsertActorImpression(
  * 返回当前 scene presence 中有印象卡的 actor 卡片（注入用）。
  */
 export function presentActorImpressions(state: State): ActorImpression[] {
-  const presentIds = new Set(state.public.scene.presentActorIds);
-  return state.public.actorImpressions.filter((card) => presentIds.has(card.actorId));
+  return state.public.scene.presentActorIds
+    .map((actorId) => state.public.actorImpressions[actorId])
+    .filter((card): card is ActorImpression => card !== undefined);
 }
 
 /**

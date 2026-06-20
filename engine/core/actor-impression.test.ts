@@ -44,7 +44,7 @@ void test("upsertActorImpression creates a new impression card", () => {
 
   assert.equal(card.actorId, "rin");
   assert.equal(card.presence, "Confident and sharp");
-  assert.equal(draft.public.actorImpressions.length, 1);
+  assert.equal(Object.keys(draft.public.actorImpressions).length, 1);
 });
 
 void test("upsertActorImpression updates existing card", () => {
@@ -67,8 +67,8 @@ void test("upsertActorImpression updates existing card", () => {
     voiceMaterial: "…别误会，我只是。",
   });
 
-  assert.equal(draft.public.actorImpressions.length, 1);
-  assert.equal(draft.public.actorImpressions[0]?.presence, "Shaken after battle");
+  assert.equal(Object.keys(draft.public.actorImpressions).length, 1);
+  assert.equal(draft.public.actorImpressions["rin"]?.presence, "Shaken after battle");
 });
 
 void test("upsertActorImpression rejects missing actor", () => {

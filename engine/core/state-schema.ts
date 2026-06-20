@@ -65,7 +65,7 @@ function nullable<T extends TSchema>(schema: T) {
 }
 
 export const STATE_META_SCHEMA = Type.Object({
-  schemaVersion: Type.Literal(12),
+  schemaVersion: Type.Literal(13),
   createdAt: ISO_INSTANT_SCHEMA,
   updatedAt: ISO_INSTANT_SCHEMA,
   rngSeed: Type.Number(),
@@ -441,7 +441,7 @@ export const PUBLIC_GAME_STATE_SCHEMA = Type.Object({
   obligations: Type.Array(TURN_OBLIGATION_SCHEMA),
   hooks: Type.Array(HOOK_STATE_SCHEMA),
   relationshipSignals: Type.Array(RELATIONSHIP_SIGNAL_SCHEMA),
-  actorImpressions: Type.Array(ACTOR_IMPRESSION_SCHEMA),
+  actorImpressions: Type.Record(Type.String(), ACTOR_IMPRESSION_SCHEMA),
 });
 
 export const SECRET_REVEAL_STATES = ["hidden", "foreshadowed", "revealed"] as const;
@@ -535,8 +535,8 @@ export const SECRET_GAME_STATE_SCHEMA = Type.Object({
   offscreenEventLog: Type.Array(OFFSCREEN_EVENT_SCHEMA),
   factionClocks: Type.Array(FACTION_CLOCK_SCHEMA),
   scheduledEvents: Type.Array(SCHEDULED_EVENT_SCHEMA),
-  actorAgendas: Type.Array(ACTOR_AGENDA_STATE_SCHEMA),
-  actorKnowledgeLenses: Type.Array(ACTOR_KNOWLEDGE_LENS_SCHEMA),
+  actorAgendas: Type.Record(Type.String(), ACTOR_AGENDA_STATE_SCHEMA),
+  actorKnowledgeLenses: Type.Record(Type.String(), ACTOR_KNOWLEDGE_LENS_SCHEMA),
   relationshipSignals: Type.Array(RELATIONSHIP_SIGNAL_SCHEMA),
 });
 
@@ -638,7 +638,7 @@ function normalizeStateDatesInPlace(state: State): void {
     event.timeRange.end = normalizeIsoInstant(event.timeRange.end, "offscreenEvent.timeRange.end");
   }
 
-  for (const agenda of state.secrets.actorAgendas) {
+  for (const agenda of Object.values(state.secrets.actorAgendas)) {
     if (agenda.lastIndependentActionAt !== null) {
       agenda.lastIndependentActionAt = normalizeIsoInstant(
         agenda.lastIndependentActionAt,
@@ -744,24 +744,20 @@ function assertActorSecretsInvariants(state: State, actors: ActorRegistry): void
 }
 
 function assertActorAgendaInvariants(state: State, actors: ActorRegistry): void {
-  const seen = new Set<string>();
-  for (const agenda of state.secrets.actorAgendas) {
-    assertActorExists(agenda.actorId, actors, "actorAgendas[].actorId");
-    if (seen.has(agenda.actorId)) {
-      throw new Error(`重复 actor agenda: ${agenda.actorId}。`);
+  for (const [actorId, agenda] of Object.entries(state.secrets.actorAgendas)) {
+    if (agenda.actorId !== actorId) {
+      throw new Error(`actorAgendas key ${actorId} 与 actorId ${agenda.actorId} 不一致。`);
     }
-    seen.add(agenda.actorId);
+    assertActorExists(actorId, actors, "actorAgendas key");
   }
 }
 
 function assertActorKnowledgeLensInvariants(state: State, actors: ActorRegistry): void {
-  const seen = new Set<string>();
-  for (const lens of state.secrets.actorKnowledgeLenses) {
-    assertActorExists(lens.actorId, actors, "actorKnowledgeLenses[].actorId");
-    if (seen.has(lens.actorId)) {
-      throw new Error(`重复 actor knowledge lens: ${lens.actorId}。`);
+  for (const [actorId, lens] of Object.entries(state.secrets.actorKnowledgeLenses)) {
+    if (lens.actorId !== actorId) {
+      throw new Error(`actorKnowledgeLenses key ${actorId} 与 actorId ${lens.actorId} 不一致。`);
     }
-    seen.add(lens.actorId);
+    assertActorExists(actorId, actors, "actorKnowledgeLenses key");
   }
 }
 
@@ -800,13 +796,11 @@ function assertUniqueRelationshipSignalId(id: string, seen: Set<string>): void {
 }
 
 function assertActorImpressionInvariants(state: State, actors: ActorRegistry): void {
-  const seen = new Set<string>();
-  for (const impression of state.public.actorImpressions) {
-    assertActorExists(impression.actorId, actors, "actorImpressions[].actorId");
-    if (seen.has(impression.actorId)) {
-      throw new Error(`重复 actor impression: ${impression.actorId}。`);
+  for (const [actorId, impression] of Object.entries(state.public.actorImpressions)) {
+    if (impression.actorId !== actorId) {
+      throw new Error(`actorImpressions key ${actorId} 与 actorId ${impression.actorId} 不一致。`);
     }
-    seen.add(impression.actorId);
+    assertActorExists(actorId, actors, "actorImpressions key");
   }
 }
 

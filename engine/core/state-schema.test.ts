@@ -88,84 +88,76 @@ void test("parseStateSchema rejects orphan actorSecrets without a matching actor
   assert.throws(() => parseStateSchema(raw), /非法actorSecrets key: actor ghost 不存在/);
 });
 
-void test("parseStateSchema validates actor agenda actor refs and uniqueness", () => {
+void test("parseStateSchema validates actor agenda actor refs and key consistency", () => {
   const raw = rawState();
-  section(raw, "secrets")["actorAgendas"] = [
-    {
-      actorId: "protagonist",
+  section(raw, "secrets")["actorAgendas"] = {
+    protagonist: {
+      actorId: "saber",
       goal: "leave the school gate",
       fear: "being watched",
       currentOrder: null,
       lastIndependentActionAt: null,
     },
-    {
-      actorId: "protagonist",
-      goal: "duplicate",
-      fear: "duplicate",
-      currentOrder: null,
-      lastIndependentActionAt: null,
-    },
-  ];
+  };
 
-  assert.throws(() => parseStateSchema(raw), /重复 actor agenda: protagonist/);
+  assert.throws(
+    () => parseStateSchema(raw),
+    /actorAgendas key protagonist 与 actorId saber 不一致/,
+  );
 
-  section(raw, "secrets")["actorAgendas"] = [
-    {
+  section(raw, "secrets")["actorAgendas"] = {
+    ghost: {
       actorId: "ghost",
       goal: "watch",
       fear: "light",
       currentOrder: null,
       lastIndependentActionAt: null,
     },
-  ];
-  assert.throws(() => parseStateSchema(raw), /非法actorAgendas\[\]\.actorId: actor ghost 不存在/);
+  };
+  assert.throws(() => parseStateSchema(raw), /非法actorAgendas key: actor ghost 不存在/);
 });
 
-void test("parseStateSchema validates actor knowledge lens actor refs and uniqueness", () => {
+void test("parseStateSchema validates actor knowledge lens actor refs and key consistency", () => {
   const raw = rawState();
-  section(raw, "secrets")["actorKnowledgeLenses"] = [
-    {
-      actorId: "protagonist",
+  section(raw, "secrets")["actorKnowledgeLenses"] = {
+    protagonist: {
+      actorId: "saber",
       knows: ["A"],
       suspects: [],
       falseBeliefs: [],
       forbiddenKnowledge: [],
     },
-    {
-      actorId: "protagonist",
-      knows: ["B"],
-      suspects: [],
-      falseBeliefs: [],
-      forbiddenKnowledge: [],
-    },
-  ];
+  };
 
-  assert.throws(() => parseStateSchema(raw), /重复 actor knowledge lens: protagonist/);
-
-  section(raw, "secrets")["actorKnowledgeLenses"] = [
-    { actorId: "ghost", knows: [], suspects: [], falseBeliefs: [], forbiddenKnowledge: [] },
-  ];
   assert.throws(
     () => parseStateSchema(raw),
-    /非法actorKnowledgeLenses\[\]\.actorId: actor ghost 不存在/,
+    /actorKnowledgeLenses key protagonist 与 actorId saber 不一致/,
   );
+
+  section(raw, "secrets")["actorKnowledgeLenses"] = {
+    ghost: { actorId: "ghost", knows: [], suspects: [], falseBeliefs: [], forbiddenKnowledge: [] },
+  };
+  assert.throws(() => parseStateSchema(raw), /非法actorKnowledgeLenses key: actor ghost 不存在/);
 });
 
 void test("parseStateSchema normalizes actor agenda independent-action time", () => {
   const raw = rawState();
-  section(raw, "secrets")["actorAgendas"] = [
-    {
+  section(raw, "secrets")["actorAgendas"] = {
+    protagonist: {
       actorId: "protagonist",
       goal: "cross the gate",
       fear: "being noticed",
       currentOrder: "move",
       lastIndependentActionAt: "2004-01-30T16:00:00+09:00",
     },
-  ];
+  };
 
   const parsed = parseStateSchema(raw);
 
-  assert.equal(parsed.secrets.actorAgendas[0]?.lastIndependentActionAt, "2004-01-30T07:00:00.000Z");
+  assert.equal(
+    parsed.secrets.actorAgendas["protagonist"]?.lastIndependentActionAt,
+    "2004-01-30T07:00:00.000Z",
+  );
 });
 
 void test("parseStateSchema validates relationship signal actor refs, visibility layers, and ids", () => {

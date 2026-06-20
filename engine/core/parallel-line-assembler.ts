@@ -180,7 +180,7 @@ function buildPrivateFacts(state: State, input: AssembleParallelLineInput): stri
 }
 
 function buildActorGoals(state: State): string[] {
-  return state.secrets.actorAgendas.map((agenda) => formatAgendaGoal(agenda));
+  return Object.values(state.secrets.actorAgendas).map((agenda) => formatAgendaGoal(agenda));
 }
 
 function formatAgendaGoal(agenda: ActorAgendaState): string {

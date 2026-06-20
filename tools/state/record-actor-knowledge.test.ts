@@ -27,7 +27,7 @@ void test("recordActorKnowledgeTool adds and removes lens facts", () => {
     undefined,
   );
 
-  let lens = cloneState().secrets.actorKnowledgeLenses[0];
+  let lens = cloneState().secrets.actorKnowledgeLenses["protagonist"];
   assert.deepEqual(lens?.suspects, ["someone is watching the gate"]);
   assert.deepEqual(lens?.forbiddenKnowledge, ["unrevealed true name"]);
 
@@ -41,7 +41,7 @@ void test("recordActorKnowledgeTool adds and removes lens facts", () => {
     undefined,
   );
 
-  lens = cloneState().secrets.actorKnowledgeLenses[0];
+  lens = cloneState().secrets.actorKnowledgeLenses["protagonist"];
   assert.deepEqual(lens?.suspects, []);
 });
 
@@ -61,7 +61,7 @@ void test("recordActorKnowledgeTool replaces and clears a lens", () => {
     undefined,
   );
 
-  const lens = cloneState().secrets.actorKnowledgeLenses[0];
+  const lens = cloneState().secrets.actorKnowledgeLenses["protagonist"];
   assert.equal(lens?.knows[0], "the road is blocked");
 
   const result = recordActorKnowledgeTool(
@@ -70,5 +70,5 @@ void test("recordActorKnowledgeTool replaces and clears a lens", () => {
   );
 
   assert.match(result.content[0]?.text ?? "", /已清除/);
-  assert.deepEqual(cloneState().secrets.actorKnowledgeLenses, []);
+  assert.deepEqual(cloneState().secrets.actorKnowledgeLenses, {});
 });

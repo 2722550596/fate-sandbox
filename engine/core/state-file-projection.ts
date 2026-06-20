@@ -100,9 +100,9 @@ export function buildTimelineStateContextFromRaw(raw: unknown): TimelineStateCon
     optionalArray(publicState["relationshipSignals"]),
     optionalArray(secrets["relationshipSignals"]),
   );
-  const actorAgendas = indexByActorId(optionalArray(secrets["actorAgendas"]), "actorAgendas");
+  const actorAgendas = indexByActorId(secrets["actorAgendas"], "actorAgendas");
   const actorKnowledgeLenses = indexByActorId(
-    optionalArray(secrets["actorKnowledgeLenses"]),
+    secrets["actorKnowledgeLenses"],
     "actorKnowledgeLenses",
   );
   const currentAt = requireString(clock["currentAt"], "clock.currentAt");
@@ -341,15 +341,11 @@ function isCoolingDown(
   return recentPressureTypes.slice(windowStart).includes(slot.pressureType);
 }
 
-function indexByActorId(values: readonly unknown[], fieldName: string): Map<string, unknown> {
+function indexByActorId(value: unknown, fieldName: string): Map<string, unknown> {
+  const record = requireRecord(value, fieldName);
   const result = new Map<string, unknown>();
-  for (const [index, value] of values.entries()) {
-    const entry = requireRecord(value, `${fieldName}[${index}]`);
-    const actorId = requireString(entry["actorId"], `${fieldName}[${index}].actorId`);
-    if (result.has(actorId)) {
-      throw new Error(`${fieldName} 含重复 actorId: ${actorId}。`);
-    }
-    result.set(actorId, entry);
+  for (const [actorId, entry] of Object.entries(record)) {
+    result.set(actorId, requireRecord(entry, `${fieldName}.${actorId}`));
   }
   return result;
 }
