@@ -68,8 +68,8 @@ function upsertProtagonist(
   input: Extract<ActorRegistryInput, { kind: "setup-protagonist" }>,
 ): UpsertActorResult {
   assertNonEmptyString(input.reason, "reason");
-  if (input.actor.id !== "protagonist") {
-    throw new Error("setup-protagonist 只能写入 actor.id=protagonist。");
+  if (input.actor.id !== draft.public.protagonistActorId) {
+    throw new Error("setup-protagonist 只能写入当前 protagonistActorId 指向的 actor。");
   }
   writeActor(draft, input.actor);
   return { message: `actor 已写入：${input.actor.id}。` };
@@ -203,7 +203,7 @@ function normalizeServantMasterName(servant: ServantInput): string | null {
 export function retireActor(draft: State, input: RetireActorInput): RetireActorResult {
   const actorId = assertNonEmptyString(input.actorId, "actorId");
   assertNonEmptyString(input.reason, "reason");
-  if (actorId === "protagonist") {
+  if (actorId === draft.public.protagonistActorId) {
     throw new Error("不能 retire protagonist。");
   }
   const actor = draft.public.actors[actorId];

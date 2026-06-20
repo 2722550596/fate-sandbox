@@ -131,8 +131,26 @@ void test("upsertActor rejects non-protagonist setup", () => {
         },
         reason: "测试",
       }),
-    /setup-protagonist 只能写入 actor.id=protagonist/,
+    /setup-protagonist 只能写入当前 protagonistActorId 指向的 actor/,
   );
+});
+
+void test("setup-protagonist accepts the actor id that protagonistActorId points to", () => {
+  const draft = createInitialState();
+  const seed = draft.public.actors["protagonist"];
+  if (seed === undefined) {
+    throw new Error("seed protagonist missing");
+  }
+  // 模拟换主角：指针指向非种子 id；setup-protagonist 应接受该 id。
+  draft.public.protagonistActorId = "hero";
+
+  const result = upsertActor(draft, {
+    kind: "setup-protagonist",
+    actor: { ...seed, id: "hero" },
+    reason: "换主角后重写主角骨架",
+  });
+
+  assert.match(result.message, /hero/);
 });
 
 void test("upsertActor can replace protagonist setup skeleton", () => {
@@ -495,6 +513,18 @@ void test("upsert-servant writes servant form with full parameter block", () => 
   assert.equal(caster?.servantForm?.contract.status, "masterless");
   assert.equal(caster?.servantForm?.contract.masterName, "葛木宗一郎");
   assert.equal(caster?.magecraft, null);
+});
+
+void test("retireActor protects whoever protagonistActorId points to, not a literal id", () => {
+  const draft = createInitialState();
+  upsertTestCaster(draft);
+  // 模拟换主角：把主角指针指向 caster（种子 protagonist id 不再是主角）。
+  draft.public.protagonistActorId = "caster";
+
+  assert.throws(
+    () => retireActor(draft, { actorId: "caster", reason: "试图退场当前主角" }),
+    /不能 retire protagonist/,
+  );
 });
 
 void test("retireActor removes a non-referenced actor from registry and scene", () => {

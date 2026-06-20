@@ -62,7 +62,13 @@ function normalizeServantInput(value: unknown): unknown {
   };
 }
 
-/** 玩家从者初始化不得公开真名——指向 reveal_secret 的领域报错，先于 schema。 */
+/**
+ * 玩家从者初始化不得公开真名——指向 reveal_secret 的领域报错，先于 schema。
+ * BACKLOG（换主角）：这里靠 id==="protagonist" 字面量识别“玩家从者”。该守卫处在无 state
+ * 上下文的输入归一层，拿不到 protagonistActorId 指针，所以暂时只能靠种子约定。
+ * 这是 prompt 兑底守卫（真防线是 commit 层 firewall）；待“换主角”真立项、重设 setup 流程时，
+ * 改成靠 kind/指针而非 id 字面量。
+ */
 function guardProtagonistTrueName(servant: Record<string, unknown>): void {
   if (servant["id"] === "protagonist" && servant["trueNameStatus"] === "revealed") {
     throw new Error(
