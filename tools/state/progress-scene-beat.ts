@@ -3,6 +3,10 @@ import { Type } from "typebox";
 import { timePolicySchema } from "./time-policy-tool-schema.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
+import {
+  assertNoOpenBackstageObligation,
+  recordCanonicalTurnForBackstage,
+} from "../../engine/core/backstage-obligation.ts";
 import { collectBackstageDueNotices } from "../../engine/core/faction-clock.ts";
 import { assertNoOpenObligations } from "../../engine/core/obligations.ts";
 import { progressSceneBeat } from "../../engine/core/scene-beat-lifecycle.ts";
@@ -11,15 +15,21 @@ import { parseSceneBeatProgressInput } from "../../engine/core/scene-beat-schema
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function progressSceneBeatTool(params: unknown, sessionManager: unknown): ToolResult {
+  const input = parseSceneBeatProgressInput(params, "progress_scene_beat 参数");
   return runDomainEventTool({
     sessionManager,
     execute: (draft) => {
-      const result = progressSceneBeat(
-        draft,
-        parseSceneBeatProgressInput(params, "progress_scene_beat 参数"),
-      );
+      // 延迟硬阻断：上一轮触发的后台推进义务未清账则拒绝本次 canonical turn。
+      assertNoOpenBackstageObligation(draft);
+      const result = progressSceneBeat(draft, input);
       // canonical commit 对账点：裁决义务未清账则拒绝提交（backlog #4）
       assertNoOpenObligations(draft);
+      // beat 转换是 canonical turn：收口触发后台推进义务。
+      recordCanonicalTurnForBackstage(draft, {
+        elapsedMinutes: input.time.elapsedMinutes,
+        hasCost: true,
+        beatBoundary: input.kind === "complete",
+      });
       // 幕后催账：到期义务/填满时钟随返回值提醒（backlog #3）
       return { result, dueNotices: collectBackstageDueNotices(draft) };
     },

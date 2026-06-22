@@ -129,6 +129,7 @@ export function buildRendererMessages(
     "```",
     "",
     ...buildLengthFloorSection(packet),
+    "npcOmissions, when present, are binding: those actors are deliberately静置 this turn (offscreen / silent / blocked / absent per reasonCode). Do not give them an active beat; at most reflect the playerSafeNote surface. Never invent actions for them.",
     "suggestedActions, when present, are UI-only. Do not mention, number, summarize, or paraphrase them in prose; end on endWindow pressure instead.",
     "Render this turn under the system-prompt contract. First turn # Current Player Input into in-scene action or speech, then render consequences under the Direction Packet constraints. Output only Chinese body prose.",
   );

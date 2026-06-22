@@ -32,7 +32,8 @@ export function runParallelLineTool(params: unknown, sessionManager: unknown): T
     [
       "parallel-line 输入已由 engine 装配完成。",
       "请将以下 JSON 作为 task 传给 parallel-line 子代理（agentScope: project）。",
-      "子代理返回后，用 record_offscreen_event 或其它领域工具落地候选结果。",
+      "子代理返回后，用 record_offscreen_event 或其它领域工具落地候选结果；",
+      "落地时从 activePressurePalette 里选一个 slot，把它的 pressureType（可选 slot id）填进 record_offscreen_event。",
       "",
       assembledJson,
     ].join("\n"),

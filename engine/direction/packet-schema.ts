@@ -39,6 +39,28 @@ export const SUGGESTED_ACTION_SCHEMA = Type.Object({
 });
 export type SuggestedAction = Static<typeof SUGGESTED_ACTION_SCHEMA>;
 
+/** 重要在场 NPC 本轮不主动行动的结构化理由（枚举）。 */
+export const NPC_OMISSION_REASON_CODES = [
+  "offscreen",
+  "unconscious",
+  "physically-absent",
+  "watching-silently",
+  "blocked-by-threat",
+  "not-relevant",
+] as const;
+export type NpcOmissionReasonCode = (typeof NPC_OMISSION_REASON_CODES)[number];
+
+/**
+ * 重要在场 NPC 的“本轮静置”声明（binding：渲染器不得把该 NPC 演成主动 beat）。
+ * playerSafeNote 只描述玩家可感知的表象，禁止写入秘密本体（走 secret 防火墙）。
+ */
+export const NPC_OMISSION_SCHEMA = Type.Object({
+  actorId: Type.String({ minLength: 1 }),
+  reasonCode: stringEnumSchema(NPC_OMISSION_REASON_CODES),
+  playerSafeNote: Type.String({ minLength: 1 }),
+});
+export type NpcOmission = Static<typeof NPC_OMISSION_SCHEMA>;
+
 export const RENDER_DIRECTION_PACKET_SCHEMA = Type.Object({
   needsRender: Type.Literal(true),
   /** 结算后的玩家行动认定（binding） */
@@ -46,6 +68,11 @@ export const RENDER_DIRECTION_PACKET_SCHEMA = Type.Object({
   /** 已结算机械事实，每条必须在正文落地（binding） */
   resolvedChanges: Type.Array(Type.String({ minLength: 1 }), { minItems: 1 }),
   npcStances: Type.Array(NPC_STANCE_SCHEMA),
+  /**
+   * binding：重要在场 NPC 本轮不主动行动时的静置声明。每个重要在场 NPC 要么在
+   * npcStances（有主动 beat），要么在 npcOmissions（被明确静置）；渲染器据此保持物理连续性。
+   */
+  npcOmissions: Type.Optional(Type.Array(NPC_OMISSION_SCHEMA)),
   /** 建议落点意象（free） */
   sensoryAnchors: Type.Array(Type.String({ minLength: 1 })),
   /** 结尾必须落在自然接续点（binding） */

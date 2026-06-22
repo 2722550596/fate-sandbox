@@ -65,7 +65,7 @@ function nullable<T extends TSchema>(schema: T) {
 }
 
 export const STATE_META_SCHEMA = Type.Object({
-  schemaVersion: Type.Literal(14),
+  schemaVersion: Type.Literal(17),
   createdAt: ISO_INSTANT_SCHEMA,
   updatedAt: ISO_INSTANT_SCHEMA,
   rngSeed: Type.Number(),
@@ -493,6 +493,8 @@ const OFFSCREEN_EVENT_SCHEMA = Type.Object({
   consequences: NON_EMPTY_STRING_ARRAY_SCHEMA,
   futureHooks: NON_EMPTY_STRING_ARRAY_SCHEMA,
   createdFrom: OFFSCREEN_EVENT_SOURCE_SCHEMA,
+  pressureType: NON_EMPTY_STRING_SCHEMA,
+  pressureSlotId: nullable(NON_EMPTY_STRING_SCHEMA),
 });
 
 export const FACTION_CLOCK_VISIBILITIES = ["hidden", "leaked"] as const;
@@ -535,6 +537,22 @@ const SECRET_ACTOR_STATE_SCHEMA = Type.Object({
   knowledgeLens: Type.Optional(ACTOR_KNOWLEDGE_LENS_SCHEMA),
 });
 
+const BACKSTAGE_OBLIGATION_SCHEMA = Type.Object({
+  id: NON_EMPTY_STRING_SCHEMA,
+  trigger: stringEnumSchema(["time-advance", "beat-complete", "no-cost-streak"]),
+  summary: NON_EMPTY_STRING_SCHEMA,
+  createdAt: ISO_INSTANT_SCHEMA,
+});
+
+const BACKSTAGE_REVIEW_ENTRY_SCHEMA = Type.Object({
+  id: NON_EMPTY_STRING_SCHEMA,
+  obligationId: NON_EMPTY_STRING_SCHEMA,
+  outcome: stringEnumSchema(["landed", "no-change", "blocked"]),
+  reasonCode: NON_EMPTY_STRING_SCHEMA,
+  note: NON_EMPTY_STRING_SCHEMA,
+  reviewedAt: ISO_INSTANT_SCHEMA,
+});
+
 export const SECRET_GAME_STATE_SCHEMA = Type.Object({
   actorStates: Type.Record(Type.String(), SECRET_ACTOR_STATE_SCHEMA),
   campaignSecrets: Type.Array(SECRET_CAMPAIGN_FACT_SCHEMA),
@@ -543,6 +561,11 @@ export const SECRET_GAME_STATE_SCHEMA = Type.Object({
   factionClocks: Type.Array(FACTION_CLOCK_SCHEMA),
   scheduledEvents: Type.Array(SCHEDULED_EVENT_SCHEMA),
   relationshipSignals: Type.Array(RELATIONSHIP_SIGNAL_SCHEMA),
+  backstageObligations: Type.Array(BACKSTAGE_OBLIGATION_SCHEMA),
+  backstageReviewLog: Type.Array(BACKSTAGE_REVIEW_ENTRY_SCHEMA),
+  backstagePressure: Type.Object({
+    consecutiveNoCostTurns: Type.Integer({ minimum: 0 }),
+  }),
 });
 
 export const STATE_SCHEMA = Type.Object({

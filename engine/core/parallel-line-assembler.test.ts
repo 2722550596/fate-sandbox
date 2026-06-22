@@ -45,6 +45,8 @@ void test("assembleParallelLineInput injects recent offscreen events and pressur
     consequences: ["east route watched"],
     futureHooks: ["trap"],
     createdFrom: "gm",
+    pressureType: "servant-autonomy",
+    pressureSlotId: null,
   });
 
   const result = assembleParallelLineInput(draft, {

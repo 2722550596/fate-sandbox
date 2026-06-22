@@ -21,6 +21,8 @@ void test("offscreen events records secret offscreen events outside the public G
     consequences: ["言峰命令库丘林明晚继续监视柳洞寺外围。"],
     futureHooks: ["玩家靠近柳洞寺外围时可能被 Lancer 发现。"],
     createdFrom: "parallel-line-subagent",
+    pressureType: "servant-autonomy",
+    pressureSlotId: null,
   });
 
   assert.match(result.eventId, /^offscreen-event-/);
@@ -42,6 +44,8 @@ void test("offscreen events rejects direct player-known writes", () => {
         consequences: [],
         futureHooks: [],
         createdFrom: "parallel-line-subagent",
+        pressureType: "servant-autonomy",
+        pressureSlotId: null,
       }),
     /不能直接写入 player-known/,
   );

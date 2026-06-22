@@ -4,6 +4,31 @@ import test from "node:test";
 import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene.ts";
 import { createInitialState } from "./state-store.ts";
 
+// objectives/threats 是 beat-scoped：只能在 active storyWindow 内增删。
+// 这个 helper 为需要在 beat 里验证 scene-event 原语的用例快速开一个 beat。
+function beginBeat(
+  draft: ReturnType<typeof createInitialState>,
+  options: {
+    objectives: string[];
+    threats?: { summary: string; severity: "low" | "medium" | "high" | "lethal" }[];
+  },
+): void {
+  beginSceneBeat(draft, {
+    storyWindow: {
+      currentArcId: "B1",
+      currentBeatId: "test-beat",
+      title: "测试 beat",
+      allowedActions: ["观察"],
+      forbiddenEscalations: [],
+      completionCriteria: ["完成"],
+      nextBeatHints: [],
+    },
+    objectives: options.objectives,
+    threats: options.threats,
+    reason: "测试设置 beat",
+  });
+}
+
 void test("updateScene can correct current location without advancing time", () => {
   const draft = createInitialState();
 
@@ -25,6 +50,7 @@ void test("updateScene can correct current location without advancing time", () 
 
 void test("updateScene creates objective ids after existing state ids", () => {
   const draft = createInitialState();
+  beginBeat(draft, { objectives: ["占位目标"] });
 
   updateScene(draft, { kind: "add-objective", summary: "第一目标", reason: "测试 id" });
   updateScene(draft, { kind: "add-objective", summary: "第二目标", reason: "测试 id" });
@@ -32,28 +58,31 @@ void test("updateScene creates objective ids after existing state ids", () => {
   const objectives = draft.public.scene.objectives;
   assert.equal(objectives[0]?.id, "objective-1");
   assert.equal(objectives[1]?.id, "objective-2");
+  assert.equal(objectives[2]?.id, "objective-3");
 });
 
-void test("updateScene records story window boundaries", () => {
+void test("updateScene rejects add-objective without an active beat", () => {
   const draft = createInitialState();
 
-  updateScene(draft, {
-    kind: "set-story-window",
-    storyWindow: {
-      currentArcId: "B2",
-      currentBeatId: "ryudou-scouting-wrapup",
-      title: "柳洞寺侦察收尾",
-      allowedActions: ["完成北侧断崖结界确认", "发送撤退信号"],
-      forbiddenEscalations: ["不得触发佐佐木小次郎正面战"],
-      completionCriteria: ["四人安全撤回", "结界四重结构被记录"],
-      nextBeatHints: ["回宅后整理战术问题"],
-    },
-    reason: "锁定侦察收尾 beat",
-  });
+  assert.throws(
+    () => updateScene(draft, { kind: "add-objective", summary: "游离目标", reason: "x" }),
+    /没有 active Scene Beat/,
+  );
+});
 
-  const storyWindow = draft.public.scene.storyWindow;
-  assert.equal(storyWindow?.currentBeatId, "ryudou-scouting-wrapup");
-  assert.deepEqual(storyWindow?.forbiddenEscalations, ["不得触发佐佐木小次郎正面战"]);
+void test("updateScene rejects resolving the last objective of a beat", () => {
+  const draft = createInitialState();
+  beginBeat(draft, { objectives: ["唯一目标"] });
+
+  assert.throws(
+    () =>
+      updateScene(draft, {
+        kind: "resolve-objective",
+        objectiveSummary: "唯一目标",
+        reason: "尝试收最后一个",
+      }),
+    /progress_scene_beat kind=complete/,
+  );
 });
 
 void test("beginSceneBeat creates window objectives threats and presence together", () => {
@@ -126,42 +155,6 @@ void test("beginSceneBeat rejects opening over an active beat", () => {
   );
 
   assert.equal(draft.public.scene.storyWindow?.currentBeatId, "active-beat");
-});
-
-void test("updateScene set-story-window rejects replacing an active beat", () => {
-  const draft = createInitialState();
-
-  beginSceneBeat(draft, {
-    storyWindow: {
-      currentArcId: "B1",
-      currentBeatId: "active-beat",
-      title: "当前 beat",
-      allowedActions: ["观察"],
-      forbiddenEscalations: [],
-      completionCriteria: ["记录"],
-      nextBeatHints: [],
-    },
-    objectives: ["记录"],
-    reason: "设置当前 beat",
-  });
-
-  assert.throws(
-    () =>
-      updateScene(draft, {
-        kind: "set-story-window",
-        storyWindow: {
-          currentArcId: "B1",
-          currentBeatId: "manual-second-beat",
-          title: "手动第二 beat",
-          allowedActions: ["观察"],
-          forbiddenEscalations: [],
-          completionCriteria: ["记录"],
-          nextBeatHints: [],
-        },
-        reason: "不能手动覆盖 active beat",
-      }),
-    /当前已有 active beat active-beat/,
-  );
 });
 
 void test("transitionSceneBeat can close current beat and open the next beat", () => {
@@ -336,11 +329,7 @@ void test("transitionSceneBeat resolves all objectives by default when no select
 
 void test("updateScene resolves objectives by summary", () => {
   const draft = createInitialState();
-  updateScene(draft, {
-    kind: "add-objective",
-    summary: "确认当前圣杯战争的基本局势",
-    reason: "测试",
-  });
+  beginBeat(draft, { objectives: ["确认当前圣杯战争的基本局势", "占位第二目标"] });
 
   updateScene(draft, {
     kind: "resolve-objective",
@@ -348,16 +337,15 @@ void test("updateScene resolves objectives by summary", () => {
     reason: "已确认局势",
   });
 
-  assert.equal(draft.public.scene.objectives[0]?.status, "resolved");
+  const resolved = draft.public.scene.objectives.find(
+    (o) => o.summary === "确认当前圣杯战争的基本局势",
+  );
+  assert.equal(resolved?.status, "resolved");
 });
 
 void test("updateScene explains missing resolve-objective selector", () => {
   const draft = createInitialState();
-  updateScene(draft, {
-    kind: "add-objective",
-    summary: "确认当前圣杯战争的基本局势",
-    reason: "测试",
-  });
+  beginBeat(draft, { objectives: ["确认当前圣杯战争的基本局势"] });
 
   assert.throws(
     () =>
@@ -414,6 +402,7 @@ void test("transitionSceneBeat clears completed window and can open next beat", 
 
 void test("updateScene clear-threat removes a threat by id", () => {
   const draft = createInitialState();
+  beginBeat(draft, { objectives: ["占位目标"] });
 
   updateScene(draft, {
     kind: "add-threat",
@@ -436,6 +425,7 @@ void test("updateScene clear-threat removes a threat by id", () => {
 
 void test("updateScene clear-threat removes a threat by summary (objectiveSummary-style fallback)", () => {
   const draft = createInitialState();
+  beginBeat(draft, { objectives: ["占位目标"] });
 
   updateScene(draft, {
     kind: "add-threat",
@@ -455,6 +445,7 @@ void test("updateScene clear-threat removes a threat by summary (objectiveSummar
 
 void test("updateScene clear-threat matches a threat by partial summary", () => {
   const draft = createInitialState();
+  beginBeat(draft, { objectives: ["占位目标"] });
 
   updateScene(draft, {
     kind: "add-threat",
@@ -475,6 +466,7 @@ void test("updateScene clear-threat matches a threat by partial summary", () => 
 
 void test("updateScene clear-threat without selector throws an actionable error", () => {
   const draft = createInitialState();
+  beginBeat(draft, { objectives: ["占位目标"] });
 
   updateScene(draft, {
     kind: "add-threat",
@@ -496,6 +488,7 @@ void test("updateScene clear-threat without selector throws an actionable error"
 
 void test("updateScene clear-threat by unknown summary lists available summaries", () => {
   const draft = createInitialState();
+  beginBeat(draft, { objectives: ["占位目标"] });
 
   updateScene(draft, {
     kind: "add-threat",
@@ -517,11 +510,7 @@ void test("updateScene clear-threat by unknown summary lists available summaries
 
 void test("updateScene resolve-objective by unknown id lists available objectives", () => {
   const draft = createInitialState();
-  updateScene(draft, {
-    kind: "add-objective",
-    summary: "确认当前圣杯战争的基本局势",
-    reason: "测试",
-  });
+  beginBeat(draft, { objectives: ["确认当前圣杯战争的基本局势"] });
 
   assert.throws(
     () =>
@@ -542,6 +531,7 @@ void test("updateScene resolve-objective by unknown id lists available objective
 
 void test("updateScene clear-threat by unknown id lists available threats", () => {
   const draft = createInitialState();
+  beginBeat(draft, { objectives: ["占位目标"] });
   updateScene(draft, {
     kind: "add-threat",
     summary: "黑水中抬升的庞然大物",

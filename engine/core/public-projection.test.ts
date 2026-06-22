@@ -85,14 +85,8 @@ void test("GM brief objective routing covers all three branches", () => {
   const draft = createInitialState();
   const publicState = draft.public;
 
-  assert.match(buildGmBrief(publicState), /当前没有可 resolve 的目标/);
-
-  publicState.scene.objectives = [{ id: "obj-1", summary: "调查异变", status: "active" }];
-  publicState.scene.storyWindow = null;
-  assert.match(
-    buildGmBrief(publicState),
-    /当前没有 active beat，不要使用 progress_scene_beat complete/,
-  );
+  // 无 active beat：objectives 是 beat-scoped，不能用 commit_turn 增删。
+  assert.match(buildGmBrief(publicState), /当前没有 active Scene Beat/);
 
   publicState.scene.storyWindow = {
     currentArcId: "arc-1",
@@ -103,6 +97,13 @@ void test("GM brief objective routing covers all three branches", () => {
     completionCriteria: ["找到目击者"],
     nextBeatHints: [],
   };
+
+  // 有 active beat 但目标已全部解决：提示用 complete 收口。
+  publicState.scene.objectives = [{ id: "obj-1", summary: "调查异变", status: "resolved" }];
+  assert.match(buildGmBrief(publicState), /progress_scene_beat kind=complete 收口/);
+
+  // 有 active beat 且仍有未解决目标：局部推进用 resolve-objective，收口用 complete。
+  publicState.scene.objectives = [{ id: "obj-1", summary: "调查异变", status: "active" }];
   const brief = buildGmBrief(publicState);
   assert.match(brief, /active beat 收口用 progress_scene_beat complete/);
   assert.match(

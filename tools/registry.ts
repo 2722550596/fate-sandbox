@@ -21,6 +21,7 @@ import { recordActorKnowledgeToolDefinition } from "./state/record-actor-knowled
 import { recordMemoryToolDefinition } from "./state/record-memory.ts";
 import { recordOffscreenEventToolDefinition } from "./state/record-offscreen-event.ts";
 import { recordRelationshipSignalToolDefinition } from "./state/record-relationship-signal.ts";
+import { resolveBackstageLineToolDefinition } from "./state/resolve-backstage-line.ts";
 import { resolveCombatExchangeToolDefinition } from "./state/resolve-combat-exchange.ts";
 import { retireActorToolDefinition } from "./state/retire-actor.ts";
 import { revealSecretToolDefinition } from "./state/reveal-secret.ts";
@@ -59,6 +60,7 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
   revealSecretToolDefinition,
   resolveCombatExchangeToolDefinition,
   runParallelLineToolDefinition,
+  resolveBackstageLineToolDefinition,
   privateResolveToolDefinition,
   submitDirectionPacketToolDefinition,
   updateHookToolDefinition,

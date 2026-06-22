@@ -18,6 +18,7 @@ import type {
 import { recordMemory } from "./memory.ts";
 import { settleOldestObligation } from "./obligations.ts";
 import { recordOffscreenEvent } from "./offscreen-event.ts";
+import { inferOffscreenPressureType } from "./offscreen-pressure.ts";
 import { getActorSecretSlots, setActorSecretSlots } from "./secret-actor-state.ts";
 import { assertNonEmptyString } from "./typebox-validation.ts";
 
@@ -412,6 +413,8 @@ function hiddenReaction(
       consequences: [],
       futureHooks: [],
       createdFrom: "gm",
+      pressureType: inferOffscreenPressureType([event.actorId], event.publicContext),
+      pressureSlotId: null,
     });
   }
   return {

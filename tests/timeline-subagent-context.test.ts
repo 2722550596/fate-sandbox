@@ -41,6 +41,8 @@ void test("timeline subagent context renders campaign timezone local time", () =
     consequences: ["Institutional search pressure increases"],
     futureHooks: ["A camera gap can become an actionable trace"],
     createdFrom: "gm",
+    pressureType: "servant-autonomy",
+    pressureSlotId: null,
   });
 
   const raw: unknown = JSON.parse(JSON.stringify(draft));

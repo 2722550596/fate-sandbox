@@ -5,10 +5,16 @@ import { Type } from "typebox";
 import { collectUnrevealedSecretStrings } from "../../engine/audit/lint-rules.ts";
 import { scanDirectionPacket } from "../../engine/direction/packet-firewall.ts";
 import {
+  buildPacketValidationContext,
+  validateRenderDirectionPacket,
+} from "../../engine/direction/packet-validation.ts";
+import {
   type DirectionPacket,
   EVENT_WEIGHTS,
+  NPC_OMISSION_REASON_CODES,
   parseDirectionPacket,
 } from "../../engine/direction/packet-schema.ts";
+import { stringEnumSchema as omissionReasonSchema } from "../../engine/core/state-enum-schemas.ts";
 import { SUBMIT_DIRECTION_PACKET_TOOL } from "../../engine/direction/render-turn.ts";
 import { stringEnumSchema } from "../../engine/core/state-enum-schemas.ts";
 import { getState } from "../../engine/core/state-store.ts";
@@ -20,7 +26,11 @@ import { textResult, type ToolResult } from "../runtime/tool-result.ts";
  */
 export function submitDirectionPacketTool(params: unknown): ToolResult & { terminate: true } {
   const packet = parseDirectionPacket(params, "direction packet");
-  const verdict = scanDirectionPacket(packet, collectUnrevealedSecretStrings(getState().secrets));
+  const state = getState();
+  if (packet.needsRender) {
+    validateRenderDirectionPacket(packet, buildPacketValidationContext(state));
+  }
+  const verdict = scanDirectionPacket(packet, collectUnrevealedSecretStrings(state.secrets));
   if (verdict.kind === "blocked") {
     const paths = verdict.findings
       .map((finding) => `${finding.path}（泄漏「${finding.secret}」）`)
@@ -78,7 +88,25 @@ export const submitDirectionPacketToolDefinition: FateToolDefinition = {
             description: "绝不说出口的话题；只描述拒说什么，严禁写入秘密本体",
           }),
         }),
-        { description: "player-safe：在场重要 NPC 每人一条（叙事轮必填，可为空数组）" },
+        { description: "player-safe：在场重要 NPC 每人一条主动 beat（叙事轮必填，可为空数组）" },
+      ),
+    ),
+    npcOmissions: Type.Optional(
+      Type.Array(
+        Type.Object({
+          actorId: Type.String({
+            description: "被静置的在场 NPC 的 actor id；必须已存在且在 scene.presentActorIds",
+          }),
+          reasonCode: omissionReasonSchema(NPC_OMISSION_REASON_CODES),
+          playerSafeNote: Type.String({
+            description:
+              "该 NPC 本轮不主动行动的玩家可感知表象（如『站在门口沉默旁观』）；严禁写入秘密本体",
+          }),
+        }),
+        {
+          description:
+            "binding：重要在场 NPC 若本轮不主动行动，必须在此明确静置（reasonCode + playerSafeNote），否则会被渲染成被动布景",
+        },
       ),
     ),
     sensoryAnchors: Type.Optional(

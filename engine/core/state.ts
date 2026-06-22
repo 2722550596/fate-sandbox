@@ -93,7 +93,7 @@ export interface GameState {
 }
 
 export interface StateMeta {
-  schemaVersion: 14;
+  schemaVersion: 17;
   createdAt: string;
   updatedAt: string;
   /** Seeded RNG seed（backlog #9）：确定性随机源，初始化时生成 */
@@ -170,6 +170,41 @@ export interface SecretGameState {
   scheduledEvents: ScheduledEvent[];
   /** 玩家未确认的关系信号与误判，只给 GM/private resolve/subagent 使用 */
   relationshipSignals: RelationshipSignal[];
+  /**
+   * 后台世界推进义务账本（backlog #5 runtime 闭环）：触发器命中时生成，
+   * 下一 canonical turn 前必须清账（延迟硬阻断）。与 public obligations 独立。
+   */
+  backstageObligations: BackstageObligation[];
+  /** 后台义务的审查记录：candidate 落地 / no-change / blocked 都在此留痕，不污染 public */
+  backstageReviewLog: BackstageReviewEntry[];
+  /** 后台压力计数：跨回合的连续无代价计数器 */
+  backstagePressure: BackstagePressureState;
+}
+
+/** 生成后台义务的触发源（v1 可检测核心集） */
+export type BackstageTrigger = "time-advance" | "beat-complete" | "no-cost-streak";
+
+export interface BackstageObligation {
+  id: string;
+  trigger: BackstageTrigger;
+  summary: string;
+  createdAt: string;
+}
+
+/** 后台义务的清账结果：landed=落地候选；no-change/blocked=经审查的显式无推进 */
+export type BackstageResolutionOutcome = "landed" | "no-change" | "blocked";
+
+export interface BackstageReviewEntry {
+  id: string;
+  obligationId: string;
+  outcome: BackstageResolutionOutcome;
+  reasonCode: string;
+  note: string;
+  reviewedAt: string;
+}
+
+export interface BackstagePressureState {
+  consecutiveNoCostTurns: number;
 }
 
 /**
@@ -657,4 +692,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 14;
+export const CURRENT_STATE_SCHEMA_VERSION = 17;

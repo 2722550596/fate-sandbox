@@ -184,10 +184,6 @@ function applySceneEvent(draft: State, event: SceneEvent): SceneEventResult {
       return setLocation(draft, event);
     case "set-situation":
       return setSituation(draft, event);
-    case "set-story-window":
-      return setStoryWindow(draft, event);
-    case "clear-story-window":
-      return clearStoryWindow(draft);
     case "add-objective":
       return addObjective(draft, event);
     case "resolve-objective":
@@ -217,22 +213,6 @@ function setSituation(
   return { message: `态势已更新为 ${event.situation}。` };
 }
 
-function setStoryWindow(
-  draft: State,
-  event: Extract<SceneEvent, { kind: "set-story-window" }>,
-): SceneEventResult {
-  if (draft.public.scene.storyWindow !== null) {
-    throw new Error(formatActiveBeatExistsError(draft.public.scene.storyWindow));
-  }
-  draft.public.scene.storyWindow = event.storyWindow;
-  return { message: `剧情窗口已更新：${event.storyWindow.title}。` };
-}
-
-function clearStoryWindow(draft: State): SceneEventResult {
-  clearBeatScopedSceneState(draft);
-  return { message: "剧情窗口已清除。" };
-}
-
 function clearBeatScopedSceneState(draft: State): void {
   draft.public.scene.storyWindow = null;
   draft.public.scene.objectives = [];
@@ -243,6 +223,7 @@ function addObjective(
   draft: State,
   event: Extract<SceneEvent, { kind: "add-objective" }>,
 ): SceneEventResult {
+  assertActiveStoryWindow(draft, "add-objective");
   const id = createId(draft, "objective");
   draft.public.scene.objectives.push({
     id,
@@ -267,6 +248,7 @@ function resolveObjective(
   draft: State,
   event: Extract<SceneEvent, { kind: "resolve-objective" }>,
 ): SceneEventResult {
+  assertActiveStoryWindow(draft, "resolve-objective");
   const objectiveId = resolveSingleObjectiveId(
     draft.public.scene.objectives,
     event.objectiveId,
@@ -275,6 +257,14 @@ function resolveObjective(
   const objective = draft.public.scene.objectives.find((entry) => entry.id === objectiveId);
   if (objective === undefined) {
     throw new Error(formatObjectiveIdNotFoundError(objectiveId, draft.public.scene.objectives));
+  }
+  // 局部推进只允许解决非最终目标；若这是本 beat 最后一个未解决目标，
+  // 收口必须走 progress_scene_beat complete（带 memory/presence/situation/nextBeat 结尾）。
+  const remainingActive = draft.public.scene.objectives.filter(
+    (entry) => entry.status !== "resolved" && entry.id !== objectiveId,
+  );
+  if (remainingActive.length === 0) {
+    throw new Error(formatLastObjectiveError());
   }
   objective.status = "resolved";
   return { message: `目标已解决：${objectiveId}。` };
@@ -303,6 +293,7 @@ function addThreat(
   draft: State,
   event: Extract<SceneEvent, { kind: "add-threat" }>,
 ): SceneEventResult {
+  assertActiveStoryWindow(draft, "add-threat");
   const id = createId(draft, "threat");
   draft.public.scene.threats.push({
     id,
@@ -316,6 +307,7 @@ function clearThreat(
   draft: State,
   event: Extract<SceneEvent, { kind: "clear-threat" }>,
 ): SceneEventResult {
+  assertActiveStoryWindow(draft, "clear-threat");
   const threatId = resolveSingleThreatId(
     draft.public.scene.threats,
     event.threatId,
@@ -476,6 +468,26 @@ function formatObjectiveSummaryNotFoundError(
   return [`目标摘要不存在: ${summary}`, "可用目标摘要：", ...renderSummaryList(objectives)].join(
     "\n",
   );
+}
+
+function assertActiveStoryWindow(draft: State, action: string): void {
+  if (draft.public.scene.storyWindow === null) {
+    throw new Error(
+      [
+        `无法执行 ${action}：当前没有 active Scene Beat。`,
+        "objectives/threats 是 beat-scoped 状态，只能在 active storyWindow 内增删。",
+        "复杂新场景请先用 progress_scene_beat kind=begin 锁定 beat 边界。",
+      ].join("\n"),
+    );
+  }
+}
+
+function formatLastObjectiveError(): string {
+  return [
+    "无法用 resolve-objective 解决本 beat 的最后一个未解决目标。",
+    "commit_turn 只能局部推进非最终目标；收口整个 beat 请用 progress_scene_beat kind=complete，",
+    "以便一并处理 memory/presence/situation/nextBeat 结尾。",
+  ].join("\n");
 }
 
 function assertBeatObjectives(objectives: readonly string[]): void {

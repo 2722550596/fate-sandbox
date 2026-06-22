@@ -2,6 +2,10 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
+import {
+  resetBackstagePressure,
+  settleOldestBackstageObligation,
+} from "../../engine/core/backstage-obligation.ts";
 import { recordOffscreenEvent } from "../../engine/core/offscreen-event.ts";
 import { parseRecordOffscreenEventInput } from "../../engine/core/offscreen-event-schema.ts";
 
@@ -14,7 +18,15 @@ export function recordOffscreenEventTool(params: unknown, sessionManager: unknow
     execute: (draft) => {
       assertNotPlayerKnown(params);
       const event = parseRecordOffscreenEventInput(params, "record_offscreen_event 参数");
-      return { event, result: recordOffscreenEvent(draft, event) };
+      const result = recordOffscreenEvent(draft, event);
+      // 后台进展落地：清掉最旧一条未清账义务（若有），并打断 no-cost 连击。
+      settleOldestBackstageObligation(draft, {
+        outcome: "landed",
+        reasonCode: "candidate-landed",
+        note: event.summary,
+      });
+      resetBackstagePressure(draft);
+      return { event, result };
     },
     details: ({ result }) => ({ result }),
     message: ({ event, result }) => `幕后事件已记录：${result.eventId}\n- ${event.summary}`,
@@ -49,6 +61,13 @@ export const recordOffscreenEventToolDefinition: FateToolDefinition = {
     consequences: Type.Array(Type.String()),
     futureHooks: Type.Array(Type.String()),
     createdFrom: Type.String({ description: "允许: parallel-line-subagent / gm / debug" }),
+    pressureType: Type.String({
+      description:
+        "canonical 后台压力类型，取自 run_parallel_line 返回的 activePressurePalette 里某个 slot 的 pressureType（如 servant-autonomy / church-supervision）",
+    }),
+    pressureSlotId: Type.Optional(
+      Type.String({ description: "可选：对应 pressure palette slot 的 id（如 fsn-night-servant-scouting）" }),
+    ),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     recordOffscreenEventTool(params, ctx.sessionManager),

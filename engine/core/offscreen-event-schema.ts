@@ -25,6 +25,8 @@ export const RECORD_OFFSCREEN_EVENT_INPUT_SCHEMA = Type.Object({
   consequences: Type.Array(Type.String({ minLength: 1 })),
   futureHooks: Type.Array(Type.String({ minLength: 1 })),
   createdFrom: OFFSCREEN_EVENT_SOURCE_SCHEMA,
+  pressureType: Type.String({ minLength: 1 }),
+  pressureSlotId: Type.Optional(Type.String({ minLength: 1 })),
 });
 
 const RECORD_OFFSCREEN_EVENT_INPUT_VALIDATOR = Compile(RECORD_OFFSCREEN_EVENT_INPUT_SCHEMA);

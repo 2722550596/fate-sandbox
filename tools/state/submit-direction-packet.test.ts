@@ -62,6 +62,8 @@ function seedHiddenTrueName(trueName: string): void {
     null,
   );
   const draft = cloneState();
+  // stance 引用 saber_shiki：它必须在场才能通过 direction packet 语义校验。
+  draft.public.scene.presentActorIds = ["protagonist", "saber_shiki"];
   draft.secrets.actorStates["saber_shiki"] = {
     actorId: "saber_shiki",
     secrets: {
@@ -109,5 +111,112 @@ void test("submitDirectionPacketTool rejects malformed packets", () => {
   assert.throws(
     () => submitDirectionPacketTool({ needsRender: true, playerAction: "x" }),
     /resolvedChanges/,
+  );
+});
+
+void test("submitDirectionPacketTool rejects a stance for a non-existent actor", () => {
+  seedHiddenTrueName("两仪式");
+  assert.throws(
+    () =>
+      submitDirectionPacketTool({
+        ...RENDER_PACKET,
+        npcStances: [{ ...RENDER_PACKET.npcStances[0], actorId: "ghost_unknown" }],
+      }),
+    /指向不存在的 actor：ghost_unknown/u,
+  );
+});
+
+void test("submitDirectionPacketTool rejects a stance for an off-scene actor", () => {
+  seedHiddenTrueName("两仪式");
+  const draft = cloneState();
+  draft.public.scene.presentActorIds = ["protagonist"];
+  commitState(draft);
+  assert.throws(
+    () => submitDirectionPacketTool(RENDER_PACKET),
+    /指向不在场的 actor：saber_shiki/u,
+  );
+});
+
+void test("submitDirectionPacketTool requires important present NPCs to be covered", () => {
+  seedHiddenTrueName("两仪式");
+  const draft = cloneState();
+  // 给 saber 加 agenda → 成为重要在场 NPC，必须被 stance 或 omission 覆盖。
+  const saberForCoverage = draft.secrets.actorStates["saber_shiki"];
+  assert.ok(saberForCoverage);
+  saberForCoverage.agenda = {
+    actorId: "saber_shiki",
+    goal: "护住御主",
+    fear: "御主死亡",
+    currentOrder: null,
+    lastIndependentActionAt: null,
+  };
+  commitState(draft);
+  assert.throws(
+    () => submitDirectionPacketTool({ ...RENDER_PACKET, npcStances: [] }),
+    /重要在场 NPC 未被覆盖：saber_shiki/u,
+  );
+});
+
+void test("submitDirectionPacketTool accepts an important NPC covered by an omission", () => {
+  seedHiddenTrueName("两仪式");
+  const draft = cloneState();
+  const saberForOmission = draft.secrets.actorStates["saber_shiki"];
+  assert.ok(saberForOmission);
+  saberForOmission.agenda = {
+    actorId: "saber_shiki",
+    goal: "护住御主",
+    fear: "御主死亡",
+    currentOrder: null,
+    lastIndependentActionAt: null,
+  };
+  commitState(draft);
+  const result = submitDirectionPacketTool({
+    ...RENDER_PACKET,
+    npcStances: [],
+    npcOmissions: [
+      {
+        actorId: "saber_shiki",
+        reasonCode: "watching-silently",
+        playerSafeNote: "站在半步之外冷眼旁观，未出手",
+      },
+    ],
+  });
+  assert.equal(result.terminate, true);
+});
+
+void test("submitDirectionPacketTool rejects an actor in both stance and omission", () => {
+  seedHiddenTrueName("两仪式");
+  assert.throws(
+    () =>
+      submitDirectionPacketTool({
+        ...RENDER_PACKET,
+        npcOmissions: [
+          {
+            actorId: "saber_shiki",
+            reasonCode: "watching-silently",
+            playerSafeNote: "旁观",
+          },
+        ],
+      }),
+    /同时出现在 npcStances 和 npcOmissions：saber_shiki/u,
+  );
+});
+
+void test("submitDirectionPacketTool runs the secret firewall over omission notes", () => {
+  seedHiddenTrueName("两仪式");
+  assert.throws(
+    () =>
+      submitDirectionPacketTool({
+        ...RENDER_PACKET,
+        npcStances: [],
+        npcOmissions: [
+          {
+            actorId: "saber_shiki",
+            reasonCode: "watching-silently",
+            playerSafeNote: "两仪式静静旁观",
+          },
+        ],
+      }),
+    /secret 防火墙拦截.*npcOmissions\[0\]\.playerSafeNote/u,
   );
 });

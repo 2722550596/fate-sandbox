@@ -47,6 +47,9 @@ function* packetStrings(packet: DirectionPacket): Generator<[path: string, text:
     yield [`npcStances[${i}].move`, stance.move];
     yield [`npcStances[${i}].refusesToSay`, stance.refusesToSay];
   }
+  for (const [i, omission] of packet.npcOmissions?.entries() ?? []) {
+    yield [`npcOmissions[${i}].playerSafeNote`, omission.playerSafeNote];
+  }
 }
 
 export function scanDirectionPacket(

@@ -18,6 +18,8 @@ void test("offscreen events accepts opaque offscreen actor ids", () => {
     consequences: ["教会线将柳洞寺外围列为持续监视点。"],
     futureHooks: ["玩家夜探柳洞寺时可能察觉远处视线。"],
     createdFrom: "parallel-line-subagent",
+    pressureType: "servant-autonomy",
+    pressureSlotId: null,
   });
 
   const event = getOffscreenEventsForDebug(draft)[0];

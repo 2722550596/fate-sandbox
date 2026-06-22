@@ -20,8 +20,6 @@ import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.t
 export const SCENE_EVENT_KINDS = [
   "set-location",
   "set-situation",
-  "set-story-window",
-  "clear-story-window",
   "add-objective",
   "resolve-objective",
   "add-threat",
@@ -29,6 +27,8 @@ export const SCENE_EVENT_KINDS = [
 ] as const;
 const SCENE_EVENT_KIND_SCHEMA = stringEnumSchema(SCENE_EVENT_KINDS);
 
+// storyWindow lifecycle 只能由 progress_scene_beat begin/complete 驱动；
+// 此 schema 仅用于持久化 state（state-schema 复用），不再有对应的 scene event。
 export const STORY_WINDOW_STATE_SCHEMA = Type.Object({
   currentArcId: Type.String({ minLength: 1 }),
   currentBeatId: Type.String({ minLength: 1 }),
@@ -48,17 +48,6 @@ export const SET_LOCATION_EVENT_SCHEMA = Type.Object({
 export const SET_SITUATION_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("set-situation"),
   situation: SITUATION_KIND_SCHEMA,
-  reason: Type.String({ minLength: 1 }),
-});
-
-export const SET_STORY_WINDOW_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("set-story-window"),
-  storyWindow: STORY_WINDOW_STATE_SCHEMA,
-  reason: Type.String({ minLength: 1 }),
-});
-
-export const CLEAR_STORY_WINDOW_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("clear-story-window"),
   reason: Type.String({ minLength: 1 }),
 });
 
@@ -95,8 +84,6 @@ export const CLEAR_THREAT_EVENT_SCHEMA = Type.Object({
 export type SceneEvent =
   | Static<typeof SET_LOCATION_EVENT_SCHEMA>
   | Static<typeof SET_SITUATION_EVENT_SCHEMA>
-  | Static<typeof SET_STORY_WINDOW_EVENT_SCHEMA>
-  | Static<typeof CLEAR_STORY_WINDOW_EVENT_SCHEMA>
   | Static<typeof ADD_OBJECTIVE_EVENT_SCHEMA>
   | Static<typeof RESOLVE_OBJECTIVE_EVENT_SCHEMA>
   | Static<typeof ADD_THREAT_EVENT_SCHEMA>
@@ -105,8 +92,6 @@ export type SceneEvent =
 const SCENE_EVENT_KIND_VALIDATOR = Compile(SCENE_EVENT_KIND_SCHEMA);
 const SET_LOCATION_EVENT_VALIDATOR = Compile(SET_LOCATION_EVENT_SCHEMA);
 const SET_SITUATION_EVENT_VALIDATOR = Compile(SET_SITUATION_EVENT_SCHEMA);
-const SET_STORY_WINDOW_EVENT_VALIDATOR = Compile(SET_STORY_WINDOW_EVENT_SCHEMA);
-const CLEAR_STORY_WINDOW_EVENT_VALIDATOR = Compile(CLEAR_STORY_WINDOW_EVENT_SCHEMA);
 const ADD_OBJECTIVE_EVENT_VALIDATOR = Compile(ADD_OBJECTIVE_EVENT_SCHEMA);
 const RESOLVE_OBJECTIVE_EVENT_VALIDATOR = Compile(RESOLVE_OBJECTIVE_EVENT_SCHEMA);
 const ADD_THREAT_EVENT_VALIDATOR = Compile(ADD_THREAT_EVENT_SCHEMA);
@@ -117,8 +102,6 @@ const CLEAR_THREAT_EVENT_VALIDATOR = Compile(CLEAR_THREAT_EVENT_SCHEMA);
 const SCENE_EVENT_VARIANT_VALIDATORS = {
   "set-location": SET_LOCATION_EVENT_VALIDATOR,
   "set-situation": SET_SITUATION_EVENT_VALIDATOR,
-  "set-story-window": SET_STORY_WINDOW_EVENT_VALIDATOR,
-  "clear-story-window": CLEAR_STORY_WINDOW_EVENT_VALIDATOR,
   "add-objective": ADD_OBJECTIVE_EVENT_VALIDATOR,
   "resolve-objective": RESOLVE_OBJECTIVE_EVENT_VALIDATOR,
   "add-threat": ADD_THREAT_EVENT_VALIDATOR,

@@ -14,7 +14,9 @@ import { assertIsoDateString, assertNonEmptyString } from "./typebox-validation.
 
 export type { OffscreenEventSource, OffscreenEventVisibility } from "./state.ts";
 
-export type RecordOffscreenEventInput = Omit<OffscreenEvent, "id">;
+export type RecordOffscreenEventInput = Omit<OffscreenEvent, "id" | "pressureSlotId"> & {
+  pressureSlotId?: string | null;
+};
 
 export interface RecordOffscreenEventResult {
   eventId: string;
@@ -44,6 +46,11 @@ export function recordOffscreenEvent(
     assertNonEmptyString(futureHook, "futureHooks[]"),
   );
   const createdFrom = assertOffscreenEventSource(input.createdFrom);
+  const pressureType = assertNonEmptyString(input.pressureType, "pressureType");
+  const pressureSlotId =
+    input.pressureSlotId === undefined || input.pressureSlotId === null
+      ? null
+      : assertNonEmptyString(input.pressureSlotId, "pressureSlotId");
 
   draft.secrets.offscreenEventLog.push({
     id: eventId,
@@ -55,6 +62,8 @@ export function recordOffscreenEvent(
     consequences,
     futureHooks,
     createdFrom,
+    pressureType,
+    pressureSlotId,
   });
 
   return { eventId };

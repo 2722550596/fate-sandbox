@@ -83,4 +83,8 @@ export interface OffscreenEvent {
   consequences: string[];
   futureHooks: string[];
   createdFrom: OffscreenEventSource;
+  /** canonical 后台压力类型（来自 pressure palette slot 或分类器），驱动 cooldown/多样性纪律 */
+  pressureType: string;
+  /** 来源 pressure palette slot id；无对应 slot 时为 null */
+  pressureSlotId: string | null;
 }

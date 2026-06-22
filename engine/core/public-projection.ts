@@ -108,13 +108,13 @@ function formatObjectiveRouting(publicState: PublicGameState): string {
   const activeObjectives = publicState.scene.objectives.filter(
     (objective) => objective.status !== "resolved",
   );
-  if (activeObjectives.length === 0) {
-    return "当前没有可 resolve 的目标；不要使用 resolve-objective 或 progress_scene_beat complete。复杂新场景先用 progress_scene_beat begin；普通状态变化用 commit_turn。";
-  }
   if (publicState.scene.storyWindow === null) {
-    return "仅在 commit_turn 局部解决目标时使用 resolve-objective，并用 objectiveSummary 逐字复制上方 summary；当前没有 active beat，不要使用 progress_scene_beat complete。";
+    return "当前没有 active Scene Beat；objectives 是 beat-scoped 状态，不能用 commit_turn 增删。复杂新场景先用 progress_scene_beat kind=begin；普通状态变化用 commit_turn。";
   }
-  return "active beat 收口用 progress_scene_beat complete；仅在 commit_turn 局部解决目标且不收口 beat 时，scene event 使用 resolve-objective，并用 objectiveSummary 逐字复制上方 summary。";
+  if (activeObjectives.length === 0) {
+    return "当前 beat 的目标已全部解决；用 progress_scene_beat kind=complete 收口。";
+  }
+  return "active beat 收口用 progress_scene_beat complete；仅在局部解决非最终目标时，commit_turn 的 scene event 用 resolve-objective 并用 objectiveSummary 逐字复制上方 summary（不能解决最后一个目标）。";
 }
 
 function formatSceneThreats(

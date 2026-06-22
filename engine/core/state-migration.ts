@@ -1,3 +1,4 @@
+import { inferOffscreenPressureType } from "./offscreen-pressure.ts";
 import { generateSeed } from "./seeded-rng.ts";
 import { CURRENT_STATE_SCHEMA_VERSION } from "./state.ts";
 import { assertInteger, formatUnknown, isRecord } from "./typebox-validation.ts";
@@ -49,6 +50,12 @@ function migrateOneSchemaVersion(
       return migrateGameStateV12ToV13(raw);
     case 13:
       return migrateGameStateV13ToV14(raw);
+    case 14:
+      return migrateGameStateV14ToV15(raw);
+    case 15:
+      return migrateGameStateV15ToV16(raw);
+    case 16:
+      return migrateGameStateV16ToV17(raw);
     default:
       throw new Error(
         `不支持的 state schemaVersion: ${version}。当前支持逐步迁移到 ${CURRENT_STATE_SCHEMA_VERSION}。`,
@@ -239,6 +246,116 @@ function migrateGameStateV13ToV14(raw: Record<string, unknown>): Record<string, 
   delete secrets["actorAgendas"];
   delete secrets["actorKnowledgeLenses"];
   return next;
+}
+
+// v15: scene objectives/threats 收紧为 beat-scoped——只能在 active storyWindow 内存在。
+// 迁移旧 state 里游离（storyWindow=null 但 objectives/threats 非空）的条目：
+// 转成一条 public memory event 保留叙事线索，再清空 scene arrays，不保留坏结构。
+function migrateGameStateV14ToV15(raw: Record<string, unknown>): Record<string, unknown> {
+  const next = structuredClone(raw);
+  const meta = assertRecordForMigration(next["meta"], "meta");
+  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  const publicState = assertRecordForMigration(next["public"], "public");
+  const scene = assertRecordForMigration(publicState["scene"], "public.scene");
+  const hasWindow = scene["storyWindow"] !== null && scene["storyWindow"] !== undefined;
+  const objectives = Array.isArray(scene["objectives"]) ? scene["objectives"] : [];
+  const threats = Array.isArray(scene["threats"]) ? scene["threats"] : [];
+  if (hasWindow || (objectives.length === 0 && threats.length === 0)) {
+    return next;
+  }
+  const consequences: string[] = [];
+  for (const objective of objectives) {
+    if (isRecord(objective) && typeof objective["summary"] === "string") {
+      const status = typeof objective["status"] === "string" ? objective["status"] : "active";
+      consequences.push(`目标（${status}）：${objective["summary"]}`);
+    }
+  }
+  for (const threat of threats) {
+    if (isRecord(threat) && typeof threat["summary"] === "string") {
+      const severity = typeof threat["severity"] === "string" ? threat["severity"] : "medium";
+      consequences.push(`威胁（${severity}）：${threat["summary"]}`);
+    }
+  }
+  const clock = isRecord(publicState["clock"]) ? publicState["clock"] : {};
+  const time = typeof clock["currentAt"] === "string" ? clock["currentAt"] : "";
+  const memory = assertRecordForMigration(publicState["memory"], "public.memory");
+  const eventLog = Array.isArray(memory["eventLog"]) ? memory["eventLog"] : [];
+  eventLog.push({
+    id: uniqueMigrationId(eventLog, "event-migrated-floating-scene"),
+    time,
+    title: "迁移：游离场景目标/威胁收归",
+    summary:
+      "schema v15 将 objectives/threats 收紧为 beat-scoped；以下原本不隐附任何 active beat 的条目已转为叙事记录。",
+    consequences,
+  });
+  memory["eventLog"] = eventLog;
+  publicState["memory"] = memory;
+  scene["objectives"] = [];
+  scene["threats"] = [];
+  return next;
+}
+
+// v16: offscreen event 新增 canonical pressureType / pressureSlotId（backlog #1）。
+// 迁移旧事件：用分类器从 actorIds+summary 回填 pressureType，pressureSlotId 置 null。
+function migrateGameStateV15ToV16(raw: Record<string, unknown>): Record<string, unknown> {
+  const next = structuredClone(raw);
+  const meta = assertRecordForMigration(next["meta"], "meta");
+  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  const secrets = assertRecordForMigration(next["secrets"], "secrets");
+  const log = Array.isArray(secrets["offscreenEventLog"]) ? secrets["offscreenEventLog"] : [];
+  for (const entry of log) {
+    if (!isRecord(entry)) {
+      continue;
+    }
+    if (typeof entry["pressureType"] !== "string" || entry["pressureType"].length === 0) {
+      const actorIds = Array.isArray(entry["actorIds"])
+        ? entry["actorIds"].filter((id): id is string => typeof id === "string")
+        : [];
+      const summary = typeof entry["summary"] === "string" ? entry["summary"] : "";
+      entry["pressureType"] = inferOffscreenPressureType(actorIds, summary);
+    }
+    if (entry["pressureSlotId"] === undefined) {
+      entry["pressureSlotId"] = null;
+    }
+  }
+  secrets["offscreenEventLog"] = log;
+  return next;
+}
+
+// v17: backstage 世界推进账本（backlog #5 runtime 闭环）。
+// 新增三个 secrets 字段：obligations 账本 / 审查记录 / 压力计数。
+function migrateGameStateV16ToV17(raw: Record<string, unknown>): Record<string, unknown> {
+  const next = structuredClone(raw);
+  const meta = assertRecordForMigration(next["meta"], "meta");
+  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  const secrets = assertRecordForMigration(next["secrets"], "secrets");
+  if (!Array.isArray(secrets["backstageObligations"])) {
+    secrets["backstageObligations"] = [];
+  }
+  if (!Array.isArray(secrets["backstageReviewLog"])) {
+    secrets["backstageReviewLog"] = [];
+  }
+  if (!isRecord(secrets["backstagePressure"])) {
+    secrets["backstagePressure"] = { consecutiveNoCostTurns: 0 };
+  }
+  return next;
+}
+
+function uniqueMigrationId(existing: readonly unknown[], base: string): string {
+  const taken = new Set<string>();
+  for (const entry of existing) {
+    if (isRecord(entry) && typeof entry["id"] === "string") {
+      taken.add(entry["id"]);
+    }
+  }
+  if (!taken.has(base)) {
+    return base;
+  }
+  let suffix = 2;
+  while (taken.has(`${base}-${suffix}`)) {
+    suffix += 1;
+  }
+  return `${base}-${suffix}`;
 }
 
 function recordOrEmpty(value: unknown): Record<string, unknown> {

@@ -219,6 +219,9 @@ export function createInitialState(): State {
       factionClocks: [],
       scheduledEvents: [],
       relationshipSignals: [],
+      backstageObligations: [],
+      backstageReviewLog: [],
+      backstagePressure: { consecutiveNoCostTurns: 0 },
     },
   };
 }

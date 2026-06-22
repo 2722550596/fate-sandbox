@@ -3,6 +3,21 @@ import test from "node:test";
 
 import { getState, resetState } from "../../engine/core/state-store.ts";
 import { commitTurnTool } from "./commit-turn.ts";
+import { progressSceneBeatTool } from "./progress-scene-beat.ts";
+
+// objectives/threats 是 beat-scoped：需要在 active beat 里验证 scene objective 事件的用例先开 beat。
+function beginBeatViaTool(objectives: string[]): void {
+  progressSceneBeatTool(
+    {
+      kind: "begin",
+      title: "测试 beat",
+      objectives,
+      purpose: "测试设置 beat",
+      time: { kind: "elapsed", elapsedMinutes: 1, reason: "开启测试 beat。" },
+    },
+    createNoopSessionManager(),
+  );
+}
 
 void test("commitTurnTool requires top-level time", () => {
   resetState();
@@ -46,6 +61,7 @@ void test("commitTurnTool accepts travel time as the only state change", () => {
 
 void test("commitTurnTool accepts canonical non-time event kinds only", () => {
   resetState();
+  beginBeatViaTool(["占位目标"]);
 
   const result = commitTurnTool(
     {
@@ -90,6 +106,7 @@ void test("commitTurnTool rejects flat payload aliases", () => {
 
 void test("commitTurnTool ignores blank objectiveId when objectiveSummary is present", () => {
   resetState();
+  beginBeatViaTool(["占位目标"]);
 
   commitTurnTool(
     {

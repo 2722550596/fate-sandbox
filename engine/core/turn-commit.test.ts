@@ -1,8 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { beginSceneBeat } from "./scene.ts";
 import { createInitialState } from "./state-store.ts";
 import { commitTurn } from "./turn-commit.ts";
+
+function beginTestBeat(draft: ReturnType<typeof createInitialState>, objectives: string[]): void {
+  beginSceneBeat(draft, {
+    storyWindow: {
+      currentArcId: "B1",
+      currentBeatId: "active-beat",
+      title: "当前调查",
+      allowedActions: ["调查"],
+      forbiddenEscalations: [],
+      completionCriteria: objectives,
+      nextBeatHints: [],
+    },
+    objectives,
+    reason: "开始调查",
+  });
+}
 
 const MIN_TIME = { kind: "elapsed", elapsedMinutes: 1, reason: "推进一个最小时间单位。" } as const;
 
@@ -101,37 +118,12 @@ void test("commitTurn throws when a later domain event fails", () => {
   );
 });
 
-void test("commitTurn auto-closes a beat after resolving the last objective", () => {
+void test("commitTurn resolves a non-final objective within an active beat", () => {
   const draft = createInitialState();
-
-  commitTurn(draft, {
-    summary: "开启调查 beat。",
-    time: MIN_TIME,
-    events: [
-      {
-        kind: "scene-beat",
-        event: {
-          kind: "begin-beat",
-          input: {
-            storyWindow: {
-              currentArcId: "B1",
-              currentBeatId: "active-beat",
-              title: "当前调查",
-              allowedActions: ["调查"],
-              forbiddenEscalations: [],
-              completionCriteria: ["确认线索"],
-              nextBeatHints: [],
-            },
-            objectives: ["确认线索"],
-            reason: "开始调查",
-          },
-        },
-      },
-    ],
-  });
+  beginTestBeat(draft, ["确认线索", "撤退"]);
 
   const result = commitTurn(draft, {
-    summary: "解决最后目标。",
+    summary: "解决阶段目标。",
     time: MIN_TIME,
     events: [
       {
@@ -145,9 +137,36 @@ void test("commitTurn auto-closes a beat after resolving the last objective", ()
     ],
   });
 
-  assert.deepEqual(draft.public.scene.objectives, []);
-  assert.equal(draft.public.scene.storyWindow, null);
-  assert.equal(result.results.length, 3);
+  const active = draft.public.scene.objectives.filter((o) => o.status !== "resolved");
+  assert.equal(active.length, 1);
+  assert.equal(draft.public.scene.storyWindow?.currentBeatId, "active-beat");
+  assert.equal(result.results.length, 2);
+});
+
+void test("commitTurn refuses to resolve the last objective of an active beat", () => {
+  const draft = createInitialState();
+  beginTestBeat(draft, ["确认线索"]);
+
+  assert.throws(
+    () =>
+      commitTurn(draft, {
+        summary: "解决最后目标。",
+        time: MIN_TIME,
+        events: [
+          {
+            kind: "scene",
+            event: {
+              kind: "resolve-objective",
+              objectiveSummary: "确认线索",
+              reason: "线索确认",
+            },
+          },
+        ],
+      }),
+    /progress_scene_beat kind=complete/,
+  );
+
+  assert.equal(draft.public.scene.storyWindow?.currentBeatId, "active-beat");
 });
 
 void test("commitTurn records presence with explicit elapsed time policy", () => {

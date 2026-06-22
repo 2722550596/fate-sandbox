@@ -44,7 +44,7 @@ void test("injectGmPromptMessages inserts slot-based prompt stack", () => {
   assert.equal(texts[6], "继续。");
   assert.match(texts[7] ?? "", /<mechanical_state>/);
   assert.match(texts[7] ?? "", /目标推进规则/);
-  assert.match(texts[7] ?? "", /当前没有可 resolve 的目标/);
+  assert.match(texts[7] ?? "", /当前没有 active Scene Beat/);
   assert.doesNotMatch(texts[7] ?? "", /active beat 收口/);
   assert.match(texts[8] ?? "", /<presence_impressions>/);
   assert.match(texts[9] ?? "", /<turn_reminder>/);
