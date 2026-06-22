@@ -16,6 +16,28 @@ function legacyActors(current: ReturnType<typeof createInitialState>): Record<st
   return actors;
 }
 
+void test("migrateState runs the FULL chain without skipping steps (v14 -> current adds backstage ledger)", () => {
+  // 忠实模拟 backstage 字段加入前的真实存档：旧版本号 + secrets 缺这三个字段。
+  // 这正是单步迁移误置 schemaVersion=CURRENT 时会被跳过的字段——回归守卫。
+  const current = createInitialState();
+  const secretsWithoutBackstage: Record<string, unknown> = { ...current.secrets };
+  delete secretsWithoutBackstage["backstageObligations"];
+  delete secretsWithoutBackstage["backstageReviewLog"];
+  delete secretsWithoutBackstage["backstagePressure"];
+  const rawV14 = {
+    ...current,
+    meta: { ...current.meta, schemaVersion: 14 },
+    secrets: secretsWithoutBackstage,
+  };
+
+  const migrated = migrateState(rawV14);
+
+  assert.equal(migrated.meta.schemaVersion, CURRENT_STATE_SCHEMA_VERSION);
+  assert.deepEqual(migrated.secrets.backstageObligations, []);
+  assert.deepEqual(migrated.secrets.backstageReviewLog, []);
+  assert.deepEqual(migrated.secrets.backstagePressure, { consecutiveNoCostTurns: 0 });
+});
+
 void test("migrateState upgrades schema v1 states to current turn log shape", () => {
   const current = createInitialState();
   const { turnLog: _turnLog, obligations: _obligations, ...publicV1 } = current.public;

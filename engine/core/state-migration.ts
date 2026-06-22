@@ -220,7 +220,7 @@ function migrateGameStateV12ToV13(raw: Record<string, unknown>): Record<string, 
 function migrateGameStateV13ToV14(raw: Record<string, unknown>): Record<string, unknown> {
   const next = structuredClone(raw);
   const meta = assertRecordForMigration(next["meta"], "meta");
-  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  meta["schemaVersion"] = 14;
   const secrets = assertRecordForMigration(next["secrets"], "secrets");
   const actorStates: Record<string, Record<string, unknown>> = {};
   const bundleFor = (actorId: string): Record<string, unknown> => {
@@ -254,7 +254,7 @@ function migrateGameStateV13ToV14(raw: Record<string, unknown>): Record<string, 
 function migrateGameStateV14ToV15(raw: Record<string, unknown>): Record<string, unknown> {
   const next = structuredClone(raw);
   const meta = assertRecordForMigration(next["meta"], "meta");
-  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  meta["schemaVersion"] = 15;
   const publicState = assertRecordForMigration(next["public"], "public");
   const scene = assertRecordForMigration(publicState["scene"], "public.scene");
   const hasWindow = scene["storyWindow"] !== null && scene["storyWindow"] !== undefined;
@@ -300,7 +300,7 @@ function migrateGameStateV14ToV15(raw: Record<string, unknown>): Record<string, 
 function migrateGameStateV15ToV16(raw: Record<string, unknown>): Record<string, unknown> {
   const next = structuredClone(raw);
   const meta = assertRecordForMigration(next["meta"], "meta");
-  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  meta["schemaVersion"] = 16;
   const secrets = assertRecordForMigration(next["secrets"], "secrets");
   const log = Array.isArray(secrets["offscreenEventLog"]) ? secrets["offscreenEventLog"] : [];
   for (const entry of log) {
@@ -327,7 +327,7 @@ function migrateGameStateV15ToV16(raw: Record<string, unknown>): Record<string, 
 function migrateGameStateV16ToV17(raw: Record<string, unknown>): Record<string, unknown> {
   const next = structuredClone(raw);
   const meta = assertRecordForMigration(next["meta"], "meta");
-  meta["schemaVersion"] = CURRENT_STATE_SCHEMA_VERSION;
+  meta["schemaVersion"] = 17;
   const secrets = assertRecordForMigration(next["secrets"], "secrets");
   if (!Array.isArray(secrets["backstageObligations"])) {
     secrets["backstageObligations"] = [];
