@@ -213,6 +213,38 @@ round-1/2 (async + durable retrieval), `pi-actors` is now comprehensively proven
 as a backstage substrate: hermetic firewall in every mode, durable inspectable
 candidates, and — uniquely — persistent self-remembering directors.
 
+## Probe 3: swarm — concurrent independent directors (the "world tick")
+
+The last map item. Key reframe: **our swarm does NOT need pi-actors'
+`parallel`-template primitive.** Our swarm is **N independent persistent directors
+fired concurrently — one per faction with an open obligation** — which is exactly
+what the Phase 3 ledger already enumerates. So we reuse the validated
+`faction_director.json` (no new recipe) and just fire one spawn per faction, each
+with its own stable `session_id`. The probe only has to prove **concurrency does
+not cross-contaminate**.
+
+### Setup
+
+Two factions with disjoint agendas/scope/knowledge, fired at the same time:
+`dir-caster-swarm` (prana harvest, scope `caster-ryudou`) and `dir-assassin-swarm`
+(gate watch, scope `assassin-ryudou`,
+`spikes/pi-actors/sample-director-assassin-turn1.md`).
+
+### Pass / fail (probe 3)
+
+| #   | Check             | Pass                                                                                       |
+| --- | ----------------- | ------------------------------------------------------------------------------------------ |
+| S1  | **Concurrency**   | both runs reach `code=0`; they overlap in time (not serialized by us)                      |
+| S2  | **Isolation** 🔑   | Caster candidate is Caster-only, Assassin candidate is Assassin-only; codewords differ; neither session file contains the other's content |
+| S3  | **Batch harvest** | the GM collects both candidates cleanly into one tick batch                                 |
+| S4  | **Output**        | both bare `ParallelLineOutput` JSON with `carryForward`                                     |
+
+If S1 + S2 pass, the "world breathing" floor is real: many factions advance
+offscreen at once, each in its own sealed lane. (Cross-faction **coordination** —
+`room`/`coordinator`, where faction A's move informs faction B — is a deeper,
+separate capability; not in scope here. Independent fan-out is the floor we need
+first.)
+
 ## Files in this spike
 
 - `spikes/pi-actors/parallel_line.json` — the v2 async recipe (hermetic `pi -p

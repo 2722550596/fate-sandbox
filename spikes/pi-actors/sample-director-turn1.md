@@ -18,8 +18,8 @@ Hard rules:
   than the context `currentAt`.
 - The JSON MUST include a `carryForward` object:
   `{ "codeword": "<one invented word, your private continuity token>",
-     "planState": "<where your scheme stands now>",
-     "nextSteps": ["<future move>", "<future move>"] }`
+   "planState": "<where your scheme stands now>",
+   "nextSteps": ["<future move>", "<future move>"] }`
   You invent the codeword freely; you will carry the SAME codeword across all
   later turns of this line.
 
