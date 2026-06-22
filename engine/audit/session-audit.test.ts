@@ -374,6 +374,29 @@ void test("measureParallelLine computes trigger hit ratio", () => {
   assert.equal(pl.triggeredTurnsWithCall, 1);
 });
 
+void test("measureParallelLine detects the pi-actors spawn forms", () => {
+  const jsonl = buildJsonl([
+    // turn 1: 45min advance (triggers) + recipe tool `parallel_line`
+    { kind: "user", text: "休整" },
+    { kind: "assistant", toolCalls: [{ id: "c1", name: "commit_turn", args: { time: ELAPSED_45 } }] },
+    { kind: "toolResult", toolCallId: "c1" },
+    { kind: "assistant", toolCalls: [{ id: "p1", name: "parallel_line", args: { run_id: "bl-caster" } }] },
+    { kind: "toolResult", toolCallId: "p1" },
+    { kind: "assistant", text: "正文。" },
+    // turn 2: 45min advance (triggers) + generic spawn(recipe=parallel_line)
+    { kind: "user", text: "过夜" },
+    { kind: "assistant", toolCalls: [{ id: "c2", name: "commit_turn", args: { time: ELAPSED_45 } }] },
+    { kind: "toolResult", toolCallId: "c2" },
+    { kind: "assistant", toolCalls: [{ id: "p2", name: "spawn", args: { recipe: "parallel_line" } }] },
+    { kind: "toolResult", toolCallId: "p2" },
+    { kind: "assistant", text: "正文。" },
+  ]);
+  const turns = groupTurns(reconstructActivePath(parseSessionJsonl(jsonl)));
+  const pl = measureParallelLine(turns);
+  assert.equal(pl.calls, 2);
+  assert.equal(pl.triggeredTurnsWithCall, 2);
+});
+
 void test("beat complete triggers parallel-line expectation", () => {
   const jsonl = buildJsonl([
     { kind: "user", text: "收尾" },

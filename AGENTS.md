@@ -206,8 +206,8 @@ type SceneResult =
 
 当前核心项目子代理：
 
-- `.pi/agents/parallel-line.md`：后台平行线候选，只输出结构化 offscreen 候选，不直接改 state，不面向玩家写正文。
-- `.pi/agents/timeline-showrunner.md`：世界线/题材审计，检查 drift、hook 滥用、NPC autonomy、world motion、beat closure。
+- **后台平行线（已迁到 pi-actors 异步后台底座）**：persona/契约住在 engine（`engine/core/backstage-director-persona.ts`）；`run_parallel_line` 用 `buildBackstageDirectorPrompt` 拼出 hermetic director prompt，【异步 spawn】`parallel_line` recipe（`agents/recipes/parallel_line.json` → `.pi/agent/recipes/`），只输出结构化 offscreen 候选，不改 state、不面向玩家写正文。同步 `parallel-line` 子代理已退役。
+- `.pi/agents/timeline-showrunner.md`：世界线/题材审计，检查 drift、hook 滥用、NPC autonomy、world motion、beat closure（仍走同步子代理）。
 
 硬规则：
 
@@ -215,7 +215,7 @@ type SceneResult =
 - 子代理不得继承大块主项目上下文或技能目录：`inheritProjectContext: false`、`inheritSkills: false`。
 - 子代理必须显式配置 `tools` 和 `extensions`。不要 omitted `extensions`，否则可能加载普通扩展。
 - timeline 子代理只应加载 `extensions/subagents/timeline/index.ts`（提供 `lookup`）。`<timeline_state_context>` 由主 GM 进程在 subagent 工具调用发出前注入 task（`extensions/subagents/timeline/task-injection.ts`），不再读 state/state.json 侧通道。
-- `parallel-line` 输出必须是 bare JSON；不要 Markdown、解释、长 prose。
+- 后台导演（parallel_line）输出必须是 bare JSON；不要 Markdown、解释、长 prose。回程由 `harvest_backstage_candidate` 过 engine 验收后才能落地。
 - 后台事件必须归属到 actor / faction / location / consequence，并给前台一个可行动痕迹；新闻、巡逻、门响、信件不能替代事件本体。
 
 ---

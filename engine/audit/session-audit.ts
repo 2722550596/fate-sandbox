@@ -451,6 +451,12 @@ export interface ParallelLineReport {
 }
 
 function isParallelLineCall(call: AuditToolCall): boolean {
+  // pi-actors 异步底座（现行）：recipe 工具 parallel_line，或 spawn(recipe=parallel_line)。
+  if (call.name === "parallel_line") return true;
+  if (call.name === "spawn" && isRecord(call.args) && call.args["recipe"] === "parallel_line") {
+    return true;
+  }
+  // 旧同步子代理（已废弃，仅为审计历史 session 保留）。
   return call.name === "subagent" && isRecord(call.args) && call.args["agent"] === "parallel-line";
 }
 
