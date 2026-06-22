@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { formatPresenceImpressionCards } from "../core/actor-impression.ts";
+import { buildBackstageGmBrief } from "../core/backstage-brief.ts";
 import { buildGmBrief } from "../core/public-projection.ts";
 import { getPublicState, getState } from "../core/state-store.ts";
 import { isRecord } from "../core/typebox-validation.ts";
@@ -145,6 +146,9 @@ function resolvePromptModuleBody(module: PromptPresetModule): string {
   if (module.source.name === "presence-impressions") {
     return buildPresenceImpressionsText();
   }
+  if (module.source.name === "backstage-ledger") {
+    return buildBackstageLedgerText();
+  }
   return buildStatePressureText();
 }
 
@@ -211,6 +215,24 @@ function buildPresenceImpressionsText(): string {
     ].join("\n");
   } catch {
     return "印象卡注入失败；可能尚未初始化状态。";
+  }
+}
+
+/**
+ * GM-only 后台账本常驻投影（secret 层，只走结算器 Pass A preset）。
+ * 渲染器 preset 不含 runtime:backstage-ledger 模块，物理上不可达。勿接入 public-projection。
+ */
+function buildBackstageLedgerText(): string {
+  try {
+    return [
+      "后台平行线账本（仅 GM 可见的决策参考；含隐藏信息，绝不得渲染给玩家、不得泄入正文）：",
+      "",
+      buildBackstageGmBrief(getState()),
+      "",
+      "这是决策前的只读概览；具体账以工具返回值为准。有待 harvest run 时优先取回落地后再起新线。",
+    ].join("\n");
+  } catch {
+    return "后台账本注入失败；可能尚未初始化状态。";
   }
 }
 

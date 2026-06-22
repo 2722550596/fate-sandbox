@@ -6,7 +6,7 @@ import { isRecord } from "../core/typebox-validation.ts";
 export type PromptSlot = "pre-history" | "pre-response" | "final-contract";
 /** 双 pass 架构：结算器与渲染器各自持有独立的 preset 文件。 */
 export type PromptPass = "settlement" | "render";
-export type RuntimePromptSource = "state-brief" | "presence-impressions";
+export type RuntimePromptSource = "state-brief" | "presence-impressions" | "backstage-ledger";
 
 export interface PromptPreset {
   version: 1;
@@ -27,7 +27,11 @@ export type PromptSource =
   | { kind: "runtime"; name: RuntimePromptSource };
 
 const PROMPT_SLOTS: readonly string[] = ["pre-history", "pre-response", "final-contract"];
-const RUNTIME_SOURCES: readonly string[] = ["state-brief", "presence-impressions"];
+const RUNTIME_SOURCES: readonly string[] = [
+  "state-brief",
+  "presence-impressions",
+  "backstage-ledger",
+];
 
 export function loadPromptPreset(projectRoot: string, pass: PromptPass): PromptPreset {
   const path = join(projectRoot, "agents", `preset-${pass}.json`);

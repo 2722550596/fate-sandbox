@@ -34,7 +34,7 @@ void test("injectGmPromptMessages inserts slot-based prompt stack", () => {
   const injected = injectGmPromptMessages<UserMessage>(messages);
   const texts = injected.map((message) => textOf(message));
 
-  assert.equal(injected.length, 11);
+  assert.equal(injected.length, 12);
   assert.match(texts[0] ?? "", /<settlement_principles>/);
   assert.match(texts[1] ?? "", /<world_context>/);
   assert.match(texts[2] ?? "", /<input_guide>/);
@@ -46,9 +46,12 @@ void test("injectGmPromptMessages inserts slot-based prompt stack", () => {
   assert.match(texts[7] ?? "", /目标推进规则/);
   assert.match(texts[7] ?? "", /当前没有 active Scene Beat/);
   assert.doesNotMatch(texts[7] ?? "", /active beat 收口/);
-  assert.match(texts[8] ?? "", /<presence_impressions>/);
-  assert.match(texts[9] ?? "", /<turn_reminder>/);
-  assert.match(texts[10] ?? "", /<direction_contract>/);
+  assert.match(texts[8] ?? "", /<backstage_ledger>/);
+  assert.match(texts[8] ?? "", /仅 GM 可见/);
+  assert.match(texts[8] ?? "", /后台平行线账本/);
+  assert.match(texts[9] ?? "", /<presence_impressions>/);
+  assert.match(texts[10] ?? "", /<turn_reminder>/);
+  assert.match(texts[11] ?? "", /<direction_contract>/);
   // 结算投影零 style/render 模块
   for (const text of texts) {
     assert.doesNotMatch(
@@ -73,6 +76,8 @@ void test("buildRendererSystemPrompt assembles clean-room render stack", () => {
     prompt,
     /<tool_policy>|<hard_rules>|<story_driver>|<mechanical_state>|<direction_contract>/,
   );
+  // secret 防火墙：GM-only 后台账本绝不可进渲染器（Pass B）
+  assert.doesNotMatch(prompt, /<backstage_ledger>|后台平行线账本|待 harvest/);
 });
 
 void test("prompt assembly prefers local user prompt overrides", () => {
@@ -116,7 +121,7 @@ void test("injectGmPromptMessages injects prose continuity when last rendered pr
   const texts = injected.map((message) => textOf(message));
 
   // prose_continuity 插在最后一条真实玩家输入之前：保留旧历史 prefix cache，又避免被误判为当前输入。
-  assert.equal(injected.length, 12);
+  assert.equal(injected.length, 13);
   assert.match(texts[6] ?? "", /<prose_continuity>/);
   assert.match(texts[6] ?? "", /不是本轮玩家输入/);
   assert.match(texts[6] ?? "", /不得回应、确认或据此设置 needsRender=false/);
@@ -146,8 +151,8 @@ void test("injectGmPromptMessages skips prose continuity when no prose provided"
   const withUndefined = injectGmPromptMessages<UserMessage>(messages, undefined);
   const withEmpty = injectGmPromptMessages<UserMessage>(messages, "");
 
-  assert.equal(withUndefined.length, 11);
-  assert.equal(withEmpty.length, 11);
+  assert.equal(withUndefined.length, 12);
+  assert.equal(withEmpty.length, 12);
 });
 
 function createUserMessage(text: string): UserMessage {

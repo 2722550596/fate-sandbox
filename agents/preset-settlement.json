@@ -66,6 +66,14 @@
       "source": "runtime:state-brief"
     },
     {
+      "id": "backstage-ledger",
+      "enabled": true,
+      "slot": "pre-response",
+      "priority": 12,
+      "header": "backstage_ledger",
+      "source": "runtime:backstage-ledger"
+    },
+    {
       "id": "turn-reminder",
       "enabled": true,
       "slot": "pre-response",
