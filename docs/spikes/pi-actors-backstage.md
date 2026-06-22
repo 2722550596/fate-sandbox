@@ -1,7 +1,39 @@
 # Spike: `@llblab/pi-actors` as the backstage parallel-line substrate
 
-**Branch:** `spike/pi-actors-backstage` · **Status:** scaffolding ready, pending
-live validation. NOT merged. master untouched.
+**Branch:** `spike/pi-actors-backstage` · **Status:** round 1 validated firewall +
+lifecycle; result-retrieval gap found and fixed (v2 recipe). Pending round-2
+live re-test. NOT merged. master untouched.
+
+## Round 1 result (live)
+
+Ran the smoke prompt against the live harness. Outcome:
+
+- **Firewall — PASS (by construction).** Child used **0 tools** (`--no-tools`),
+  separate process. `state.json` mtime did move, but that was the **parent**
+  re-deriving its turn brief on the conversation turn — the subprocess has no
+  write path to it (`turn-state.json` / `prose-digests.json` untouched).
+- **Lifecycle — PASS.** `spawn` clean, `inspect` polled cleanly, child exited
+  `code=0` in ~16s.
+- **Result flow — FAIL (the fixable gap).** The run dir
+  `~/.pi/agent/tmp/pi-actors/runs/<run>/` was **GC'd before the GM could harvest**
+  it — no `result.json` / `stdout.log` survived, so the candidate never reached
+  the GM. Root cause: the run state root lives under the **volatile `tmp` tree**;
+  inspecting after the fact races the cleanup.
+- **Cleanliness / extension-load — UNASSESSED** (no output to inspect).
+
+### v2 fix (this commit)
+
+- **Retrieval:** stop harvesting from the volatile run dir. Pin the child's
+  transcript to a **durable session dir we control** —
+  `--session-dir spikes/pi-actors/.sessions --session-id {run_id}` — and read the
+  candidate (the child's last assistant message) straight from that session file.
+  Independent of the `tmp` run-dir GC.
+- **Cleanliness:** add `--no-approve` (ignore project-local files → the child
+  does **not** load our `.pi/settings.json` / `extension.ts` hooks) and
+  `--no-context-files` (skip AGENTS.md). `--no-tools` stays → firewall still
+  airtight. This also resolves the "does the child load our extension?" risk
+  below: with `--no-approve` it should not.
+- Runtime products (`.sessions/`, `.out/`) are gitignored.
 
 ## Why this spike
 
@@ -22,7 +54,7 @@ child needs the harness + a model):
 2. **Result flow** — the candidate JSON reliably comes back to the GM, readable
    via `inspect`, surviving context compaction.
 
-## Why the firewall is airtight *by construction* (the part we CAN reason about)
+## Why the firewall is airtight _by construction_ (the part we CAN reason about)
 
 Unlike `@gotgenes` (shared in-process memory; firewall depended on fragile
 per-agent permission resolution), pi-actors runs the child as a **separate `pi`
@@ -43,28 +75,22 @@ process**:
   mutating a live tool-call event), and the firewall is the process boundary +
   `--no-tools`, not a permission package.
 
-So the *secret* firewall is structurally sound. What still needs live eyes is
+So the _secret_ firewall is structurally sound. What still needs live eyes is
 the **process-boundary cleanliness** (below).
 
-## The one real open risk: does the child load our GM extension?
+## The child-loads-our-extension risk — addressed in v2
 
-When `pi -p` runs in the project cwd it reads `.pi/settings.json` → loads our
-`extension.ts` (+ player-panel, two-pass-render, …). With `--no-tools` those
-tools are dead, but the extensions' **hooks** (`session_start` →
-`syncStateFromSessionManager`, context transforms, GM-prompt injection) may still
-fire in the child and **pollute the candidate prompt** with GM persona/scaffolding.
-
-It cannot leak secrets (the child's session is empty — `syncStateFromSessionManager`
-finds nothing to hydrate), but it can make the candidate noisy or off-contract.
-Mitigation to test: run the actor from a **neutral cwd** (e.g. the run state dir)
-so it does not load our project `.pi/settings.json`, or point `pi -p` at a
-hermetic agent. The prompt is fully self-contained, so no project context is
-needed for the child to do its job.
+When `pi -p` runs in the project cwd it would read `.pi/settings.json` → load our
+`extension.ts` (+ player-panel, two-pass-render, …); even with `--no-tools` the
+hooks could pollute the candidate. **`--no-approve` ("ignore project-local files
+for this run") is the clean fix** — the child loads no project extension at all.
+It still cannot leak secrets regardless (own empty session, no parent-state
+path). Round-2 confirms the candidate comes back clean.
 
 ## Files in this spike
 
-- `spikes/pi-actors/parallel_line.json` — the async recipe (hermetic `pi -p
-  --no-tools` candidate generator).
+- `spikes/pi-actors/parallel_line.json` — the v2 async recipe (hermetic `pi -p
+  --no-tools --no-approve --no-context-files`, durable `--session-dir`).
 - `spikes/pi-actors/sample-backstage-prompt.md` — a ready, self-contained test
   prompt (safe projection + ParallelLineInput + "output bare JSON").
 - `.pi/settings.json` — adds `npm:@llblab/pi-actors` (spike-only).
@@ -80,6 +106,7 @@ needed for the child to do its job.
    ```
 
    Then in-session confirm discovery: `inspect target=recipes view=summary`.
+
 2. **Spawn the backstage actor** with the sample prompt:
 
    ```
@@ -87,23 +114,25 @@ needed for the child to do its job.
    ```
 
    (Or ask the GM to spawn `parallel_line` with that file's contents as `prompt`.)
-3. **Inspect the result** once it finishes:
+
+3. **Harvest the candidate from the durable session dir** (NOT the volatile run
+   dir). When the terminal follow-up reports `done`:
 
    ```
-   inspect target=run:pl_smoke view=status
-   inspect target=run:pl_smoke view=tail lines=120
+   ls -t spikes/pi-actors/.sessions/**/*.jsonl | head -1     # newest child session
    ```
 
-   `stdout.log` / `result.json` should hold the candidate.
+   Read that file; the child's last assistant message is the ParallelLineOutput
+   JSON. `inspect target=run:pl_smoke view=status` confirms `code=0`.
 
 ## Pass / fail criteria
 
-| # | Check | Pass | Fail |
-| - | ----- | ---- | ---- |
-| 1 | **Firewall** | child used 0 tools; `state/` + the parent session unchanged; no secret text in child output | any tool call, or any canonical-state mutation |
-| 2 | **Result flow** | a parseable `ParallelLineOutput` JSON object in `view=tail` / `result.json`; survives a compaction | empty / truncated / unparseable output |
-| 3 | **Cleanliness** | output is a bare candidate JSON, no GM persona / panel / prose bleed | output polluted by our extension hooks → switch to neutral-cwd / hermetic-agent run |
-| 4 | **Deferred land** | GM can read the candidate next turn and land it via `record_offscreen_event` (settles the obligation) | candidate unusable for landing |
+| #   | Check             | Pass                                                                                                  | Fail                                                                                |
+| --- | ----------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 1   | **Firewall**      | child used 0 tools; `state/` + the parent session unchanged; no secret text in child output           | any tool call, or any canonical-state mutation                                      |
+| 2   | **Result flow**   | a parseable `ParallelLineOutput` JSON object in `view=tail` / `result.json`; survives a compaction    | empty / truncated / unparseable output                                              |
+| 3   | **Cleanliness**   | output is a bare candidate JSON, no GM persona / panel / prose bleed                                  | output polluted by our extension hooks → switch to neutral-cwd / hermetic-agent run |
+| 4   | **Deferred land** | GM can read the candidate next turn and land it via `record_offscreen_event` (settles the obligation) | candidate unusable for landing                                                      |
 
 If #1 and #2 pass, the substrate is viable and the next step is a real
 `parallel_line` recipe wired to the obligation loop (spawn on obligation-open,

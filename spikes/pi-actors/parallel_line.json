@@ -1,11 +1,14 @@
 {
-  "description": "SPIKE: hermetic backstage parallel-line candidate generator. Runs `pi -p --no-tools` as a detached async actor. Separate process + zero tools + a fully self-contained prompt means it physically cannot read or write the GM's canonical state or secrets (it opens its own empty session; the parent state lives only in the parent process + parent session file). It returns a ParallelLineOutput JSON candidate on stdout; the main GM validates and lands it via record_offscreen_event, which settles the backstage obligation. This is a spike artifact — not active GM policy.",
+  "description": "SPIKE v2: hermetic backstage parallel-line candidate generator. Runs `pi -p` as a detached async actor with `--no-tools` (zero tools) and `--no-approve --no-context-files` (the child does NOT load this project's .pi/settings.json / extension.ts / AGENTS.md). Separate process + zero tools + an own empty session means it physically cannot read or write the GM's canonical state or secrets; its only input is the self-contained safe-projection prompt. The child's transcript is pinned to a DURABLE session dir (`--session-dir` + `--session-id {run_id}`) so the candidate survives the volatile `~/.pi/agent/tmp` run-dir GC: harvest the last assistant message from that session file. Returns a ParallelLineOutput JSON candidate for the main GM to validate and land via record_offscreen_event. Spike artifact — not active GM policy.",
   "async": true,
-  "args": ["prompt:string", "model:string"],
-  "defaults": { "model": "{current_model}" },
+  "args": ["prompt:string", "model:string", "session_dir:path"],
+  "defaults": {
+    "model": "{current_model}",
+    "session_dir": "spikes/pi-actors/.sessions"
+  },
   "mailbox": {
     "accepts": ["control.kill"],
     "emits": ["candidate.ready", "run.failed"]
   },
-  "template": "pi -p --no-tools --model {model} {prompt}"
+  "template": "pi -p --no-tools --no-approve --no-context-files --model {model} --session-dir {session_dir} --session-id {run_id} {prompt}"
 }

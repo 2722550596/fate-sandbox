@@ -1,4 +1,9 @@
 {
-  "packages": ["npm:pi-subagents", "npm:pi-web-access", "npm:pi-claude-oauth-adapter", "npm:@llblab/pi-actors"],
+  "packages": [
+    "npm:pi-subagents",
+    "npm:pi-web-access",
+    "npm:pi-claude-oauth-adapter",
+    "npm:@llblab/pi-actors"
+  ],
   "npmCommand": ["pnpm"]
 }
