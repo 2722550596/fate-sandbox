@@ -206,7 +206,7 @@ type SceneResult =
 
 当前核心项目子代理：
 
-- **后台平行线（已迁到 pi-actors 异步后台底座）**：persona/契约住在 engine（`engine/core/backstage-director-persona.ts`）；`run_parallel_line` 用 `buildBackstageDirectorPrompt` 拼出 hermetic director prompt，【异步 spawn】`parallel_line` recipe（`agents/recipes/parallel_line.json` → `.pi/agent/recipes/`），只输出结构化 offscreen 候选，不改 state、不面向玩家写正文。同步 `parallel-line` 子代理已退役。
+- **后台平行线（引擎直起异步 hermetic 导演）**：persona/契约住在 engine（`engine/core/backstage-director-persona.ts`）；`run_parallel_line` 用 `buildBackstageDirectorPrompt` 拼出 hermetic director prompt，并【直接 fork 一个 detached `pi -p` 后台导演】（`engine/core/backstage-spawn.ts`，不经主 agent loop、不阻塞），只输出结构化 offscreen 候选，不改 state、不面向玩家写正文。隔轮 `harvest_backstage_candidate` 过 engine 验收后落地。同步 `parallel-line` 子代理已退役；pi-actors recipe（`agents/recipes/parallel_line.json`）保留给后续可巡检的持久/swarm slice。
 - `.pi/agents/timeline-showrunner.md`：世界线/题材审计，检查 drift、hook 滥用、NPC autonomy、world motion、beat closure（仍走同步子代理）。
 
 硬规则：
