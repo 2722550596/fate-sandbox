@@ -5,7 +5,7 @@ import {
   setBackstageDirectorSpawnerForTest,
   type BackstageDirectorHandle,
 } from "../../engine/core/backstage-spawn.ts";
-import { resetState } from "../../engine/core/state-store.ts";
+import { getState, resetState } from "../../engine/core/state-store.ts";
 
 import { runParallelLineTool } from "./run-parallel-line.ts";
 
@@ -51,6 +51,12 @@ void test("runParallelLineTool engine-forks the async director (no main-loop spa
     assert.equal(result.details["pid"], 4242);
     const prompt = result.details["directorPrompt"];
     assert.ok(typeof prompt === "string" && prompt.includes("caster-ryudou"));
+
+    // a pending-harvest marker is persisted so a forgotten harvest is dunned + guarded
+    const pending = getState().secrets.backstagePendingHarvests;
+    assert.equal(pending.length, 1);
+    assert.equal(pending[0]?.runId, "bl-caster-ryudou");
+    assert.equal(pending[0]?.lineId, "caster-ryudou");
   } finally {
     setBackstageDirectorSpawnerForTest(null);
   }

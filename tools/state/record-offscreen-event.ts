@@ -6,6 +6,7 @@ import {
   resetBackstagePressure,
   settleOldestBackstageObligation,
 } from "../../engine/core/backstage-obligation.ts";
+import { clearPendingHarvestByLine } from "../../engine/core/backstage-pending.ts";
 import { recordOffscreenEvent } from "../../engine/core/offscreen-event.ts";
 import { parseRecordOffscreenEventInput } from "../../engine/core/offscreen-event-schema.ts";
 
@@ -25,6 +26,8 @@ export function recordOffscreenEventTool(params: unknown, sessionManager: unknow
         reasonCode: "candidate-landed",
         note: event.summary,
       });
+      // 该 line 的候选已落地：清掉它的 pending-harvest 标记（含未经 harvest 直接手动落地的情形）。
+      clearPendingHarvestByLine(draft, event.lineId);
       resetBackstagePressure(draft);
       return { event, result };
     },

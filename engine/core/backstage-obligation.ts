@@ -146,7 +146,7 @@ function formatOpenBackstageObligations(obligations: readonly BackstageObligatio
     "存在未清账的后台世界推进义务，拒绝开始新的 canonical turn。先推进后台世界线：",
     ...obligations.map((entry) => `- [${entry.trigger}] ${entry.summary}`),
     "清账方式（任选其一）：",
-    "1. run_parallel_line（引擎直接 fork 后台导演，不用手动 spawn）→ 隔轮从 session_dir 取裸候选 → harvest_backstage_candidate 验收 → record_offscreen_event 落地；",
+    "1. run_parallel_line（引擎直接 fork 后台导演，不用手动 spawn）→ 隔轮用返回的 run_id 调 harvest_backstage_candidate（引擎自动取回+验收）→ record_offscreen_event 落地；",
     "2. 经审查确无可推进时，用 resolve_backstage_line 记录 no-change / blocked（窄结构化理由）。",
     "导演失败/未调用不算清账。",
   ].join("\n");

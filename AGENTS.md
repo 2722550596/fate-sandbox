@@ -206,7 +206,7 @@ type SceneResult =
 
 当前核心项目子代理：
 
-- **后台平行线（引擎直起异步 hermetic 导演）**：persona/契约住在 engine（`engine/core/backstage-director-persona.ts`）；`run_parallel_line` 用 `buildBackstageDirectorPrompt` 拼出 hermetic director prompt，并【直接 fork 一个 detached `pi -p` 后台导演】（`engine/core/backstage-spawn.ts`，不经主 agent loop、不阻塞），只输出结构化 offscreen 候选，不改 state、不面向玩家写正文。隔轮 `harvest_backstage_candidate` 过 engine 验收后落地。同步 `parallel-line` 子代理已退役；不依赖任何子代理框架（引擎用 `node:child_process` 直接 fork `pi -p`，理由见 `docs/adr/0005`），持久/swarm/协调增长路径都是这条缝上的小增量。
+- **后台平行线（引擎直起异步 hermetic 导演）**：persona/契约住在 engine（`engine/core/backstage-director-persona.ts`）；`run_parallel_line` 用 `buildBackstageDirectorPrompt` 拼出 hermetic director prompt，并【直接 fork 一个 detached `pi -p` 后台导演】（`engine/core/backstage-spawn.ts`，不经主 agent loop、不阻塞），只输出结构化 offscreen 候选，不改 state、不面向玩家写正文。隔轮用返回的 run_id 调 `harvest_backstage_candidate`（引擎按 run_id 定位 director session、取回+验收，见 `engine/core/backstage-session-read.ts`）后落地。忘了 harvest 不会静默丢：`run_parallel_line` 起飞即记 pending-harvest（`engine/core/backstage-pending.ts`），commit 逐轮催账，且 `resolve_backstage_line` 在有未 harvest run 时拒绝清账（防 no-change 丢弃已产出候选）。同步 `parallel-line` 子代理已退役；不依赖任何子代理框架（引擎用 `node:child_process` 直接 fork `pi -p`，理由见 `docs/adr/0005`），持久/swarm/协调增长路径都是这条缝上的小增量。
 - `.pi/agents/timeline-showrunner.md`：世界线/题材审计，检查 drift、hook 滥用、NPC autonomy、world motion、beat closure（仍走同步子代理）。
 
 硬规则：

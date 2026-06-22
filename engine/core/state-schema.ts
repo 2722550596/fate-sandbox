@@ -65,7 +65,7 @@ function nullable<T extends TSchema>(schema: T) {
 }
 
 export const STATE_META_SCHEMA = Type.Object({
-  schemaVersion: Type.Literal(17),
+  schemaVersion: Type.Literal(18),
   createdAt: ISO_INSTANT_SCHEMA,
   updatedAt: ISO_INSTANT_SCHEMA,
   rngSeed: Type.Number(),
@@ -544,6 +544,12 @@ const BACKSTAGE_OBLIGATION_SCHEMA = Type.Object({
   createdAt: ISO_INSTANT_SCHEMA,
 });
 
+const BACKSTAGE_PENDING_HARVEST_SCHEMA = Type.Object({
+  runId: NON_EMPTY_STRING_SCHEMA,
+  lineId: NON_EMPTY_STRING_SCHEMA,
+  spawnedAt: ISO_INSTANT_SCHEMA,
+});
+
 const BACKSTAGE_REVIEW_ENTRY_SCHEMA = Type.Object({
   id: NON_EMPTY_STRING_SCHEMA,
   obligationId: NON_EMPTY_STRING_SCHEMA,
@@ -566,6 +572,7 @@ export const SECRET_GAME_STATE_SCHEMA = Type.Object({
   backstagePressure: Type.Object({
     consecutiveNoCostTurns: Type.Integer({ minimum: 0 }),
   }),
+  backstagePendingHarvests: Type.Array(BACKSTAGE_PENDING_HARVEST_SCHEMA),
 });
 
 export const STATE_SCHEMA = Type.Object({

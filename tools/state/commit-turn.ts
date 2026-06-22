@@ -8,6 +8,7 @@ import {
   assertNoOpenBackstageObligation,
   recordCanonicalTurnForBackstage,
 } from "../../engine/core/backstage-obligation.ts";
+import { formatPendingHarvestReminder } from "../../engine/core/backstage-pending.ts";
 import type { TurnCommitEvent } from "../../engine/core/turn-commit.ts";
 
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
@@ -37,10 +38,11 @@ export function commitTurnTool(params: unknown, sessionManager: unknown): ToolRe
         hasCost: turnHasCost(input.events),
         beatBoundary: false,
       });
-      return result;
+      return { result, pendingReminder: formatPendingHarvestReminder(draft) };
     },
-    details: resultDetails,
-    message: (result) => result.message,
+    details: ({ result }) => resultDetails(result),
+    message: ({ result, pendingReminder }) =>
+      pendingReminder === null ? result.message : `${result.message}\n\n${pendingReminder}`,
   });
 }
 

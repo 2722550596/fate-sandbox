@@ -5,6 +5,7 @@ import type { BackstageResolutionInput } from "../../engine/core/backstage-oblig
 import { Type } from "typebox";
 
 import { settleOldestBackstageObligation } from "../../engine/core/backstage-obligation.ts";
+import { assertNoUnharvestedPending } from "../../engine/core/backstage-pending.ts";
 import { assertOneOfString } from "../../engine/core/string-enum.ts";
 import { assertNonEmptyString, isRecord } from "../../engine/core/typebox-validation.ts";
 
@@ -24,6 +25,8 @@ export function resolveBackstageLineTool(params: unknown, sessionManager: unknow
   return runDomainEventTool({
     sessionManager,
     execute: (draft) => {
+      // 拦住 footgun：有已起但未 harvest 的 run 时，不准用 no-change 清账丢弃已产出的候选。
+      assertNoUnharvestedPending(draft);
       const settled = settleOldestBackstageObligation(draft, input);
       if (settled === undefined) {
         throw new Error("当前没有未清账的后台世界推进义务，无需 resolve_backstage_line。");

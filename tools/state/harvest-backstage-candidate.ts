@@ -16,20 +16,35 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
+import { clearPendingHarvestByRun } from "../../engine/core/backstage-pending.ts";
 import { readBackstageCandidateRaw } from "../../engine/core/backstage-session-read.ts";
 import { parseParallelLineOutput } from "../../engine/core/parallel-line-output-schema.ts";
 import { assertNonEmptyString, isRecord } from "../../engine/core/typebox-validation.ts";
-import { textResult } from "../runtime/tool-result.ts";
+
+import { runDomainEventTool } from "./domain-tool-runner.ts";
 
 /** sessionDir 仅供测试注入临时夹具目录；生产走默认 BACKSTAGE_SESSION_DIR。 */
-export function harvestBackstageCandidateTool(params: unknown, sessionDir?: string): ToolResult {
+export function harvestBackstageCandidateTool(
+  params: unknown,
+  sessionManager: unknown,
+  sessionDir?: string,
+): ToolResult {
   if (!isRecord(params)) {
     throw new Error("harvest_backstage_candidate 参数必须是对象。");
   }
   const runId = assertNonEmptyString(params["run_id"], "run_id");
+  // 读+验收在前（可能报错）；只有取回成功才清掉该 run 的 pending 标记。
   const raw = readBackstageCandidateRaw(runId, sessionDir);
   const candidate = parseParallelLineOutput(raw);
-  return textResult(buildGuidance(candidate), { candidate, runId });
+  return runDomainEventTool({
+    sessionManager,
+    execute: (draft) => {
+      clearPendingHarvestByRun(draft, runId);
+      return { candidate, runId };
+    },
+    details: ({ candidate: c, runId: r }) => ({ candidate: c, runId: r }),
+    message: ({ candidate: c }) => buildGuidance(c),
+  });
 }
 
 function buildGuidance(candidate: ParallelLineOutput): string {
@@ -69,5 +84,6 @@ export const harvestBackstageCandidateToolDefinition: FateToolDefinition = {
       description: "run_parallel_line 返回的 run_id（如 bl-archer-floor1-scout）；engine 按它定位该 director 的持久 session 并取回裸候选",
     }),
   }),
-  execute: async (_toolCallId, params) => harvestBackstageCandidateTool(params),
+  execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
+    harvestBackstageCandidateTool(params, ctx.sessionManager),
 };

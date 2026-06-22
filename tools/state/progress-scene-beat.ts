@@ -7,6 +7,7 @@ import {
   assertNoOpenBackstageObligation,
   recordCanonicalTurnForBackstage,
 } from "../../engine/core/backstage-obligation.ts";
+import { formatPendingHarvestReminder } from "../../engine/core/backstage-pending.ts";
 import { collectBackstageDueNotices } from "../../engine/core/faction-clock.ts";
 import { assertNoOpenObligations } from "../../engine/core/obligations.ts";
 import { progressSceneBeat } from "../../engine/core/scene-beat-lifecycle.ts";
@@ -30,12 +31,21 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
         hasCost: true,
         beatBoundary: input.kind === "complete",
       });
-      // 幕后催账：到期义务/填满时钟随返回值提醒（backlog #3）
-      return { result, dueNotices: collectBackstageDueNotices(draft) };
+      // 幕后催账：到期义务/填满时钟 + 待 harvest 的后台 run 随返回值提醒（backlog #3）
+      return {
+        result,
+        dueNotices: collectBackstageDueNotices(draft),
+        pendingReminder: formatPendingHarvestReminder(draft),
+      };
     },
     details: ({ result }) => ({ result }),
-    message: ({ result, dueNotices }) =>
-      dueNotices.length === 0 ? result.message : [result.message, ...dueNotices].join("\n"),
+    message: ({ result, dueNotices, pendingReminder }) => {
+      const lines = [result.message, ...dueNotices];
+      if (pendingReminder !== null) {
+        lines.push(pendingReminder);
+      }
+      return lines.join("\n");
+    },
   });
 }
 

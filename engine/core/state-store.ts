@@ -222,6 +222,7 @@ export function createInitialState(): State {
       backstageObligations: [],
       backstageReviewLog: [],
       backstagePressure: { consecutiveNoCostTurns: 0 },
+      backstagePendingHarvests: [],
     },
   };
 }

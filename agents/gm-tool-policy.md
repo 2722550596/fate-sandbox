@@ -48,13 +48,13 @@ Project-scope subagents are auditors or candidate generators only; the main GM s
 
 - Call `timeline-showrunner` when timeline tone drifts, a beat spins in place, a mystery hook is being forced back without novelty, or the next offscreen ecosystem is unclear.
 - Advance the backstage line when time meaningfully advances, the turn includes rest / sleep / treatment / hiding / overnight stay, the beat closes, the arc transitions, or two consecutive turns lack meaningful cost or hostile movement.
-- Call `run_parallel_line` (lineId + timeWindow). The engine assembles the hermetic director prompt **and forks a detached `pi -p` backstage director itself** — you do NOT spawn anything, and the call does not block. Next turn, read the director's last assistant message from `.pi/agent/backstage-sessions` → `harvest_backstage_candidate` to validate → review → land with `record_offscreen_event` (pick a slot from `activePressurePalette` for `pressureType` / optional slot id). The synchronous `parallel-line` subagent is retired.
+- Call `run_parallel_line` (lineId + timeWindow). The engine assembles the hermetic director prompt **and forks a detached `pi -p` backstage director itself** — you do NOT spawn anything, and the call does not block. Next turn, call `harvest_backstage_candidate` with the returned `run_id` (the engine locates the director session and validates the candidate for you — no manual file read, no `inspect`) → review → land with `record_offscreen_event` (pick a slot from `activePressurePalette` for `pressureType` / optional slot id). The synchronous `parallel-line` subagent is retired. **If you forget:** the engine duns the pending run every turn, and `resolve_backstage_line` refuses while an unharvested run exists — so a produced candidate can't be discarded by a stray no-change.
 
 ### Backstage obligation (hard-blocked)
 
 The engine now enforces this discipline instead of trusting prompt self-discipline. A canonical turn that advances ≥30 minutes, completes a Scene Beat, or is the second consecutive no-cost turn raises a **backstage obligation**. While one is open, the NEXT `commit_turn` / `progress_scene_beat` is hard-rejected until you discharge it:
 
-- Real backstage movement → `run_parallel_line` (engine forks the async director itself) → next turn harvest the candidate → `harvest_backstage_candidate` to validate → land with `record_offscreen_event` (this clears the obligation).
+- Real backstage movement → `run_parallel_line` (engine forks the async director itself) → next turn `harvest_backstage_candidate` with the `run_id` (engine auto-retrieves + validates) → land with `record_offscreen_event` (this clears the obligation and the pending-harvest marker).
 - Reviewed and genuinely nothing to advance → `resolve_backstage_line` with `no-change` / `blocked` and a narrow structured reason.
 - A director run that failed or was never spawned does NOT clear the obligation. Do not fake a discharge.
 

@@ -93,7 +93,7 @@ export interface GameState {
 }
 
 export interface StateMeta {
-  schemaVersion: 17;
+  schemaVersion: 18;
   createdAt: string;
   updatedAt: string;
   /** Seeded RNG seed（backlog #9）：确定性随机源，初始化时生成 */
@@ -179,6 +179,12 @@ export interface SecretGameState {
   backstageReviewLog: BackstageReviewEntry[];
   /** 后台压力计数：跨回合的连续无代价计数器 */
   backstagePressure: BackstagePressureState;
+  /**
+   * 待 harvest 的后台 director run（run_parallel_line 起飞即记，harvest 即清）。
+   * 引擎据此在 canonical commit 催账，并让 resolve_backstage_line 在有未 harvest run 时
+   * 拒绝清账——防止已产出的候选被一句 no-change 静默丢弃。
+   */
+  backstagePendingHarvests: BackstagePendingHarvest[];
 }
 
 /** 生成后台义务的触发源（v1 可检测核心集） */
@@ -205,6 +211,13 @@ export interface BackstageReviewEntry {
 
 export interface BackstagePressureState {
   consecutiveNoCostTurns: number;
+}
+
+/** 已起飞但尚未 harvest 的后台 director run 标记。 */
+export interface BackstagePendingHarvest {
+  runId: string;
+  lineId: string;
+  spawnedAt: string;
 }
 
 /**
@@ -692,4 +705,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 17;
+export const CURRENT_STATE_SCHEMA_VERSION = 18;

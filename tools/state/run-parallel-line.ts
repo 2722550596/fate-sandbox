@@ -13,12 +13,13 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 import { Type } from "typebox";
 
 import { buildBackstageDirectorPrompt } from "../../engine/core/backstage-director-prompt.ts";
+import { recordPendingHarvest } from "../../engine/core/backstage-pending.ts";
 import { spawnBackstageDirector } from "../../engine/core/backstage-spawn.ts";
 import { type AssembleParallelLineInput } from "../../engine/core/parallel-line-assembler.ts";
 import { hydrateStateFromSessionManager } from "../../engine/core/session-hydration.ts";
 import { getState } from "../../engine/core/state-store.ts";
 import { isRecord } from "../../engine/core/typebox-validation.ts";
-import { textResult } from "../runtime/tool-result.ts";
+import { runDomainEventTool } from "./domain-tool-runner.ts";
 
 /** sanitize lineId into a stable run-id suffix for the director session. */
 function backstageRunId(lineId: string): string {
@@ -35,24 +36,31 @@ export function runParallelLineTool(params: unknown, sessionManager: unknown): T
   const directorPrompt = buildBackstageDirectorPrompt(state, input);
   const runId = backstageRunId(input.lineId);
   const handle = spawnBackstageDirector(directorPrompt, runId);
-  return textResult(
-    [
-      "后台 director 已【异步起飞】（engine 直接 fork hermetic pi -p，不经主循环、不阻塞本回合）：",
-      `  run_id=${handle.runId}  model=${handle.model}  session_dir=${handle.sessionDir}  pid=${handle.pid ?? "?"}`,
-      "",
-      `隔轮（约 10-20s 后）用 run_id=${handle.runId} 调 harvest_backstage_candidate（engine 自动取回，无需手动读 session / inspect）→`,
-      "审查 → record_offscreen_event（progress/escalation，落地即清义务）",
-      "或 resolve_backstage_line（no-change/blocked）。导演失败/未起不算清账。",
-    ].join("\n"),
-    {
-      runId: handle.runId,
-      lineId: input.lineId,
-      model: handle.model,
-      sessionDir: handle.sessionDir,
-      pid: handle.pid,
-      directorPrompt,
+  // 持久化 pending-harvest 标记：忘了 harvest 会被催账，且 resolve_backstage_line 被拦住（不能丢弃已产出候选）。
+  return runDomainEventTool({
+    sessionManager,
+    execute: (draft) => {
+      recordPendingHarvest(draft, { runId: handle.runId, lineId: input.lineId });
+      return { handle, lineId: input.lineId, directorPrompt };
     },
-  );
+    details: ({ handle: h, lineId, directorPrompt: prompt }) => ({
+      runId: h.runId,
+      lineId,
+      model: h.model,
+      sessionDir: h.sessionDir,
+      pid: h.pid,
+      directorPrompt: prompt,
+    }),
+    message: ({ handle: h }) =>
+      [
+        "后台 director 已【异步起飞】（engine 直接 fork hermetic pi -p，不经主循环、不阻塞本回合）：",
+        `  run_id=${h.runId}  model=${h.model}  session_dir=${h.sessionDir}  pid=${h.pid ?? "?"}`,
+        "",
+        `隔轮（约 10-20s 后）用 run_id=${h.runId} 调 harvest_backstage_candidate（engine 自动取回，无需手动读 session / inspect）→`,
+        "审查 → record_offscreen_event（progress/escalation，落地即清义务）",
+        "或 resolve_backstage_line（no-change/blocked）。导演失败/未起不算清账。",
+      ].join("\n"),
+  });
 }
 
 function parseToolInput(params: unknown): AssembleParallelLineInput {

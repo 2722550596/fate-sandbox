@@ -24,6 +24,7 @@ void test("migrateState runs the FULL chain without skipping steps (v14 -> curre
   delete secretsWithoutBackstage["backstageObligations"];
   delete secretsWithoutBackstage["backstageReviewLog"];
   delete secretsWithoutBackstage["backstagePressure"];
+  delete secretsWithoutBackstage["backstagePendingHarvests"];
   const rawV14 = {
     ...current,
     meta: { ...current.meta, schemaVersion: 14 },
@@ -36,6 +37,7 @@ void test("migrateState runs the FULL chain without skipping steps (v14 -> curre
   assert.deepEqual(migrated.secrets.backstageObligations, []);
   assert.deepEqual(migrated.secrets.backstageReviewLog, []);
   assert.deepEqual(migrated.secrets.backstagePressure, { consecutiveNoCostTurns: 0 });
+  assert.deepEqual(migrated.secrets.backstagePendingHarvests, []);
 });
 
 void test("migrateState upgrades schema v1 states to current turn log shape", () => {
