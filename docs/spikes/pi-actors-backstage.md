@@ -269,6 +269,59 @@ cross-faction intent into Assassin's next delta. This precisely marks the
 boundary between the validated **independent fan-out** floor and the deeper
 **coordination** ceiling (`room`/`coordinator`).
 
+## Probe 4: cross-faction coordination — engine-mediated, NOT native room
+
+The deeper ceiling: faction A's move informs faction B (Caster commands
+Assassin). Research finding **before** building decided the shape:
+
+### Why native `room`/`coordinator` is the wrong tool here
+
+pi-actors' native coordination (`room:<run>` + `branch:<run>/<branch>` +
+`coordinator`) requires the participants to be **long-lived worker actors that
+carry `message`/`inspect` tools** — they post to and read the shared room. The
+docs are explicit: backstage workers "should be **long-lived workers, not
+one-shot prompts**" that "claim … and share `room:<run>` for visibility." That is
+exactly what our hermetic firewall forbids: our directors are **one-shot
+`pi -p --no-tools`** (zero tools → cannot message a room; exit immediately).
+Native room would force tool-bearing, long-lived children — a regression to the
+fragile `@gotgenes`-style scoped-tool firewall.
+
+And pi-actors' **own docs** point the other way:
+
+> "Use pi-actors as the actor runtime **without making pi-actors own swarm
+> semantics**. The **coordinator prepares scope** … the async run owns fanout,
+> state, logs, status."
+> "`communication.json` is visible actor context, **not a global mutable truth
+> table**."
+
+### The fsn-correct shape: the engine is the coordinator
+
+Coordination flows through the **canonical world state the GM owns**, not an
+out-of-band actor room. Caster (tick 1) emits a structured cross-faction order;
+the **GM (coordinator)** extracts it and threads it into Assassin's tick-2 delta;
+Assassin executes it. Directors stay one-shot hermetic `--no-tools`; the firewall
+is untouched; it matches "engine is the single source of truth" and the deferred
+obligation model. Files: `sample-coord-caster-turn1.md` (Caster issues
+`carryForward.ordersToAllies`), `sample-coord-assassin-turn2.md` (delta with a
+`{{CASTER_ORDER}}` insert point the GM fills).
+
+### Pass / fail (probe 4)
+
+| #   | Check              | Pass                                                                                  |
+| --- | ------------------ | ------------------------------------------------------------------------------------- |
+| C1  | **A issues order** | Caster tick-1 emits a well-formed `ordersToAllies` entry for `assassin-ryudou`         |
+| C2  | **GM relays**      | the order text is extracted and threaded into Assassin's delta (no direct A↔B channel) |
+| C3  | **B executes** 🔑  | Assassin tick-2 candidate visibly carries out Caster's order (behavior changed), within its own constraints (still gate-bound) |
+| C4  | **Firewall holds** | both directors 0 tools, one-shot; Assassin never read Caster's session; no secret crossed |
+
+If C3 + C4 pass, cross-faction coordination works **with the firewall intact**:
+the GM/engine is the coordination surface, pi-actors only owns fanout — exactly
+the layering pi-actors' docs endorse.
+
+_(A separate, opt-in probe could stress the **native** `room`/`coordinator`
+primitive with tool-bearing long-lived branch actors — at the documented firewall
+cost. Not pursued here; engine-mediated is the fsn-correct path.)_
+
 ---
 
 ## Spike complete — capability map 4/4 validated
@@ -279,7 +332,7 @@ boundary between the validated **independent fan-out** floor and the deeper
 | Durable, inspectable retrieval     | ✅ r2    | ❌                  |
 | **Persistent-memory director**     | ✅ p2    | ❌ (structural)     |
 | **Swarm: concurrent independent**  | ✅ p3    | ❌                  |
-| Cross-faction coordination (room)  | ⚪ not probed | ❌              |
+| Cross-faction coordination         | 🔬 probe 4 (engine-mediated) | ❌    |
 
 The firewall held in **every** mode (single, persistent, concurrent): 0 tools, no
 secret ever in any child session, no canonical-state path. The differentiators
@@ -315,9 +368,11 @@ multi-faction world ticks, or single-turn synchronous generation becoming a UX
 block. Until then the validated spike stands as a proven, ready option; master's
 working synchronous substrate is fine as the baseline.
 
-**Out of scope / next spike if pursued:** cross-faction coordination
-(`room`/`coordinator`) — the only unproven capability, and the one that would let
-Caster actually command Assassin offscreen.
+**Cross-faction coordination:** see Probe 4 above — pursued via the
+**engine-mediated** shape (GM as coordinator, canonical state as the shared
+board), because native `room`/`coordinator` would break the hermetic firewall by
+requiring tool-bearing long-lived actors. The native primitive remains an
+opt-in-at-firewall-cost probe, not the fsn path.
 
 ## Files in this spike
 
