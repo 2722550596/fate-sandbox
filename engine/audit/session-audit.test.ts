@@ -3,7 +3,9 @@ import test from "node:test";
 
 import {
   auditSession,
+  extractLatestSecrets,
   groupTurns,
+  measureBackstageLedger,
   measureGetStatusUsage,
   measureLint,
   measureParallelLine,
@@ -387,6 +389,62 @@ void test("beat complete triggers parallel-line expectation", () => {
   const pl = measureParallelLine(groupTurns(reconstructActivePath(parseSessionJsonl(jsonl))));
   assert.equal(pl.triggeredTurns, 1);
   assert.equal(pl.triggeredTurnsWithCall, 0);
+});
+
+// ---------- backstage 账本 ----------
+
+void test("measureBackstageLedger reads outcome + open ledger from secrets snapshot", () => {
+  const report = measureBackstageLedger({
+    backstageReviewLog: [
+      {
+        id: "r1",
+        obligationId: "o1",
+        outcome: "landed",
+        reasonCode: "candidate-landed",
+        note: "x",
+      },
+      {
+        id: "r2",
+        obligationId: "o2",
+        outcome: "no-change",
+        reasonCode: "advanced-recently",
+        note: "y",
+      },
+      {
+        id: "r3",
+        obligationId: "o3",
+        outcome: "no-change",
+        reasonCode: "actors-on-scene",
+        note: "z",
+      },
+    ],
+    backstageObligations: [{ id: "o4", trigger: "time-advance", summary: "s", createdAt: "t" }],
+  });
+  assert.equal(report.reviewed, 3);
+  assert.equal(report.byOutcome["landed"], 1);
+  assert.equal(report.byOutcome["no-change"], 2);
+  assert.equal(report.openAtEnd, 1);
+  assert.deepEqual(report.openTriggers, ["time-advance"]);
+  assert.ok(Math.abs(report.nonLandedRatio - 2 / 3) < 1e-9);
+});
+
+void test("measureBackstageLedger defaults to an empty ledger on legacy secrets", () => {
+  const report = measureBackstageLedger({ secretActors: {} });
+  assert.equal(report.reviewed, 0);
+  assert.equal(report.openAtEnd, 0);
+  assert.equal(report.nonLandedRatio, 0);
+});
+
+void test("extractLatestSecrets returns the last fsn-state snapshot's secrets", () => {
+  const jsonl = buildJsonl([
+    { kind: "user", text: "一" },
+    { kind: "state", secrets: { backstageObligations: [{ id: "old" }] } },
+    { kind: "assistant", text: "正文。" },
+    { kind: "state", secrets: { backstageObligations: [{ id: "new", trigger: "beat-complete" }] } },
+  ]);
+  const secrets = extractLatestSecrets(reconstructActivePath(parseSessionJsonl(jsonl)));
+  const report = measureBackstageLedger(secrets);
+  assert.deepEqual(report.openTriggers, ["beat-complete"]);
 });
 
 // ---------- 端到端 ----------

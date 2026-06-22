@@ -94,7 +94,7 @@ The runtime is built around deterministic engine mutations plus prompt/tool rout
 
 ## Start Here
 
-The three highest-value runtime-closure improvements are now implemented (Scene Beat single-path, direction-packet semantic validation, and the parallel-line backstage obligation loop). Remaining optional polish: (a) wire `engine/audit/session-audit.ts` to read the new `backstageReviewLog` instead of only inferring parallel-line discipline from tool-call text; (b) tighten the `turnHasCost` core set in `tools/state/commit-turn.ts` if no-cost detection proves too coarse; (c) finding #4 (memory free-text evidence escape hatch) and #5 (debug tools in the main registry) remain open as originally scoped.
+The three highest-value runtime-closure improvements are now implemented (Scene Beat single-path, direction-packet semantic validation, and the parallel-line backstage obligation loop). Polish item (a) is DONE: `engine/audit/session-audit.ts` now reads the engine's ground-truth ledger via `measureBackstageLedger` / `extractLatestSecrets` (`secrets.backstageReviewLog` + `backstageObligations` from the latest fsn-state snapshot), reporting reviewed/open counts, outcome + reasonCode breakdown, and a `nonLandedRatio` "rubber-stamp" tell; the `measureParallelLine` heuristic stays as a tool-call cross-check. Remaining optional polish (awaiting user observation before acting): (b) tighten the `turnHasCost` core set in `tools/state/commit-turn.ts` if no-cost detection proves too coarse; (c) finding #4 (memory free-text evidence escape hatch) and #5 (debug tools in the main registry) remain open as originally scoped.
 
 ## Residual Risks
 

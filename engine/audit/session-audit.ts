@@ -2,7 +2,8 @@
  * Session JSONL 叙事纪律审计（backlog #8）。
  *
  * 把「感觉最近 GM 变软了」变成数字：时间推进覆盖率、工具调用分布、
- * get_status 冗余率、连续无代价轮数、输出契约违规、parallel-line 触发命中率。
+ * get_status 冗余率、连续无代价轮数、输出契约违规、parallel-line 触发命中率、
+ * backstage 义务账本结算情况（引擎实账，schema v17+）。
  *
  * 全部纯函数：输入是 JSONL 行解析出的 entry 数组，输出是结构化报告。
  * CLI 薄壳在 `scripts/audit-session.ts`。
@@ -494,6 +495,82 @@ export function measureParallelLine(turns: readonly AuditTurn[]): ParallelLineRe
   };
 }
 
+// ---------- backstage 义务账本（引擎实账，schema v17+）----------
+
+/**
+ * `measureParallelLine` 是「按 tool-call 推断 GM 该不该推进后台」的启发式。
+ * v17 硬阻断落地后，引擎自己在 `secrets.backstageReviewLog` / `backstageObligations`
+ * 里记了实账——触发的义务必被结算才能继续。这里直接读实账，给出 ground truth：
+ * 结算了多少、按 outcome/reasonCode 分布、结束时还欠多少。
+ *
+ * 新的「软」信号是 `nonLandedRatio`：硬阻断逼着 GM 清账，但 GM 可能用
+ * `resolve_backstage_line` 的 no-change 橡皮图章绕过，而非真的 record_offscreen_event 落地。
+ */
+export interface BackstageLedgerReport {
+  /** reviewLog 中已结算的义务数（landed + no-change + blocked） */
+  reviewed: number;
+  /** 按 outcome 分布 */
+  byOutcome: Record<string, number>;
+  /** 按 reasonCode 分布 */
+  byReasonCode: Record<string, number>;
+  /** session 结束时仍未结算的义务数 */
+  openAtEnd: number;
+  /** 仍未结算义务的 trigger 列表 */
+  openTriggers: string[];
+  /** 已结算中 outcome 非 landed（no-change/blocked）的占比——敷衍率 */
+  nonLandedRatio: number;
+}
+
+function readLedgerArray(secrets: unknown, key: string): Record<string, unknown>[] {
+  if (!isRecord(secrets)) return [];
+  const value = secrets[key];
+  if (!Array.isArray(value)) return [];
+  return value.filter(isRecord);
+}
+
+/**
+ * active path 上最后一个 fsn-state 快照的 `secrets`（最新引擎账本所在）。
+ * 老 schema（无 backstage 字段）返回的对象里读不到，measure 会安全降级为空账本。
+ */
+export function extractLatestSecrets(path: readonly RawEntry[]): unknown {
+  let secrets: unknown;
+  for (const entry of path) {
+    if (entry.type === "custom" && entry.customType === "fsn-state" && isRecord(entry.data)) {
+      const state = entry.data["state"];
+      if (isRecord(state)) secrets = state["secrets"];
+    }
+  }
+  return secrets;
+}
+
+export function measureBackstageLedger(secrets: unknown): BackstageLedgerReport {
+  const reviewLog = readLedgerArray(secrets, "backstageReviewLog");
+  const obligations = readLedgerArray(secrets, "backstageObligations");
+
+  const byOutcome: Record<string, number> = {};
+  const byReasonCode: Record<string, number> = {};
+  let nonLanded = 0;
+  for (const entry of reviewLog) {
+    const outcome = typeof entry["outcome"] === "string" ? entry["outcome"] : "unknown";
+    const reasonCode = typeof entry["reasonCode"] === "string" ? entry["reasonCode"] : "unknown";
+    byOutcome[outcome] = (byOutcome[outcome] ?? 0) + 1;
+    byReasonCode[reasonCode] = (byReasonCode[reasonCode] ?? 0) + 1;
+    if (outcome !== "landed") nonLanded += 1;
+  }
+  const openTriggers = obligations.map((entry) =>
+    typeof entry["trigger"] === "string" ? entry["trigger"] : "unknown",
+  );
+
+  return {
+    reviewed: reviewLog.length,
+    byOutcome,
+    byReasonCode,
+    openAtEnd: obligations.length,
+    openTriggers,
+    nonLandedRatio: reviewLog.length === 0 ? 0 : nonLanded / reviewLog.length,
+  };
+}
+
 // ---------- 汇总 ----------
 
 export interface SessionAuditReport {
@@ -504,10 +581,12 @@ export interface SessionAuditReport {
   pressure: PressureReport;
   lint: LintReport;
   parallelLine: ParallelLineReport;
+  backstageLedger: BackstageLedgerReport;
 }
 
 export function auditSession(content: string): SessionAuditReport {
-  const turns = groupTurns(reconstructActivePath(parseSessionJsonl(content)));
+  const path = reconstructActivePath(parseSessionJsonl(content));
+  const turns = groupTurns(path);
   return {
     turnCount: turns.length,
     timeCoverage: measureTimeCoverage(turns),
@@ -516,6 +595,7 @@ export function auditSession(content: string): SessionAuditReport {
     pressure: measurePressure(turns),
     lint: measureLint(turns),
     parallelLine: measureParallelLine(turns),
+    backstageLedger: measureBackstageLedger(extractLatestSecrets(path)),
   };
 }
 
@@ -569,11 +649,26 @@ export function renderAuditReport(report: SessionAuditReport): string {
 
   const pl = report.parallelLine;
   lines.push("");
-  lines.push("[parallel-line]");
+  lines.push("[parallel-line 触发启发式（按 tool-call 推断）]");
   lines.push(`  调用 ${pl.calls} 次`);
   lines.push(
     `  触发条件命中轮 ${pl.triggeredTurns}，其中调用了 parallel-line: ${pl.triggeredTurnsWithCall} (${percent(pl.hitRatio)})`,
   );
+
+  const bl = report.backstageLedger;
+  lines.push("");
+  lines.push("[backstage 义务账本（引擎实账）]");
+  lines.push(`  已结算义务: ${bl.reviewed}，session 结束仍未清账: ${bl.openAtEnd}`);
+  if (bl.openTriggers.length > 0) {
+    lines.push(`  未清账 trigger: ${bl.openTriggers.join(", ")}`);
+  }
+  if (bl.reviewed > 0) {
+    const outcomes = Object.entries(bl.byOutcome).toSorted((a, b) => b[1] - a[1]);
+    lines.push(`  outcome: ${outcomes.map(([key, count]) => `${key} ${count}`).join(" / ")}`);
+    lines.push(`  非 landed（敷衍）占比: ${percent(bl.nonLandedRatio)}`);
+    const reasons = Object.entries(bl.byReasonCode).toSorted((a, b) => b[1] - a[1]);
+    lines.push(`  reasonCode: ${reasons.map(([key, count]) => `${key} ${count}`).join(" / ")}`);
+  }
 
   return lines.join("\n");
 }
