@@ -353,13 +353,13 @@ cost. Not pursued here; engine-mediated is the fsn-correct path.)_
 
 ## Spike complete — capability map 5/5 validated
 
-| Capability                        | Verdict                      | `pi-subagents` can? |
-| --------------------------------- | ---------------------------- | ------------------- |
-| Async hermetic single-line        | ✅ r1/r2                     | partial (sync only) |
-| Durable, inspectable retrieval    | ✅ r2                        | ❌                  |
-| **Persistent-memory director**    | ✅ p2                        | ❌ (structural)     |
-| **Swarm: concurrent independent** | ✅ p3                        | ❌                  |
-| **Cross-faction coordination**    | ✅ p4 (engine-mediated)      | ❌                  |
+| Capability                        | Verdict                 | `pi-subagents` can? |
+| --------------------------------- | ----------------------- | ------------------- |
+| Async hermetic single-line        | ✅ r1/r2                | partial (sync only) |
+| Durable, inspectable retrieval    | ✅ r2                   | ❌                  |
+| **Persistent-memory director**    | ✅ p2                   | ❌ (structural)     |
+| **Swarm: concurrent independent** | ✅ p3                   | ❌                  |
+| **Cross-faction coordination**    | ✅ p4 (engine-mediated) | ❌                  |
 
 The firewall held in **every** mode (single, persistent, concurrent, coordinated):
 0 tools, no secret ever in any child session, no canonical-state path. The
