@@ -1,8 +1,53 @@
 # Spike: `@llblab/pi-actors` as the backstage parallel-line substrate
 
-**Branch:** `spike/pi-actors-backstage` · **Status:** round 1 validated firewall +
-lifecycle; result-retrieval gap found and fixed (v2 recipe). Pending round-2
-live re-test. NOT merged. master untouched.
+**Branch:** `spike/pi-actors-backstage` · **Status:** VALIDATED end-to-end (round 2,
+v2 recipe). Substrate viable; adoption decision pending. NOT merged. master
+untouched.
+
+## Round 2 result (live, v2 recipe) — PASS
+
+Ran `pl_smoke2b` (deepseek-v4-pro), `code=0`. Every check green:
+
+- **A. Firewall — PASS.** Child used **0 tools**; session JSONL shows no
+  `tool_use`. Canonical state untouched by the subprocess.
+- **B. Candidate — PASS.** The child's last assistant message was a clean,
+  parseable `ParallelLineOutput` JSON object (`outcome: success`, abstractEvent
+  for `caster-ryudou`, deniable nighttime prana-harvest). No fence, no prose.
+- **C. Cleanliness — PASS.** `--no-approve --no-context-files` confirmed: **no**
+  `extension.ts` / `.pi/settings.json` / AGENTS.md load in the child. Only
+  deepseek `reasoning_content` lived in the transcript; the `text` field was pure
+  JSON.
+- **D. Retrieval — PASS.** Durable session file survived the run-dir GC:
+  `spikes/pi-actors/.sessions/2026-...-pl_smoke2b.jsonl`, readable on demand.
+- **E. Errors — none.** spawn / inspect / subprocess / file-discovery all clean.
+
+**One quality nit (not a substrate issue):** the candidate returned a
+zero-duration `timeRange` (`start == end`) despite a multi-hour input window. The
+hand-written sample prompt under-specified "span a real window"; the production
+recipe must feed the full `.pi/agents/parallel-line.md` contract + real injected
+context, which already pins time-window discipline.
+
+## Verdict
+
+The **opposite** outcome from `@gotgenes`: firewall airtight, retrieval works,
+candidate clean. The firewall/retrieval debt that sank `@gotgenes` is **paid and
+proven low here** — process boundary + `--no-tools` + `--no-approve`, injection at
+spawn, candidate harvested from a durable file we own.
+
+What remains is **adoption debt**, and it is real: master already runs
+parallel-line **synchronously** on the old `pi-subagents` substrate and it works.
+Adopting pi-actors means swapping a working path for an async one, re-plumbing the
+GM tool-policy (spawn actor + later harvest instead of a blocking subagent call),
+and a slightly clunky session-JSONL harvest. The *win* is async (turn not
+blocked) + durable, inspectable candidate artifacts + a firewall that is airtight
+by construction + a shape that matches the already-deferred Phase 3 obligation
+loop.
+
+So unlike `@gotgenes` (debt > value, clear no), this is **debt ≈ value**: a
+validated, genuinely viable option whose adoption is justified by a concrete
+trigger (multi-faction world-tick, or single-turn blocking becoming a UX
+problem), not by novelty. **Recommendation: bank it as a proven option; adopt on
+trigger.**
 
 ## Round 1 result (live)
 
@@ -54,7 +99,7 @@ child needs the harness + a model):
 2. **Result flow** — the candidate JSON reliably comes back to the GM, readable
    via `inspect`, surviving context compaction.
 
-## Why the firewall is airtight _by construction_ (the part we CAN reason about)
+## Why the firewall is airtight *by construction* (the part we CAN reason about)
 
 Unlike `@gotgenes` (shared in-process memory; firewall depended on fragile
 per-agent permission resolution), pi-actors runs the child as a **separate `pi`
@@ -75,7 +120,7 @@ process**:
   mutating a live tool-call event), and the firewall is the process boundary +
   `--no-tools`, not a permission package.
 
-So the _secret_ firewall is structurally sound. What still needs live eyes is
+So the *secret* firewall is structurally sound. What still needs live eyes is
 the **process-boundary cleanliness** (below).
 
 ## The child-loads-our-extension risk — addressed in v2
@@ -90,7 +135,7 @@ path). Round-2 confirms the candidate comes back clean.
 ## Files in this spike
 
 - `spikes/pi-actors/parallel_line.json` — the v2 async recipe (hermetic `pi -p
-  --no-tools --no-approve --no-context-files`, durable `--session-dir`).
+--no-tools --no-approve --no-context-files`, durable `--session-dir`).
 - `spikes/pi-actors/sample-backstage-prompt.md` — a ready, self-contained test
   prompt (safe projection + ParallelLineInput + "output bare JSON").
 - `.pi/settings.json` — adds `npm:@llblab/pi-actors` (spike-only).
