@@ -18,12 +18,12 @@ Hard rules:
   than the context `currentAt`.
 - The JSON MUST include a `carryForward` object:
   `{ "codeword": "<one invented word>",
-     "planState": "<where your scheme stands now>",
-     "nextSteps": ["<future move>"],
-     "ordersToAllies": [
-       { "toFaction": "assassin-ryudou",
-         "order": "<one concrete instruction Assassin can carry out WITHOUT leaving the gate>" }
-     ] }`
+   "planState": "<where your scheme stands now>",
+   "nextSteps": ["<future move>"],
+   "ordersToAllies": [
+     { "toFaction": "assassin-ryudou",
+       "order": "<one concrete instruction Assassin can carry out WITHOUT leaving the gate>" }
+   ] }`
   Keep the order within a gate-guard's means (Assassin cannot leave the gate or
   descend the mountain).
 

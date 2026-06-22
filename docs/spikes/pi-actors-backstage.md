@@ -307,16 +307,43 @@ obligation model. Files: `sample-coord-caster-turn1.md` (Caster issues
 
 ### Pass / fail (probe 4)
 
-| #   | Check              | Pass                                                                                  |
-| --- | ------------------ | ------------------------------------------------------------------------------------- |
-| C1  | **A issues order** | Caster tick-1 emits a well-formed `ordersToAllies` entry for `assassin-ryudou`         |
-| C2  | **GM relays**      | the order text is extracted and threaded into Assassin's delta (no direct A↔B channel) |
+| #   | Check              | Pass                                                                                                                           |
+| --- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| C1  | **A issues order** | Caster tick-1 emits a well-formed `ordersToAllies` entry for `assassin-ryudou`                                                 |
+| C2  | **GM relays**      | the order text is extracted and threaded into Assassin's delta (no direct A↔B channel)                                         |
 | C3  | **B executes** 🔑  | Assassin tick-2 candidate visibly carries out Caster's order (behavior changed), within its own constraints (still gate-bound) |
-| C4  | **Firewall holds** | both directors 0 tools, one-shot; Assassin never read Caster's session; no secret crossed |
+| C4  | **Firewall holds** | both directors 0 tools, one-shot; Assassin never read Caster's session; no secret crossed                                      |
 
 If C3 + C4 pass, cross-faction coordination works **with the firewall intact**:
 the GM/engine is the coordination surface, pi-actors only owns fanout — exactly
 the layering pi-actors' docs endorse.
+
+### Probe 4 result (live) — PASS
+
+Three spawns (`pl_caster_c1`/`dir-caster-coord`, `pl_assassin_c1` +
+`pl_assassin_c2`/`dir-assassin-coord`), deepseek-v4-pro.
+
+- **C1 A issues order — PASS.** Caster emitted a well-formed `ordersToAllies`
+  entry for `assassin-ryudou` ("remain at the gate, spirit-form, detect approach
+  up the stairway, report mana/Master presence, do not engage unless the barrier
+  is threatened").
+- **C2 GM relays — PASS.** The coordinator extracted only the `order` string and
+  substituted it into Assassin's `{{CASTER_ORDER}}` slot. The directors never
+  spoke directly.
+- **C3 B executes — PASS.** A_T1 was a passive physical vigil; A_T2 visibly
+  **transformed** to spirit-form with a sensory net extended down the full
+  stairway + an explicit no-engage/report protocol — and stayed gate-bound (no
+  physical descent). `acknowledgedOrder` confirmed the landing; codeword
+  `VigilantHollow` held across both turns. **B obeyed A while respecting B's own
+  constraints** — coordination with integrity.
+- **C4 Firewall — PASS.** Both directors 0 tools, one-shot. Assassin's session
+  held only its own prompts/outputs + the relayed order string — none of Caster's
+  candidate, codeword (`Ichorfeather`), planState, or nextSteps. No secret
+  crossed in either direction.
+
+Cross-faction coordination is validated **the fsn-correct way**: the engine is
+the coordinator, canonical state is the shared board, pi-actors owns only fanout,
+and the hermetic firewall is untouched.
 
 _(A separate, opt-in probe could stress the **native** `room`/`coordinator`
 primitive with tool-bearing long-lived branch actors — at the documented firewall
@@ -324,20 +351,21 @@ cost. Not pursued here; engine-mediated is the fsn-correct path.)_
 
 ---
 
-## Spike complete — capability map 4/4 validated
+## Spike complete — capability map 5/5 validated
 
-| Capability                         | Verdict | `pi-subagents` can? |
-| ---------------------------------- | ------- | ------------------- |
-| Async hermetic single-line         | ✅ r1/r2 | partial (sync only) |
-| Durable, inspectable retrieval     | ✅ r2    | ❌                  |
-| **Persistent-memory director**     | ✅ p2    | ❌ (structural)     |
-| **Swarm: concurrent independent**  | ✅ p3    | ❌                  |
-| Cross-faction coordination         | 🔬 probe 4 (engine-mediated) | ❌    |
+| Capability                        | Verdict                      | `pi-subagents` can? |
+| --------------------------------- | ---------------------------- | ------------------- |
+| Async hermetic single-line        | ✅ r1/r2                     | partial (sync only) |
+| Durable, inspectable retrieval    | ✅ r2                        | ❌                  |
+| **Persistent-memory director**    | ✅ p2                        | ❌ (structural)     |
+| **Swarm: concurrent independent** | ✅ p3                        | ❌                  |
+| **Cross-faction coordination**    | ✅ p4 (engine-mediated)      | ❌                  |
 
-The firewall held in **every** mode (single, persistent, concurrent): 0 tools, no
-secret ever in any child session, no canonical-state path. The differentiators
-`pi-subagents` cannot reach — self-remembering directors and a concurrent
-multi-faction world tick — are both proven.
+The firewall held in **every** mode (single, persistent, concurrent, coordinated):
+0 tools, no secret ever in any child session, no canonical-state path. The
+differentiators `pi-subagents` cannot reach — self-remembering directors, a
+concurrent multi-faction world tick, and engine-mediated cross-faction
+coordination — are all proven.
 
 ### Recommendation
 

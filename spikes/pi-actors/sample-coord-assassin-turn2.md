@@ -6,9 +6,9 @@ Coordination this tick: your summoner Caster has issued an order, relayed to you
 by the main GM (the coordinator). You did NOT hear it from Caster directly — the
 GM is the only channel. Fold this order into your watch.
 
->>> CASTER'S ORDER (the GM pastes Caster's `ordersToAllies[].order` text here):
-{{CASTER_ORDER}}
-<<<
+> > > CASTER'S ORDER (the GM pastes Caster's `ordersToAllies[].order` text here):
+> > > {{CASTER_ORDER}}
+> > > <<<
 
 Do this:
 
