@@ -2,11 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { resetState } from "../../engine/core/state-store.ts";
-import { isRecord } from "../../engine/core/typebox-validation.ts";
 
 import { runParallelLineTool } from "./run-parallel-line.ts";
 
-void test("runParallelLineTool assembles input with engine defaults", () => {
+void test("runParallelLineTool emits async spawn instructions + full director prompt", () => {
   resetState();
 
   const result = runParallelLineTool(
@@ -21,14 +20,21 @@ void test("runParallelLineTool assembles input with engine defaults", () => {
   );
 
   const text = result.content[0]?.text ?? "";
-  assert.match(text, /engine 装配完成/);
-  assert.match(text, /caster-ryudou/);
+  // async spawn flow, not the retired sync subagent
+  assert.match(text, /异步 spawn/);
+  assert.match(text, /recipe=parallel_line/);
+  assert.match(text, /model=deepseek-v4-pro/);
+  assert.match(text, /session_dir=~\/\.pi\/agent\/backstage-sessions/);
+  assert.match(text, /harvest_backstage_candidate/);
+  assert.doesNotMatch(text, /agentScope/);
+  // the full director prompt is embedded for the GM to pass to spawn
+  assert.match(text, /DIRECTOR PROMPT/);
+  assert.match(text, /"lineId": "caster-ryudou"/);
 
-  const assembled = result.details?.["assembledInput"];
-  assert.ok(isRecord(assembled));
-  assert.equal(assembled["lineId"], "caster-ryudou");
-  assert.equal(assembled["timelineId"], "fsn");
-  assert.ok(Array.isArray(assembled["activePressurePalette"]));
+  const prompt = result.details["directorPrompt"];
+  assert.ok(typeof prompt === "string" && prompt.includes("caster-ryudou"));
+  assert.equal(result.details["recipe"], "parallel_line");
+  assert.equal(result.details["runId"], "bl-caster-ryudou");
 });
 
 void test("runParallelLineTool rejects missing lineId", () => {

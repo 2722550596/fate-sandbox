@@ -1,9 +1,10 @@
 /**
- * run_parallel_line 领域工具（backlog #5）。
+ * run_parallel_line 领域工具（backlog #5；pi-actors 生产化 slice A）。
  *
- * GM 只需提供 lineId + timeWindow + 可选偏好，engine 自动装配
- * ParallelLineInput 并把结果用 TypeBox 验收。装配质量不再依赖
- * 主模型现编，泄密风险由 engine 过滤而非 prompt 自查。
+ * GM 只给 lineId + timeWindow + 可选偏好，engine 装配 ParallelLineInput 并进一步
+ * 拼成完整的 hermetic director prompt，返回【异步 spawn 指令】——不再走同步子代理。
+ * 后台生成只走 pi-actors：spawn faction-director（独立进程、--no-tools、钉模型）→
+ * 隔轮取回裸候选 → harvest_backstage_candidate 验收 → 审查 → 落地清账。
  */
 
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
@@ -12,13 +13,22 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 import { Type } from "typebox";
 
 import {
-  assembleParallelLineInput,
-  type AssembleParallelLineInput,
-} from "../../engine/core/parallel-line-assembler.ts";
+  BACKSTAGE_MODEL,
+  BACKSTAGE_RECIPE,
+  BACKSTAGE_SESSION_DIR,
+} from "../../engine/core/backstage-substrate-config.ts";
+import { buildBackstageDirectorPrompt } from "../../engine/core/backstage-director-prompt.ts";
+import { type AssembleParallelLineInput } from "../../engine/core/parallel-line-assembler.ts";
 import { hydrateStateFromSessionManager } from "../../engine/core/session-hydration.ts";
 import { getState } from "../../engine/core/state-store.ts";
 import { isRecord } from "../../engine/core/typebox-validation.ts";
 import { textResult } from "../runtime/tool-result.ts";
+
+/** sanitize lineId into a run-id suffix for inspectable, collision-free async runs. */
+function backstageRunId(lineId: string): string {
+  const slug = lineId.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return `bl-${slug || "line"}`;
+}
 
 export function runParallelLineTool(params: unknown, sessionManager: unknown): ToolResult {
   if (sessionManager !== undefined) {
@@ -26,18 +36,26 @@ export function runParallelLineTool(params: unknown, sessionManager: unknown): T
   }
   const state = getState();
   const input = parseToolInput(params);
-  const assembled = assembleParallelLineInput(state, input);
-  const assembledJson = JSON.stringify(assembled, null, 2);
+  const directorPrompt = buildBackstageDirectorPrompt(state, input);
+  const runId = backstageRunId(input.lineId);
   return textResult(
     [
-      "parallel-line 输入已由 engine 装配完成。",
-      "请将以下 JSON 作为 task 传给 parallel-line 子代理（agentScope: project）。",
-      "子代理返回后，用 record_offscreen_event 或其它领域工具落地候选结果；",
-      "落地时从 activePressurePalette 里选一个 slot，把它的 pressureType（可选 slot id）填进 record_offscreen_event。",
+      "backstage 异步导演 prompt 已由 engine 装配（persona + 安全投影 + ParallelLineInput）。",
+      "请【异步 spawn】一个 hermetic faction-director（不要走同步子代理）：",
+      `  recipe=${BACKSTAGE_RECIPE}`,
+      `  model=${BACKSTAGE_MODEL}   （钉死，勿继承 {current_model}）`,
+      `  session_dir=${BACKSTAGE_SESSION_DIR}   （持久、含隐藏事实、勿入 repo）`,
+      `  run_id=${runId}   （便于 inspect 巡检）`,
+      "  prompt=以下完整 director prompt 全文",
       "",
-      assembledJson,
+      "导演跑完后：从该 session 取最后一条 assistant 文本 → harvest_backstage_candidate 验收 →",
+      "审查 → record_offscreen_event（progress/escalation，落地即清义务）或 resolve_backstage_line（no-change/blocked）。",
+      "子代理失败/未调用不算清账。",
+      "",
+      "========== DIRECTOR PROMPT (spawn 的 prompt 参数) ==========",
+      directorPrompt,
     ].join("\n"),
-    { assembledInput: assembled },
+    { directorPrompt, lineId: input.lineId, recipe: BACKSTAGE_RECIPE, model: BACKSTAGE_MODEL, runId },
   );
 }
 
@@ -103,15 +121,16 @@ function optionalBoolean(value: unknown): boolean | undefined {
 export const runParallelLineToolDefinition: FateToolDefinition = {
   name: "run_parallel_line",
   description:
-    "由 engine 自动装配 parallel-line 子代理输入。GM 只给 lineId + timeWindow + 可选偏好，engine 从 secret state / agenda / offscreenEventLog / pressure palette 补齐其余字段，返回可直接传给子代理的 JSON。\n\n" +
+    "由 engine 装配完整 hermetic director prompt，返回【异步 spawn 指令】。GM 只给 lineId + timeWindow + 可选偏好，engine 从 secret state / agenda / offscreenEventLog / pressure palette 补齐字段并拼出可直接作为 spawn prompt 的全文。\n\n" +
     "【使用边界】\n" +
     "- 需推进后台世界线，不想手写全部 ParallelLineInput\n" +
     "- gm-tool-policy 触发 parallel-line（跳时 >10-30min、beat 关闭、连续 2 轮无代价）\n" +
-    "流程：拿 JSON → 作 task 传给 parallel-line 子代理（agentScope: project）→ 审查后用 record_offscreen_event 等工具落地。\n\n" +
+    "流程：拿 director prompt → 【异步 spawn】 faction-director（pi-actors recipe，非同步子代理）→ 隔轮从持久 session 取裸候选 → harvest_backstage_candidate 验收 → 审查 → record_offscreen_event / resolve_backstage_line 落地。\n\n" +
     "禁区：\n" +
-    "- 绕过 engine 装配手写完整 ParallelLineInput\n" +
-    "- 把 privateFacts 原样写进玩家可见正文\n" +
-    "- 不审查子代理候选就落地",
+    "- 绕过 engine 装配手写完整 ParallelLineInput / director prompt\n" +
+    "- 改走同步子代理（已废弃）或让导演继承 {current_model}\n" +
+    "- 把 privateFacts / privateSummary 原样写进玩家可见正文\n" +
+    "- 不过 harvest_backstage_candidate 验收就落地",
   parameters: Type.Object({
     lineId: Type.String({ description: "后台线标识，如 caster-ryudou、lancer-church" }),
     timeWindow: Type.Object({
