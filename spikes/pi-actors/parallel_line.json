@@ -1,0 +1,11 @@
+{
+  "description": "SPIKE: hermetic backstage parallel-line candidate generator. Runs `pi -p --no-tools` as a detached async actor. Separate process + zero tools + a fully self-contained prompt means it physically cannot read or write the GM's canonical state or secrets (it opens its own empty session; the parent state lives only in the parent process + parent session file). It returns a ParallelLineOutput JSON candidate on stdout; the main GM validates and lands it via record_offscreen_event, which settles the backstage obligation. This is a spike artifact — not active GM policy.",
+  "async": true,
+  "args": ["prompt:string", "model:string"],
+  "defaults": { "model": "{current_model}" },
+  "mailbox": {
+    "accepts": ["control.kill"],
+    "emits": ["candidate.ready", "run.failed"]
+  },
+  "template": "pi -p --no-tools --model {model} {prompt}"
+}
