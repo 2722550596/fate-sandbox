@@ -12,7 +12,7 @@
 | ----------------------------- | ---------------- | ------ |
 | M1: 骨架可编译（Phase 1+9）   | ✅ 完成          | 100%   |
 | M2: 引擎核心可运行（Phase 2） | ✅ 大部          | ~85%   |
-| M3: 工具链可用（Phase 3）     | 🔶 部分 + 有断层 | ~50%   |
+| M3: 工具链可用（Phase 3）     | ✅ 完成          | 100%   |
 | M4: 数据可用（Phase 4）       | 🔶 部分（见详）  | ~20%   |
 | M5: Prompt 可游玩（Phase 5）  | ❌ 未动          | 0%     |
 | M6: 高级功能（Phase 6-7）     | ❌ 未动          | 0%     |
@@ -157,30 +157,32 @@
 
 **2026-06-27 修复：** 工具层描述和 schema 已重写，匹配引擎的 `add-status-effect` / `remove-status-effect` / `change-outfit` / `transfer-tracked-item` / `update-tracked-item` / `add-tracked-item`。已删除所有 Fate 术语（wound/affliction/magecraft-circuits/Fate rank 等）。
 
-### ❌ 尚未创建的新工具
+### ✅ 已完成的新工具
 
-| 工具名              | 迁移计划要求                         | 状态      |
-| ------------------- | ------------------------------------ | --------- |
-| `attempt_promotion` | 序列晋升（魔药消化、仪式、失控风险） | ❌ 未创建 |
-| `roll_dice`         | 独立骰子工具                         | ❌ 未创建 |
-| `move_to`           | 位置移动（含坐标）                   | ❌ 未创建 |
+| 工具名              | 迁移计划要求                         | 状态       |
+| ------------------- | ------------------------------------ | ---------- |
+| `attempt_promotion` | 序列晋升（魔药消化、仪式、失控风险） | ✅ 已创建  |
+| `roll_dice`         | 独立骰子工具                         | ✅ 已创建  |
+| `move_to`           | 位置移动（含坐标）                   | ✅ 已创建  |
+| `resolve_combat`    | 战斗结算（替代 resolve_combat_exchange） | ✅ 已创建 |
+
 
 ### ✅ 工具层残留 Fate 引用 —— 已全部清理
 
-| 文件 | 修复内容 |
-|------|---------|
-| `tools/state/commit-turn.ts:18` | `COST_EVENT_KINDS`: `"servant-form"` → `"sequence"` |
-| `tools/state/commit-turn.ts:57` | 工具描述 `resolve_combat_exchange` → `resolve_combat` |
-| `tools/state/commit-turn.ts:74` | event kind: `"servant-form"` → `"sequence"` |
-| `tools/debug/get-state-schema.ts:31` | 移除 `update_servant_form` |
-| `engine/audit/session-audit.ts:354` | `resolve_combat_exchange` → `resolve_combat` |
-| `engine/core/obligations.ts:4` | 注释更新 |
-| `tools/state/retire-actor.ts:25,28` | `servantForm` / `master role` → `sequence` / `契约` |
-| `tools/state/record-offscreen-event.ts:69,72` | 压力类型示例更新 |
-| `tools/state/initialize-new-game.ts` | 全工具描述重写，从 Fate 到 LOTM |
-| `tools/state/update-actor-condition.ts` | 全工具描述 + schema 重写，匹配引擎 |
-| `engine/core/offscreen-pressure.ts` | 关键词改为 LOTM（值夜人、机械之心、非凡者、序列等） |
-| `engine/core/state-file-projection.ts` | `TimelineActorContext` 字段改为 LOTM；`classifyPressureType` 关键词更新 |
+| 文件                                          | 修复内容                                                                |
+| --------------------------------------------- | ----------------------------------------------------------------------- |
+| `tools/state/commit-turn.ts:18`               | `COST_EVENT_KINDS`: `"servant-form"` → `"sequence"`                     |
+| `tools/state/commit-turn.ts:57`               | 工具描述 `resolve_combat_exchange` → `resolve_combat`                   |
+| `tools/state/commit-turn.ts:74`               | event kind: `"servant-form"` → `"sequence"`                             |
+| `tools/debug/get-state-schema.ts:31`          | 移除 `update_servant_form`                                              |
+| `engine/audit/session-audit.ts:354`           | `resolve_combat_exchange` → `resolve_combat`                            |
+| `engine/core/obligations.ts:4`                | 注释更新                                                                |
+| `tools/state/retire-actor.ts:25,28`           | `servantForm` / `master role` → `sequence` / `契约`                     |
+| `tools/state/record-offscreen-event.ts:69,72` | 压力类型示例更新                                                        |
+| `tools/state/initialize-new-game.ts`          | 全工具描述重写，从 Fate 到 LOTM                                         |
+| `tools/state/update-actor-condition.ts`       | 全工具描述 + schema 重写，匹配引擎                                      |
+| `engine/core/offscreen-pressure.ts`           | 关键词改为 LOTM（值夜人、机械之心、非凡者、序列等）                     |
+| `engine/core/state-file-projection.ts`        | `TimelineActorContext` 字段改为 LOTM；`classifyPressureType` 关键词更新 |
 
 ---
 
@@ -207,6 +209,7 @@
 ### ✅ 工具/引擎层数据依赖已同步
 
 `state-file-projection.ts`（timeline subagent context）现已读取 LOTM 字段：
+
 - `wounds` / `afflictions` / `servantModifiers` → `statusEffects` / `sequence`
 - `classifyPressureType` 正则关键词已更新为 LOTM 势力
 - `offscreen-pressure.ts` 兜底分类正则同步更新（值夜人、机械之心、非凡者、序列等）
@@ -301,22 +304,23 @@ tests 342 | suites 6 | pass 341 | fail 0 | skipped 1 | duration_ms 6384ms
 
 ## 执行时序总结
 
-| 步骤                             | 完成情况                                                           |
-| -------------------------------- | ------------------------------------------------------------------ |
-| 项目基础配置 (Phase 9 部分)      | ✅ package.json 已改                                               |
-| State Schema (Phase 1)           | ✅ 完整重写，typecheck 零错，341 测试通过                          |
-| Engine Core 领域模块 (Phase 2)   | ✅ 核心数值逻辑已实现，旧 Fate 模块已清                            |
+| 步骤                                 | 完成情况                                                               |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| 项目基础配置 (Phase 9 部分)          | ✅ package.json 已改                                                   |
+| State Schema (Phase 1)               | ✅ 完整重写，typecheck 零错，341 测试通过                              |
+| Engine Core 领域模块 (Phase 2)       | ✅ 核心数值逻辑已实现，旧 Fate 模块已清                                |
 | **~~Tools"工具层"断层~~（Phase 3）** | ✅ 已修复（工具描述/schema + 12 处残留引用 + pressure 关键词全部清理） |
-| **新工具缺失（Phase 3）**        | ❌ `attempt_promotion` / `roll_dice` / `move_to`                   |
-| **Data 半迁移（Phase 4）**       | 🔶 campaign presets + pressure palettes 已 LOTM 化，其余 Fate      |
-| Agents/Prompts (Phase 5)         | ❌ 完全未动                                                        |
-| Skills (Phase 6)                 | ❌ 完全未动                                                        |
-| Extensions/Subagents (Phase 7)   | ❌ 完全未动                                                        |
-| 新测试 (Phase 8)                 | ❌ 5 个引擎逻辑测试未创建                                          |
+| **新工具缺失（Phase 3）**            | ✅ `attempt_promotion` / `roll_dice` / `move_to` / `resolve_combat` 已完成 |
+| **Data 半迁移（Phase 4）**           | 🔶 campaign presets + pressure palettes 已 LOTM 化，其余 Fate          |
+| Agents/Prompts (Phase 5)             | ❌ 完全未动                                                            |
+| Skills (Phase 6)                     | ❌ 完全未动                                                            |
+| Extensions/Subagents (Phase 7)       | ❌ 完全未动                                                            |
+| 新测试 (Phase 8)                     | ❌ 5 个引擎逻辑测试未创建                                              |
 
 ### 建议下一步行动
 
 1. ✅ ~~修断层（Phase 3）~~ **已全部清理（工具描述/schema + 12 处残留 Fate 引用）**
-2. **补新工具（Phase 3）：** `attempt_promotion`、`roll_dice`、`move_to`
+2. ✅ ~~补新工具（Phase 3）~~ **`attempt_promotion`、`roll_dice`、`move_to`、`resolve_combat` 已创建**
 3. **补数据（Phase 4）：** 替换 characters/locations/world/timelines 为 LOTM 数据
 4. **写测试（Phase 8）：** judgment、damage-calculator、attribute-calculator、status-effect、sequence-promotion
+
