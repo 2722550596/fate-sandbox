@@ -13,7 +13,7 @@
 | M1: 骨架可编译（Phase 1+9）   | ✅ 完成          | 100%   |
 | M2: 引擎核心可运行（Phase 2） | ✅ 大部          | ~85%   |
 | M3: 工具链可用（Phase 3）     | ✅ 完成          | 100%   |
-| M4: 数据可用（Phase 4）       | 🔶 部分（见详）  | ~20%   |
+| M4: 数据可用（Phase 4）       | ✅ 完成          | 100%   |
 | M5: Prompt 可游玩（Phase 5）  | ❌ 未动          | 0%     |
 | M6: 高级功能（Phase 6-7）     | ❌ 未动          | 0%     |
 | M7: 发布就绪（Phase 9 余项）  | ❌ 未动          | 0%     |
@@ -132,7 +132,7 @@
 
 ---
 
-## Phase 3 — Tools 🔶 部分完成（有断层）
+## Phase 3 — Tools ✅ 完成
 
 ### 已删除的工具
 
@@ -186,7 +186,42 @@
 
 ---
 
-## Phase 4 — Data 🔶 部分完成（需重新评估）
+## Phase 4 — Data ✅ 完成
+
+### 架构变更
+
+从硬编码 JSON 切换为 **目录 + Markdown + Frontmatter** 架构：
+- 每个实体一个 .md 文件，frontmatter 存元数据（title/type/tags/aliases）
+- 按类别分目录：characters/、locations/、organizations/、items/、pathways/、lore/、mechanics/
+- lookup 引擎启动时扫描 data/ 下所有 .md，解析 frontmatter + 正文，构建内存索引
+- 后续 RAG 只需把 MD 喂给 embedding 模型，不改代码
+
+### 数据量统计
+
+| 目录 | 文件数 | 说明 |
+| --- | --- | --- |
+| characters/ | 59 | 核心 NPC + 角色 |
+| locations/  | 82 | 城市、区域、地标 |
+| organizations/ | 18 | 教会、组织、学派 |
+| items/ | 41 | 封印物、源质、奇特物品 |
+| pathways/ | 6 | 途径定义 |
+| lore/ | 15 | 世界观、历史、文风指南 |
+| mechanics/ | 23 | 判定、魔药、仪式、神性等规则 |
+| economy.md | 1 | 经济/货币规则（5 条目合并） |
+
+### 已删除的旧 JSON 文件
+
+- data/characters.json（Fate 角色）
+- data/locations.json（Fate 地点）
+- data/world.json（Fate 世界观）
+- data/timelines.json（Fate 时间线）
+- data/servants.json（Fate 从者）
+
+### 引擎改动
+
+- `engine/world-data/frontmatter.ts` — 新增轻量 YAML frontmatter 解析器
+- `engine/world-data/lookup.ts` — 重写为 MD 扫描 + 索引搜索（API 不变）
+- lookup 工具 `tools/lookup/lookup.ts` — 无需改动
 
 ### ✅ 实际已迁移的 LOTM 数据
 
@@ -311,7 +346,7 @@ tests 342 | suites 6 | pass 341 | fail 0 | skipped 1 | duration_ms 6384ms
 | Engine Core 领域模块 (Phase 2)       | ✅ 核心数值逻辑已实现，旧 Fate 模块已清                                |
 | **~~Tools"工具层"断层~~（Phase 3）** | ✅ 已修复（工具描述/schema + 12 处残留引用 + pressure 关键词全部清理） |
 | **新工具缺失（Phase 3）**            | ✅ `attempt_promotion` / `roll_dice` / `move_to` / `resolve_combat` 已完成 |
-| **Data 半迁移（Phase 4）**           | 🔶 campaign presets + pressure palettes 已 LOTM 化，其余 Fate          |
+| **Data 半迁移（Phase 4）**           | ✅ 目录+MD 架构，244 个 MD 文件，旧 JSON 已全部删除 |
 | Agents/Prompts (Phase 5)             | ❌ 完全未动                                                            |
 | Skills (Phase 6)                     | ❌ 完全未动                                                            |
 | Extensions/Subagents (Phase 7)       | ❌ 完全未动                                                            |
@@ -321,6 +356,6 @@ tests 342 | suites 6 | pass 341 | fail 0 | skipped 1 | duration_ms 6384ms
 
 1. ✅ ~~修断层（Phase 3）~~ **已全部清理（工具描述/schema + 12 处残留 Fate 引用）**
 2. ✅ ~~补新工具（Phase 3）~~ **`attempt_promotion`、`roll_dice`、`move_to`、`resolve_combat` 已创建**
-3. **补数据（Phase 4）：** 替换 characters/locations/world/timelines 为 LOTM 数据
+3. ✅ ~~补数据（Phase 4）~~ **已替换为目录+MD 架构，244 个文件**
 4. **写测试（Phase 8）：** judgment、damage-calculator、attribute-calculator、status-effect、sequence-promotion
 
