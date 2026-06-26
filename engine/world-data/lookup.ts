@@ -1,51 +1,37 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { extname, join, relative, sep } from "node:path";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { isRecord } from "../core/typebox-validation.ts";
+import { parseFrontmatter } from "./frontmatter.ts";
 
-export type LookupKind = "角色" | "地点" | "设定" | "时间线";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_ROOT = join(__dirname, "..", "..", "data");
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type LookupKind = "角色" | "地点" | "组织" | "途径" | "物品" | "设定" | "经济" | "机制";
 
 export interface LookupRequest {
   query: string;
-  category?: string;
+  category?: LookupKind;
 }
 
 export interface LookupResult {
   text: string;
 }
 
-interface CharacterEntry {
-  类型: string;
-  原文: string;
-  时期?: string;
-}
-
-interface WorldData {
-  地点: Record<string, string>;
-  核心设定: Record<string, string>;
-  规则: Record<string, string>;
-}
-
-interface LocationEntry {
-  id: string;
-  name: string;
-  category: string;
-  summary: string;
-  stateLocation: Record<string, string>;
-  notes: string[];
-}
-
-interface WorldDataStore {
-  characters: Record<string, CharacterEntry>;
-  world: WorldData;
-  timelines: Record<string, string>;
-  locations: LocationEntry[];
-}
-
-interface LookupEntry {
-  key: string;
-  text: string;
+interface MdDocument {
+  /** data/ 下的相对路径，如 characters/klein-moretti.md */
+  relPath: string;
+  title: string;
+  kind: LookupKind;
+  tags: string[];
+  aliases: string[];
+  body: string;
+  /** 用于搜索的全文 */
   searchableText: string;
 }
 
@@ -57,154 +43,269 @@ interface MatchedEntry {
   reason: string;
 }
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const MAX_FUZZY_RESULTS = 5;
-const CHARACTER_PREVIEW_LENGTH = 600;
-const MIN_FUZZY_SCORE = 52;
+// ---------------------------------------------------------------------------
+// 目录 → LookupKind 映射
+// ---------------------------------------------------------------------------
 
-let cachedStore: WorldDataStore | null = null;
+const DIR_KIND_MAP: Record<string, LookupKind> = {
+  characters: "角色",
+  locations: "地点",
+  organizations: "组织",
+  pathways: "途径",
+  items: "物品",
+  lore: "设定",
+  mechanics: "机制",
+};
+
+// ---------------------------------------------------------------------------
+// 缓存
+// ---------------------------------------------------------------------------
+
+let cachedDocIndex: MdDocument[] | null = null;
+
+// ---------------------------------------------------------------------------
+// 公共 API
+// ---------------------------------------------------------------------------
 
 export function lookupWorldData(request: LookupRequest): LookupResult {
   const query = normalizeQuery(request.query);
-  const store = getWorldDataStore();
-  const matches = lookupAllKinds(store, query);
+  const docs = getDocIndex();
+  const matches = lookupAll(docs, query, request.category);
 
   if (matches.length > 0) {
     return { text: formatMatches(matches) };
   }
 
-  return {
-    text: `未找到 "${query}" 的相关信息。`,
-  };
+  return { text: `未找到 "${query}" 的相关信息。` };
 }
 
-function getWorldDataStore(): WorldDataStore {
-  if (cachedStore === null) {
-    cachedStore = loadWorldDataStore();
+// ---------------------------------------------------------------------------
+// 文档索引构建
+// ---------------------------------------------------------------------------
+
+function getDocIndex(): MdDocument[] {
+  if (cachedDocIndex === null) {
+    cachedDocIndex = buildDocIndex();
   }
-  return cachedStore;
+  return cachedDocIndex;
 }
 
-function loadWorldDataStore(): WorldDataStore {
-  return {
-    characters: readJsonRecord(
-      join(__dirname, "..", "..", "data", "characters.json"),
-      assertCharacterEntry,
-    ),
-    world: readWorldData(join(__dirname, "..", "..", "data", "world.json")),
-    timelines: readJsonRecord(
-      join(__dirname, "..", "..", "data", "timelines.json"),
-      assertStringValue,
-    ),
-    locations: readLocationData(join(__dirname, "..", "..", "data", "locations.json")),
+function buildDocIndex(): MdDocument[] {
+  const docs: MdDocument[] = [];
+
+  // 扫描子目录（每个目录对应一种 LookupKind）
+  for (const dirName of Object.keys(DIR_KIND_MAP)) {
+    const dirPath = join(DATA_ROOT, dirName);
+    try {
+      if (!statSync(dirPath).isDirectory()) continue;
+    } catch {
+      continue; // 目录还不存在
+    }
+
+    const kind: LookupKind = DIR_KIND_MAP[dirName] ?? "设定";
+    const files = readdirSync(dirPath).filter((f) => extname(f).toLowerCase() === ".md");
+
+    for (const file of files) {
+      const filePath = join(dirPath, file);
+      const doc = parseMdFile(filePath, kind);
+      if (doc !== null) {
+        docs.push(doc);
+      }
+    }
+  }
+
+  // 扫描 data/ 根目录的独立 .md 文件（如 economy.md, narrative.md）
+  try {
+    const rootFiles = readdirSync(DATA_ROOT).filter((f) => extname(f).toLowerCase() === ".md" && f !== "NOTICE.md");
+    for (const file of rootFiles) {
+      const filePath = join(DATA_ROOT, file);
+      if (statSync(filePath).isFile()) {
+        const name = file.replace(/\.md$/i, "");
+        // 根据文件名推断 kind
+        const kind = guessRootFileKind(name);
+        const doc = parseMdFile(filePath, kind);
+        if (doc !== null) {
+          docs.push(doc);
+        }
+      }
+    }
+  } catch {
+    // 根目录可能没有 md 文件
+  }
+
+  return docs;
+}
+
+function guessRootFileKind(filename: string): LookupKind {
+  const map: Record<string, LookupKind> = {
+    economy: "经济",
+    narrative: "设定",
+    theater: "设定",
+    "system-rules": "机制",
+    "world-lore": "设定",
   };
+  return map[filename] ?? "设定";
 }
 
-function lookupAllKinds(store: WorldDataStore, query: string): MatchedEntry[] {
-  const kinds: LookupKind[] = ["角色", "地点", "设定", "时间线"];
-  return kinds
-    .flatMap((kind) => lookupByKind(store, kind, query))
+// ---------------------------------------------------------------------------
+// MD 文件解析
+// ---------------------------------------------------------------------------
+
+function parseMdFile(filePath: string, fallbackKind: LookupKind): MdDocument | null {
+  try {
+    const raw = readFileSync(filePath, "utf-8");
+    const parsed = parseFrontmatter(raw);
+
+    const frontmatterAttrs = parsed?.attrs ?? {};
+    const body = parsed?.body ?? raw;
+
+    // 从 frontmatter 提取字段
+    const title = safeStr(frontmatterAttrs["title"]) ?? filenameToTitle(filePath);
+    const type = safeStr(frontmatterAttrs["type"]);
+    const tags = safeStrArr(frontmatterAttrs["tags"]);
+    const aliases = safeStrArr(frontmatterAttrs["aliases"]);
+
+    // 如果 frontmatter 指定了 type，用它覆盖 kind
+    const kind = typeToKind(type) ?? fallbackKind;
+
+    // 构建全文搜索文本
+    const relPath = relative(DATA_ROOT, filePath);
+    const searchableText = [title, ...tags, ...aliases, body].join("\n");
+
+    return { relPath, title, kind, tags, aliases, body, searchableText };
+  } catch {
+    return null;
+  }
+}
+
+function filenameToTitle(filePath: string): string {
+  const name = filePath.split(sep).pop()?.replace(/\.md$/i, "") ?? "";
+  // 把 kebab-case 转成空格分隔
+  return name.replace(/[-_]/g, " ");
+}
+
+function typeToKind(type: string | undefined): LookupKind | undefined {
+  const map: Record<string, LookupKind> = {
+    character: "角色",
+    location: "地点",
+    organization: "组织",
+    pathway: "途径",
+    item: "物品",
+    lore: "设定",
+    mechanic: "机制",
+    economy: "经济",
+  };
+  return type !== undefined ? map[type] : undefined;
+}
+
+// ---------------------------------------------------------------------------
+// 搜索
+// ---------------------------------------------------------------------------
+
+const MAX_FUZZY_RESULTS = 5;
+const MIN_FUZZY_SCORE = 52;
+const BODY_PREVIEW_LENGTH = 600;
+
+function lookupAll(docs: MdDocument[], query: string, category?: LookupKind): MatchedEntry[] {
+  let candidates = docs;
+  if (category !== undefined) {
+    candidates = docs.filter((d) => d.kind === category);
+  }
+
+  return fuzzyMatchEntries(candidates, query)
     .toSorted(compareMatches)
     .slice(0, MAX_FUZZY_RESULTS);
 }
 
-function lookupByKind(store: WorldDataStore, kind: LookupKind, query: string): MatchedEntry[] {
-  const handlers: Record<LookupKind, () => LookupEntry[]> = {
-    角色: () => [...characterEntries(store.characters)],
-    地点: () => [...recordEntries(store.world.地点), ...locationEntries(store.locations)],
-    设定: () => [...recordEntries(store.world.核心设定), ...recordEntries(store.world.规则)],
-    时间线: () => recordEntries(store.timelines),
-  };
-  return fuzzyMatchEntries(handlers[kind](), kind, query);
-}
-
-function characterEntries(characters: Record<string, CharacterEntry>): LookupEntry[] {
-  return Object.entries(characters).map(([key, character]) => ({
-    key,
-    text: character.原文,
-    searchableText: [key, character.类型, character.时期 ?? "", character.原文].join("\n"),
-  }));
-}
-
-function recordEntries(record: Record<string, string>): LookupEntry[] {
-  return Object.entries(record).map(([key, value]) => ({
-    key,
-    text: value,
-    searchableText: [key, value].join("\n"),
-  }));
-}
-
-function locationEntries(locations: LocationEntry[]): LookupEntry[] {
-  return locations.map((location) => ({
-    key: location.name,
-    text: JSON.stringify(location, null, 2),
-    searchableText: [
-      location.id,
-      location.name,
-      location.category,
-      location.summary,
-      ...Object.values(location.stateLocation),
-      ...location.notes,
-    ].join("\n"),
-  }));
-}
-
-function fuzzyMatchEntries(
-  entries: LookupEntry[],
-  kind: LookupKind,
-  query: string,
-): MatchedEntry[] {
+function fuzzyMatchEntries(docs: MdDocument[], query: string): MatchedEntry[] {
   const normalizedQuery = normalizeSearchText(query);
   const queryTerms = splitQueryTerms(query);
-  return entries
-    .map((entry) => scoreEntry(entry, kind, normalizedQuery, queryTerms))
-    .filter((match) => match.score >= MIN_FUZZY_SCORE)
-    .toSorted(compareMatches)
-    .slice(0, MAX_FUZZY_RESULTS);
+
+  return docs
+    .map((doc) => scoreDoc(doc, normalizedQuery, queryTerms))
+    .filter((match) => match.score >= MIN_FUZZY_SCORE);
 }
 
-function scoreEntry(
-  entry: LookupEntry,
-  kind: LookupKind,
+function scoreDoc(
+  doc: MdDocument,
   normalizedQuery: string,
   queryTerms: readonly string[],
 ): MatchedEntry {
-  const normalizedKey = normalizeSearchText(entry.key);
-  const normalizedSearchableText = normalizeSearchText(entry.searchableText);
+  const normalizedTitle = normalizeSearchText(doc.title);
+  const normalizedAliases = doc.aliases.map(normalizeSearchText);
+  const normalizedTags = doc.tags.map(normalizeSearchText);
+  const normalizedBody = normalizeSearchText(doc.searchableText);
 
-  if (normalizedKey === normalizedQuery) {
-    return { kind, key: entry.key, text: entry.text, score: 100, reason: "精确匹配" };
+  // 精确匹配标题
+  if (normalizedTitle === normalizedQuery) {
+    return makeMatch(doc, 100, "精确匹配");
   }
-  if (normalizedKey.includes(normalizedQuery)) {
-    return { kind, key: entry.key, text: entry.text, score: 92, reason: "名称包含关键词" };
+
+  // 别名精确匹配
+  for (const alias of normalizedAliases) {
+    if (alias === normalizedQuery) {
+      return makeMatch(doc, 98, "别名精确匹配");
+    }
   }
-  if (normalizedSearchableText.includes(normalizedQuery)) {
-    return { kind, key: entry.key, text: entry.text, score: 78, reason: "正文包含关键词" };
+
+  // 标题包含关键词
+  if (normalizedTitle.includes(normalizedQuery)) {
+    return makeMatch(doc, 92, "标题包含关键词");
   }
+
+  // 别名包含关键词
+  for (const alias of normalizedAliases) {
+    if (alias.includes(normalizedQuery)) {
+      return makeMatch(doc, 88, "别名包含关键词");
+    }
+  }
+
+  // 标签匹配
+  for (const tag of normalizedTags) {
+    if (tag.includes(normalizedQuery)) {
+      return makeMatch(doc, 85, "标签匹配");
+    }
+  }
+
+  // 正文包含关键词
+  if (normalizedBody.includes(normalizedQuery)) {
+    return makeMatch(doc, 78, "正文包含关键词");
+  }
+
+  // 多关键词部分匹配
   if (queryTerms.length > 1) {
-    const keyTermHits = countContainedTerms(normalizedKey, queryTerms);
-    const textTermHits = countContainedTerms(normalizedSearchableText, queryTerms);
-    if (keyTermHits === queryTerms.length) {
-      return { kind, key: entry.key, text: entry.text, score: 88, reason: "名称包含全部关键词" };
+    const keyTermHits = countContainedTerms(normalizedTitle, queryTerms);
+    const aliasTermHits = countContainedTerms(normalizedAliases.join(" "), queryTerms);
+    const allTermHits = countContainedTerms(normalizedBody, queryTerms);
+
+    if (keyTermHits === queryTerms.length || aliasTermHits === queryTerms.length) {
+      return makeMatch(doc, 88, "名称包含全部关键词");
     }
-    if (textTermHits === queryTerms.length) {
-      return { kind, key: entry.key, text: entry.text, score: 84, reason: "正文包含全部关键词" };
+    if (allTermHits === queryTerms.length) {
+      return makeMatch(doc, 84, "正文包含全部关键词");
     }
-    if (textTermHits > 0) {
-      const partialScore = Math.round(48 + (textTermHits / queryTerms.length) * 28);
-      return {
-        kind,
-        key: entry.key,
-        text: entry.text,
-        score: partialScore,
-        reason: "正文包含部分关键词",
-      };
+    if (allTermHits > 0) {
+      const partialScore = Math.round(48 + (allTermHits / queryTerms.length) * 28);
+      return makeMatch(doc, partialScore, "正文包含部分关键词");
     }
   }
 
-  const keySimilarity = similarity(normalizedKey, normalizedQuery);
-  const fuzzyScore = Math.round(keySimilarity * 100);
-  return { kind, key: entry.key, text: entry.text, score: fuzzyScore, reason: "名称模糊匹配" };
+  // 模糊匹配
+  const titleSimilarity = similarity(normalizedTitle, normalizedQuery);
+  const fuzzyScore = Math.round(titleSimilarity * 100);
+  return makeMatch(doc, fuzzyScore, "模糊匹配");
+}
+
+function makeMatch(doc: MdDocument, score: number, reason: string): MatchedEntry {
+  return {
+    kind: doc.kind,
+    key: doc.title,
+    text: doc.body.length > BODY_PREVIEW_LENGTH
+      ? doc.body.slice(0, BODY_PREVIEW_LENGTH).replace(/\s+\S*$/, "") + "…"
+      : doc.body,
+    score,
+    reason,
+  };
 }
 
 function compareMatches(left: MatchedEntry, right: MatchedEntry): number {
@@ -214,14 +315,21 @@ function compareMatches(left: MatchedEntry, right: MatchedEntry): number {
   return left.key.localeCompare(right.key, "zh-Hans-CN");
 }
 
+// ---------------------------------------------------------------------------
+// 格式化
+// ---------------------------------------------------------------------------
+
 function formatMatches(matches: MatchedEntry[]): string {
   return matches.map(formatMatch).join("\n\n---\n\n");
 }
 
 function formatMatch(match: MatchedEntry): string {
-  const text = match.kind === "角色" ? truncate(match.text, CHARACTER_PREVIEW_LENGTH) : match.text;
-  return `### [${match.kind}] ${match.key}（${match.reason}）\n${text}`;
+  return `### [${match.kind}] ${match.key}（${match.reason}）\n${match.text}`;
 }
+
+// ---------------------------------------------------------------------------
+// 文本工具
+// ---------------------------------------------------------------------------
 
 function normalizeQuery(query: string): string {
   const normalized = query.trim();
@@ -235,7 +343,7 @@ function normalizeSearchText(text: string): string {
   return text
     .normalize("NFKC")
     .toLocaleLowerCase()
-    .replace(/[\s·・.＿_\-—:：()（）[\]【】{}]/g, "");
+    .replace(/[\s·・.＿_\-—:：()（）[\]【】{}#*~`>`|]/g, "");
 }
 
 function splitQueryTerms(query: string): string[] {
@@ -245,8 +353,8 @@ function splitQueryTerms(query: string): string[] {
     .filter((term) => term.length > 0);
 }
 
-function countContainedTerms(key: string, queryTerms: readonly string[]): number {
-  return queryTerms.filter((term) => key.includes(term)).length;
+function countContainedTerms(text: string, queryTerms: readonly string[]): number {
+  return queryTerms.filter((term) => text.includes(term)).length;
 }
 
 function similarity(text: string, query: string): number {
@@ -265,100 +373,19 @@ function getBigrams(text: string): string[] {
   return bigrams;
 }
 
-function truncate(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).replace(/\S*$/, "") + "…";
+// ---------------------------------------------------------------------------
+// 安全取值工具
+// ---------------------------------------------------------------------------
+
+function safeStr(value: unknown): string | undefined {
+  if (typeof value === "string" && value.length > 0) return value;
+  return undefined;
 }
 
-function readJsonRecord<T>(
-  path: string,
-  assertValue: (value: unknown, label: string) => T,
-): Record<string, T> {
-  const raw = readFileSync(path, "utf-8");
-  const parsed: unknown = JSON.parse(raw);
-  if (!isRecord(parsed)) {
-    throw new Error(`Invalid JSON data in ${path}: root must be an object.`);
+function safeStrArr(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((v): v is string => typeof v === "string" && v.length > 0);
   }
-  const result: Record<string, T> = {};
-  for (const [key, value] of Object.entries(parsed)) {
-    result[key] = assertValue(value, `${path}.${key}`);
-  }
-  return result;
-}
-
-function readWorldData(path: string): WorldData {
-  const raw = readFileSync(path, "utf-8");
-  const parsed: unknown = JSON.parse(raw);
-  if (!isRecord(parsed)) {
-    throw new Error(`Invalid world data in ${path}: root must be an object.`);
-  }
-  const 地点 = ensureRecord(parsed["地点"], `${path}.地点`);
-  const 核心设定 = ensureRecord(parsed["核心设定"], `${path}.核心设定`);
-  const 规则 = ensureRecord(parsed["规则"], `${path}.规则`);
-  return { 地点, 核心设定, 规则 };
-}
-
-function readLocationData(path: string): LocationEntry[] {
-  const raw = readFileSync(path, "utf-8");
-  const parsed: unknown = JSON.parse(raw);
-  const locations = Array.isArray(parsed)
-    ? parsed
-    : isRecord(parsed) && Array.isArray(parsed["locations"])
-      ? parsed["locations"]
-      : [];
-  return locations.map((entry: unknown, index: number) =>
-    assertLocationEntry(entry, `${path}[${index}]`),
-  );
-}
-
-function assertStringValue(value: unknown, label: string): string {
-  if (typeof value !== "string") {
-    throw new Error(`Invalid string value at ${label}: expected string.`);
-  }
-  return value;
-}
-
-function assertCharacterEntry(value: unknown, label: string): CharacterEntry {
-  if (!isRecord(value)) {
-    throw new Error(`Invalid character entry at ${label}: must be an object.`);
-  }
-  const 类型 = assertStringField(value["类型"], label, "类型");
-  const 原文 = assertStringField(value["原文"], label, "原文");
-  return {
-    类型,
-    原文,
-    时期: value["时期"] !== undefined ? assertStringField(value["时期"], label, "时期") : undefined,
-  };
-}
-
-function assertLocationEntry(value: unknown, label: string): LocationEntry {
-  if (!isRecord(value)) {
-    throw new Error(`Invalid location entry at ${label}: must be an object.`);
-  }
-  return {
-    id: assertStringField(value["id"], label, "id"),
-    name: assertStringField(value["name"], label, "name"),
-    category: assertStringField(value["category"], label, "category"),
-    summary: assertStringField(value["summary"], label, "summary"),
-    stateLocation: ensureRecord(value["stateLocation"], `${label}.stateLocation`),
-    notes: Array.isArray(value["notes"]) ? value["notes"].map((n: unknown) => String(n)) : [],
-  };
-}
-
-function assertStringField(value: unknown, label: string, field: string): string {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`Invalid ${field} at ${label}: must be a non-empty string.`);
-  }
-  return value.trim();
-}
-
-function ensureRecord(value: unknown, label: string): Record<string, string> {
-  if (!isRecord(value)) {
-    throw new Error(`Invalid record at ${label}: must be an object.`);
-  }
-  const result: Record<string, string> = {};
-  for (const [key, val] of Object.entries(value)) {
-    result[key] = String(val);
-  }
-  return result;
+  if (typeof value === "string" && value.length > 0) return [value];
+  return [];
 }
