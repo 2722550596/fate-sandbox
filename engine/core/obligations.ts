@@ -1,7 +1,7 @@
 /**
  * Turn obligations ledger（backlog #4）。
  *
- * 裁决类工具（如 resolve_combat_exchange）只判定不改状态，伤势/威胁等
+ * 裁决类工具（如 resolve_combat）只判定不改状态，伤势/威胁等
  * 「必须落地」项以前靠 GM 自觉跟进——这是无人看守的缝隙。
  * 现在裁决产生的 mandatory landing 记入账本，对应领域事件成功执行时
  * 自动清账（FIFO，一次事件清一条），canonical commit（commit_turn /

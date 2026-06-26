@@ -20,21 +20,21 @@ export function initializeNewGameTool(params: unknown, sessionManager: unknown):
 export const initializeNewGameToolDefinition: FateToolDefinition = {
   name: "initialize_new_game",
   description:
-    "初始化新游戏 Game State 的单入口 recipe：重置 state、配置 campaign、写 protagonist、设在场 actor、必要时配 protagonist 从者隐藏真名。\n\n" +
+    "初始化新游戏 Game State 的单入口 recipe：重置 state、配置 campaign、写 protagonist、设在场 actor、必要时配 protagonist 序列隐藏秘密。\n\n" +
     "【使用边界】\n" +
     "- /skill:start-game 已定好时间线/立场/开场身份，进正式剧情前一次性建立可运行 state\n" +
-    "- protagonist 是从者/非人现界者且真名/宝具需 hidden-canonical secret slot\n\n" +
+    "- protagonist 是非凡者且序列秘密需 hidden-canonical secret slot\n\n" +
     "禁区：\n" +
     "- 用它续局、修档或剧情中重置后果\n" +
     "- 把 player-only 原作知识写成 public world fact\n" +
-    "- protagonist 从者开局直接 public revealed 真名（未公开必须 hidden/suspected + hiddenTrueName secret）\n" +
+    "- protagonist 非凡者开局直接 public revealed 序列（未公开必须 hidden/suspected + pathSequenceSecret secret）\n" +
     "- 用它替代后续领域事件工具",
   parameters: Type.Object({
-    kind: Type.String({ description: "human-protagonist / servant-protagonist" }),
+    kind: Type.String({ description: "human-protagonist / beyonder-protagonist" }),
     campaign: Type.Object({
       presetId: Type.String({
         description:
-          "fsn_2004_fuyuki / fz_1994_fuyuki / ha_2004_fuyuki / fsf_2008_snowfield / apocrypha_2004_trifas / extra_2032_seraph / extra_ccc_2032_far_side / case_files_2003_london / tsukihime_2000_misaki / tsukihime_2021_souya / knk_1998_mifune / mahoyo_1989_misaki / custom_worldline",
+          "tingen_1349 / backlund_1350 / bayam_1351 / condat_1349 / custom_worldline",
       }),
       title: Type.Optional(Type.String()),
       premise: Type.Optional(Type.String()),
@@ -44,7 +44,7 @@ export const initializeNewGameToolDefinition: FateToolDefinition = {
     }),
     protagonist: Type.Unknown({
       description:
-        "human: internalName/renderName/publicIdentity/background/apparentAge/outfit/demeanor；servant additionally className/trueNameDisplay/trueNameStatus(hidden|suspected)。renderName 是正文固定用名，中文名优先。",
+        "human: internalName/renderName/publicIdentity/background/apparentAge/outfit/demeanor；beyonder additionally pathway/sequence/trueNameDisplay。renderName 是正文固定用名，中文名优先。",
     }),
     presence: Type.Optional(
       Type.Object({
@@ -52,13 +52,21 @@ export const initializeNewGameToolDefinition: FateToolDefinition = {
         allyActorIds: Type.Optional(Type.Array(Type.String())),
       }),
     ),
-    hiddenTrueName: Type.Optional(
+    hiddenSequenceSecrets: Type.Optional(
       Type.Object({
-        value: Type.String(),
+        pathway: Type.Optional(Type.String({
+          description: "途径 ID（如 seer / thief / spectator 等）",
+        })),
+        sequenceName: Type.Optional(Type.String({
+          description: "当前序列名（如 序列9-占卜家）",
+        })),
+        trueName: Type.Optional(Type.String({
+          description: "非凡者真名",
+        })),
         revealConditions: Type.Array(
           Type.String({
             description:
-              "可被后续 reveal_secret 的 claim/trigger/evidence 字面命中的短线索词；不要写整句判定条件。例：直死之魔眼 / 死亡线 / 自报姓名 / 両儀式",
+              "可被后续 reveal_secret 的 claim/trigger/evidence 字面命中的短线索词。例：愚者 / 源堡 / 灰雾之上",
           }),
         ),
       }),

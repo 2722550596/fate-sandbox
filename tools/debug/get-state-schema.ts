@@ -28,7 +28,6 @@ export function getStateSchemaTool(): ToolResult {
       "upsert_actor",
       "update_actor_condition",
       "update_economy",
-      "update_servant_form",
       "reveal_secret",
       "private_resolve",
     ],

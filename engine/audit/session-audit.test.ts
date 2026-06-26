@@ -225,7 +225,7 @@ void test("measureGetStatusUsage flags repeat reads without state change", () =>
 void test("measurePressure tracks no-cost streaks", () => {
   const costTurn: ChainSpec[] = [
     { kind: "user", text: "进攻" },
-    { kind: "assistant", toolCalls: [{ id: "x1", name: "resolve_combat_exchange", args: {} }] },
+    { kind: "assistant", toolCalls: [{ id: "x1", name: "resolve_combat", args: {} }] },
     { kind: "toolResult", toolCallId: "x1" },
     { kind: "assistant", text: "正文。" },
   ];

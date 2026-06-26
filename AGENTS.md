@@ -6,15 +6,15 @@
 
 ## 项目当前形态
 
-`fate-sandbox` 不是一张 prompt 卡；它是本地运行的互动叙事 runtime。
+`lotm-sandbox` 不是一张 prompt 卡；它是本地运行的互动叙事 runtime。
 
 核心组成：
 
 - `agents/`：GM prompt 模块。分工包括 system、context、rules、tool-policy、story-driver、render、style、input-guide、output-contract 等。
 - `skills/start-game/`：新游戏初始化流程机。只负责新游戏/重新开始/创建角色，不负责续局或修档。
-- `engine/core/`：确定性领域引擎。state、scene、actor、servant、economy、memory、secret、offscreen 等逻辑在这里落地。
+- `engine/core/`：确定性领域引擎。state、scene、actor、pathway、economy、memory、secret、offscreen 等逻辑在这里落地。
 - `tools/`：GM 领域事件工具。工具不是状态栏更新器，而是 GM 改变世界的接口。
-- `data/`：型月世界数据、lookup 数据、campaign preset、timeline contract。
+- `data/`：LOTM 世界数据、lookup 数据、campaign preset、timeline contract。
 - `extensions/`：pi extension。玩家 UI panel、compaction policy、timeline subagent 注入都在这里。
 - `.pi/agents/`：项目作用域子代理定义。必须保持 project-only 语义，不依赖 user-scope agent。
 - `sessions/`、`state/`、`.pi/agent/`：运行产物/本地私有配置，不属于发布内容，不进 git。
@@ -134,8 +134,8 @@ type SceneResult =
 - `commit_turn`：非 Scene Beat lifecycle 的 canonical turn 提交入口；顶层 `time` 是必填 turn envelope。
 - `progress_scene_beat`：玩家当前 Scene Beat 行动窗口的开启与收口；顶层 `time` 是必填 turn envelope。
 - `update_economy`：有账户、有来源、有 reason 的资金事件；修账户名用 `rename-purse`，不要伪造 spend/gain。
-- `update_actor_condition`：wound / affliction / outfit / tracked item 等可审计条件变化。
-- `reveal_secret`：隐藏真名、宝具、动机的配置与揭示；不能用叙事直接泄密。
+- `update_actor_condition`：status effect / outfit / tracked item 等可审计条件变化。
+- `reveal_secret`：隐藏途径、序列秘密、动机的配置与揭示；不能用叙事直接泄密。
 - `record_offscreen_event`：玩家视野外的真实后台事件；前台只能看到痕迹、传闻、梦境、异常投影或后果。
 
 模型犯错时，优先把错误沉淀成：
@@ -175,28 +175,27 @@ type SceneResult =
 
 典型禁区：
 
-- 玩家设定里知道从者真名 ≠ `public.servantForm.identity.trueName.status = "revealed"`。
 - 穿越者知道原作 ≠ public world fact。
 - GM 知道幕后阵营行动 ≠ NPC 台词或玩家记忆。
 - hidden-canonical 不得写入 public memory。
 
-### Protagonist 从者真名防线
+### Protagonist 非凡者序列/途径防线
 
-玩家就是从者时：
+玩家就是非凡者时：
 
-- 初始化 protagonist 从者不得直接 `trueNameStatus: "revealed"`。
-- 未在剧情世界内公开时，public trueName 必须是 `hidden` 或 `suspected`，display 填职阶名或疑似称呼，如 `Saber`。
-- 真实真名通过 `reveal_secret kind=configure-servant-secrets` 写入 secret slot。
-- 修档时可用 `override_locked_fact kind=servant-true-name status=hidden/suspected` 把误公开状态改回去。
+- 初始化 protagonist 非凡者不得直接 `pathway/sequence` 公开。
+- 未在剧情世界内公开时，public 序列状态必须是 `hidden` 或 `suspected`，display 填序列名或疑似称呼，如 `序列9`。
+- 真实途径/序列通过 `reveal_secret kind=configure-sequence-secrets` 写入 secret slot。
+- 修档时可用 `override_locked_fact kind=sequence-status status=hidden/suspected` 把误公开状态改回去。
 
 ### 新手模式
 
-不了解 Fate 的玩家可以玩，但必须从普通人/穿越者/低知识边界进入。
+不了解 LOTM 的玩家可以玩，但必须从普通人/穿越者/低知识边界进入。
 
-- `/skill:start-game` 中，用户说“第一次玩”“不了解 Fate”“随便来”时默认新手模式。
-- 新手模式不把术语知识当解谜前提；危险不能来自玩家不知道“御主/令咒/真名/宝具”等专有名词。
+- `/skill:start-game` 中，用户说“第一次玩”“不了解 LOTM”“随便来”时默认新手模式。
+- 新手模式不把术语知识当解谜前提；危险不能来自玩家不知道“序列/途径/魔药/源堡”等专有名词。
 - 专有名词首次影响行动时，只给一句与下一步选择相关的场内解释；禁止百科式灌输。
-- 不建议新人第一次直接进入复杂 FSF 多阵营中心或从者开局，除非用户明确要求。
+- 不建议新人第一次直接进入复杂多阵营中心或非凡者开局，除非用户明确要求。
 
 ---
 
@@ -492,12 +491,12 @@ pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 ## 修改提示词 / 数据 / 引擎时的规则
 
 - **改 GM prompt** → 保持模块分工：`gm-system.md` 只放身份与最高契约；世界边界在 `gm-context.md`；硬规则在 `gm-rules.md`；工具路由在 `gm-tool-policy.md`；剧情推进纪律在 `gm-story-driver.md`；渲染在 `gm-render.md`；输入解释在 `gm-input-guide.md`；输出格式在 `gm-output-contract.md`。不要把所有规则塞进 system 层。
-- **改 `/skill:start-game`** → 它只处理新游戏/重新开始/创建角色。必须保持流程机、public/secrets/player knowledge 分层、protagonist 从者真名防泄露、新手模式。
+- **改 `/skill:start-game`** → 它只处理新游戏/重新开始/创建角色。必须保持流程机、public/secrets/player knowledge 分层、protagonist 非凡者序列/途径秘密防泄露、新手模式。
 - **新增工具** → 在 `tools/registry.ts` 注册；description 写成紧凑的「一行用途 + 使用边界 bullet + 禁区 bullet」，避免「必须调用场景/严禁行为」长清单这种 reasoning-bait。工具应是领域事件，不是状态栏 setter。不要在当前工具契约里提旧字段、旧 kind 或旧入口。
 - **模型常犯错** → 先写回归测试或 JSONL 统计复现，再加工具拒绝/领域 invariant/schema 约束/迁移。不要只补 prompt。
 - **改 state 结构** → bump `schemaVersion`，同步 initial state + schema + protected paths 白名单，新增逐版本 migration 和 migration 测试。只允许经 migration 后访问新字段，不做运行时 fallback。
 - **查 state 的代码** → 必须处理 `noUncheckedIndexedAccess` 带来的 `| undefined`——每个索引访问都有判空路径。
-- **改 lookup/data** → 保留 canonical fact skeleton，避免复制 wiki prose；不要引入非 TYPE-MOON 材料污染目标世界。
+- **改 lookup/data** → 保留 canonical fact skeleton，避免复制 wiki prose；不要引入非 LOTM 材料污染目标世界。
 - **改 subagent** → project-scope、explicit `tools`、explicit `extensions`、bare JSON 输出约束必须保留。
 - **改 release 包** → 跑打包检查，确认不含 `sessions/`、`state/`、`.pi/agent/`、`agents/user/`、`docs/`、`*.test.ts`。
 - **任何改动** → `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test` 全过。

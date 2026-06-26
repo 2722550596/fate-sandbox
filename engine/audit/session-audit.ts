@@ -351,7 +351,7 @@ function turnHasCost(turn: AuditTurn): boolean {
   for (const call of turn.toolCalls) {
     if (!call.accepted) continue;
     if (
-      call.name === "resolve_combat_exchange" ||
+      call.name === "resolve_combat" ||
       call.name === "update_actor_condition" ||
       call.name === "retire_actor"
     ) {

@@ -36,9 +36,8 @@ export interface TimelineActorContext {
   displayName: string;
   kind: string;
   stance: string;
-  wounds: number;
-  afflictions: number;
-  servantModifiers: number;
+  statusEffects: number;
+  sequence: string | null;
   agenda: TimelineActorAgendaContext | null;
   knowledgeLens: TimelineActorKnowledgeLensContext | null;
 }
@@ -152,16 +151,14 @@ function actorContext(
     `actors.${actorId}.relationshipToProtagonist`,
   );
   const condition = requireRecord(actor["condition"], `actors.${actorId}.condition`);
-  const servantForm = optionalRecord(actor["servantForm"]);
-  const parameters = servantForm === null ? null : optionalRecord(servantForm["parameters"]);
+  const sequence = optionalRecord(actor["sequence"]);
   return {
     actorId,
     displayName: requireString(presentation["renderName"], `actors.${actorId}.renderName`),
     kind: requireString(actor["kind"], `actors.${actorId}.kind`),
     stance: requireString(relationship["stance"], `actors.${actorId}.stance`),
-    wounds: optionalArray(condition["wounds"]).length,
-    afflictions: optionalArray(condition["afflictions"]).length,
-    servantModifiers: parameters === null ? 0 : optionalArray(parameters["modifiers"]).length,
+    statusEffects: optionalArray(condition["statusEffects"]).length,
+    sequence: sequence === null ? null : (optionalString(sequence["currentSequence"]) ?? null),
     agenda: agendaValue === undefined ? null : agendaContext(actorId, agendaValue),
     knowledgeLens:
       knowledgeLensValue === undefined ? null : knowledgeLensContext(actorId, knowledgeLensValue),
@@ -258,27 +255,27 @@ function offscreenEventContext(value: unknown, index: number): TimelineOffscreen
 function classifyPressureType(actorIds: readonly string[], summary: string): string {
   const haystack = `${actorIds.join(" ")} ${summary}`.toLowerCase();
   if (
-    /police|government|faldeus|orlando|calatin|karatin|监测|封锁|巡逻|警方|警察|媒体|政府/.test(
-      haystack,
-    )
+    /police|government|监测|封锁|巡逻|警方|警察|媒体|政府|值夜人|机械之心|代罚者/.test(haystack)
   ) {
     return "authority-surveillance";
   }
-  if (/church|executor|hansa|kotomine|教会|代行者|监督者/.test(haystack)) {
+  if (/church|教会|代行者|监督者|风暴教会|永恒烈阳|蒸汽与机械/.test(haystack)) {
     return "church-supervision";
   }
-  if (/clock tower|association|el-melloi|时钟塔|协会|魔术师协会|贵族|专利/.test(haystack)) {
-    return "mage-association-politics";
+  if (/nighthawks|值夜人|廷根|机械之心|代罚者|非凡者|序列|魔药/.test(haystack)) {
+    return "beyonder-activity";
   }
   if (
-    /workshop|bounded field|leyline|familiar|caster|工房|结界|灵脉|使魔|术式|魔术师/.test(haystack)
+    /workshop|bounded field|leyline|familiar|caster|工房|结界|灵脉|使魔|术式|非凡者|序列|魔药/.test(
+      haystack,
+    )
   ) {
     return "magecraft-infrastructure";
   }
   if (
     /servant|saber|archer|lancer|rider|caster|assassin|berserker|从者|英灵|宝具|真名/.test(haystack)
   ) {
-    return "servant-autonomy";
+    return "beyonder-activity";
   }
   if (/civilian|school|hospital|news|rumor|市民|学校|医院|新闻|传闻|社交|交通/.test(haystack)) {
     return "civilian-society";

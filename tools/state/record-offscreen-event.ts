@@ -66,10 +66,10 @@ export const recordOffscreenEventToolDefinition: FateToolDefinition = {
     createdFrom: Type.String({ description: "允许: parallel-line-subagent / gm / debug" }),
     pressureType: Type.String({
       description:
-        "canonical 后台压力类型，取自 run_parallel_line 返回的 activePressurePalette 里某个 slot 的 pressureType（如 servant-autonomy / church-supervision）",
+        "canonical 后台压力类型，取自 run_parallel_line 返回的 activePressurePalette 里某个 slot 的 pressureType（如 beyonder-activity / church-supervision）",
     }),
     pressureSlotId: Type.Optional(
-      Type.String({ description: "可选：对应 pressure palette slot 的 id（如 fsn-night-servant-scouting）" }),
+      Type.String({ description: "可选：对应 pressure palette slot 的 id（如 nighthawk-patrol / machinery-heart-investigation）" }),
     ),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>

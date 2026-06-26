@@ -19,42 +19,42 @@ export function updateActorConditionTool(params: unknown, sessionManager: unknow
 export const updateActorConditionToolDefinition: FateToolDefinition = {
   name: "update_actor_condition",
   description:
-    "更新 actor 的伤势、异常、长期影响、外观装备或 tracked item。\n\n" +
+    "更新 actor 的非凡者状态效果、外观装备或 tracked item。\n\n" +
     "【使用边界】\n" +
-    "- 受伤、感染、诅咒、永久影响、治疗进度、恢复或稳定\n" +
+    "- 添加/移除状态效果（buff/debuff/risk/flag），对应 add-status-effect / remove-status-effect\n" +
     "- 外观/服装变化用 change-outfit\n" +
-    "- 关键物跨 actor 转移、状态变化或加入 trackedItems\n" +
-    "- 非从者 actor 的魔术回路或 Od 状态变化\n\n" +
+    "- 关键物跨 actor 转移、状态变化或加入 trackedItems，对应 transfer-tracked-item / update-tracked-item / add-tracked-item\n\n" +
     "禁区：\n" +
-    "- 改写锁定身份事实、真名或基础参数\n" +
-    "- 用通用 HP 百分比代替离散伤势\n" +
-    "- 声称 Od / 魔力变化却不更新 circuits\n" +
+    "- 改写锁定身份事实、序列秘密或基础参数\n" +
+    "- 用通用 HP 百分比代替离散状态效果\n" +
     "- 把普通消耗品和临时杂物塞进 trackedItems",
   parameters: Type.Object({
     kind: Type.String({
       description:
-        "add-wound / update-wound / add-affliction / add-permanent-effect / update-magecraft-circuits / resolve-condition / change-outfit / update-outfit(alias) / change-clothes(alias) / transfer-tracked-item / update-tracked-item / add-tracked-item",
+        "add-status-effect / remove-status-effect / change-outfit / update-outfit(alias) / change-clothes(alias) / transfer-tracked-item / update-tracked-item / add-tracked-item",
     }),
     actorId: Type.Optional(
       Type.String({ description: "目标 actor id；必须已存在于 public actors" }),
     ),
-    severity: Type.Optional(
-      Type.String({ description: "minor / moderate / severe / critical" }),
+    name: Type.Optional(Type.String({ description: "add-status-effect 必填：效果名称" })),
+    type: Type.Optional(
+      Type.String({ description: "add-status-effect：buff / debuff / risk / flag" }),
     ),
-    text: Type.Optional(Type.String()),
-    source: Type.Optional(Type.String()),
-    recoverable: Type.Optional(Type.Boolean()),
-    expectedDuration: Type.Optional(Type.Unknown({ description: "预计持续时间或 null" })),
-    mechanicalEffect: Type.Optional(Type.String()),
-    circuits: Type.Optional(
-      Type.Object({
-        count: Type.String({ description: "魔术回路数量摘要" }),
-        quality: Type.String({ description: "Fate rank 或 none" }),
-        od: Type.Integer({ description: "0-100 Od / 人类魔力余量" }),
-        status: Type.String({
-          description: "normal / overheated / depleted / dormant / damaged",
-        }),
-        traits: Type.Array(Type.String()),
+    affectedAttribute: Type.Optional(
+      Type.String({ description: "add-status-effect：vitality / spirituality / reason / humanity / agility / luck" }),
+    ),
+    valueType: Type.Optional(
+      Type.String({ description: "add-status-effect：percentage / fixed" }),
+    ),
+    value: Type.Optional(Type.Number({ description: "add-status-effect：效果数值" })),
+    duration: Type.Optional(Type.Integer({ description: "add-status-effect：持续轮数" })),
+    source: Type.Optional(Type.String({ description: "add-status-effect：效果来源" })),
+    conditionId: Type.Optional(
+      Type.String({ description: "remove-status-effect 必填：要移除的效果 id" }),
+    ),
+    outcome: Type.Optional(
+      Type.String({
+        description: "remove-status-effect：recovered / expired / removed",
       }),
     ),
     outfit: Type.Optional(
@@ -73,7 +73,7 @@ export const updateActorConditionToolDefinition: FateToolDefinition = {
     label: Type.Optional(Type.String({ description: "add-tracked-item 必填：玩家可见标签" })),
     itemKind: Type.Optional(
       Type.String({
-        description: "mundane / weapon / mystic-code / document / key-item / other",
+        description: "mundane / weapon / sealed-artifact / mystical-item / document / key-item / consumable / other",
       }),
     ),
     condition: Type.Optional(
@@ -81,14 +81,6 @@ export const updateActorConditionToolDefinition: FateToolDefinition = {
     ),
     visibility: Type.Optional(Type.String({ description: "player-known / suspected" })),
     notes: Type.Optional(Type.Array(Type.String())),
-    treatment: Type.Optional(Type.String({ description: "update-wound 可用：当前处理状态" })),
-    conditionKind: Type.Optional(Type.String({ description: "resolve-condition：wound / affliction" })),
-    conditionId: Type.Optional(Type.String()),
-    outcome: Type.Optional(
-      Type.String({
-        description: "resolve-condition：recovered / stabilized；其它 kind 不用写",
-      }),
-    ),
     reason: Type.Optional(Type.String()),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>

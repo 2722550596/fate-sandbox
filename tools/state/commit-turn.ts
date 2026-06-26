@@ -15,7 +15,7 @@ import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 import { normalizeTurnCommitInput } from "./commit-turn-normalizer.ts";
 
 // 本轮是否产生机械代价：用于打断后台 no-cost 连击。可检测核心集。
-const COST_EVENT_KINDS = new Set(["actor-condition", "economy", "servant-form", "memory"]);
+const COST_EVENT_KINDS = new Set(["actor-condition", "economy", "sequence", "memory"]);
 function turnHasCost(events: readonly TurnCommitEvent[]): boolean {
   return events.some((event) => {
     if (COST_EVENT_KINDS.has(event.kind)) {
@@ -52,9 +52,9 @@ export const commitTurnToolDefinition: FateToolDefinition = {
     "每轮叙事结束时一次性提交本轮领域事件。用于一轮内聚合多个状态变化。\n\n" +
     "【使用边界】\n" +
     "- 每次 canonical turn 都必须提交顶层 time\n" +
-    "- 一轮内同时改变时间、地点、目标、伤势、物品、资金、记忆或从者资源\n" +
+    "- 一轮内同时改变时间、地点、目标、伤势、物品、资金、记忆或序列变更\n" +
     "- Scene Beat 开启/收口优先用 progress_scene_beat\n" +
-    "- resolve_combat_exchange 登记的义务必须在本次 events 里落地\n\n" +
+    "- resolve_combat 登记的义务必须在本次 events 里落地\n\n" +
     "禁区：\n" +
     "- 把它当裸 patch\n" +
     "- 在 events 里写时间或移动\n" +
@@ -71,7 +71,7 @@ export const commitTurnToolDefinition: FateToolDefinition = {
       Type.Object({
         kind: Type.String({
           description:
-            "scene / scene-presence / actor-condition / servant-form / economy / memory",
+            "scene / scene-presence / actor-condition / sequence / economy / memory",
         }),
         event: Type.Unknown({
           description:
