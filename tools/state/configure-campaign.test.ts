@@ -20,7 +20,7 @@ void test("configureCampaignTool updates campaign and timezone", () => {
   assert.match(result.content[0]?.text ?? "", /Campaign 已配置/);
   const state = exportState();
   assert.equal(state.public.campaign.timeline, "fsf");
-  assert.equal(state.public.clock.timezone, "America/Denver");
+  assert.equal(state.public.clock.timezone, "UTC");
   assert.equal(state.public.clock.displayTime, "2008年06月02日 星期一 21:28");
 });
 

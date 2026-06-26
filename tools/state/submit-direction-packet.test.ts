@@ -28,7 +28,7 @@ function seedHiddenTrueName(trueName: string): void {
   resetState();
   upsertActorTool(
     {
-      kind: "upsert-servant",
+      kind: "upsert-sequence",
       servant: {
         id: "saber_shiki",
         internalName: "Saber",
@@ -68,8 +68,7 @@ function seedHiddenTrueName(trueName: string): void {
     actorId: "saber_shiki",
     secrets: {
       actorId: "saber_shiki",
-      trueName: { id: "tn-1", value: trueName, revealState: "hidden", revealConditions: [] },
-      hiddenNoblePhantasms: [],
+      pathwaySecret: { id: "tn-1", value: trueName, revealState: "hidden", revealConditions: [] },
       privateMotives: [],
       unrevealedAffiliations: [],
     },

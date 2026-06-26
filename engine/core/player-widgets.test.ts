@@ -21,8 +21,7 @@ function addTestNpc(
     id: actorId,
     kind: "human",
     roles: [],
-    magecraft: null,
-    servantForm: null,
+    sequence: null,
     identity: { publicIdentity: actorId, background: "", lockedFacts: [] },
     presentation: {
       internalName: actorId.charAt(0).toUpperCase() + actorId.slice(1),
@@ -31,7 +30,7 @@ function addTestNpc(
       outfit: { label: "default", details: "" },
       demeanor: "neutral",
     },
-    condition: { wounds: [], afflictions: [], permanentEffects: [] },
+    condition: { statusEffects: [] },
     inventory: { ordinaryItems: [] },
     abilities: [],
     relationshipToProtagonist: { stance: "neutral", summary: stance },

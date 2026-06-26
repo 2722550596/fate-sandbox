@@ -4,7 +4,6 @@ import type {
   PublicNpcSkeletonInput,
   RetireActorInput,
   ScenePresenceInput,
-  ServantInput,
 } from "./actor-schema.ts";
 import type { ActorId, PublicActorState, PublicGameState, State } from "./state.ts";
 
@@ -16,12 +15,7 @@ export interface UpsertActorInput {
   reason: string;
 }
 
-export type {
-  ActorRegistryInput,
-  PublicNpcInput,
-  PublicNpcSkeletonInput,
-  ServantInput,
-} from "./actor-schema.ts";
+export type { ActorRegistryInput, PublicNpcInput, PublicNpcSkeletonInput } from "./actor-schema.ts";
 
 export interface UpsertActorResult {
   message: string;
@@ -56,8 +50,8 @@ export function upsertActor(draft: State, input: ActorRegistryInput): UpsertActo
       return upsertPublicNpc(draft, input);
     case "ensure-public-npc":
       return ensurePublicNpc(draft, input);
-    case "upsert-servant":
-      return upsertServant(draft, input);
+    case "upsert-sequence":
+      return upsertSequence(draft, input);
     default:
       throw new Error("unreachable actor registry input kind");
   }
@@ -98,106 +92,32 @@ function ensurePublicNpc(
   return { message: `public npc skeleton 已写入：${actor.id}。` };
 }
 
-function upsertServant(
+function upsertSequence(
   draft: State,
-  input: Extract<ActorRegistryInput, { kind: "upsert-servant" }>,
+  input: Extract<ActorRegistryInput, { kind: "upsert-sequence" }>,
 ): UpsertActorResult {
   assertNonEmptyString(input.reason, "reason");
-  const sv = input.servant;
-  assertNonEmptyString(sv.id, "servant.id");
-  assertNonEmptyString(sv.internalName, "servant.internalName");
-  assertNonEmptyString(sv.publicIdentity, "servant.publicIdentity");
+  const seq = input.sequence;
+  assertNonEmptyString(seq.actorId, "sequence.actorId");
 
-  const actor: PublicActorState = {
-    id: sv.id,
-    kind: "spirit",
-    origin: "圣杯召唤",
-    roles: sv.publicRoles ?? [],
-    magecraft: null,
-    servantForm: {
-      identity: {
-        className: sv.className,
-        trueName: {
-          status: sv.trueNameStatus,
-          display: sv.trueNameDisplay,
-        },
-        locked: true,
-      },
-      condition: {
-        spiritualCore: { value: sv.spiritualCore },
-        mana: { value: sv.mana },
-        spiritualCondition: sv.spiritualCondition,
-        permanentDefects: [],
-      },
-      contract: {
-        masterActorId: normalizeServantMasterActorId(sv),
-        masterName: normalizeServantMasterName(sv),
-        status: sv.contractStatus,
-        manaSupply: sv.manaSupply,
-      },
-      parameters: {
-        base: sv.parameters,
-        modifiers: [],
-        baseLocked: true,
-      },
-      skills: {
-        classSkills: sv.classSkills,
-        personalSkills: sv.personalSkills,
-      },
-      noblePhantasms: sv.noblePhantasms,
-      currentOrder: sv.currentOrder,
-    },
-    identity: {
-      publicIdentity: sv.publicIdentity,
-      background: sv.publicIdentity,
-      lockedFacts: [],
-    },
-    presentation: {
-      internalName: sv.internalName,
-      renderName: sv.renderName ?? sv.internalName,
-      apparentAge: sv.apparentAge,
-      outfit: sv.outfit,
-      demeanor: sv.demeanor,
-    },
-    condition: { wounds: [], afflictions: [], permanentEffects: [] },
-    inventory: { ordinaryItems: sv.ordinaryItems ?? [] },
-    abilities: [],
-    relationshipToProtagonist: sv.relationshipToProtagonist ?? {
-      stance: "neutral",
-      summary: "尚未建立关系。",
-    },
+  const actor = draft.public.actors[seq.actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在，无法设置序列: ${seq.actorId}。`);
+  }
+
+  actor.sequence = {
+    currentSequence: seq.currentSequence,
+    rank: seq.rank,
+    pathway: seq.pathway,
+    promotionSystem: seq.promotionSystem,
+    divinity: seq.divinity,
+    digestionProgress: seq.digestionProgress,
+    lossOfControlProgress: seq.lossOfControlProgress,
   };
 
-  writeActor(draft, actor);
-  return { message: `从者已写入：${sv.id} (${sv.className})。` };
-}
-
-function normalizeServantMasterActorId(servant: ServantInput): ActorId | null {
-  if (servant.contractStatus !== "masterless") {
-    return assertNonEmptyString(servant.masterActorId, "servant.masterActorId");
-  }
-  if (
-    servant.masterActorId === undefined ||
-    servant.masterActorId === null ||
-    servant.masterActorId === "none"
-  ) {
-    return null;
-  }
-  return assertNonEmptyString(servant.masterActorId, "servant.masterActorId");
-}
-
-function normalizeServantMasterName(servant: ServantInput): string | null {
-  if (servant.contractStatus !== "masterless") {
-    return assertNonEmptyString(servant.masterName, "servant.masterName");
-  }
-  if (
-    servant.masterName === undefined ||
-    servant.masterName === null ||
-    servant.masterName === "无"
-  ) {
-    return null;
-  }
-  return assertNonEmptyString(servant.masterName, "servant.masterName");
+  return {
+    message: `序列已更新：${seq.actorId} → ${seq.currentSequence} (${seq.pathway})。`,
+  };
 }
 
 export function retireActor(draft: State, input: RetireActorInput): RetireActorResult {
@@ -215,12 +135,6 @@ export function retireActor(draft: State, input: RetireActorInput): RetireActorR
   return { message: `actor 已退场并从当前 registry 移除：${actorId}。` };
 }
 
-/**
- * actor 生命周期的唯一级联出口：从所有按 actorId 聚合的状态中抹除该 actor。
- * 独占状态（public.actors / public.actorImpressions / secrets.actorStates）按 key 删除；
- * 关系边（两层 relationshipSignals）凡是碰到该 actor 的一端就一起删。
- * 所有退场路径必须走这里，不允许再手动逐表删除。
- */
 export function removeActorEverywhere(draft: State, actorId: ActorId): void {
   delete draft.public.actors[actorId];
   delete draft.public.actorImpressions[actorId];
@@ -240,18 +154,6 @@ export function removeActorEverywhere(draft: State, actorId: ActorId): void {
 }
 
 function assertActorHasNoBlockingReferences(publicState: PublicGameState, actorId: ActorId): void {
-  for (const [otherActorId, actor] of Object.entries(publicState.actors)) {
-    if (otherActorId === actorId) continue;
-    const contractedServantIds = actor.roles.flatMap((role) =>
-      role.kind === "master" ? role.contractedServantIds : [],
-    );
-    if (contractedServantIds.includes(actorId)) {
-      throw new Error(`actor ${actorId} 仍被 ${otherActorId} 的 contractedServantIds 引用。`);
-    }
-    if (actor.servantForm?.contract.masterActorId === actorId) {
-      throw new Error(`actor ${actorId} 仍是 ${otherActorId} 的 masterActorId。`);
-    }
-  }
   for (const [itemId, item] of Object.entries(publicState.trackedItems)) {
     if (item.ownerActorId === actorId || item.holderActorId === actorId) {
       throw new Error(`actor ${actorId} 仍持有/拥有 tracked item ${itemId}；请先转移或结算物品。`);
@@ -277,8 +179,7 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
   const base = {
     id: assertNonEmptyString(npc.id, "npc.id"),
     roles: npc.publicRoles,
-    magecraft: null,
-    servantForm: null,
+    sequence: null,
     identity: {
       publicIdentity: assertNonEmptyString(npc.publicIdentity, "npc.publicIdentity"),
       background: assertNonEmptyString(npc.publicIdentity, "npc.publicIdentity"),
@@ -291,7 +192,7 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
       outfit: npc.outfit,
       demeanor: assertNonEmptyString(npc.demeanor, "npc.demeanor"),
     },
-    condition: { wounds: [], afflictions: [], permanentEffects: [] },
+    condition: { statusEffects: [] },
     inventory: { ordinaryItems: npc.ordinaryItems },
     abilities: [],
     relationshipToProtagonist: npc.relationshipToProtagonist,
@@ -300,16 +201,10 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
   switch (npc.kind) {
     case "human":
       return { ...base, kind: "human" };
-    case "outsider":
-      return {
-        ...base,
-        kind: "outsider",
-        sourceProfile: "玩家可见信息未确认",
-        fateTranslation: "玩家可见信息未确认",
-        restrictions: [],
-      };
-    case "spirit":
-      return { ...base, kind: "spirit", origin: "玩家可见信息未确认" };
+    case "beyonder":
+      return { ...base, kind: "beyonder" };
+    case "creature":
+      return { ...base, kind: "creature", origin: "玩家可见信息未确认" };
     case "other":
       return { ...base, kind: "other", nature: "玩家可见信息未确认" };
     default:

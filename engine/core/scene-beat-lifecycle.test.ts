@@ -49,6 +49,7 @@ void test("progressSceneBeat can travel and begin in one lifecycle step", () => 
         site: "新都",
         detail: "商业街",
         boundary: "normal",
+        coordinates: null,
       },
       elapsedMinutes: 40,
       reason: "移动到新都商业街。",

@@ -101,13 +101,12 @@ void test("recordRelationshipSignal blocks player-known unrevealed secret string
     actorId: PROTAGONIST_ACTOR_ID,
     secrets: {
       actorId: PROTAGONIST_ACTOR_ID,
-      trueName: {
-        id: "protagonist-true-name",
-        value: "Artoria Pendragon",
+      pathwaySecret: {
+        id: "protagonist-pathway-secret",
+        value: "偷盗者途径",
         revealState: "hidden",
         revealConditions: ["revealed in story"],
       },
-      hiddenNoblePhantasms: [],
       privateMotives: [],
       unrevealedAffiliations: [],
     },

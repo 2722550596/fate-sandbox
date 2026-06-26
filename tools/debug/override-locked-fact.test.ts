@@ -1,98 +1,98 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state-store.ts";
-import { upsertActorTool } from "../state/upsert-actor.ts";
+import {
+  createInitialState,
+  commitState,
+  getState,
+  resetState,
+} from "../../engine/core/state-store.ts";
 import { overrideLockedFactTool } from "./override-locked-fact.ts";
 
-void test("overrideLockedFactTool can hide an accidentally revealed true name", () => {
+void test("overrideLockedFactTool can override sequence rank", () => {
   resetState();
-  upsertActorTool(
-    {
-      kind: "upsert-servant",
-      servant: baseServant(),
-      reason: "建立测试从者",
-    },
-    createNoopSessionManager(),
-  );
-
-  overrideLockedFactTool(
-    {
-      kind: "servant-true-name",
-      actorId: "caster",
-      display: "Caster",
-      status: "hidden",
-      reason: "修正误公开真名",
-    },
-    createNoopSessionManager(),
-  );
-
-  assert.deepEqual(getState().public.actors["caster"]?.servantForm?.identity.trueName, {
-    status: "hidden",
-    display: "Caster",
-  });
-});
-
-void test("overrideLockedFactTool defaults true name override to revealed", () => {
-  resetState();
-  upsertActorTool(
-    {
-      kind: "upsert-servant",
-      servant: baseServant(),
-      reason: "建立测试从者",
-    },
-    createNoopSessionManager(),
-  );
-
-  overrideLockedFactTool(
-    {
-      kind: "servant-true-name",
-      actorId: "caster",
-      display: "美狄亚",
-      reason: "测试默认公开真名",
-    },
-    createNoopSessionManager(),
-  );
-
-  assert.deepEqual(getState().public.actors["caster"]?.servantForm?.identity.trueName, {
-    status: "revealed",
-    display: "美狄亚",
-  });
-});
-
-function baseServant(): Record<string, unknown> {
-  return {
+  const draft = createInitialState();
+  draft.public.actors["caster"] = {
     id: "caster",
-    internalName: "Caster",
-    publicIdentity: "身份不明的从者",
-    apparentAge: "二十岁后半",
-    outfit: { label: "长袍", details: "深蓝色连帽长袍。" },
-    demeanor: "沉静寡言",
-    className: "Caster",
-    trueNameDisplay: "美狄亚",
-    trueNameStatus: "revealed",
-    parameters: {
-      strength: "E",
-      endurance: "D",
-      agility: "C",
-      mana: "A",
-      luck: "B",
-      noblePhantasm: "A",
+    kind: "beyonder",
+    roles: [],
+    sequence: {
+      currentSequence: "序列7-魔术师",
+      rank: "seq-7",
+      pathway: "seer",
+      promotionSystem: "potion",
+      divinity: 1,
+      digestionProgress: 30,
+      lossOfControlProgress: 0,
     },
-    classSkills: [{ name: "阵地作成", rank: "A", summary: "可建造魔术阵地。" }],
-    personalSkills: [{ name: "高速神言", rank: "A", summary: "无需咏唱发动大魔术。" }],
-    noblePhantasms: [],
-    spiritualCore: 100,
-    mana: 100,
-    spiritualCondition: "完好",
-    masterActorId: null,
-    masterName: null,
-    contractStatus: "masterless",
-    manaSupply: "starved",
-    currentOrder: "自主行动",
+    identity: { publicIdentity: "身份非凡者", background: "", lockedFacts: [] },
+    presentation: {
+      internalName: "Caster",
+      renderName: "Caster",
+      apparentAge: "二十岁后半",
+      outfit: { label: "长袍", details: "深蓝色连帽长袍。" },
+      demeanor: "沉静寡言",
+    },
+    condition: { statusEffects: [] },
+    inventory: { ordinaryItems: [] },
+    abilities: [],
+    relationshipToProtagonist: { stance: "neutral", summary: "尚未建立关系。" },
   };
-}
+  commitState(draft);
 
-function createNoopSessionManager(): unknown {
-  return { appendCustomEntry: () => "entry-test" };
-}
+  overrideLockedFactTool(
+    {
+      kind: "sequence-rank",
+      actorId: "caster",
+      rank: "seq-6",
+      reason: "debug override",
+    },
+    { appendCustomEntry: () => "entry-test" },
+  );
+
+  assert.equal(getState().public.actors["caster"]?.sequence?.rank, "seq-6");
+});
+
+void test("overrideLockedFactTool can override sequence secret display", () => {
+  resetState();
+  const draft = createInitialState();
+  draft.public.actors["caster"] = {
+    id: "caster",
+    kind: "beyonder",
+    roles: [],
+    sequence: {
+      currentSequence: "序列7-魔术师",
+      rank: "seq-7",
+      pathway: "seer",
+      promotionSystem: "potion",
+      divinity: 1,
+      digestionProgress: 30,
+      lossOfControlProgress: 0,
+    },
+    identity: { publicIdentity: "身份非凡者", background: "", lockedFacts: [] },
+    presentation: {
+      internalName: "Caster",
+      renderName: "Caster",
+      apparentAge: "二十岁后半",
+      outfit: { label: "长袍", details: "深蓝色连帽长袍。" },
+      demeanor: "沉静寡言",
+    },
+    condition: { statusEffects: [] },
+    inventory: { ordinaryItems: [] },
+    abilities: [],
+    relationshipToProtagonist: { stance: "neutral", summary: "尚未建立关系。" },
+  };
+  commitState(draft);
+
+  overrideLockedFactTool(
+    {
+      kind: "pathway-secret",
+      actorId: "caster",
+      display: "序列6-记录官",
+      reason: "debug override",
+    },
+    { appendCustomEntry: () => "entry-test" },
+  );
+
+  assert.equal(getState().public.actors["caster"]?.sequence?.currentSequence, "序列6-记录官");
+});

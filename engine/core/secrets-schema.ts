@@ -5,7 +5,6 @@ import type { TypeBoxValidator } from "./typebox-validation.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { NOBLE_PHANTASM_SCHEMA } from "./actor-schema.ts";
 import { stringEnumSchema } from "./state-enum-schemas.ts";
 import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
 
@@ -13,42 +12,34 @@ import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.t
  * Secrets 领域（reveal_secret 工具）边界 schema：单一事实来源。
  * 对应输入类型由此派生（secrets.ts re-export 原名）。
  */
-export const SERVANT_SECRET_STRING_INPUT_SCHEMA = Type.Object({
+export const SECRET_STRING_INPUT_SCHEMA = Type.Object({
   value: Type.String({ minLength: 1 }),
   revealConditions: Type.Array(Type.String({ minLength: 1 })),
 });
-export type ServantSecretStringInput = Static<typeof SERVANT_SECRET_STRING_INPUT_SCHEMA>;
-
-export const SERVANT_SECRET_NOBLE_PHANTASM_INPUT_SCHEMA = Type.Object({
-  value: NOBLE_PHANTASM_SCHEMA,
-  revealConditions: Type.Array(Type.String({ minLength: 1 })),
-});
-export type ServantSecretNoblePhantasmInput = Static<
-  typeof SERVANT_SECRET_NOBLE_PHANTASM_INPUT_SCHEMA
->;
+export type SecretStringInput = Static<typeof SECRET_STRING_INPUT_SCHEMA>;
 
 export const REVEAL_SECRET_TOOL_KINDS = [
-  "configure-servant-secrets",
+  "configure-sequence-secrets",
   "configure-actor-secrets",
   "claim-reveal",
   "observed-reveal",
 ] as const;
 const REVEAL_SECRET_TOOL_KIND_SCHEMA = stringEnumSchema(REVEAL_SECRET_TOOL_KINDS);
 
-export const CONFIGURE_SERVANT_SECRETS_SCHEMA = Type.Object({
-  kind: Type.Literal("configure-servant-secrets"),
+export const CONFIGURE_SEQUENCE_SECRETS_SCHEMA = Type.Object({
+  kind: Type.Literal("configure-sequence-secrets"),
   actorId: Type.String({ minLength: 1 }),
-  trueName: Type.Optional(SERVANT_SECRET_STRING_INPUT_SCHEMA),
-  hiddenNoblePhantasms: Type.Optional(Type.Array(SERVANT_SECRET_NOBLE_PHANTASM_INPUT_SCHEMA)),
+  pathwaySecret: Type.Optional(SECRET_STRING_INPUT_SCHEMA),
+  sequenceSecret: Type.Optional(SECRET_STRING_INPUT_SCHEMA),
   reason: Type.String({ minLength: 1 }),
 });
-export type ConfigureServantSecretsInput = Static<typeof CONFIGURE_SERVANT_SECRETS_SCHEMA>;
+export type ConfigureSequenceSecretsInput = Static<typeof CONFIGURE_SEQUENCE_SECRETS_SCHEMA>;
 
 export const CONFIGURE_ACTOR_SECRETS_SCHEMA = Type.Object({
   kind: Type.Literal("configure-actor-secrets"),
   actorId: Type.String({ minLength: 1 }),
-  privateMotives: Type.Optional(Type.Array(SERVANT_SECRET_STRING_INPUT_SCHEMA)),
-  unrevealedAffiliations: Type.Optional(Type.Array(SERVANT_SECRET_STRING_INPUT_SCHEMA)),
+  privateMotives: Type.Optional(Type.Array(SECRET_STRING_INPUT_SCHEMA)),
+  unrevealedAffiliations: Type.Optional(Type.Array(SECRET_STRING_INPUT_SCHEMA)),
   reason: Type.String({ minLength: 1 }),
 });
 export type ConfigureActorSecretsInput = Static<typeof CONFIGURE_ACTOR_SECRETS_SCHEMA>;
@@ -72,19 +63,18 @@ export type RevealSecretEvent =
   | Static<typeof OBSERVED_REVEAL_SCHEMA>;
 
 export type RevealSecretToolInput =
-  | ConfigureServantSecretsInput
+  | ConfigureSequenceSecretsInput
   | ConfigureActorSecretsInput
   | RevealSecretEvent;
 
 const REVEAL_SECRET_TOOL_KIND_VALIDATOR = Compile(REVEAL_SECRET_TOOL_KIND_SCHEMA);
-const CONFIGURE_SERVANT_SECRETS_VALIDATOR = Compile(CONFIGURE_SERVANT_SECRETS_SCHEMA);
+const CONFIGURE_SEQUENCE_SECRETS_VALIDATOR = Compile(CONFIGURE_SEQUENCE_SECRETS_SCHEMA);
 const CONFIGURE_ACTOR_SECRETS_VALIDATOR = Compile(CONFIGURE_ACTOR_SECRETS_SCHEMA);
 const CLAIM_REVEAL_VALIDATOR = Compile(CLAIM_REVEAL_SCHEMA);
 const OBSERVED_REVEAL_VALIDATOR = Compile(OBSERVED_REVEAL_SCHEMA);
 
-// Compile 必须在独立常量上调用（satisfies 上下文会干扰泛型推导）。
 const REVEAL_SECRET_TOOL_VARIANT_VALIDATORS = {
-  "configure-servant-secrets": CONFIGURE_SERVANT_SECRETS_VALIDATOR,
+  "configure-sequence-secrets": CONFIGURE_SEQUENCE_SECRETS_VALIDATOR,
   "configure-actor-secrets": CONFIGURE_ACTOR_SECRETS_VALIDATOR,
   "claim-reveal": CLAIM_REVEAL_VALIDATOR,
   "observed-reveal": OBSERVED_REVEAL_VALIDATOR,

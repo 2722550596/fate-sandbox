@@ -3,7 +3,6 @@ import type { State, TurnTimePolicy } from "./state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 
-import { pruneExpiredParamModifiers } from "./servant.ts";
 import { assertNonEmptyString, assertNonNegativeInteger } from "./typebox-validation.ts";
 
 /** 不经过 Scene Beat/Turn Commit 的裸时钟推进，供初始化与测试准备使用。 */
@@ -17,7 +16,6 @@ export function advanceClock(draft: State, minutes: number, reason: string): voi
     .toString({ fractionalSecondDigits: 3 });
   draft.public.clock.currentAt = nextTime;
   draft.public.scene.lastResolvedAt = nextTime;
-  pruneExpiredParamModifiers(draft);
 }
 
 export function applyTurnTime(draft: State, time: TurnTimePolicy): SceneEventResult {
@@ -39,7 +37,6 @@ function advanceTurnTime(draft: State, elapsedMinutesInput: number): SceneEventR
     .toString({ fractionalSecondDigits: 3 });
   draft.public.clock.currentAt = nextTime;
   draft.public.scene.lastResolvedAt = nextTime;
-  pruneExpiredParamModifiers(draft);
   return { message: `时间已推进 ${elapsedMinutes} 分钟。` };
 }
 
@@ -54,7 +51,6 @@ function travelTurnTime(
   draft.public.clock.currentAt = nextTime;
   draft.public.scene.lastResolvedAt = nextTime;
   draft.public.scene.location = time.location;
-  pruneExpiredParamModifiers(draft);
   return { message: `地点已更新，经过 ${elapsedMinutes} 分钟。` };
 }
 

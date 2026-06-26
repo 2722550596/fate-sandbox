@@ -4,16 +4,20 @@ import type { TypeBoxValidator } from "./typebox-validation.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { FATE_PARAMS_SCHEMA, OUTFIT_STATE_SCHEMA } from "./actor-schema.ts";
-import { SERVANT_SECRET_STRING_INPUT_SCHEMA } from "./secrets-schema.ts";
-import { SERVANT_CLASS_SCHEMA, stringEnumSchema } from "./state-enum-schemas.ts";
+import { OUTFIT_STATE_SCHEMA } from "./actor-schema.ts";
+import {
+  PATHWAY_ID_SCHEMA,
+  PROMOTION_SYSTEM_SCHEMA,
+  SEQUENCE_RANK_SCHEMA,
+  stringEnumSchema,
+} from "./state-enum-schemas.ts";
 import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
 
 /**
  * initialize_new_game 工具边界 schema。
  *
- * 注意：故意只声明旧工具边界放行的字段子集（引擎 NewGameInitializationInput
- * 还支持 roles/magecraft/master/knownFacts 等），多余字段由 Clean 剥除——
+ * 注意：故意只声明工具边界放行的字段子集（引擎 NewGameInitializationInput
+ * 还支持 roles/abilities/knownFacts 等），多余字段由 Clean 剥除——
  * 与旧手写 assert 重建对象的行为一致。开放新字段时在这里显式加。
  */
 const NEW_GAME_CAMPAIGN_INPUT_SCHEMA = Type.Object({
@@ -42,21 +46,26 @@ const HUMAN_PROTAGONIST_OPENING_SCHEMA = Type.Object({
   ordinaryItems: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
 });
 
-const SERVANT_PROTAGONIST_OPENING_SCHEMA = Type.Object({
+const BEYONDER_PROTAGONIST_OPENING_SCHEMA = Type.Object({
   internalName: Type.String({ minLength: 1 }),
   renderName: Type.Optional(Type.String({ minLength: 1 })),
   publicIdentity: Type.String({ minLength: 1 }),
+  background: Type.String({ minLength: 1 }),
   apparentAge: Type.String({ minLength: 1 }),
   outfit: OUTFIT_STATE_SCHEMA,
   demeanor: Type.String({ minLength: 1 }),
-  className: SERVANT_CLASS_SCHEMA,
-  trueNameDisplay: Type.String({ minLength: 1 }),
-  trueNameStatus: stringEnumSchema(["hidden", "suspected"]),
-  parameters: Type.Optional(FATE_PARAMS_SCHEMA),
+  currentSequence: Type.String({ minLength: 1 }),
+  rank: SEQUENCE_RANK_SCHEMA,
+  pathway: PATHWAY_ID_SCHEMA,
+  promotionSystem: Type.Optional(PROMOTION_SYSTEM_SCHEMA),
+  divinity: Type.Optional(Type.Number({ minimum: 0 })),
+  digestionProgress: Type.Optional(Type.Integer({ minimum: 0, maximum: 100 })),
+  lossOfControlProgress: Type.Optional(Type.Integer({ minimum: 0, maximum: 100 })),
+  abilities: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
   ordinaryItems: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
 });
 
-export const NEW_GAME_KINDS = ["human-protagonist", "servant-protagonist"] as const;
+export const NEW_GAME_KINDS = ["human-protagonist", "beyonder-protagonist"] as const;
 const NEW_GAME_KIND_SCHEMA = stringEnumSchema(NEW_GAME_KINDS);
 
 const HUMAN_NEW_GAME_INPUT_SCHEMA = Type.Object({
@@ -67,23 +76,21 @@ const HUMAN_NEW_GAME_INPUT_SCHEMA = Type.Object({
   reason: Type.String({ minLength: 1 }),
 });
 
-const SERVANT_NEW_GAME_INPUT_SCHEMA = Type.Object({
-  kind: Type.Literal("servant-protagonist"),
+const BEYONDER_NEW_GAME_INPUT_SCHEMA = Type.Object({
+  kind: Type.Literal("beyonder-protagonist"),
   campaign: NEW_GAME_CAMPAIGN_INPUT_SCHEMA,
-  protagonist: SERVANT_PROTAGONIST_OPENING_SCHEMA,
+  protagonist: BEYONDER_PROTAGONIST_OPENING_SCHEMA,
   presence: Type.Optional(NEW_GAME_PRESENCE_INPUT_SCHEMA),
-  hiddenTrueName: Type.Optional(SERVANT_SECRET_STRING_INPUT_SCHEMA),
   reason: Type.String({ minLength: 1 }),
 });
 
 const NEW_GAME_KIND_VALIDATOR = Compile(NEW_GAME_KIND_SCHEMA);
 const HUMAN_NEW_GAME_INPUT_VALIDATOR = Compile(HUMAN_NEW_GAME_INPUT_SCHEMA);
-const SERVANT_NEW_GAME_INPUT_VALIDATOR = Compile(SERVANT_NEW_GAME_INPUT_SCHEMA);
+const BEYONDER_NEW_GAME_INPUT_VALIDATOR = Compile(BEYONDER_NEW_GAME_INPUT_SCHEMA);
 
-// Compile 必须在独立常量上调用（satisfies 上下文会干扰泛型推导）。
 const NEW_GAME_VARIANT_VALIDATORS = {
   "human-protagonist": HUMAN_NEW_GAME_INPUT_VALIDATOR,
-  "servant-protagonist": SERVANT_NEW_GAME_INPUT_VALIDATOR,
+  "beyonder-protagonist": BEYONDER_NEW_GAME_INPUT_VALIDATOR,
 } satisfies Record<
   NewGameInitializationInput["kind"],
   TypeBoxValidator<NewGameInitializationInput>

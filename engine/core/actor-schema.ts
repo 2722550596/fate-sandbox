@@ -1,6 +1,6 @@
 import type { Static } from "typebox";
 
-import type { FateRank, FateRankOrUnknown, FateRankRange, PublicActorState } from "./state.ts";
+import type { PublicActorState } from "./state.ts";
 import type { TypeBoxValidator } from "./typebox-validation.ts";
 
 import { Type } from "typebox";
@@ -9,8 +9,9 @@ import { Compile } from "typebox/compile";
 import {
   ACTOR_KIND_SCHEMA,
   ACTOR_STANCE_SCHEMA,
-  REVEAL_STATUS_SCHEMA,
-  SERVANT_CLASS_SCHEMA,
+  PATHWAY_ID_SCHEMA,
+  PROMOTION_SYSTEM_SCHEMA,
+  SEQUENCE_RANK_SCHEMA,
   stringEnumSchema,
 } from "./state-enum-schemas.ts";
 import {
@@ -50,75 +51,14 @@ export function parseRetireActorInput(value: unknown, fieldName: string): Retire
   return parseTypeBoxValue(trimStringsDeep(value), fieldName, RETIRE_ACTOR_INPUT_VALIDATOR);
 }
 
-/** Fate rank 文法与 engine/core/fate-rank.ts 保持一致。 */
-const FATE_RANK_PATTERN_FRAGMENT = "(?:E|D|C|B|A|EX)(?:\\+{1,3}|-)?";
-
-export const FATE_RANK_OR_NONE_SCHEMA = Type.Unsafe<FateRank | "none">({
-  type: "string",
-  pattern: `^(?:${FATE_RANK_PATTERN_FRAGMENT}|none)$`,
-});
-
-/** 宝具评级：单值、可变范围（如 E~A++）或 none（无宝具）。 */
-export const NOBLE_PHANTASM_RANK_SCHEMA = Type.Unsafe<FateRank | FateRankRange | "none">({
-  type: "string",
-  pattern: `^(?:${FATE_RANK_PATTERN_FRAGMENT}(?:~${FATE_RANK_PATTERN_FRAGMENT})?|none)$`,
-});
-
-export const NOBLE_PHANTASM_SCHEMA = Type.Object({
-  name: Type.String({ minLength: 1 }),
-  rank: NOBLE_PHANTASM_RANK_SCHEMA,
-  kind: Type.String({ minLength: 1 }),
-  status: REVEAL_STATUS_SCHEMA,
-  summary: Type.String({ minLength: 1 }),
-});
-
-export type NoblePhantasm = Static<typeof NOBLE_PHANTASM_SCHEMA>;
-
 export const OUTFIT_STATE_SCHEMA = Type.Object({
   label: Type.String({ minLength: 1 }),
   details: Type.String({ minLength: 1 }),
 });
 
-export const FATE_RANK_SCHEMA = Type.Unsafe<FateRank>({
-  type: "string",
-  pattern: `^${FATE_RANK_PATTERN_FRAGMENT}$`,
-});
-
-/** 参数允许 unknown：未被观测/拍板的对手参数走中性比较路径。 */
-export const FATE_RANK_OR_UNKNOWN_SCHEMA = Type.Unsafe<FateRankOrUnknown>({
-  type: "string",
-  pattern: `^(?:${FATE_RANK_PATTERN_FRAGMENT}|unknown)$`,
-});
-
-export const FATE_PARAMS_SCHEMA = Type.Object({
-  strength: FATE_RANK_OR_UNKNOWN_SCHEMA,
-  endurance: FATE_RANK_OR_UNKNOWN_SCHEMA,
-  agility: FATE_RANK_OR_UNKNOWN_SCHEMA,
-  mana: FATE_RANK_OR_UNKNOWN_SCHEMA,
-  luck: FATE_RANK_OR_UNKNOWN_SCHEMA,
-  noblePhantasm: FATE_RANK_OR_UNKNOWN_SCHEMA,
-});
-
-export const SERVANT_SKILL_SCHEMA = Type.Object({
-  name: Type.String({ minLength: 1 }),
-  rank: FATE_RANK_OR_NONE_SCHEMA,
-  summary: Type.String({ minLength: 1 }),
-});
-
 export const RELATIONSHIP_STATE_SCHEMA = Type.Object({
   stance: ACTOR_STANCE_SCHEMA,
   summary: Type.String({ minLength: 1 }),
-});
-
-export const COMMAND_SPELL_STATE_SCHEMA = Type.Object({
-  total: Type.Integer({ minimum: 0 }),
-  remaining: Type.Integer({ minimum: 0 }),
-});
-
-const MASTER_ROLE_SCHEMA = Type.Object({
-  kind: Type.Literal("master"),
-  commandSpells: COMMAND_SPELL_STATE_SCHEMA,
-  contractedServantIds: Type.Array(Type.String({ minLength: 1 })),
 });
 
 const SOCIAL_ROLE_SCHEMA = Type.Object({
@@ -132,11 +72,7 @@ const FACTION_ROLE_SCHEMA = Type.Object({
   label: Type.String({ minLength: 1 }),
 });
 
-export const ACTOR_ROLE_SCHEMA = Type.Union([
-  MASTER_ROLE_SCHEMA,
-  SOCIAL_ROLE_SCHEMA,
-  FACTION_ROLE_SCHEMA,
-]);
+export const ACTOR_ROLE_SCHEMA = Type.Union([SOCIAL_ROLE_SCHEMA, FACTION_ROLE_SCHEMA]);
 
 export const PUBLIC_NPC_INPUT_SCHEMA = Type.Object({
   id: Type.String({ minLength: 1 }),
@@ -168,35 +104,24 @@ export const PUBLIC_NPC_SKELETON_INPUT_SCHEMA = Type.Object({
 });
 export type PublicNpcSkeletonInput = Static<typeof PUBLIC_NPC_SKELETON_INPUT_SCHEMA>;
 
-export const SERVANT_INPUT_SCHEMA = Type.Object({
-  id: Type.String({ minLength: 1 }),
-  internalName: Type.String({ minLength: 1 }),
-  renderName: Type.Optional(Type.String({ minLength: 1 })),
-  publicIdentity: Type.String({ minLength: 1 }),
-  apparentAge: Type.String({ minLength: 1 }),
-  outfit: OUTFIT_STATE_SCHEMA,
-  demeanor: Type.String({ minLength: 1 }),
-  className: SERVANT_CLASS_SCHEMA,
-  trueNameDisplay: Type.String({ minLength: 1 }),
-  trueNameStatus: REVEAL_STATUS_SCHEMA,
-  parameters: FATE_PARAMS_SCHEMA,
-  classSkills: Type.Array(SERVANT_SKILL_SCHEMA),
-  personalSkills: Type.Array(SERVANT_SKILL_SCHEMA),
-  noblePhantasms: Type.Array(NOBLE_PHANTASM_SCHEMA),
-  spiritualCore: Type.Integer(),
-  mana: Type.Integer(),
-  spiritualCondition: Type.String({ minLength: 1 }),
-  masterActorId: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
-  masterName: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
-  contractStatus: stringEnumSchema(["stable", "weak", "cut", "masterless"]),
-  manaSupply: stringEnumSchema(["sufficient", "strained", "starved"]),
-  currentOrder: Type.String({ minLength: 1 }),
-  publicRoles: Type.Optional(Type.Array(ACTOR_ROLE_SCHEMA)),
-  relationshipToProtagonist: Type.Optional(RELATIONSHIP_STATE_SCHEMA),
-  ordinaryItems: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
+export const SEQUENCE_INPUT_SCHEMA = Type.Object({
+  actorId: Type.String({ minLength: 1 }),
+  currentSequence: Type.String({ minLength: 1 }),
+  rank: SEQUENCE_RANK_SCHEMA,
+  pathway: PATHWAY_ID_SCHEMA,
+  promotionSystem: PROMOTION_SYSTEM_SCHEMA,
+  divinity: Type.Number({ minimum: 0 }),
+  digestionProgress: Type.Integer({ minimum: 0, maximum: 100 }),
+  lossOfControlProgress: Type.Integer({ minimum: 0, maximum: 100 }),
+  reason: Type.String({ minLength: 1 }),
 });
-export type ServantInput = Static<typeof SERVANT_INPUT_SCHEMA>;
+export type SequenceInput = Static<typeof SEQUENCE_INPUT_SCHEMA>;
 
+const SEQUENCE_INPUT_VALIDATOR = Compile(SEQUENCE_INPUT_SCHEMA);
+
+export function parseSequenceInput(value: unknown, fieldName: string): SequenceInput {
+  return parseTypeBoxValue(trimStringsDeep(value), fieldName, SEQUENCE_INPUT_VALIDATOR);
+}
 /** setup-protagonist 的 actor 整体由 Domain Event Tool Runner 提交时的 assertState 负责校验；这里故意放行。 */
 const PUBLIC_ACTOR_STATE_DELEGATED_SCHEMA = Type.Unsafe<PublicActorState>({});
 
@@ -204,7 +129,7 @@ export const ACTOR_REGISTRY_KINDS = [
   "setup-protagonist",
   "upsert-public-npc",
   "ensure-public-npc",
-  "upsert-servant",
+  "upsert-sequence",
 ] as const;
 const ACTOR_REGISTRY_KIND_SCHEMA = stringEnumSchema(ACTOR_REGISTRY_KINDS);
 
@@ -226,9 +151,9 @@ const ENSURE_PUBLIC_NPC_INPUT_SCHEMA = Type.Object({
   reason: Type.String({ minLength: 1 }),
 });
 
-const UPSERT_SERVANT_INPUT_SCHEMA = Type.Object({
-  kind: Type.Literal("upsert-servant"),
-  servant: SERVANT_INPUT_SCHEMA,
+const UPSERT_SEQUENCE_INPUT_SCHEMA = Type.Object({
+  kind: Type.Literal("upsert-sequence"),
+  sequence: SEQUENCE_INPUT_SCHEMA,
   reason: Type.String({ minLength: 1 }),
 });
 
@@ -236,20 +161,19 @@ export type ActorRegistryInput =
   | Static<typeof SETUP_PROTAGONIST_INPUT_SCHEMA>
   | Static<typeof UPSERT_PUBLIC_NPC_INPUT_SCHEMA>
   | Static<typeof ENSURE_PUBLIC_NPC_INPUT_SCHEMA>
-  | Static<typeof UPSERT_SERVANT_INPUT_SCHEMA>;
+  | Static<typeof UPSERT_SEQUENCE_INPUT_SCHEMA>;
 
 const ACTOR_REGISTRY_KIND_VALIDATOR = Compile(ACTOR_REGISTRY_KIND_SCHEMA);
 const SETUP_PROTAGONIST_INPUT_VALIDATOR = Compile(SETUP_PROTAGONIST_INPUT_SCHEMA);
 const UPSERT_PUBLIC_NPC_INPUT_VALIDATOR = Compile(UPSERT_PUBLIC_NPC_INPUT_SCHEMA);
 const ENSURE_PUBLIC_NPC_INPUT_VALIDATOR = Compile(ENSURE_PUBLIC_NPC_INPUT_SCHEMA);
-const UPSERT_SERVANT_INPUT_VALIDATOR = Compile(UPSERT_SERVANT_INPUT_SCHEMA);
+const UPSERT_SEQUENCE_INPUT_VALIDATOR = Compile(UPSERT_SEQUENCE_INPUT_SCHEMA);
 
-// Compile 必须在独立常量上调用（satisfies 上下文会干扰泛型推导）。
 const ACTOR_REGISTRY_VARIANT_VALIDATORS = {
   "setup-protagonist": SETUP_PROTAGONIST_INPUT_VALIDATOR,
   "upsert-public-npc": UPSERT_PUBLIC_NPC_INPUT_VALIDATOR,
   "ensure-public-npc": ENSURE_PUBLIC_NPC_INPUT_VALIDATOR,
-  "upsert-servant": UPSERT_SERVANT_INPUT_VALIDATOR,
+  "upsert-sequence": UPSERT_SEQUENCE_INPUT_VALIDATOR,
 } satisfies Record<ActorRegistryInput["kind"], TypeBoxValidator<ActorRegistryInput>>;
 
 export function parseActorRegistryInput(value: unknown, fieldName: string): ActorRegistryInput {

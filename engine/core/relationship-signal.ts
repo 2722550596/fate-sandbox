@@ -74,12 +74,10 @@ function assertPlayerKnownSignalIsSafe(draft: State, signal: RelationshipSignal)
 function collectUnrevealedSecretStrings(state: State): string[] {
   const out = new Set<string>();
   for (const slots of allActorSecretSlots(state.secrets)) {
-    const trueName = readUnrevealedValue(slots.trueName, pickString);
-    if (trueName !== undefined) out.add(trueName);
-    for (const noblePhantasm of slots.hiddenNoblePhantasms) {
-      const name = readUnrevealedValue(noblePhantasm, pickNoblePhantasmName);
-      if (name !== undefined) out.add(name);
-    }
+    const pathwaySecret = readUnrevealedValue(slots.pathwaySecret, pickString);
+    if (pathwaySecret !== undefined) out.add(pathwaySecret);
+    const sequenceSecret = readUnrevealedValue(slots.sequenceSecret, pickString);
+    if (sequenceSecret !== undefined) out.add(sequenceSecret);
     for (const motive of slots.privateMotives) {
       const value = readUnrevealedValue(motive, pickString);
       if (value !== undefined) out.add(value);
@@ -103,10 +101,6 @@ function readUnrevealedValue(
 
 function pickString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
-}
-
-function pickNoblePhantasmName(value: unknown): string | undefined {
-  return isRecord(value) ? pickString(value["name"]) : undefined;
 }
 
 function assertActorExists(state: State, actorId: ActorId): void {

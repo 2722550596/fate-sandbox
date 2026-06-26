@@ -31,6 +31,7 @@ describe("Fate state tool-level smoke flow", () => {
             site: "新都",
             detail: "駅前商店街",
             boundary: "normal",
+            coordinates: null,
           },
           elapsedMinutes: 30,
           reason: "smoke test moves to a known public location",
@@ -54,12 +55,15 @@ describe("Fate state tool-level smoke flow", () => {
 
     const woundResult = updateActorConditionTool(
       {
-        kind: "add-wound",
+        kind: "add-status-effect",
         actorId: "protagonist",
-        severity: "minor",
-        text: "左手手背擦伤。",
+        name: "擦伤",
+        type: "debuff",
+        affectedAttribute: "agility",
+        value: 5,
+        duration: 1,
         source: "smoke test scripted scrape",
-        recoverable: true,
+        valueType: "percentage",
       },
       sessionManager,
     );
@@ -74,7 +78,7 @@ describe("Fate state tool-level smoke flow", () => {
     assert.equal(hydrated.public.scene.location.site, "新都");
     assert.equal(hydrated.public.scene.location.detail, "駅前商店街");
     assert.equal(hydrated.public.economy.accessibleFunds[0]?.amount, 48800);
-    assert.equal(hydrated.public.actors.protagonist?.condition.wounds[0]?.severity, "minor");
+    assert.equal(hydrated.public.actors.protagonist?.condition.statusEffects[0]?.name, "擦伤");
     assert.deepEqual(hydrated.public, beforeHydration.public);
   });
 
@@ -102,56 +106,36 @@ describe("Fate state tool-level smoke flow", () => {
     assert.equal(sessionManager.entries.length, 1);
   });
 
-  it("accepts runtime servant setup through upsert_actor tool", () => {
+  it("accepts runtime sequence setup through upsert_actor tool", () => {
     resetState();
     const sessionManager = createMockSessionManager();
 
     const result = upsertActorTool(
       {
-        kind: "upsert-servant",
-        servant: {
-          id: "caster",
-          internalName: "Caster",
-          publicIdentity: "柳洞寺驻留的从者",
-          apparentAge: "不明",
-          outfit: { label: "深紫色长袍与兜帽", details: "遮住面容" },
-          demeanor: "谨慎、孤高",
-          className: "Caster",
-          trueNameDisplay: "Caster",
-          trueNameStatus: "hidden",
-          parameters: {
-            strength: "E",
-            endurance: "D",
-            agility: "C",
-            mana: "A+",
-            luck: "B",
-            noblePhantasm: "C",
-          },
-          classSkills: [{ name: "阵地作成", rank: "A", summary: "建造工房级别的魔术阵地" }],
-          personalSkills: [{ name: "高速神言", rank: "A", summary: "无需咏唱发动大魔术" }],
-          noblePhantasms: [],
-          spiritualCore: 100,
-          mana: 90,
-          spiritualCondition: "完好",
-          masterActorId: null,
-          masterName: "葛木宗一郎",
-          contractStatus: "masterless",
-          manaSupply: "sufficient",
-          currentOrder: "守卫柳洞寺山门",
+        kind: "upsert-sequence",
+        sequence: {
+          actorId: "caster",
+          currentSequence: "序列7-魔术师",
+          rank: "seq-7",
+          pathway: "seer",
+          promotionSystem: "potion",
+          divinity: 3,
+          digestionProgress: 40,
+          lossOfControlProgress: 10,
         },
-        reason: "tool smoke test servant setup",
+        reason: "tool smoke test sequence setup",
       },
       sessionManager,
     );
 
-    assert.match(textOf(result), /从者已写入：caster/);
+    assert.match(textOf(result), /序列已更新：caster/);
     const presenceResult = setScenePresenceTool(
       { presentActorIds: ["protagonist", "caster"], allyActorIds: [], reason: "Caster enters scene" },
       sessionManager,
     );
     assert.match(textOf(presenceResult), /场景在场 actor 已更新/);
     const state = cloneState();
-    assert.equal(state.public.actors["caster"]?.servantForm?.identity.className, "Caster");
+    assert.equal(state.public.actors["caster"]?.sequence?.currentSequence, "序列7-魔术师");
     assert.deepEqual(state.public.scene.presentActorIds, ["protagonist", "caster"]);
     assert.equal(sessionManager.entries.length, 2);
   });
@@ -171,6 +155,7 @@ describe("Fate state tool-level smoke flow", () => {
                 site: "旧分支",
                 detail: "不该被 branch_summary 恢复",
                 boundary: "normal",
+                coordinates: null,
               },
               reason: "生成旧分支 state",
             },
@@ -207,6 +192,7 @@ describe("Fate state tool-level smoke flow", () => {
                 site: "歌剧院",
                 detail: "回滚前旧地点",
                 boundary: "normal",
+                coordinates: null,
               },
               reason: "制造需要被回滚清除的状态",
             },
@@ -237,6 +223,7 @@ describe("Fate state tool-level smoke flow", () => {
                 site: "歌剧院",
                 detail: "回滚前旧地点",
                 boundary: "normal",
+                coordinates: null,
               },
               reason: "制造旧内存状态",
             },
@@ -259,6 +246,7 @@ describe("Fate state tool-level smoke flow", () => {
                 site: "冬木教会",
                 detail: "礼拜堂",
                 boundary: "normal",
+                coordinates: null,
               },
               reason: "写入当前 branch 应恢复的状态",
             },
@@ -280,6 +268,7 @@ describe("Fate state tool-level smoke flow", () => {
                 site: "住宅区",
                 detail: "错误残留内存",
                 boundary: "normal",
+                coordinates: null,
               },
               reason: "再次污染全局内存",
             },

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { upsertActor } from "./actor.ts";
 import { parseStateSchema } from "./state-schema.ts";
 import { createInitialState } from "./state-store.ts";
 import { isRecord } from "./typebox-validation.ts";
@@ -218,77 +217,67 @@ void test("parseStateSchema validates relationship signal actor refs, visibility
   assert.throws(() => parseStateSchema(raw), /public\.relationshipSignals 只能包含 player-known/);
 });
 
-void test("parseStateSchema rejects dangling contractedServantIds", () => {
+void test("parseStateSchema rejects overfilled faction clock", () => {
   const raw = rawState();
-  const protagonist = section(section(section(raw, "public"), "actors"), "protagonist");
-  protagonist["roles"] = [
-    {
-      kind: "master",
-      commandSpells: { total: 3, remaining: 3 },
-      contractedServantIds: ["no-such-servant"],
-    },
-  ];
-
-  assert.throws(
-    () => parseStateSchema(raw),
-    /非法actors\.protagonist contractedServantIds\[\]: actor no-such-servant 不存在/,
-  );
-});
-
-void test("parseStateSchema rejects dangling servant contract masterActorId", () => {
-  const draft = createInitialState();
-  upsertActor(draft, {
-    kind: "upsert-servant",
-    servant: {
-      id: "caster",
-      internalName: "Caster",
-      publicIdentity: "柳洞寺驻留的从者",
-      apparentAge: "不明",
-      outfit: { label: "深紫色长袍与兜帽", details: "遮住面容" },
-      demeanor: "谨慎、孤高",
-      className: "Caster",
-      trueNameDisplay: "Caster",
-      trueNameStatus: "hidden",
-      parameters: {
-        strength: "E",
-        endurance: "D",
-        agility: "C",
-        mana: "A+",
-        luck: "B",
-        noblePhantasm: "C",
-      },
-      classSkills: [],
-      personalSkills: [],
-      noblePhantasms: [],
-      spiritualCore: 100,
-      mana: 90,
-      spiritualCondition: "完好",
-      masterActorId: null,
-      masterName: null,
-      contractStatus: "masterless",
-      manaSupply: "sufficient",
-      currentOrder: "守卫柳洞寺山门",
-    },
-    reason: "测试悬空 master 引用",
+  const factionClocks = section(raw, "secrets")?.["factionClocks"];
+  if (!Array.isArray(factionClocks)) {
+    throw new Error("secrets.factionClocks must be an array");
+  }
+  factionClocks.push({
+    id: "test-clock",
+    factionId: "nighthawks",
+    label: "值夜人行动",
+    filled: 7,
+    size: 6,
+    visibility: "hidden",
   });
-  const caster = draft.public.actors["caster"];
-  assert.ok(caster?.servantForm);
-  caster.servantForm.contract.masterActorId = "no-such-master";
 
-  assert.throws(
-    () => parseStateSchema(draft),
-    /非法actors\.caster servantForm\.contract\.masterActorId: actor no-such-master 不存在/,
-  );
+  assert.throws(() => parseStateSchema(raw), /filled\(7\) 不能大于 size\(6\)/);
 });
 
-void test("parseStateSchema rejects command spells with remaining above total", () => {
+void test("parseStateSchema rejects dangling purse owner", () => {
   const raw = rawState();
-  const protagonist = section(section(section(raw, "public"), "actors"), "protagonist");
-  protagonist["roles"] = [
-    { kind: "master", commandSpells: { total: 3, remaining: 5 }, contractedServantIds: [] },
+  const economy = section(section(raw, "public"), "economy");
+  economy["accessibleFunds"] = [
+    {
+      id: "orphan-purse",
+      ownerActorId: "no-such-actor",
+      label: "孤儿钱包",
+      amount: 100,
+      access: "held",
+    },
   ];
 
-  assert.throws(() => parseStateSchema(raw), /remaining 不能大于 total/);
+  assert.throws(() => parseStateSchema(raw), /purse\.ownerActorId: actor no-such-actor 不存在/);
+});
+
+void test("parseStateSchema rejects duplicate relationship signal IDs", () => {
+  const raw = rawState();
+  const publicState = section(raw, "public");
+  publicState["relationshipSignals"] = [
+    {
+      id: "dup-signal",
+      actorId: "protagonist",
+      targetActorId: "protagonist",
+      signal: "test",
+      interpretation: "test",
+      boundary: "test",
+      sourceEventId: null,
+      visibility: "player-known",
+    },
+    {
+      id: "dup-signal",
+      actorId: "protagonist",
+      targetActorId: "protagonist",
+      signal: "another",
+      interpretation: "another",
+      boundary: "another",
+      sourceEventId: null,
+      visibility: "player-known",
+    },
+  ];
+
+  assert.throws(() => parseStateSchema(raw), /重复 relationship signal/);
 });
 
 function rawState(): Record<string, unknown> {

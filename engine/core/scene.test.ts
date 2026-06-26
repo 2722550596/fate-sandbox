@@ -39,6 +39,7 @@ void test("updateScene can correct current location without advancing time", () 
       site: "新都",
       detail: "公园长椅旁",
       boundary: "normal",
+      coordinates: null,
     },
     reason: "续局声明当前位置为新都公园",
   });

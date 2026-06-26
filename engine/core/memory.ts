@@ -100,8 +100,8 @@ function validateClaims(draft: State, claims: readonly MemoryClaim[] | undefined
 }
 
 type ClaimSecretSlots = Readonly<{
-  trueName?: SecretSlot<string>;
-  hiddenNoblePhantasms: SecretSlot<unknown>[];
+  pathwaySecret?: SecretSlot<string>;
+  sequenceSecret?: SecretSlot<string>;
   privateMotives: SecretSlot<string>[];
   unrevealedAffiliations: SecretSlot<string>[];
 }>;
@@ -141,8 +141,8 @@ function findRelatedSecretSlots(
   }
 
   const allSlots = actorSecrets.flatMap((slots) => [
-    slots.trueName,
-    ...slots.hiddenNoblePhantasms,
+    slots.pathwaySecret,
+    slots.sequenceSecret,
     ...slots.privateMotives,
     ...slots.unrevealedAffiliations,
   ]);

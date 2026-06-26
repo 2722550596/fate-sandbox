@@ -23,7 +23,6 @@ import { recordMemoryToolDefinition } from "./state/record-memory.ts";
 import { recordOffscreenEventToolDefinition } from "./state/record-offscreen-event.ts";
 import { recordRelationshipSignalToolDefinition } from "./state/record-relationship-signal.ts";
 import { resolveBackstageLineToolDefinition } from "./state/resolve-backstage-line.ts";
-import { resolveCombatExchangeToolDefinition } from "./state/resolve-combat-exchange.ts";
 import { retireActorToolDefinition } from "./state/retire-actor.ts";
 import { revealSecretToolDefinition } from "./state/reveal-secret.ts";
 import { runParallelLineToolDefinition } from "./state/run-parallel-line.ts";
@@ -34,7 +33,6 @@ import { updateActorConditionToolDefinition } from "./state/update-actor-conditi
 import { updateActorImpressionToolDefinition } from "./state/update-actor-impression.ts";
 import { updateEconomyToolDefinition } from "./state/update-economy.ts";
 import { updateHookToolDefinition } from "./state/update-hook.ts";
-import { updateServantFormToolDefinition } from "./state/update-servant-form.ts";
 import { upsertActorToolDefinition } from "./state/upsert-actor.ts";
 
 /** 全部 Domain Event Tool 契约清单；契约本体与实现同文件维护。 */
@@ -57,9 +55,7 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
   setScenePresenceToolDefinition,
   upsertActorToolDefinition,
   updateEconomyToolDefinition,
-  updateServantFormToolDefinition,
   revealSecretToolDefinition,
-  resolveCombatExchangeToolDefinition,
   runParallelLineToolDefinition,
   harvestBackstageCandidateToolDefinition,
   resolveBackstageLineToolDefinition,
@@ -76,6 +72,6 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
 
 export function registerAllTools(pi: ExtensionAPI): void {
   for (const definition of TOOL_DEFINITIONS) {
-    pi.registerTool({ label: "FSN 叙事", renderResult: renderDomainToolResult, ...definition });
+    pi.registerTool({ label: "LOTM 叙事", renderResult: renderDomainToolResult, ...definition });
   }
 }

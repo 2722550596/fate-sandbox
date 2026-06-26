@@ -186,11 +186,11 @@ function buildPlayerSideSummary(state: State): string {
   if (protagonist === undefined) return "Player state unknown.";
   const location = formatLocation(state);
   const situation = state.public.scene.situation;
-  const wounds = protagonist.condition.wounds.length;
+  const statusEffects = protagonist.condition.statusEffects.length;
   const allies = state.public.allyActorIds
     .map((id) => state.public.actors[id]?.presentation.renderName ?? id)
     .join(", ");
-  return `${protagonist.presentation.renderName} at ${location} (${situation}). Wounds: ${wounds}. Allies: ${allies.length > 0 ? allies : "none"}.`;
+  return `${protagonist.presentation.renderName} at ${location} (${situation}). Status effects: ${statusEffects}. Allies: ${allies.length > 0 ? allies : "none"}.`;
 }
 
 function formatLocation(state: State): string {

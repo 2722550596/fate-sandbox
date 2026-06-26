@@ -2,8 +2,15 @@ import type { TimeZoneId } from "./state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 
-export const DEFAULT_TIME_ZONE: TimeZoneId = "Asia/Tokyo";
-const CHINESE_LOCALE = "zh-CN";
+export const DEFAULT_TIME_ZONE: TimeZoneId = "UTC";
+
+/**
+ * LOTM 第五纪起始时刻的 ISO 锚点。
+ * 第五纪1349年1月1日 星期一 07:00 对应这个 UTC instant。
+ * 内部时间始终以 ISO 存储；显示时转换为第五纪历法。
+ */
+const EPOCH_ISO = "1349-01-01T07:00:00.000Z";
+const EPOCH_INSTANT = Temporal.Instant.from(EPOCH_ISO);
 
 export interface HumanTimeParts {
   iso: string;
@@ -12,6 +19,8 @@ export interface HumanTimeParts {
   weekday: string;
   display: string;
 }
+
+const WEEKDAY_NAMES = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"];
 
 export function nowIso(): string {
   return Temporal.Now.instant().toString({ smallestUnit: "millisecond" });
@@ -43,43 +52,48 @@ export function diffMinutes(fromIso: string, toIso: string): number {
 export function isDifferentGameDate(
   beforeIso: string,
   afterIso: string,
-  timezone: TimeZoneId = DEFAULT_TIME_ZONE,
+  _timezone: TimeZoneId = DEFAULT_TIME_ZONE,
 ): boolean {
-  const beforeDate = toGamePlainDate(beforeIso, timezone);
-  const afterDate = toGamePlainDate(afterIso, timezone);
-  return !beforeDate.equals(afterDate);
+  const beforeDate = toEpochDayOffset(beforeIso);
+  const afterDate = toEpochDayOffset(afterIso);
+  return beforeDate !== afterDate;
 }
 
+/**
+ * 将 ISO 时间格式化为 LOTM 第五纪历法显示。
+ * 格式：第五纪XXXX年XX月XX日 星期X HH:MM
+ */
 export function formatHumanTime(
   isoTime: string,
-  timezone: TimeZoneId = DEFAULT_TIME_ZONE,
+  _timezone: TimeZoneId = DEFAULT_TIME_ZONE,
 ): HumanTimeParts {
   const instant = parseInstant(isoTime, "显示时间");
-  const zoned = instant.toZonedDateTimeISO(timezone);
-  const parts = createDateTimeFormat(timezone).formatToParts(new Date(instant.epochMilliseconds));
-  const weekday = readDateTimePart(parts, "weekday");
-  const date = `${zoned.year}年${pad2(zoned.month)}月${pad2(zoned.day)}日`;
+  const zoned = instant.toZonedDateTimeISO("UTC");
+
+  // 计算与第五纪纪元起点的天数差
+  const epochZoned = EPOCH_INSTANT.toZonedDateTimeISO("UTC");
+  const epochDate = epochZoned.toPlainDate();
+  const currentDate = zoned.toPlainDate();
+  const dayDiff = epochDate.until(currentDate, { largestUnit: "days" }).days;
+
+  // 第五纪1349年1月1日是星期一（dayDiff=0 → weekday index 0）
+  const weekdayIndex = ((dayDiff % 7) + 7) % 7;
+  const weekday = WEEKDAY_NAMES[weekdayIndex] ?? "星期一";
+
+  const year = 1349 + Math.floor(dayDiff / 365);
+  // 简化：直接用日历月日（LOTM 世界假设与地球日历一致）
+  const month = zoned.month;
+  const day = zoned.day;
+  const date = `${year}年${pad2(month)}月${pad2(day)}日`;
   const time = `${pad2(zoned.hour)}:${pad2(zoned.minute)}`;
+
   return {
     iso: instant.toString({ smallestUnit: "millisecond" }),
     date,
     time,
     weekday,
-    display: `${date} ${weekday} ${time}`,
+    display: `第五纪${date} ${weekday} ${time}`,
   };
-}
-
-function createDateTimeFormat(timezone: TimeZoneId): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat(CHINESE_LOCALE, {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    weekday: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
 }
 
 function parseInstant(isoTime: string, fieldName: string): Temporal.Instant {
@@ -90,21 +104,16 @@ function parseInstant(isoTime: string, fieldName: string): Temporal.Instant {
   }
 }
 
-function toGamePlainDate(isoTime: string, timezone: TimeZoneId): Temporal.PlainDate {
-  return parseInstant(isoTime, "游戏日期").toZonedDateTimeISO(timezone).toPlainDate();
-}
-
-function readDateTimePart(
-  parts: Intl.DateTimeFormatPart[],
-  type: Intl.DateTimeFormatPartTypes,
-): string {
-  const part = parts.find((item) => item.type === type);
-  if (!part) {
-    throw new Error(`Intl.DateTimeFormat 未返回 ${type} 字段。`);
-  }
-  return part.value;
+function toEpochDayOffset(isoTime: string): number {
+  const instant = parseInstant(isoTime, "游戏日期");
+  const zoned = instant.toZonedDateTimeISO("UTC");
+  const epochZoned = EPOCH_INSTANT.toZonedDateTimeISO("UTC");
+  return epochZoned.toPlainDate().until(zoned.toPlainDate(), { largestUnit: "days" }).days;
 }
 
 function pad2(value: number): string {
   return String(value).padStart(2, "0");
 }
+
+/** LOTM 第五纪起始时刻的 ISO 字符串，供 state-store 使用。 */
+export const LOTM_EPOCH_ISO = EPOCH_ISO;

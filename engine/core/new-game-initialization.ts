@@ -1,29 +1,22 @@
-import type { PublicNpcSkeletonInput, ServantInput } from "./actor.ts";
 import type { ConfigureCampaignInput } from "./campaign.ts";
 import type { MemoryClaim } from "./memory.ts";
-import type { ServantSecretNoblePhantasmInput, ServantSecretStringInput } from "./secrets.ts";
 import type {
   ActorId,
   ActorRole,
-  FateParams,
-  MagecraftCapability,
-  NoblePhantasm,
   OutfitState,
+  PathwayId,
+  PromotionSystem,
   PublicActorState,
-  RelationshipState,
-  ServantClass,
-  ServantSkill,
+  SequenceRank,
   State,
 } from "./state.ts";
 
 import { setScenePresence, upsertActor } from "./actor.ts";
 import { configureCampaign } from "./campaign.ts";
 import { recordMemory } from "./memory.ts";
-import { getActorSecretSlots } from "./secret-actor-state.ts";
-import { configureServantSecrets } from "./secrets.ts";
 import { createInitialState, PROTAGONIST_ACTOR_ID } from "./state-store.ts";
 
-export type NewGameInitializationInput = HumanNewGameInput | ServantNewGameInput;
+export type NewGameInitializationInput = HumanNewGameInput | BeyonderNewGameInput;
 
 export interface NewGameCampaignInput extends Omit<ConfigureCampaignInput, "reason"> {
   reason?: string;
@@ -38,15 +31,12 @@ export interface HumanNewGameInput {
   reason: string;
 }
 
-export interface ServantNewGameInput {
-  kind: "servant-protagonist";
+export interface BeyonderNewGameInput {
+  kind: "beyonder-protagonist";
   campaign: NewGameCampaignInput;
-  protagonist: ServantProtagonistOpeningInput;
-  master?: PublicNpcSkeletonInput;
+  protagonist: BeyonderProtagonistOpeningInput;
   presence?: NewGamePresenceInput;
   knownFacts?: NewGameKnownFactInput[];
-  hiddenTrueName?: ServantSecretStringInput;
-  hiddenNoblePhantasms?: ServantSecretNoblePhantasmInput[];
   reason: string;
 }
 
@@ -59,35 +49,27 @@ export interface HumanProtagonistOpeningInput {
   outfit: OutfitState;
   demeanor: string;
   roles?: ActorRole[];
-  magecraft?: MagecraftCapability | null;
   abilities?: string[];
   ordinaryItems?: string[];
 }
 
-export interface ServantProtagonistOpeningInput {
+export interface BeyonderProtagonistOpeningInput {
   internalName: string;
   renderName?: string;
   publicIdentity: string;
+  background: string;
   apparentAge: string;
   outfit: OutfitState;
   demeanor: string;
-  className: ServantClass;
-  trueNameDisplay: string;
-  trueNameStatus: "hidden" | "suspected";
-  parameters?: FateParams;
-  classSkills?: ServantSkill[];
-  personalSkills?: ServantSkill[];
-  noblePhantasms?: NoblePhantasm[];
-  spiritualCore?: number;
-  mana?: number;
-  spiritualCondition?: string;
-  masterActorId?: ActorId | null;
-  masterName?: string | null;
-  contractStatus?: "stable" | "weak" | "cut" | "masterless";
-  manaSupply?: "sufficient" | "strained" | "starved";
-  currentOrder?: string;
-  publicRoles?: ActorRole[];
-  relationshipToProtagonist?: RelationshipState;
+  currentSequence: string;
+  rank: SequenceRank;
+  pathway: PathwayId;
+  promotionSystem?: PromotionSystem;
+  divinity?: number;
+  digestionProgress?: number;
+  lossOfControlProgress?: number;
+  roles?: ActorRole[];
+  abilities?: string[];
   ordinaryItems?: string[];
 }
 
@@ -108,15 +90,6 @@ export interface NewGameInitializationResult {
   steps: string[];
 }
 
-const DEFAULT_FATE_PARAMS: FateParams = {
-  strength: "E",
-  endurance: "E",
-  agility: "E",
-  mana: "E",
-  luck: "E",
-  noblePhantasm: "E",
-};
-
 export function initializeNewGame(
   draft: State,
   input: NewGameInitializationInput,
@@ -136,7 +109,12 @@ export function initializeNewGame(
     });
     steps.push("setup-human-protagonist");
   } else {
-    initializeServantProtagonist(draft, input, steps);
+    upsertActor(draft, {
+      kind: "setup-protagonist",
+      actor: buildBeyonderProtagonist(input.protagonist),
+      reason: input.reason,
+    });
+    steps.push("setup-beyonder-protagonist");
   }
 
   if (input.presence !== undefined) {
@@ -164,42 +142,12 @@ export function initializeNewGame(
   return { message: "新游戏 state 已初始化。", steps };
 }
 
-function initializeServantProtagonist(
-  draft: State,
-  input: ServantNewGameInput,
-  steps: string[],
-): void {
-  if (input.master !== undefined) {
-    upsertActor(draft, { kind: "ensure-public-npc", npc: input.master, reason: input.reason });
-    steps.push("ensure-master-npc");
-  }
-
-  upsertActor(draft, {
-    kind: "upsert-servant",
-    servant: buildServantProtagonist(input.protagonist),
-    reason: input.reason,
-  });
-  steps.push("setup-servant-protagonist");
-
-  if (input.hiddenTrueName !== undefined || input.hiddenNoblePhantasms !== undefined) {
-    configureServantSecrets(draft, {
-      kind: "configure-servant-secrets",
-      actorId: PROTAGONIST_ACTOR_ID,
-      trueName: input.hiddenTrueName,
-      hiddenNoblePhantasms: input.hiddenNoblePhantasms,
-      reason: input.reason,
-    });
-    steps.push("configure-servant-secrets");
-  }
-}
-
 function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActorState {
   return {
     id: PROTAGONIST_ACTOR_ID,
     kind: "human",
     roles: input.roles ?? [],
-    magecraft: input.magecraft ?? null,
-    servantForm: null,
+    sequence: null,
     identity: {
       publicIdentity: input.publicIdentity,
       background: input.background,
@@ -212,7 +160,7 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
       outfit: input.outfit,
       demeanor: input.demeanor,
     },
-    condition: { wounds: [], afflictions: [], permanentEffects: [] },
+    condition: { statusEffects: [] },
     inventory: { ordinaryItems: input.ordinaryItems ?? [] },
     abilities: (input.abilities ?? []).map((summary, index) => ({
       id: `ability-protagonist-${index + 1}`,
@@ -223,36 +171,40 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
   };
 }
 
-function buildServantProtagonist(input: ServantProtagonistOpeningInput): ServantInput {
+function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): PublicActorState {
   return {
     id: PROTAGONIST_ACTOR_ID,
-    internalName: input.internalName,
-    renderName: input.renderName,
-    publicIdentity: input.publicIdentity,
-    apparentAge: input.apparentAge,
-    outfit: input.outfit,
-    demeanor: input.demeanor,
-    className: input.className,
-    trueNameDisplay: input.trueNameDisplay,
-    trueNameStatus: input.trueNameStatus,
-    parameters: input.parameters ?? DEFAULT_FATE_PARAMS,
-    classSkills: input.classSkills ?? [],
-    personalSkills: input.personalSkills ?? [],
-    noblePhantasms: input.noblePhantasms ?? [],
-    spiritualCore: input.spiritualCore ?? 100,
-    mana: input.mana ?? 100,
-    spiritualCondition: input.spiritualCondition ?? "现界稳定。",
-    masterActorId: input.masterActorId ?? null,
-    masterName: input.masterName ?? null,
-    contractStatus: input.contractStatus ?? "masterless",
-    manaSupply: input.manaSupply ?? "sufficient",
-    currentOrder: input.currentOrder ?? "等待玩家行动。",
-    publicRoles: input.publicRoles ?? [],
-    relationshipToProtagonist: input.relationshipToProtagonist ?? {
-      stance: "self",
-      summary: "玩家本人。",
+    kind: "beyonder",
+    roles: input.roles ?? [],
+    sequence: {
+      currentSequence: input.currentSequence,
+      rank: input.rank,
+      pathway: input.pathway,
+      promotionSystem: input.promotionSystem ?? "potion",
+      divinity: input.divinity ?? 1,
+      digestionProgress: input.digestionProgress ?? 0,
+      lossOfControlProgress: input.lossOfControlProgress ?? 0,
     },
-    ordinaryItems: input.ordinaryItems ?? [],
+    identity: {
+      publicIdentity: input.publicIdentity,
+      background: input.background,
+      lockedFacts: [],
+    },
+    presentation: {
+      internalName: input.internalName,
+      renderName: input.renderName ?? input.internalName,
+      apparentAge: input.apparentAge,
+      outfit: input.outfit,
+      demeanor: input.demeanor,
+    },
+    condition: { statusEffects: [] },
+    inventory: { ordinaryItems: input.ordinaryItems ?? [] },
+    abilities: (input.abilities ?? []).map((summary, index) => ({
+      id: `ability-protagonist-${index + 1}`,
+      label: summary,
+      summary,
+    })),
+    relationshipToProtagonist: { stance: "self", summary: "玩家本人。" },
   };
 }
 
@@ -267,19 +219,9 @@ function assertNewGameInitialized(state: State, input: NewGameInitializationInpu
   if (state.public.campaign.title.trim().length === 0) {
     throw new Error("新游戏初始化失败：campaign 未配置。");
   }
-  if (input.kind === "servant-protagonist") {
-    const trueName = protagonist.servantForm?.identity.trueName;
-    if (trueName === undefined) {
-      throw new Error("新游戏初始化失败：从者 protagonist 缺少 servantForm。");
-    }
-    if (trueName.status === "revealed") {
-      throw new Error("新游戏初始化失败：protagonist 从者开局不得直接 public revealed 真名。");
-    }
-    if (
-      input.hiddenTrueName !== undefined &&
-      getActorSecretSlots(state.secrets, PROTAGONIST_ACTOR_ID) === undefined
-    ) {
-      throw new Error("新游戏初始化失败：隐藏真名未写入 Secret Game State。");
+  if (input.kind === "beyonder-protagonist") {
+    if (protagonist.sequence === null) {
+      throw new Error("新游戏初始化失败：非凡者 protagonist 缺少 sequence。");
     }
   }
 }

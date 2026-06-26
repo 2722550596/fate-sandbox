@@ -6,10 +6,9 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { FATE_PARAMS_SCHEMA } from "../../engine/core/actor-schema.ts";
 import {
-  REVEAL_STATUS_SCHEMA,
-  SERVANT_CLASS_SCHEMA,
+  PATHWAY_ID_SCHEMA,
+  SEQUENCE_RANK_SCHEMA,
   stringEnumSchema,
 } from "../../engine/core/state-enum-schemas.ts";
 import { persistStateAfterCommit } from "../../engine/core/state-persistence.ts";
@@ -17,50 +16,45 @@ import { cloneState, commitState } from "../../engine/core/state-store.ts";
 import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../../engine/core/typebox-validation.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
-const OVERRIDE_LOCKED_FACT_KINDS = [
-  "servant-class",
-  "servant-true-name",
-  "servant-base-params",
-] as const;
+const OVERRIDE_LOCKED_FACT_KINDS = ["sequence-rank", "pathway-secret", "sequence-secret"] as const;
 const OVERRIDE_LOCKED_FACT_KIND_SCHEMA = stringEnumSchema(OVERRIDE_LOCKED_FACT_KINDS);
 
-const SERVANT_CLASS_OVERRIDE_SCHEMA = Type.Object({
-  kind: Type.Literal("servant-class"),
+const SEQUENCE_RANK_OVERRIDE_SCHEMA = Type.Object({
+  kind: Type.Literal("sequence-rank"),
   actorId: Type.String({ minLength: 1 }),
-  className: SERVANT_CLASS_SCHEMA,
+  rank: SEQUENCE_RANK_SCHEMA,
   reason: Type.String({ minLength: 1 }),
 });
 
-const SERVANT_TRUE_NAME_OVERRIDE_SCHEMA = Type.Object({
-  kind: Type.Literal("servant-true-name"),
+const PATHWAY_SECRET_OVERRIDE_SCHEMA = Type.Object({
+  kind: Type.Literal("pathway-secret"),
   actorId: Type.String({ minLength: 1 }),
-  display: Type.String({ minLength: 1 }),
-  status: Type.Optional(REVEAL_STATUS_SCHEMA),
+  pathway: PATHWAY_ID_SCHEMA,
   reason: Type.String({ minLength: 1 }),
 });
 
-const SERVANT_BASE_PARAMS_OVERRIDE_SCHEMA = Type.Object({
-  kind: Type.Literal("servant-base-params"),
+const SEQUENCE_SECRET_OVERRIDE_SCHEMA = Type.Object({
+  kind: Type.Literal("sequence-secret"),
   actorId: Type.String({ minLength: 1 }),
-  base: FATE_PARAMS_SCHEMA,
+  pathway: PATHWAY_ID_SCHEMA,
+  currentSequence: Type.String({ minLength: 1 }),
   reason: Type.String({ minLength: 1 }),
 });
 
 export type OverrideLockedFactParams =
-  | Static<typeof SERVANT_CLASS_OVERRIDE_SCHEMA>
-  | Static<typeof SERVANT_TRUE_NAME_OVERRIDE_SCHEMA>
-  | Static<typeof SERVANT_BASE_PARAMS_OVERRIDE_SCHEMA>;
+  | Static<typeof SEQUENCE_RANK_OVERRIDE_SCHEMA>
+  | Static<typeof PATHWAY_SECRET_OVERRIDE_SCHEMA>
+  | Static<typeof SEQUENCE_SECRET_OVERRIDE_SCHEMA>;
 
 const OVERRIDE_LOCKED_FACT_KIND_VALIDATOR = Compile(OVERRIDE_LOCKED_FACT_KIND_SCHEMA);
-const SERVANT_CLASS_OVERRIDE_VALIDATOR = Compile(SERVANT_CLASS_OVERRIDE_SCHEMA);
-const SERVANT_TRUE_NAME_OVERRIDE_VALIDATOR = Compile(SERVANT_TRUE_NAME_OVERRIDE_SCHEMA);
-const SERVANT_BASE_PARAMS_OVERRIDE_VALIDATOR = Compile(SERVANT_BASE_PARAMS_OVERRIDE_SCHEMA);
+const SEQUENCE_RANK_OVERRIDE_VALIDATOR = Compile(SEQUENCE_RANK_OVERRIDE_SCHEMA);
+const PATHWAY_SECRET_OVERRIDE_VALIDATOR = Compile(PATHWAY_SECRET_OVERRIDE_SCHEMA);
+const SEQUENCE_SECRET_OVERRIDE_VALIDATOR = Compile(SEQUENCE_SECRET_OVERRIDE_SCHEMA);
 
-// Compile 必须在独立常量上调用（satisfies 上下文会干扰泛型推导）。
 const OVERRIDE_LOCKED_FACT_VARIANT_VALIDATORS = {
-  "servant-class": SERVANT_CLASS_OVERRIDE_VALIDATOR,
-  "servant-true-name": SERVANT_TRUE_NAME_OVERRIDE_VALIDATOR,
-  "servant-base-params": SERVANT_BASE_PARAMS_OVERRIDE_VALIDATOR,
+  "sequence-rank": SEQUENCE_RANK_OVERRIDE_VALIDATOR,
+  "pathway-secret": PATHWAY_SECRET_OVERRIDE_VALIDATOR,
+  "sequence-secret": SEQUENCE_SECRET_OVERRIDE_VALIDATOR,
 } satisfies Record<OverrideLockedFactParams["kind"], TypeBoxValidator<OverrideLockedFactParams>>;
 
 export function overrideLockedFactTool(params: unknown, sessionManager: unknown): ToolResult {
@@ -79,22 +73,20 @@ export function overrideLockedFactTool(params: unknown, sessionManager: unknown)
   if (actor === undefined) {
     throw new Error(`actor 不存在: ${override.actorId}`);
   }
-  const servantForm = actor.servantForm;
-  if (servantForm === null) {
-    throw new Error(`actor ${override.actorId} 没有 servantForm。`);
+  const sequence = actor.sequence;
+  if (sequence === null) {
+    throw new Error(`actor ${override.actorId} 没有 sequence。`);
   }
   switch (override.kind) {
-    case "servant-class":
-      servantForm.identity.className = override.className;
+    case "sequence-rank":
+      sequence.rank = override.rank;
       break;
-    case "servant-true-name":
-      servantForm.identity.trueName = {
-        status: override.status ?? "revealed",
-        display: override.display,
-      };
+    case "pathway-secret":
+      sequence.pathway = override.pathway;
       break;
-    case "servant-base-params":
-      servantForm.parameters.base = override.base;
+    case "sequence-secret":
+      sequence.currentSequence = override.currentSequence;
+      sequence.pathway = override.pathway;
       break;
   }
   commitState(draft);
@@ -110,20 +102,15 @@ export function overrideLockedFactTool(params: unknown, sessionManager: unknown)
 export const overrideLockedFactToolDefinition: FateToolDefinition = {
   name: "override_locked_fact",
   description:
-    "【调试工具】覆盖已锁定的从者职阶、真名或基础参数。仅用于开发修档，必须写明 reason。",
+    "【调试工具】覆盖已锁定的序列等级、途径秘密或序列秘密。仅用于开发修档，必须写明 reason。",
   parameters: Type.Object({
     kind: Type.String({
-      description: "允许: servant-class / servant-true-name / servant-base-params",
+      description: "允许: sequence-rank / pathway-secret / sequence-secret",
     }),
     actorId: Type.String(),
-    className: Type.Optional(Type.String()),
-    display: Type.Optional(Type.String()),
-    status: Type.Optional(
-      Type.String({
-        description: "servant-true-name 可选；允许 hidden / suspected / revealed，默认 revealed",
-      }),
-    ),
-    base: Type.Optional(Type.Unknown()),
+    rank: Type.Optional(Type.String()),
+    pathway: Type.Optional(Type.String()),
+    currentSequence: Type.Optional(Type.String()),
     reason: Type.String(),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>

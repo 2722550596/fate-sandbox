@@ -1,28 +1,33 @@
 import type { ActorConditionEvent, ActorConditionEventResult } from "./actor-condition.ts";
+import type { SequenceInput } from "./actor-schema.ts";
 import type { ScenePresenceInput, ScenePresenceResult } from "./actor.ts";
 import type { EconomyEvent, EconomyEventResult } from "./economy.ts";
 import type { MemoryEvent, MemoryEventResult } from "./memory.ts";
 import type { SceneEvent, SceneEventResult } from "./scene.ts";
-import type { ServantFormEvent, ServantFormEventResult } from "./servant.ts";
 import type { State, TurnTimePolicy } from "./state.ts";
 
 import { updateActorCondition } from "./actor-condition.ts";
-import { setScenePresence } from "./actor.ts";
+import { setScenePresence, upsertActor } from "./actor.ts";
 import { updateEconomy } from "./economy.ts";
 import { collectBackstageDueNotices } from "./faction-clock.ts";
 import { recordMemory } from "./memory.ts";
-import { assertNoOpenObligations } from "./obligations.ts";
+import { assertNoOpenObligations, settleOldestObligation } from "./obligations.ts";
 import { updateScene } from "./scene.ts";
-import { updateServantForm } from "./servant.ts";
 import { appendTurnLogEntry } from "./turn-log.ts";
 import { applyTurnTime } from "./turn-time.ts";
 import { assertNonEmptyString } from "./typebox-validation.ts";
+
+export type SequenceEvent = SequenceInput;
+
+export interface SequenceEventResult {
+  message: string;
+}
 
 export type TurnCommitEvent =
   | { kind: "scene"; event: SceneEvent }
   | { kind: "scene-presence"; event: ScenePresenceInput }
   | { kind: "actor-condition"; event: ActorConditionEvent }
-  | { kind: "servant-form"; event: ServantFormEvent }
+  | { kind: "sequence"; event: SequenceEvent }
   | { kind: "economy"; event: EconomyEvent }
   | { kind: "memory"; event: MemoryEvent };
 
@@ -36,7 +41,7 @@ export type TurnCommitEventResult =
   | { kind: "scene"; result: SceneEventResult }
   | { kind: "scene-presence"; result: ScenePresenceResult }
   | { kind: "actor-condition"; result: ActorConditionEventResult }
-  | { kind: "servant-form"; result: ServantFormEventResult }
+  | { kind: "sequence"; result: SequenceEventResult }
   | { kind: "economy"; result: EconomyEventResult }
   | { kind: "memory"; result: MemoryEventResult };
 
@@ -51,8 +56,6 @@ export function commitTurn(draft: State, input: TurnCommitInput): TurnCommitResu
   const startedAt = draft.public.clock.currentAt;
   const timeResult = applyTurnTime(draft, input.time);
   const results = input.events.map((event) => applyTurnEvent(draft, event));
-  // canonical commit 对账点：本轮裁决登记的义务必须在 events 里落地，
-  // 账未清则整次 commit 拒绝回滚（backlog #4）。
   assertNoOpenObligations(draft);
   const timeResults = [{ kind: "scene" as const, result: timeResult }];
   const finalResults = [...timeResults, ...results];
@@ -80,8 +83,8 @@ function applyTurnEvent(draft: State, event: TurnCommitEvent): TurnCommitEventRe
       return { kind: event.kind, result: setScenePresence(draft, event.event) };
     case "actor-condition":
       return { kind: event.kind, result: updateActorCondition(draft, event.event) };
-    case "servant-form":
-      return { kind: event.kind, result: updateServantForm(draft, event.event) };
+    case "sequence":
+      return { kind: event.kind, result: applySequenceEvent(draft, event.event) };
     case "economy":
       return { kind: event.kind, result: updateEconomy(draft, event.event) };
     case "memory":
@@ -91,10 +94,19 @@ function applyTurnEvent(draft: State, event: TurnCommitEvent): TurnCommitEventRe
   }
 }
 
+function applySequenceEvent(draft: State, event: SequenceEvent): SequenceEventResult {
+  const result = upsertActor(draft, {
+    kind: "upsert-sequence",
+    sequence: event,
+    reason: event.reason,
+  });
+  settleOldestObligation(draft, ["sequence"]);
+  return { message: result.message };
+}
+
 function collectWarnings(draft: State, input: TurnCommitInput): string[] {
   const warnings: string[] = [];
   warnings.push(...collectPacingWarnings(input));
-  // 幕后催账：时间推进越过 dueAt / 时钟填满时，engine 直接在返回值里提醒（backlog #3）
   warnings.push(...collectBackstageDueNotices(draft));
   return warnings;
 }

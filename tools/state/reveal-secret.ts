@@ -2,7 +2,7 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import type {
   ConfigureActorSecretsResult,
-  ConfigureServantSecretsResult,
+  ConfigureSequenceSecretsResult,
   RevealSecretResult,
   RevealSecretToolInput,
 } from "../../engine/core/secrets.ts";
@@ -10,7 +10,7 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import {
   configureActorSecrets,
-  configureServantSecrets,
+  configureSequenceSecrets,
   revealSecret,
 } from "../../engine/core/secrets.ts";
 import type { State } from "../../engine/core/state.ts";
@@ -19,7 +19,7 @@ import { parseRevealSecretToolInput } from "../../engine/core/secrets-schema.ts"
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 
 type RevealSecretToolResult =
-  | { kind: "configure"; result: ConfigureActorSecretsResult | ConfigureServantSecretsResult }
+  | { kind: "configure"; result: ConfigureActorSecretsResult | ConfigureSequenceSecretsResult }
   | { kind: "reveal"; result: RevealSecretResult };
 
 export function revealSecretTool(params: unknown, sessionManager: unknown): ToolResult {
@@ -32,8 +32,8 @@ export function revealSecretTool(params: unknown, sessionManager: unknown): Tool
 }
 
 function executeSecretTool(draft: State, input: RevealSecretToolInput): RevealSecretToolResult {
-  if (input.kind === "configure-servant-secrets") {
-    return { kind: "configure", result: configureServantSecrets(draft, input) };
+  if (input.kind === "configure-sequence-secrets") {
+    return { kind: "configure", result: configureSequenceSecrets(draft, input) };
   }
   if (input.kind === "configure-actor-secrets") {
     return { kind: "configure", result: configureActorSecrets(draft, input) };
@@ -60,8 +60,8 @@ export const revealSecretToolDefinition: FateToolDefinition = {
   description:
     "配置或揭示 hidden-canonical secret。配置模式只写 secrets；揭示模式只在玩家可见证据成立时更新 public。\n\n" +
     "【使用边界】\n" +
-    "- 首次建立从者或重要 NPC 的隐藏真相时，用 configure-* 写入 secret slot\n" +
-    "- 玩家提出真名/宝具/隐藏身份 claim，或场内触发揭示条件时，用 claim-reveal / observed-reveal\n" +
+    "- 首次建立非凡者或重要 NPC 的隐藏途径/序列秘密时，用 configure-sequence-secrets 写入 secret slot\n" +
+    "- 玩家提出途径/序列/隐藏身份 claim，或场内触发揭示条件时，用 claim-reveal / observed-reveal\n" +
     "- revealConditions 必须是之后 claim/trigger/evidence 能字面命中的短线索词\n\n" +
     "禁区：\n" +
     "- 重复配置相同 secret\n" +
@@ -70,37 +70,27 @@ export const revealSecretToolDefinition: FateToolDefinition = {
   parameters: Type.Object({
     kind: Type.String({
       description:
-        "claim-reveal / observed-reveal / configure-servant-secrets / configure-actor-secrets",
+        "claim-reveal / observed-reveal / configure-sequence-secrets / configure-actor-secrets",
     }),
     actorId: Type.String({ description: "要揭示秘密的 actor id；必须已存在于 public actors" }),
     claim: Type.Optional(Type.String()),
     trigger: Type.Optional(Type.String()),
     evidence: Type.Optional(Type.String()),
-    trueName: Type.Optional(
+    pathwaySecret: Type.Optional(
       Type.Object({
-        value: Type.String({ description: "隐藏真名" }),
+        value: Type.String({ description: "隐藏途径" }),
         revealConditions: Type.Array(
           Type.String({ description: "可被 claim/trigger/evidence 命中的短线索词" }),
         ),
       }),
     ),
-    hiddenNoblePhantasms: Type.Optional(
-      Type.Array(
-        Type.Object({
-          value: Type.Object({
-            name: Type.String(),
-            rank: Type.String({ description: "Fate rank；非宝具可填 none" }),
-            kind: Type.String({ description: "宝具类型" }),
-            status: Type.String({
-              description: "hidden / suspected / revealed",
-            }),
-            summary: Type.String(),
-          }),
-          revealConditions: Type.Array(
-            Type.String({ description: "可被 claim/trigger/evidence 命中的短线索词" }),
-          ),
-        }),
-      ),
+    sequenceSecret: Type.Optional(
+      Type.Object({
+        value: Type.String({ description: "隐藏序列" }),
+        revealConditions: Type.Array(
+          Type.String({ description: "可被 claim/trigger/evidence 命中的短线索词" }),
+        ),
+      }),
     ),
     privateMotives: Type.Optional(
       Type.Array(

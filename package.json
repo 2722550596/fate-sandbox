@@ -1,12 +1,15 @@
 {
-  "name": "fate-sandbox",
+  "name": "lotm-sandbox",
   "version": "0.1.0",
   "private": true,
-  "description": "Fate sandbox — pi coding agent experimental interactive narrative card",
+  "description": "LOTM sandbox — pi coding agent interactive narrative RPG (Lord of Mysteries)",
   "keywords": [
     "interactive-fiction",
+    "lord-of-mysteries",
+    "lotm",
     "pi-card",
-    "pi-package"
+    "pi-package",
+    "rpg"
   ],
   "license": "GPL-3.0-or-later",
   "files": [

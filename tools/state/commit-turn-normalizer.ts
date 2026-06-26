@@ -5,7 +5,7 @@ import type { TurnCommitEvent, TurnCommitInput } from "../../engine/core/turn-co
 import { parseEconomyEvent } from "../../engine/core/economy-schema.ts";
 import { parseMemoryEvent } from "../../engine/core/memory-schema.ts";
 import { parseSceneEvent } from "../../engine/core/scene-schema.ts";
-import { parseServantFormEvent } from "../../engine/core/servant-schema.ts";
+import { parseSequenceInput } from "../../engine/core/actor-schema.ts";
 import { parseTurnTimePolicySchema } from "../../engine/core/turn-time-schema.ts";
 
 import { normalizeActorConditionEvent } from "./actor-condition-normalizer.ts";
@@ -16,7 +16,7 @@ const TURN_EVENT_KINDS = [
   "scene",
   "scene-presence",
   "actor-condition",
-  "servant-form",
+  "sequence",
   "economy",
   "memory",
 ] as const;
@@ -55,12 +55,12 @@ function normalizeTurnCommitEvent(value: unknown, summary: string): TurnCommitEv
           summary,
         ),
       };
-    case "servant-form":
+    case "sequence":
       return {
         kind: normalizedKind,
-        event: parseServantFormEvent(
-          withReason(extractDomainEvent(event, "servant-form.event"), summary),
-          "commit_turn servant-form.event",
+        event: parseSequenceInput(
+          withReason(extractDomainEvent(event, "sequence.event"), summary),
+          "commit_turn sequence.event",
         ),
       };
     case "economy":
@@ -75,7 +75,7 @@ function normalizeTurnCommitEvent(value: unknown, summary: string): TurnCommitEv
       return { kind: normalizedKind, event: normalizeMemoryTurnEvent(event) };
     default:
       throw new Error(
-        `非法 commit_turn event.kind: ${formatUnknown(event["kind"])}。允许: scene / scene-presence / actor-condition / servant-form / economy / memory。`,
+        `非法 commit_turn event.kind: ${formatUnknown(event["kind"])}。允许: scene / scene-presence / actor-condition / sequence / economy / memory。`,
       );
   }
 }

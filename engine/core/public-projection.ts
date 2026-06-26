@@ -20,7 +20,7 @@ export function buildGmBrief(publicState: PublicGameState): string {
     `玩家角色：${formatActorLine(protagonist)}`,
     `同行者：${formatAllies(publicState)}`,
     `资源：${formatGmBriefFunds(publicState)}`,
-    `伤势/长期影响：${formatCondition(protagonist.condition)}`,
+    `状态效果：${formatCondition(protagonist.condition)}`,
     `当前目标：${formatActiveObjectives(publicState, { separator: "；" })}`,
     `目标推进规则：${formatObjectiveRouting(publicState)}`,
     `当前威胁：${formatSceneThreats(publicState, { separator: "；", colon: ":" })}`,
@@ -149,27 +149,28 @@ function formatStoryWindow(publicState: PublicGameState): string {
 }
 
 function formatActorLine(actor: NonNullable<PublicGameState["actors"][string]>): string {
-  const servant = actor.servantForm;
   const identity = formatIdentity(actor);
-  if (servant === null) {
-    return [actor.presentation.renderName, actor.kind, identity, formatMagecraft(actor)].join(
-      " / ",
-    );
-  }
-  return [
-    actor.presentation.renderName,
-    actor.kind,
-    servant.identity.className,
-    `真名${servant.identity.trueName.status}:${servant.identity.trueName.display}`,
-    `灵基完整度${resourceBand(servant.condition.spiritualCore.value)}（${servant.condition.spiritualCore.value}%）`,
-    `魔力余量${resourceBand(servant.condition.mana.value)}（${servant.condition.mana.value}%；参数${servant.parameters.base.mana}）`,
-    `契约${servant.contract.status}`,
-  ].join(" / ");
+  const sequence = formatSequence(actor);
+  return [actor.presentation.renderName, actor.kind, identity, sequence].join(" / ");
 }
 
 function formatIdentity(actor: NonNullable<PublicGameState["actors"][string]>): string {
   const memoryIdentity = actor.identity.lockedFacts.find((fact) => fact.id === "setup-identity");
   return memoryIdentity?.text ?? actor.identity.publicIdentity;
+}
+
+function formatSequence(actor: NonNullable<PublicGameState["actors"][string]>): string {
+  const seq = actor.sequence;
+  if (seq === null) {
+    return "无序列";
+  }
+  return [
+    seq.currentSequence,
+    `途径${seq.pathway}`,
+    `神性${seq.divinity}`,
+    `消化${seq.digestionProgress}%`,
+    `失控${seq.lossOfControlProgress}%`,
+  ].join("；");
 }
 
 function formatAllies(publicState: PublicGameState): string {
@@ -192,17 +193,17 @@ function formatGmBriefFunds(publicState: PublicGameState): string {
     .map((item) => item.label)
     .slice(0, 5);
   const itemText = keyItems.length === 0 ? "无关键物品" : `关键物品：${keyItems.join("、")}`;
-  return `可访问资金 ${total.toLocaleString()} 円；${itemText}`;
+  return `可访问资金 ${total.toLocaleString()} 便士；${itemText}`;
 }
 
 function formatCondition(
   condition: NonNullable<PublicGameState["actors"][string]>["condition"],
 ): string {
-  const wounds = condition.wounds.map((wound) => `${wound.severity}:${wound.text}`);
-  const afflictions = condition.afflictions.map((affliction) => affliction.text);
-  const effects = condition.permanentEffects.map((effect) => effect.text);
-  const all = [...wounds, ...afflictions, ...effects];
-  return all.length === 0 ? "无显著伤势或长期影响" : all.join("；");
+  const effects = condition.statusEffects.map(
+    (effect) =>
+      `${effect.type}:${effect.name}(${effect.affectedAttribute}${effect.value}${effect.valueType === "percentage" ? "%" : ""})`,
+  );
+  return effects.length === 0 ? "无显著状态效果" : effects.join("；");
 }
 
 function formatRecentEvents(publicState: PublicGameState): string {
@@ -269,20 +270,4 @@ function formatOrdinaryItems(publicState: PublicGameState): string {
       (actor) => `- ${actor.presentation.renderName}：${actor.inventory.ordinaryItems.join("、")}`,
     );
   return lines.length === 0 ? "- 无记录" : lines.join("\n");
-}
-
-function formatMagecraft(actor: NonNullable<PublicGameState["actors"][string]>): string {
-  const magecraft = actor.magecraft;
-  if (magecraft === null) {
-    return "无可用魔术回路";
-  }
-  return `魔术回路${magecraft.circuits.count}/${magecraft.circuits.quality}；Od余量${resourceBand(magecraft.circuits.od)}（${magecraft.circuits.od}%）`;
-}
-
-function resourceBand(value: number): string {
-  if (value >= 80) return "稳定";
-  if (value >= 50) return "尚可";
-  if (value >= 25) return "低落";
-  if (value > 0) return "危险";
-  return "枯竭";
 }

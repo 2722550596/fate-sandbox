@@ -5,14 +5,14 @@ import type { TypeBoxValidator } from "./typebox-validation.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { FATE_RANK_OR_NONE_SCHEMA, OUTFIT_STATE_SCHEMA } from "./actor-schema.ts";
+import { OUTFIT_STATE_SCHEMA } from "./actor-schema.ts";
 import {
-  CIRCUIT_STATUS_SCHEMA,
+  STATUS_EFFECT_TYPE_SCHEMA,
   stringEnumSchema,
   TRACKED_ITEM_CONDITION_SCHEMA,
   TRACKED_ITEM_KIND_SCHEMA,
   TRACKED_ITEM_VISIBILITY_SCHEMA,
-  WOUND_SEVERITY_SCHEMA,
+  VALUE_TYPE_SCHEMA,
 } from "./state-enum-schemas.ts";
 import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
 
@@ -25,12 +25,8 @@ import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.t
  * 留在 tools/state/actor-condition-normalizer.ts。
  */
 export const ACTOR_CONDITION_EVENT_KINDS = [
-  "add-wound",
-  "update-wound",
-  "add-affliction",
-  "add-permanent-effect",
-  "update-magecraft-circuits",
-  "resolve-condition",
+  "add-status-effect",
+  "remove-status-effect",
   "change-outfit",
   "transfer-tracked-item",
   "update-tracked-item",
@@ -38,63 +34,24 @@ export const ACTOR_CONDITION_EVENT_KINDS = [
 ] as const;
 const ACTOR_CONDITION_EVENT_KIND_SCHEMA = stringEnumSchema(ACTOR_CONDITION_EVENT_KINDS);
 
-export const MAGECRAFT_CIRCUIT_STATE_SCHEMA = Type.Object({
-  count: Type.String({ minLength: 1 }),
-  quality: FATE_RANK_OR_NONE_SCHEMA,
-  od: Type.Integer({ minimum: 0 }),
-  status: CIRCUIT_STATUS_SCHEMA,
-  traits: Type.Array(Type.String({ minLength: 1 })),
-});
-
-const ADD_WOUND_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("add-wound"),
+const ADD_STATUS_EFFECT_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("add-status-effect"),
   actorId: Type.String({ minLength: 1 }),
-  severity: WOUND_SEVERITY_SCHEMA,
-  text: Type.String({ minLength: 1 }),
+  name: Type.String({ minLength: 1 }),
+  type: STATUS_EFFECT_TYPE_SCHEMA,
+  affectedAttribute: Type.String({ minLength: 1 }),
+  valueType: VALUE_TYPE_SCHEMA,
+  value: Type.Number(),
+  duration: Type.Integer({ minimum: 0 }),
   source: Type.String({ minLength: 1 }),
-  recoverable: Type.Boolean(),
-});
-
-const UPDATE_WOUND_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("update-wound"),
-  actorId: Type.String({ minLength: 1 }),
-  conditionId: Type.String({ minLength: 1 }),
-  severity: Type.Optional(WOUND_SEVERITY_SCHEMA),
-  text: Type.Optional(Type.String({ minLength: 1 })),
-  treatment: Type.Optional(Type.String({ minLength: 1 })),
-  recoverable: Type.Optional(Type.Boolean()),
   reason: Type.String({ minLength: 1 }),
 });
 
-const ADD_AFFLICTION_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("add-affliction"),
+const REMOVE_STATUS_EFFECT_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("remove-status-effect"),
   actorId: Type.String({ minLength: 1 }),
-  text: Type.String({ minLength: 1 }),
-  source: Type.String({ minLength: 1 }),
-  expectedDuration: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
-});
-
-const ADD_PERMANENT_EFFECT_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("add-permanent-effect"),
-  actorId: Type.String({ minLength: 1 }),
-  text: Type.String({ minLength: 1 }),
-  source: Type.String({ minLength: 1 }),
-  mechanicalEffect: Type.String({ minLength: 1 }),
-});
-
-const UPDATE_MAGECRAFT_CIRCUITS_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("update-magecraft-circuits"),
-  actorId: Type.String({ minLength: 1 }),
-  circuits: MAGECRAFT_CIRCUIT_STATE_SCHEMA,
-  reason: Type.String({ minLength: 1 }),
-});
-
-const RESOLVE_CONDITION_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("resolve-condition"),
-  actorId: Type.String({ minLength: 1 }),
-  conditionKind: stringEnumSchema(["wound", "affliction"]),
   conditionId: Type.String({ minLength: 1 }),
-  outcome: stringEnumSchema(["recovered", "stabilized"]),
+  outcome: stringEnumSchema(["recovered", "expired", "removed"]),
   reason: Type.String({ minLength: 1 }),
 });
 
@@ -135,24 +92,16 @@ const ADD_TRACKED_ITEM_EVENT_SCHEMA = Type.Object({
 });
 
 export type ActorConditionEvent =
-  | Static<typeof ADD_WOUND_EVENT_SCHEMA>
-  | Static<typeof UPDATE_WOUND_EVENT_SCHEMA>
-  | Static<typeof ADD_AFFLICTION_EVENT_SCHEMA>
-  | Static<typeof ADD_PERMANENT_EFFECT_EVENT_SCHEMA>
-  | Static<typeof UPDATE_MAGECRAFT_CIRCUITS_EVENT_SCHEMA>
-  | Static<typeof RESOLVE_CONDITION_EVENT_SCHEMA>
+  | Static<typeof ADD_STATUS_EFFECT_EVENT_SCHEMA>
+  | Static<typeof REMOVE_STATUS_EFFECT_EVENT_SCHEMA>
   | Static<typeof CHANGE_OUTFIT_EVENT_SCHEMA>
   | Static<typeof TRANSFER_TRACKED_ITEM_EVENT_SCHEMA>
   | Static<typeof UPDATE_TRACKED_ITEM_EVENT_SCHEMA>
   | Static<typeof ADD_TRACKED_ITEM_EVENT_SCHEMA>;
 
 const ACTOR_CONDITION_EVENT_KIND_VALIDATOR = Compile(ACTOR_CONDITION_EVENT_KIND_SCHEMA);
-const ADD_WOUND_EVENT_VALIDATOR = Compile(ADD_WOUND_EVENT_SCHEMA);
-const UPDATE_WOUND_EVENT_VALIDATOR = Compile(UPDATE_WOUND_EVENT_SCHEMA);
-const ADD_AFFLICTION_EVENT_VALIDATOR = Compile(ADD_AFFLICTION_EVENT_SCHEMA);
-const ADD_PERMANENT_EFFECT_EVENT_VALIDATOR = Compile(ADD_PERMANENT_EFFECT_EVENT_SCHEMA);
-const UPDATE_MAGECRAFT_CIRCUITS_EVENT_VALIDATOR = Compile(UPDATE_MAGECRAFT_CIRCUITS_EVENT_SCHEMA);
-const RESOLVE_CONDITION_EVENT_VALIDATOR = Compile(RESOLVE_CONDITION_EVENT_SCHEMA);
+const ADD_STATUS_EFFECT_EVENT_VALIDATOR = Compile(ADD_STATUS_EFFECT_EVENT_SCHEMA);
+const REMOVE_STATUS_EFFECT_EVENT_VALIDATOR = Compile(REMOVE_STATUS_EFFECT_EVENT_SCHEMA);
 const CHANGE_OUTFIT_EVENT_VALIDATOR = Compile(CHANGE_OUTFIT_EVENT_SCHEMA);
 const TRANSFER_TRACKED_ITEM_EVENT_VALIDATOR = Compile(TRANSFER_TRACKED_ITEM_EVENT_SCHEMA);
 const UPDATE_TRACKED_ITEM_EVENT_VALIDATOR = Compile(UPDATE_TRACKED_ITEM_EVENT_SCHEMA);
@@ -160,12 +109,8 @@ const ADD_TRACKED_ITEM_EVENT_VALIDATOR = Compile(ADD_TRACKED_ITEM_EVENT_SCHEMA);
 
 // Compile 必须在独立常量上调用（satisfies 上下文会干扰泛型推导）。
 const ACTOR_CONDITION_EVENT_VARIANT_VALIDATORS = {
-  "add-wound": ADD_WOUND_EVENT_VALIDATOR,
-  "update-wound": UPDATE_WOUND_EVENT_VALIDATOR,
-  "add-affliction": ADD_AFFLICTION_EVENT_VALIDATOR,
-  "add-permanent-effect": ADD_PERMANENT_EFFECT_EVENT_VALIDATOR,
-  "update-magecraft-circuits": UPDATE_MAGECRAFT_CIRCUITS_EVENT_VALIDATOR,
-  "resolve-condition": RESOLVE_CONDITION_EVENT_VALIDATOR,
+  "add-status-effect": ADD_STATUS_EFFECT_EVENT_VALIDATOR,
+  "remove-status-effect": REMOVE_STATUS_EFFECT_EVENT_VALIDATOR,
   "change-outfit": CHANGE_OUTFIT_EVENT_VALIDATOR,
   "transfer-tracked-item": TRANSFER_TRACKED_ITEM_EVENT_VALIDATOR,
   "update-tracked-item": UPDATE_TRACKED_ITEM_EVENT_VALIDATOR,

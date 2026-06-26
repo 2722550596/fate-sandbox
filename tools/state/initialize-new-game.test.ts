@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state-store.ts";
+import { resetState } from "../../engine/core/state-store.ts";
 import { sessionKey } from "../../engine/core/state-persistence.ts";
 import { initializeNewGameTool } from "./initialize-new-game.ts";
 
@@ -12,7 +12,7 @@ void test("initializeNewGameTool initializes human protagonist and persists deta
   const result = initializeNewGameTool(
     {
       kind: "human-protagonist",
-      campaign: { presetId: "fsn_2004_fuyuki" },
+      campaign: { presetId: "tingen-1349" },
       protagonist: {
         internalName: "你",
         publicIdentity: "不了解魔术的本地学生",
@@ -34,93 +34,6 @@ void test("initializeNewGameTool initializes human protagonist and persists deta
   assert.equal(result.details[sessionKey()], undefined);
   assert.deepEqual(getStateDetail(sessionManager).public.scene.presentActorIds, ["protagonist"]);
   assert.equal(getStateDetail(sessionManager).public.actors.protagonist?.identity.publicIdentity, "不了解魔术的本地学生");
-});
-
-void test("initializeNewGameTool initializes servant protagonist hidden true name", () => {
-  resetState();
-  const sessionManager = createMockSessionManager();
-  initializeNewGameTool(
-    {
-      kind: "servant-protagonist",
-      campaign: { presetId: "fsf_2008_snowfield" },
-      protagonist: {
-        internalName: "Saber",
-        publicIdentity: "刚现界且真名未公开的 Saber",
-        apparentAge: "青年",
-        outfit: { label: "战斗礼装", details: "灵基投影出的轻甲。" },
-        demeanor: "警戒而克制。",
-        className: "Saber",
-        trueNameDisplay: "Saber",
-        trueNameStatus: "hidden",
-      },
-      hiddenTrueName: {
-        value: "隐藏真名",
-        revealConditions: ["剧情内提出可验证证据"],
-      },
-      reason: "tool-level 初始化玩家从者并隐藏真名",
-    },
-    sessionManager,
-  );
-
-  const state = getStateDetail(sessionManager);
-  assert.equal(state.public.actors.protagonist?.servantForm?.identity.trueName.status, "hidden");
-  assert.equal(state.secrets.actorStates.protagonist?.secrets !== undefined, true);
-});
-
-void test("initializeNewGameTool rejects public revealed servant protagonist true name", () => {
-  resetState();
-
-  assert.throws(
-    () =>
-      initializeNewGameTool(
-        {
-          kind: "servant-protagonist",
-          campaign: { presetId: "fsf_2008_snowfield" },
-          protagonist: {
-            internalName: "Saber",
-            publicIdentity: "真名不该公开的 Saber",
-            apparentAge: "青年",
-            outfit: { label: "战斗礼装", details: "灵基投影出的轻甲。" },
-            demeanor: "警戒而克制。",
-            className: "Saber",
-            trueNameDisplay: "两仪式",
-            trueNameStatus: "revealed",
-          },
-          reason: "tool-level 测试拒绝开局公开真名",
-        },
-        createMockSessionManager(),
-      ),
-    /protagonist.trueNameStatus/,
-  );
-});
-
-void test("initializeNewGameTool coerces scalar reveal conditions into an array", () => {
-  resetState();
-
-  initializeNewGameTool(
-    {
-      kind: "servant-protagonist",
-      campaign: { presetId: "fsf_2008_snowfield" },
-      protagonist: {
-        internalName: "Saber",
-        publicIdentity: "刚现界且真名未公开的 Saber",
-        apparentAge: "青年",
-        outfit: { label: "战斗礼装", details: "灵基投影出的轻甲。" },
-        demeanor: "警戒而克制。",
-        className: "Saber",
-        trueNameDisplay: "Saber",
-        trueNameStatus: "hidden",
-      },
-      // TypeBox Convert 的系统性宽容：标量字符串自动包装为单元素数组。
-      hiddenTrueName: { value: "隐藏真名", revealConditions: "剧情内证据" },
-      reason: "tool-level 测试标量 revealConditions coercion",
-    },
-    createMockSessionManager(),
-  );
-
-  const trueName = getState().secrets.actorStates["protagonist"]?.secrets?.trueName;
-  assert.equal(trueName?.value, "隐藏真名");
-  assert.deepEqual(trueName?.revealConditions, ["剧情内证据"]);
 });
 
 interface MockSessionManager {
@@ -145,7 +58,7 @@ function getStateDetail(sessionManager: MockSessionManager): {
     actors: {
       protagonist?: {
         identity: { publicIdentity: string };
-        servantForm: { identity: { trueName: { status: string } } } | null;
+        sequence: null;
       };
     };
   };
@@ -167,7 +80,7 @@ function isStateEntry(value: unknown): value is {
       actors: {
         protagonist?: {
           identity: { publicIdentity: string };
-          servantForm: { identity: { trueName: { status: string } } } | null;
+          sequence: null;
         };
       };
     };

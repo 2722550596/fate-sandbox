@@ -1,5 +1,5 @@
 import type { ActorConditionEvent } from "./actor-condition-schema.ts";
-import type { ActorId, PermanentEffect, PublicActorState, State } from "./state.ts";
+import type { PublicActorState, State } from "./state.ts";
 
 import { createId } from "./ids.ts";
 import { settleOldestObligation } from "./obligations.ts";
@@ -16,7 +16,6 @@ export function updateActorCondition(
   event: ActorConditionEvent,
 ): ActorConditionEventResult {
   const result = applyActorConditionEvent(draft, event);
-  // 伤势/状态落地 = 裁决义务清账（FIFO 一次一条）
   settleOldestObligation(draft, ["actor-condition"]);
   return result;
 }
@@ -26,18 +25,10 @@ function applyActorConditionEvent(
   event: ActorConditionEvent,
 ): ActorConditionEventResult {
   switch (event.kind) {
-    case "add-wound":
-      return addWound(draft, event);
-    case "update-wound":
-      return updateWound(draft, event);
-    case "add-affliction":
-      return addAffliction(draft, event);
-    case "add-permanent-effect":
-      return addPermanentEffect(draft, event);
-    case "update-magecraft-circuits":
-      return updateMagecraftCircuits(draft, event);
-    case "resolve-condition":
-      return resolveCondition(draft, event);
+    case "add-status-effect":
+      return addStatusEffect(draft, event);
+    case "remove-status-effect":
+      return removeStatusEffect(draft, event);
     case "change-outfit":
       return changeOutfit(draft, event);
     case "transfer-tracked-item":
@@ -51,213 +42,55 @@ function applyActorConditionEvent(
   }
 }
 
-function addWound(
+function addStatusEffect(
   draft: State,
-  event: Extract<ActorConditionEvent, { kind: "add-wound" }>,
+  event: Extract<ActorConditionEvent, { kind: "add-status-effect" }>,
 ): ActorConditionEventResult {
   const actor = draft.public.actors[event.actorId];
   if (actor === undefined) {
     throw new Error(`actor 不存在: ${event.actorId}`);
   }
-  actor.condition.wounds.push({
-    id: createId(draft, "wound"),
-    severity: event.severity,
-    text: assertNonEmptyString(event.text, "text"),
-    recoverable: event.recoverable,
-    treatment: assertNonEmptyString(event.source, "source"),
-  });
-  return { message: "伤势已记录。" };
-}
-
-function updateWound(
-  draft: State,
-  event: Extract<ActorConditionEvent, { kind: "update-wound" }>,
-): ActorConditionEventResult {
-  assertNonEmptyString(event.reason, "reason");
-  const actor = draft.public.actors[event.actorId];
-  if (actor === undefined) {
-    throw new Error(`actor 不存在: ${event.actorId}`);
-  }
-  const wound = actor.condition.wounds.find((condition) => condition.id === event.conditionId);
-  if (wound === undefined) {
-    throw new Error(`wound 不存在: ${event.conditionId}`);
-  }
-  if (event.severity !== undefined) {
-    wound.severity = event.severity;
-  }
-  if (event.text !== undefined) {
-    wound.text = assertNonEmptyString(event.text, "text");
-  }
-  if (event.treatment !== undefined) {
-    wound.treatment = assertNonEmptyString(event.treatment, "treatment");
-  }
-  if (event.recoverable !== undefined) {
-    wound.recoverable = event.recoverable;
-  }
-  return { message: `伤势已更新：${event.conditionId}。` };
-}
-
-function addAffliction(
-  draft: State,
-  event: Extract<ActorConditionEvent, { kind: "add-affliction" }>,
-): ActorConditionEventResult {
-  const actor = draft.public.actors[event.actorId];
-  if (actor === undefined) {
-    throw new Error(`actor 不存在: ${event.actorId}`);
-  }
-  actor.condition.afflictions.push({
-    id: createId(draft, "affliction"),
-    source: assertNonEmptyString(event.source, "source"),
-    text: assertNonEmptyString(event.text, "text"),
-    expectedDuration:
-      event.expectedDuration === null
-        ? null
-        : assertNonEmptyString(event.expectedDuration, "expectedDuration"),
-  });
-  return { message: "异常状态已记录。" };
-}
-
-function addPermanentEffect(
-  draft: State,
-  event: Extract<ActorConditionEvent, { kind: "add-permanent-effect" }>,
-): ActorConditionEventResult {
-  const actor = draft.public.actors[event.actorId];
-  if (actor === undefined) {
-    throw new Error(`actor 不存在: ${event.actorId}`);
-  }
-  const effect: PermanentEffect = {
+  actor.condition.statusEffects.push({
     id: createId(draft, "effect"),
+    name: assertNonEmptyString(event.name, "name"),
+    type: event.type,
+    affectedAttribute: assertNonEmptyString(event.affectedAttribute, "affectedAttribute"),
+    valueType: event.valueType,
+    value: event.value,
+    duration: event.duration,
     source: assertNonEmptyString(event.source, "source"),
-    text: assertNonEmptyString(event.text, "text"),
-    mechanicalEffect: assertNonEmptyString(event.mechanicalEffect, "mechanicalEffect"),
-  };
-  actor.condition.permanentEffects.push(effect);
-  return { message: "长期影响已记录。" };
+  });
+  return { message: "状态效果已记录。" };
 }
 
-function updateMagecraftCircuits(
+function removeStatusEffect(
   draft: State,
-  event: Extract<ActorConditionEvent, { kind: "update-magecraft-circuits" }>,
+  event: Extract<ActorConditionEvent, { kind: "remove-status-effect" }>,
 ): ActorConditionEventResult {
   assertNonEmptyString(event.reason, "reason");
   const actor = draft.public.actors[event.actorId];
   if (actor === undefined) {
     throw new Error(`actor 不存在: ${event.actorId}`);
   }
-  if (actor.magecraft === null) {
-    throw new Error(`actor 没有 magecraft: ${event.actorId}`);
+  const next = actor.condition.statusEffects.filter((effect) => effect.id !== event.conditionId);
+  if (next.length === actor.condition.statusEffects.length) {
+    throw new Error(
+      `status effect 不存在于 ${formatActorLabel(actor)}: ${event.conditionId}。当前 actor 可用 status effects: ${formatAvailableConditions(actor.condition.statusEffects)}`,
+    );
   }
-  actor.magecraft.circuits = event.circuits;
-  return { message: "魔术回路状态已更新。" };
-}
-
-function resolveCondition(
-  draft: State,
-  event: Extract<ActorConditionEvent, { kind: "resolve-condition" }>,
-): ActorConditionEventResult {
-  assertNonEmptyString(event.reason, "reason");
-  const actor = draft.public.actors[event.actorId];
-  if (actor === undefined) {
-    throw new Error(`actor 不存在: ${event.actorId}`);
-  }
-  switch (event.conditionKind) {
-    case "wound":
-      actor.condition.wounds = removeCondition({
-        conditions: actor.condition.wounds,
-        conditionId: event.conditionId,
-        conditionKind: "wound",
-        actor,
-        actors: draft.public.actors,
-      });
-      break;
-    case "affliction":
-      actor.condition.afflictions = removeCondition({
-        conditions: actor.condition.afflictions,
-        conditionId: event.conditionId,
-        conditionKind: "affliction",
-        actor,
-        actors: draft.public.actors,
-      });
-      break;
-    default:
-      throw new Error("unreachable condition kind");
-  }
-  return { message: `状态已处理：${event.conditionId} (${event.outcome})。` };
-}
-
-interface RemoveConditionInput<TCondition extends { id: string; text?: string }> {
-  conditions: TCondition[];
-  conditionId: string;
-  conditionKind: "wound" | "affliction";
-  actor: PublicActorState;
-  actors: Record<ActorId, PublicActorState>;
-}
-
-function removeCondition<TCondition extends { id: string; text?: string }>(
-  input: RemoveConditionInput<TCondition>,
-): TCondition[] {
-  const id = assertNonEmptyString(input.conditionId, "conditionId");
-  const next = input.conditions.filter((condition) => condition.id !== id);
-  if (next.length === input.conditions.length) {
-    throw new Error(formatMissingConditionMessage(input, id));
-  }
-  return next;
-}
-
-function formatMissingConditionMessage<TCondition extends { id: string; text?: string }>(
-  input: RemoveConditionInput<TCondition>,
-  conditionId: string,
-): string {
-  const owner = findConditionOwner(input.actors, input.conditionKind, conditionId);
-  const ownerHint =
-    owner === null
-      ? ""
-      : `。该 ${input.conditionKind} 存在于 ${formatActorLabel(owner)}；请改用 actorId=${owner.id}`;
-  return `${input.conditionKind} 不存在于 ${formatActorLabel(input.actor)}: ${conditionId}。当前 actor 可用 ${input.conditionKind}: ${formatAvailableConditions(input.conditions)}${ownerHint}`;
-}
-
-function findConditionOwner(
-  actors: Record<ActorId, PublicActorState>,
-  conditionKind: "wound" | "affliction",
-  conditionId: string,
-): PublicActorState | null {
-  return (
-    Object.values(actors).find((actor) =>
-      getConditionsByKind(actor, conditionKind).some((condition) => condition.id === conditionId),
-    ) ?? null
-  );
-}
-
-function getConditionsByKind(
-  actor: PublicActorState,
-  conditionKind: "wound" | "affliction",
-): readonly { id: string; text?: string }[] {
-  switch (conditionKind) {
-    case "wound":
-      return actor.condition.wounds;
-    case "affliction":
-      return actor.condition.afflictions;
-    default:
-      throw new Error("unreachable condition kind");
-  }
+  actor.condition.statusEffects = next;
+  return { message: `状态效果已处理：${event.conditionId} (${event.outcome})。` };
 }
 
 function formatActorLabel(actor: PublicActorState): string {
   return `${actor.id}（${actor.presentation.renderName}）`;
 }
 
-function formatAvailableConditions(conditions: readonly { id: string; text?: string }[]): string {
+function formatAvailableConditions(conditions: readonly { id: string; name: string }[]): string {
   if (conditions.length === 0) {
     return "无";
   }
-  return conditions.map(formatAvailableCondition).join("；");
-}
-
-function formatAvailableCondition(condition: { id: string; text?: string }): string {
-  if (condition.text === undefined) {
-    return condition.id;
-  }
-  return `${condition.id}（${condition.text}）`;
+  return conditions.map((c) => `${c.id}（${c.name}）`).join("；");
 }
 
 function changeOutfit(

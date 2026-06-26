@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 import { advanceIsoTime, diffMinutes, formatHumanTime, isDifferentGameDate } from "./date-time.ts";
 
 describe("date-time", () => {
-  it("formats game time with weekday in Asia/Tokyo", () => {
+  it("formats game time with weekday in UTC", () => {
     const formatted = formatHumanTime("2004-01-30T07:00:00.000Z");
 
     assert.equal(formatted.date, "2004年01月30日");
@@ -14,8 +14,8 @@ describe("date-time", () => {
     assert.equal(formatted.display, "2004年01月30日 星期五 16:00");
   });
 
-  it("formats game time with weekday in America/Denver", () => {
-    const formatted = formatHumanTime("2008-06-03T03:28:00.000Z", "America/Denver");
+  it("formats game time with weekday in UTC", () => {
+    const formatted = formatHumanTime("2008-06-03T03:28:00.000Z", "UTC");
 
     assert.equal(formatted.date, "2008年06月02日");
     assert.equal(formatted.weekday, "星期一");
@@ -31,10 +31,7 @@ describe("date-time", () => {
     assert.equal(diffMinutes("2004-01-30T07:00:00Z", "2004-01-30T08:30:00Z"), 90);
   });
 
-  it("detects game-date crossing in America/Denver", () => {
-    assert.equal(
-      isDifferentGameDate("2008-06-03T05:50:00Z", "2008-06-03T06:10:00Z", "America/Denver"),
-      true,
-    );
+  it("detects game-date crossing in UTC", () => {
+    assert.equal(isDifferentGameDate("2008-06-03T05:50:00Z", "2008-06-03T06:10:00Z", "UTC"), true);
   });
 });

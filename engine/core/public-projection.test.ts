@@ -23,7 +23,8 @@ void test("GM brief shows special boundaries; status markdown hides them", () =>
     region: "冬木市",
     site: "深山镇",
     detail: "卫宫邸",
-    boundary: "bounded-field",
+    boundary: "sacred-domain",
+    coordinates: null,
   };
 
   assert.match(buildGmBrief(publicState), /地点：冬木市 · 深山镇 · 卫宫邸（bounded-field）/);

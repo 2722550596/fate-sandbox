@@ -2,29 +2,17 @@ import type { HumanActorState, PublicGameState, State, StateExport } from "./sta
 
 import { mkdirSync, writeFileSync } from "node:fs";
 
-import { formatHumanTime, nowIso } from "./date-time.ts";
+import { formatHumanTime, LOTM_EPOCH_ISO, nowIso } from "./date-time.ts";
 import { generateSeed } from "./seeded-rng.ts";
-import { pruneExpiredParamModifiers } from "./servant.ts";
 import { migrateRawGameState } from "./state-migration.ts";
 import { parseStateSchema } from "./state-schema.ts";
 import { CURRENT_STATE_SCHEMA_VERSION } from "./state.ts";
 import { formatUnknown, isRecord } from "./typebox-validation.ts";
 
 const DEBUG_STATE_PATH = "state/state.json";
-const INITIAL_CURRENT_TIME = "2004-01-30T07:00:00.000Z";
 
-/**
- * 种子主角的 actor id——开局唯一真相点。“谁是主角”由 public.protagonistActorId
- * 指针决定；这里只是初始 state 工厂播下的种子值，所有处都引用本常量，
- * 不再各自写死字面量。未来要换种子 id，只改这一处。
- */
 export const PROTAGONIST_ACTOR_ID = "protagonist";
 
-/**
- * 模块级单例。状态在每个入口（context / tool_call / session_start / 面板命令）
- * 都会先从 session entries 重新 hydrate，因此即使模块被重复实例化，
- * 各实例也会从同一份 session 数据收敛，无需跨实例共享 globalThis。
- */
 let store: State | undefined;
 
 export function getState(): State {
@@ -58,11 +46,6 @@ export function replaceStateForDebug(state: State): State {
   return cloneState();
 }
 
-/**
- * Game State Store 的唯一提交入口。仅供 Domain Event Tool Runner 与
- * store 生命周期代码（session hydration、new game）调用；领域事件函数
- * 本身是 (draft, event) 形态的确定性函数，不得直接提交。
- */
 export function commitState(next: State): State {
   setStore(touchState(assertState(next)));
   return cloneState();
@@ -91,17 +74,13 @@ function getStore(): State {
 }
 
 function setStore(state: State): void {
-  const normalizedState = pruneExpiredParamModifiers(structuredClone(state));
-  store = normalizedState;
-  writeStateDebugSnapshot(normalizedState);
+  store = state;
+  writeStateDebugSnapshot(state);
 }
 
-/** 上次落盘的序列化快照；hydrate 在每个入口都会触发，内容不变时跳过同步磁盘写。 */
 let lastWrittenSnapshot: string | undefined;
 
 function writeStateDebugSnapshot(state: State): void {
-  // node --test 子进程里的 commitState/resetState 不得覆写 state/state.json，
-  // 否则跑一轮测试就会把调试快照砋成最后一个测试用例的近初始状态。
   if (process.env["NODE_TEST_CONTEXT"] !== undefined) {
     return;
   }
@@ -148,44 +127,50 @@ export function createInitialState(): State {
     },
     public: {
       campaign: {
-        title: "Fate 叙事",
-        timeline: "fsn",
+        title: "诡秘之主叙事",
+        timeline: "tingen",
         openingMode: "selected",
-        premise: "2004 年冬木，玩家角色的身份与卷入方式尚待开局确认。",
-        activeRuleSetIds: ["fate-worldview-filter", "fate-rank-combat", "jpy-2004-economy"],
+        premise: "第五纪1349年，鲁恩王国廷根市，玩家角色的身份与卷入方式尚待开局确认。",
+        activeRuleSetIds: [
+          "lotm-worldview-filter",
+          "lotm-judgment-combat",
+          "lotm-economy",
+          "lotm-sequence-promotion",
+        ],
       },
       clock: {
-        startedAt: INITIAL_CURRENT_TIME,
-        currentAt: INITIAL_CURRENT_TIME,
-        timezone: "Asia/Tokyo",
+        startedAt: LOTM_EPOCH_ISO,
+        currentAt: LOTM_EPOCH_ISO,
+        timezone: "UTC",
         lastLongRestAt: null,
       },
       scene: {
         location: {
-          region: "冬木市",
-          site: "深山镇",
-          detail: "穗群原学园·校门外",
+          region: "鲁恩王国",
+          site: "廷根",
+          detail: "廷根大学·校门外",
           boundary: "normal",
+          coordinates: { x: 55.36, y: 26.34 },
         },
         situation: "daily",
         storyWindow: null,
         presentActorIds: [PROTAGONIST_ACTOR_ID],
         objectives: [],
         threats: [],
-        lastResolvedAt: INITIAL_CURRENT_TIME,
+        lastResolvedAt: LOTM_EPOCH_ISO,
       },
       actors: { [PROTAGONIST_ACTOR_ID]: protagonist },
       trackedItems: {},
       protagonistActorId: PROTAGONIST_ACTOR_ID,
       allyActorIds: [],
       economy: {
-        currency: "JPY",
+        currency: "penny",
         accessibleFunds: [
           {
             id: "purse-protagonist-cash",
             ownerActorId: PROTAGONIST_ACTOR_ID,
-            label: "随身现金",
-            amount: 50000,
+            label: "随身便士",
+            amount: 24,
             access: "held",
           },
         ],
@@ -197,8 +182,8 @@ export function createInitialState(): State {
             id: "fact-opening-identity-unfixed",
             scope: "protagonist",
             subject: PROTAGONIST_ACTOR_ID,
-            text: "玩家角色身份尚未锁定；不得默认是御主、普通人或从者。",
-            since: INITIAL_CURRENT_TIME,
+            text: "玩家角色身份尚未锁定；不得默认是非凡者、普通人或穿越者。",
+            since: LOTM_EPOCH_ISO,
             sourceEventId: null,
           },
         ],
@@ -232,8 +217,7 @@ function createInitialProtagonist(): HumanActorState {
     id: PROTAGONIST_ACTOR_ID,
     kind: "human",
     roles: [],
-    magecraft: null,
-    servantForm: null,
+    sequence: null,
     identity: {
       publicIdentity: "身份未定的玩家角色",
       background: "开局尚未确认。由初始化或后续记忆事件锁定，不得在叙事中漂移。",
@@ -246,7 +230,7 @@ function createInitialProtagonist(): HumanActorState {
       outfit: { label: "日常服装", details: "开局尚未细化。" },
       demeanor: "由玩家行动定义。",
     },
-    condition: { wounds: [], afflictions: [], permanentEffects: [] },
+    condition: { statusEffects: [] },
     inventory: { ordinaryItems: [] },
     abilities: [],
     relationshipToProtagonist: { stance: "self", summary: "玩家本人。" },

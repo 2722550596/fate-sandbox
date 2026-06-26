@@ -42,7 +42,7 @@ void test("settleOldestObligation clears FIFO, one per call", () => {
   assert.match(settled?.summary ?? "", /必须登记伤口/);
   assert.equal(draft.public.obligations.length, 1);
 
-  assert.equal(settleOldestObligation(draft, ["servant-form"]), undefined);
+  assert.equal(settleOldestObligation(draft, ["sequence"]), undefined);
   assert.equal(draft.public.obligations.length, 1);
 });
 
@@ -50,12 +50,16 @@ void test("updateActorCondition settles a pending actor-condition obligation", (
   const draft = draftWithObligation();
 
   updateActorCondition(draft, {
-    kind: "add-wound",
+    kind: "add-status-effect",
     actorId: draft.public.protagonistActorId,
-    severity: "moderate",
-    text: "左肩撕裂伤，发力受限",
+    name: "撕裂伤",
+    type: "debuff",
+    affectedAttribute: "agility",
+    value: 15,
+    duration: 3,
     source: "交锋落地",
-    recoverable: true,
+    valueType: "percentage",
+    reason: "测试",
   });
 
   assert.equal(draft.public.obligations.length, 0);
@@ -85,12 +89,16 @@ void test("commitTurn passes when its own events settle the ledger", () => {
       {
         kind: "actor-condition",
         event: {
-          kind: "add-wound",
+          kind: "add-status-effect",
           actorId: draft.public.protagonistActorId,
-          severity: "moderate",
-          text: "左肩撕裂伤，发力受限",
+          name: "撕裂伤",
+          type: "debuff",
+          affectedAttribute: "agility",
+          value: 15,
+          duration: 3,
           source: "交锋落地",
-          recoverable: true,
+          valueType: "percentage",
+          reason: "测试",
         },
       },
     ],

@@ -1,0 +1,83 @@
+{
+  "nextId": 14,
+  "items": [
+    {
+      "id": 1,
+      "content": "M1: 项目配置 (package.json, .pi/settings.json)",
+      "done": true,
+      "created": 1782463032
+    },
+    {
+      "id": 2,
+      "content": "M1: state-enum-schemas.ts — LOTM 枚举",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 3,
+      "content": "M1: state.ts — LOTM GameState 类型树",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 4,
+      "content": "M1: state-schema.ts — TypeBox schema",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 5,
+      "content": "M1: state-migration.ts — v1 起步",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 6,
+      "content": "M1: state-store.ts — 初始 state + protected paths",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 7,
+      "content": "M1: date-time.ts — LOTM 历法",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 8,
+      "content": "M1: new-game-initialization.ts + new-game-schema.ts",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 9,
+      "content": "M1: 删除 Fate 域模块 (servant, fate-rank, combat-exchange)",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 10,
+      "content": "M1: 创建 LOTM 域模块 (pathway, judgment, combat, status-effect, attribute-calculator, damage-calculator)",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 11,
+      "content": "M1: 更新依赖模块 (actor, economy, memory, secret, scene, campaign, offscreen, faction-clock, actor-condition, turn-commit, etc.)",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 12,
+      "content": "M1: pnpm typecheck 通过",
+      "done": false,
+      "created": 1782463032
+    },
+    {
+      "id": 13,
+      "content": "M2-M7: 后续里程碑",
+      "done": false,
+      "created": 1782463032
+    }
+  ]
+}

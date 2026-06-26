@@ -15,9 +15,9 @@ void test("configureCampaign applies FSF Snowfield preset", () => {
   });
 
   const state = draft;
-  assert.equal(result.message, "Campaign 已配置：Fate/strange Fake 叙事 (fsf, America/Denver)。");
+  assert.equal(result.message, "Campaign 已配置：Fate/strange Fake 叙事 (fsf, UTC)。");
   assert.equal(state.public.campaign.timeline, "fsf");
-  assert.equal(state.public.clock.timezone, "America/Denver");
+  assert.equal(state.public.clock.timezone, "UTC");
   assert.equal(state.public.clock.currentAt, "2008-06-03T03:28:00.000Z");
   assert.equal(state.public.scene.location.region, "斯诺菲尔德");
   assert.equal(state.public.economy.currency, "USD");
