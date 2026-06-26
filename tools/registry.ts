@@ -8,12 +8,14 @@ import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact.t
 import { resetStateToolDefinition } from "./debug/reset-state.ts";
 import { lookupToolDefinition } from "./lookup/lookup.ts";
 import { renderDomainToolResult } from "./runtime/tool-render.ts";
+import { attemptPromotionToolDefinition } from "./state/attempt-promotion.ts";
 import { commitTurnToolDefinition } from "./state/commit-turn.ts";
 import { configureCampaignToolDefinition } from "./state/configure-campaign.ts";
 import { getStatusToolDefinition } from "./state/get-status.ts";
 import { harvestBackstageCandidateToolDefinition } from "./state/harvest-backstage-candidate.ts";
 import { initializeNewGameToolDefinition } from "./state/initialize-new-game.ts";
 import { manageFactionClockToolDefinition } from "./state/manage-faction-clock.ts";
+import { moveToToolDefinition } from "./state/move-to.ts";
 import { patchStateToolDefinition } from "./state/patch-state.ts";
 import { privateResolveToolDefinition } from "./state/private-resolve.ts";
 import { progressSceneBeatToolDefinition } from "./state/progress-scene-beat.ts";
@@ -23,8 +25,10 @@ import { recordMemoryToolDefinition } from "./state/record-memory.ts";
 import { recordOffscreenEventToolDefinition } from "./state/record-offscreen-event.ts";
 import { recordRelationshipSignalToolDefinition } from "./state/record-relationship-signal.ts";
 import { resolveBackstageLineToolDefinition } from "./state/resolve-backstage-line.ts";
+import { resolveCombatToolDefinition } from "./state/resolve-combat.ts";
 import { retireActorToolDefinition } from "./state/retire-actor.ts";
 import { revealSecretToolDefinition } from "./state/reveal-secret.ts";
+import { rollDiceToolDefinition } from "./state/roll-dice.ts";
 import { runParallelLineToolDefinition } from "./state/run-parallel-line.ts";
 import { setScenePresenceToolDefinition } from "./state/set-scene-presence.ts";
 import { submitDirectionPacketToolDefinition } from "./state/submit-direction-packet.ts";
@@ -68,6 +72,10 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
   migrateStateToolDefinition,
   resetStateToolDefinition,
   getStateSchemaToolDefinition,
+  attemptPromotionToolDefinition,
+  moveToToolDefinition,
+  resolveCombatToolDefinition,
+  rollDiceToolDefinition,
 ];
 
 export function registerAllTools(pi: ExtensionAPI): void {
