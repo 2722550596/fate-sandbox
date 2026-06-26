@@ -7,68 +7,65 @@ import { upsertActorTool } from "./upsert-actor.ts";
 
 const RENDER_PACKET = {
   needsRender: true,
-  playerAction: "下达突进指令",
-  resolvedChanges: ["Saber 突进受阻，转为阵地防守", "消耗一成魔力"],
+  playerAction: "下达探查指令",
+  resolvedChanges: [
+    "克劳斯 沿壁潜行探查地下室入口",
+    "当前灵性消耗约 15%",
+  ],
   npcStances: [
     {
-      actorId: "saber_shiki",
-      stance: "平静但手腕绷紧",
-      wants: "护住御主",
-      move: "上前半步拦在御主身前，冷声要对方报上来意",
-      refusesToSay: "自己还藏着底牌",
+      actorId: "mysterious_woman",
+      stance: "倚墙而立，目光冷漠",
+      wants: "保持距离观察",
+      move: "缓缓跟上半步，手指藏在大衣口袋里",
+      refusesToSay: "自己的身份和目的",
     },
   ],
-  sensoryAnchors: ["灼热气浪"],
-  endWindow: "玩家必须创造让 Saber 近身的破绽",
+  sensoryAnchors: ["湿润的霉味", "远处钟声"],
+  endWindow: "玩家必须设法看清对方的真面目",
   eventWeight: "normal",
   canonFacts: [],
 };
 
-function seedHiddenTrueName(trueName: string): void {
+/**
+ * 在 state 中创建 actor 并灌入 hidden pathway secret。
+ * 两步：先 upsert-public-npc 创建 actor，再手动在 secrets 中写入秘密。
+ */
+function seedHiddenSecret(secretValue: string): void {
   resetState();
+  // Step 1: create the actor
   upsertActorTool(
     {
-      kind: "upsert-sequence",
-      servant: {
-        id: "saber_shiki",
-        internalName: "Saber",
-        publicIdentity: "和服装束的女性剑士",
+      kind: "upsert-public-npc",
+      npc: {
+        id: "mysterious_woman",
+        kind: "human",
+        internalName: "神秘女子",
+        publicIdentity: "穿着大衣的不明女性",
         apparentAge: "二十岁前后",
-        outfit: { label: "和服", details: "白色和服配皮夹克。" },
-        demeanor: "態懒",
-        className: "Saber",
-        trueNameDisplay: "Saber",
-        trueNameStatus: "hidden",
-        parameters: {
-          strength: "C",
-          endurance: "C",
-          agility: "A",
-          mana: "C",
-          luck: "B",
-          noblePhantasm: "EX",
-        },
-        classSkills: [{ name: "对魔力", rank: "C", summary: "无效化低阶魔术。" }],
-        personalSkills: [{ name: "直死之魔眼", rank: "EX", summary: "看见死之线。" }],
-        noblePhantasms: [],
-        spiritualCore: 100,
-        mana: 100,
-        spiritualCondition: "完好",
-        contractStatus: "masterless",
-        manaSupply: "starved",
-        currentOrder: "随行护卫御主",
+        outfit: { label: "大衣", details: "深棕色呢绒大衣，领口竖起。" },
+        demeanor: "警惕而疏离",
+        publicRoles: [],
+        relationshipToProtagonist: { stance: "wary", summary: "敌友不明" },
+        ordinaryItems: [],
       },
       reason: "测试种子 actor",
     },
     null,
   );
   const draft = cloneState();
-  // stance 引用 saber_shiki：它必须在场才能通过 direction packet 语义校验。
-  draft.public.scene.presentActorIds = ["protagonist", "saber_shiki"];
-  draft.secrets.actorStates["saber_shiki"] = {
-    actorId: "saber_shiki",
+  // Step 2: set present and seed the pathway secret
+  draft.public.scene.presentActorIds = ["protagonist", "mysterious_woman"];
+  draft.secrets.actorStates["mysterious_woman"] = {
+    actorId: "mysterious_woman",
     secrets: {
-      actorId: "saber_shiki",
-      pathwaySecret: { id: "tn-1", value: trueName, revealState: "hidden", revealConditions: [] },
+      actorId: "mysterious_woman",
+      pathwaySecret: {
+        id: "pw-1",
+        value: secretValue,
+        revealState: "hidden",
+        revealConditions: [],
+      },
       privateMotives: [],
       unrevealedAffiliations: [],
     },
@@ -77,7 +74,7 @@ function seedHiddenTrueName(trueName: string): void {
 }
 
 void test("submitDirectionPacketTool accepts a clean packet and terminates", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   const result = submitDirectionPacketTool(RENDER_PACKET);
 
   assert.equal(result.terminate, true);
@@ -86,7 +83,7 @@ void test("submitDirectionPacketTool accepts a clean packet and terminates", () 
 });
 
 void test("submitDirectionPacketTool accepts a direct reply packet", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   const result = submitDirectionPacketTool({ needsRender: false, directReply: "OOC 解答。" });
 
   assert.equal(result.terminate, true);
@@ -94,19 +91,19 @@ void test("submitDirectionPacketTool accepts a direct reply packet", () => {
 });
 
 void test("submitDirectionPacketTool blocks packets leaking unrevealed secrets", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   assert.throws(
     () =>
       submitDirectionPacketTool({
         ...RENDER_PACKET,
-        canonFacts: ["Saber 的真名是两仪式"],
+        canonFacts: ["神秘女子的真实身份是观众途径序列6非凡者"],
       }),
     /secret 防火墙拦截.*canonFacts\[0\]/u,
   );
 });
 
 void test("submitDirectionPacketTool rejects malformed packets", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   assert.throws(
     () => submitDirectionPacketTool({ needsRender: true, playerAction: "x" }),
     /resolvedChanges/,
@@ -114,7 +111,7 @@ void test("submitDirectionPacketTool rejects malformed packets", () => {
 });
 
 void test("submitDirectionPacketTool rejects a stance for a non-existent actor", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   assert.throws(
     () =>
       submitDirectionPacketTool({
@@ -126,45 +123,45 @@ void test("submitDirectionPacketTool rejects a stance for a non-existent actor",
 });
 
 void test("submitDirectionPacketTool rejects a stance for an off-scene actor", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   const draft = cloneState();
   draft.public.scene.presentActorIds = ["protagonist"];
   commitState(draft);
   assert.throws(
     () => submitDirectionPacketTool(RENDER_PACKET),
-    /指向不在场的 actor：saber_shiki/u,
+    /指向不在场的 actor：mysterious_woman/u,
   );
 });
 
 void test("submitDirectionPacketTool requires important present NPCs to be covered", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   const draft = cloneState();
-  // 给 saber 加 agenda → 成为重要在场 NPC，必须被 stance 或 omission 覆盖。
-  const saberForCoverage = draft.secrets.actorStates["saber_shiki"];
-  assert.ok(saberForCoverage);
-  saberForCoverage.agenda = {
-    actorId: "saber_shiki",
-    goal: "护住御主",
-    fear: "御主死亡",
+  // agenda → becomes important, must be covered by stance or omission
+  const actorForCoverage = draft.secrets.actorStates["mysterious_woman"];
+  assert.ok(actorForCoverage);
+  actorForCoverage.agenda = {
+    actorId: "mysterious_woman",
+    goal: "监视周围动向",
+    fear: "身份暴露",
     currentOrder: null,
     lastIndependentActionAt: null,
   };
   commitState(draft);
   assert.throws(
     () => submitDirectionPacketTool({ ...RENDER_PACKET, npcStances: [] }),
-    /重要在场 NPC 未被覆盖：saber_shiki/u,
+    /重要在场 NPC 未被覆盖：mysterious_woman/u,
   );
 });
 
 void test("submitDirectionPacketTool accepts an important NPC covered by an omission", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   const draft = cloneState();
-  const saberForOmission = draft.secrets.actorStates["saber_shiki"];
-  assert.ok(saberForOmission);
-  saberForOmission.agenda = {
-    actorId: "saber_shiki",
-    goal: "护住御主",
-    fear: "御主死亡",
+  const actorForOmission = draft.secrets.actorStates["mysterious_woman"];
+  assert.ok(actorForOmission);
+  actorForOmission.agenda = {
+    actorId: "mysterious_woman",
+    goal: "监视周围动向",
+    fear: "身份暴露",
     currentOrder: null,
     lastIndependentActionAt: null,
   };
@@ -174,9 +171,9 @@ void test("submitDirectionPacketTool accepts an important NPC covered by an omis
     npcStances: [],
     npcOmissions: [
       {
-        actorId: "saber_shiki",
+        actorId: "mysterious_woman",
         reasonCode: "watching-silently",
-        playerSafeNote: "站在半步之外冷眼旁观，未出手",
+        playerSafeNote: "倚在角落里没动，只是目光一直落在主角身上",
       },
     ],
   });
@@ -184,25 +181,25 @@ void test("submitDirectionPacketTool accepts an important NPC covered by an omis
 });
 
 void test("submitDirectionPacketTool rejects an actor in both stance and omission", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   assert.throws(
     () =>
       submitDirectionPacketTool({
         ...RENDER_PACKET,
         npcOmissions: [
           {
-            actorId: "saber_shiki",
+            actorId: "mysterious_woman",
             reasonCode: "watching-silently",
             playerSafeNote: "旁观",
           },
         ],
       }),
-    /同时出现在 npcStances 和 npcOmissions：saber_shiki/u,
+    /同时出现在 npcStances 和 npcOmissions：mysterious_woman/u,
   );
 });
 
 void test("submitDirectionPacketTool runs the secret firewall over omission notes", () => {
-  seedHiddenTrueName("两仪式");
+  seedHiddenSecret("观众途径·序列6");
   assert.throws(
     () =>
       submitDirectionPacketTool({
@@ -210,9 +207,9 @@ void test("submitDirectionPacketTool runs the secret firewall over omission note
         npcStances: [],
         npcOmissions: [
           {
-            actorId: "saber_shiki",
+            actorId: "mysterious_woman",
             reasonCode: "watching-silently",
-            playerSafeNote: "两仪式静静旁观",
+            playerSafeNote: "观众途径序列6静静打量着主角",
           },
         ],
       }),

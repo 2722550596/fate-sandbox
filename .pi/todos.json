@@ -3,81 +3,45 @@
   "items": [
     {
       "id": 1,
-      "content": "M1: 项目配置 (package.json, .pi/settings.json)",
-      "done": true,
-      "created": 1782463032
+      "content": "Create LOTM domain engine modules (judgment, combat, status-effect, attribute-calc, damage-calc, pathway)",
+      "done": false,
+      "created": 1782500199
     },
     {
       "id": 2,
-      "content": "M1: state-enum-schemas.ts — LOTM 枚举",
-      "done": true,
-      "created": 1782463032
+      "content": "Fix remaining Fate refs in engine/core (state-file-projection, scene-beat-lifecycle.test)",
+      "done": false,
+      "created": 1782500199
     },
     {
       "id": 3,
-      "content": "M1: state.ts — LOTM GameState 类型树",
-      "done": true,
-      "created": 1782463032
+      "content": "Create LOTM domain module schemas",
+      "done": false,
+      "created": 1782500199
     },
     {
       "id": 4,
-      "content": "M1: state-schema.ts — TypeBox schema",
-      "done": true,
-      "created": 1782463032
+      "content": "Create tests for new LOTM modules",
+      "done": false,
+      "created": 1782500199
     },
     {
       "id": 5,
-      "content": "M1: state-migration.ts — v1 起步",
-      "done": true,
-      "created": 1782463032
+      "content": "Update tools/registry.ts for new tools",
+      "done": false,
+      "created": 1782500199
     },
     {
       "id": 6,
-      "content": "M1: state-store.ts — 初始 state + protected paths",
-      "done": true,
-      "created": 1782463032
+      "content": "Fix data files + lookup + prompts (M4-M5)",
+      "done": false,
+      "created": 1782500199
     },
     {
       "id": 7,
-      "content": "M1: date-time.ts — LOTM 历法",
-      "done": true,
-      "created": 1782463032
-    },
-    {
-      "id": 8,
-      "content": "M1: new-game-initialization.ts + new-game-schema.ts",
-      "done": true,
-      "created": 1782463032
-    },
-    {
-      "id": 9,
-      "content": "M1: 删除 Fate 域模块 (servant, fate-rank, combat-exchange)",
-      "done": true,
-      "created": 1782463032
-    },
-    {
-      "id": 10,
-      "content": "M1: 创建 LOTM 域模块 (pathway, judgment, combat, status-effect, attribute-calculator, damage-calculator)",
-      "done": true,
-      "created": 1782463032
-    },
-    {
-      "id": 11,
-      "content": "M1: 更新依赖模块 (actor, economy, memory, secret, scene, campaign, offscreen, faction-clock, actor-condition, turn-commit, etc.)",
-      "done": true,
-      "created": 1782463032
-    },
-    {
-      "id": 12,
-      "content": "M1: pnpm typecheck 通过",
-      "done": true,
-      "created": 1782463032
-    },
-    {
-      "id": 13,
-      "content": "M2-M7: 后续里程碑",
+      "content": "Fix remaining test files, all 4 checks pass (M7)",
       "done": false,
-      "created": 1782463032
+      "created": 1782500199
     }
   ]
 }

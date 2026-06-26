@@ -15,7 +15,7 @@ void test("initializeNewGameTool initializes human protagonist and persists deta
       campaign: { presetId: "tingen-1349" },
       protagonist: {
         internalName: "你",
-        publicIdentity: "不了解魔术的本地学生",
+        publicIdentity: "不了解非凡世界的本地学生",
         background: "普通日常被异常打断。",
         apparentAge: "高中生",
         outfit: { label: "日常服装", details: "便于行动的普通衣物。" },

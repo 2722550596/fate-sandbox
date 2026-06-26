@@ -17,7 +17,7 @@ import { setScenePresenceTool } from "./set-scene-presence.ts";
 import { updateActorConditionTool } from "./update-actor-condition.ts";
 import { updateEconomyTool } from "./update-economy.ts";
 
-describe("Fate state tool-level smoke flow", () => {
+describe("LOTM state tool-level smoke flow", () => {
   it("persists state details that can hydrate a later session", () => {
     resetState();
     const sessionManager = createMockSessionManager();
@@ -27,9 +27,9 @@ describe("Fate state tool-level smoke flow", () => {
         time: {
           kind: "travel",
           location: {
-            region: "冬木市",
-            site: "新都",
-            detail: "駅前商店街",
+            region: "鲁恩王国",
+            site: "廷根",
+            detail: "霍尔广场",
             boundary: "normal",
             coordinates: null,
           },
@@ -46,8 +46,8 @@ describe("Fate state tool-level smoke flow", () => {
       {
         kind: "spend-money",
         purseId: "purse-protagonist-cash",
-        amount: 1200,
-        reason: "smoke test buys food during the move",
+        amount: 5,
+        reason: "smoke test buys bread during the move",
       },
       sessionManager,
     );
@@ -75,9 +75,9 @@ describe("Fate state tool-level smoke flow", () => {
     assert.equal(hydrateStateFromSessionEntries(sessionManager.entries), true);
     const hydrated = cloneState();
 
-    assert.equal(hydrated.public.scene.location.site, "新都");
-    assert.equal(hydrated.public.scene.location.detail, "駅前商店街");
-    assert.equal(hydrated.public.economy.accessibleFunds[0]?.amount, 48800);
+    assert.equal(hydrated.public.scene.location.site, "廷根");
+    assert.equal(hydrated.public.scene.location.detail, "霍尔广场");
+    assert.equal(hydrated.public.economy.accessibleFunds[0]?.amount, 19);
     assert.equal(hydrated.public.actors.protagonist?.condition.statusEffects[0]?.name, "擦伤");
     assert.deepEqual(hydrated.public, beforeHydration.public);
   });
@@ -90,19 +90,19 @@ describe("Fate state tool-level smoke flow", () => {
       {
         kind: "ensure-public-npc",
         npc: {
-          actorId: "tohsaka-rin",
-          internalName: "远坂凛",
-          publicIdentity: "穗群原学园学生，当前与士郎同行调查的魔术师。",
+          actorId: "kohl-staff",
+          internalName: "科霍尔",
+          publicIdentity: "廷根大学图书馆管理员。",
         },
         reason: "tool smoke test ensures a known NPC skeleton",
       },
       sessionManager,
     );
 
-    assert.match(textOf(result), /public npc skeleton 已写入：tohsaka-rin/);
+    assert.match(textOf(result), /public npc skeleton 已写入：kohl-staff/);
     const state = cloneState();
-    assert.equal(state.public.actors["tohsaka-rin"]?.presentation.internalName, "远坂凛");
-    assert.equal(state.public.scene.presentActorIds.includes("tohsaka-rin"), false);
+    assert.equal(state.public.actors["kohl-staff"]?.presentation.internalName, "科霍尔");
+    assert.equal(state.public.scene.presentActorIds.includes("kohl-staff"), false);
     assert.equal(sessionManager.entries.length, 1);
   });
 
@@ -114,7 +114,7 @@ describe("Fate state tool-level smoke flow", () => {
       {
         kind: "upsert-sequence",
         sequence: {
-          actorId: "caster",
+          actorId: "mysterious_beyonder",
           currentSequence: "序列7-魔术师",
           rank: "seq-7",
           pathway: "seer",
@@ -128,15 +128,15 @@ describe("Fate state tool-level smoke flow", () => {
       sessionManager,
     );
 
-    assert.match(textOf(result), /序列已更新：caster/);
+    assert.match(textOf(result), /序列已更新：mysterious_beyonder/);
     const presenceResult = setScenePresenceTool(
-      { presentActorIds: ["protagonist", "caster"], allyActorIds: [], reason: "Caster enters scene" },
+      { presentActorIds: ["protagonist", "mysterious_beyonder"], allyActorIds: [], reason: "beyonder enters scene" },
       sessionManager,
     );
     assert.match(textOf(presenceResult), /场景在场 actor 已更新/);
     const state = cloneState();
-    assert.equal(state.public.actors["caster"]?.sequence?.currentSequence, "序列7-魔术师");
-    assert.deepEqual(state.public.scene.presentActorIds, ["protagonist", "caster"]);
+    assert.equal(state.public.actors["mysterious_beyonder"]?.sequence?.currentSequence, "序列7-魔术师");
+    assert.deepEqual(state.public.scene.presentActorIds, ["protagonist", "mysterious_beyonder"]);
     assert.equal(sessionManager.entries.length, 2);
   });
 
@@ -151,8 +151,8 @@ describe("Fate state tool-level smoke flow", () => {
             event: {
               kind: "set-location",
               location: {
-                region: "斯诺菲尔德",
-                site: "旧分支",
+                region: "鲁恩王国",
+                site: "廷根",
                 detail: "不该被 branch_summary 恢复",
                 boundary: "normal",
                 coordinates: null,
@@ -173,11 +173,11 @@ describe("Fate state tool-level smoke flow", () => {
 
     assert.equal(hydrateStateFromSessionEntries([targetEntry, staleSummary]), true);
     const state = cloneState();
-    assert.equal(state.public.scene.location.region, "冬木市");
-    assert.equal(state.public.scene.location.site, "深山镇");
+    assert.equal(state.public.scene.location.region, "鲁恩王国");
+    assert.equal(state.public.scene.location.site, "廷根");
   });
 
-  it("resets in-memory state when the current branch has no Fate state", () => {
+  it("resets in-memory state when the current branch has no LOTM state", () => {
     resetState();
     commitTurnTool(
       {
@@ -188,8 +188,8 @@ describe("Fate state tool-level smoke flow", () => {
             event: {
               kind: "set-location",
               location: {
-                region: "斯诺菲尔德",
-                site: "歌剧院",
+                region: "鲁恩王国",
+                site: "廷根",
                 detail: "回滚前旧地点",
                 boundary: "normal",
                 coordinates: null,
@@ -203,8 +203,8 @@ describe("Fate state tool-level smoke flow", () => {
     );
 
     assert.equal(syncStateFromSessionEntries([]), false);
-    assert.equal(cloneState().public.scene.location.region, "冬木市");
-    assert.equal(cloneState().public.scene.location.site, "深山镇");
+    assert.equal(cloneState().public.scene.location.region, "鲁恩王国");
+    assert.equal(cloneState().public.scene.location.site, "廷根");
   });
 
   it("get_status rehydrates from the active session branch before reading state", () => {
@@ -219,8 +219,8 @@ describe("Fate state tool-level smoke flow", () => {
             event: {
               kind: "set-location",
               location: {
-                region: "斯诺菲尔德",
-                site: "歌剧院",
+                region: "鲁恩王国",
+                site: "廷根",
                 detail: "回滚前旧地点",
                 boundary: "normal",
                 coordinates: null,
@@ -242,9 +242,9 @@ describe("Fate state tool-level smoke flow", () => {
             event: {
               kind: "set-location",
               location: {
-                region: "冬木市",
-                site: "冬木教会",
-                detail: "礼拜堂",
+                region: "鲁恩王国",
+                site: "廷根",
+                detail: "廷根大学",
                 boundary: "normal",
                 coordinates: null,
               },
@@ -264,8 +264,8 @@ describe("Fate state tool-level smoke flow", () => {
             event: {
               kind: "set-location",
               location: {
-                region: "斯诺菲尔德",
-                site: "住宅区",
+                region: "鲁恩王国",
+                site: "廷根",
                 detail: "错误残留内存",
                 boundary: "normal",
                 coordinates: null,
@@ -281,7 +281,7 @@ describe("Fate state tool-level smoke flow", () => {
     assert.equal(syncStateFromSessionManager(sessionManager), true);
     const result = getStatusTool(sessionManager);
 
-    assert.match(textOf(result), /冬木市 · 冬木教会 · 礼拜堂/);
+    assert.match(textOf(result), /鲁恩王国 · 廷根 · 廷根大学/);
     assert.doesNotMatch(textOf(result), /错误残留内存/);
   });
 });
@@ -322,7 +322,7 @@ function createBranchSummaryEntry(id: string, details: unknown): BranchSummaryEn
     type: "branch_summary",
     id,
     parentId: null,
-    timestamp: "2004-01-30T07:00:00.000Z",
+    timestamp: "1349-01-01T07:00:00.000Z",
     fromId: "old-leaf",
     summary: "旧分支摘要",
     details,
@@ -338,7 +338,7 @@ function createCustomEntry(
     type: "custom",
     id,
     parentId: null,
-    timestamp: "2004-01-30T07:00:00.000Z",
+    timestamp: "1349-01-01T07:00:00.000Z",
     customType,
     data,
   };

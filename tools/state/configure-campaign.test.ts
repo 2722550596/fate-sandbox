@@ -4,40 +4,39 @@ import test from "node:test";
 import { exportState, resetState } from "../../engine/core/state-store.ts";
 import { configureCampaignTool } from "./configure-campaign.ts";
 
-void test("configureCampaignTool updates campaign and timezone", () => {
+void test("configureCampaignTool applies LOTM Tingen preset", () => {
   resetState();
 
   const result = configureCampaignTool(
     {
-      presetId: "fsf_2008_snowfield",
-      currentAt: "2008-06-03T03:28:00.000Z",
-      premise: "2008 年斯诺菲尔德，绫香·沙条召唤到的 Saber 是两仪式。",
-      reason: "当前游戏已确定为 FSF 斯诺菲尔德替换 Saber 线。",
+      presetId: "tingen_1349",
+      currentAt: "1349-01-01T07:00:00.000Z",
+      premise: "第五纪1349年，廷根市，玩家角色刚刚成为一名非凡者。",
+      reason: "新游戏初始化廷根线。",
     },
     createNoopSessionManager(),
   );
 
   assert.match(result.content[0]?.text ?? "", /Campaign 已配置/);
   const state = exportState();
-  assert.equal(state.public.campaign.timeline, "fsf");
+  assert.equal(state.public.campaign.timeline, "tingen");
   assert.equal(state.public.clock.timezone, "UTC");
-  assert.equal(state.public.clock.displayTime, "2008年06月02日 星期一 21:28");
 });
 
-void test("configureCampaignTool normalizes Moon Cell currency aliases", () => {
+void test("configureCampaignTool normalizes currency aliases", () => {
   resetState();
 
   configureCampaignTool(
     {
-      presetId: "extra_ccc_2032_far_side",
-      title: "月之海的残响",
-      currency: "PPT",
-      reason: "测试 Moon Cell 货币别名归一化。",
+      presetId: "backlund_1350",
+      title: "贝克兰德的阴影",
+      currency: "gold-pound",
+      reason: "测试货币别名归一化。",
     },
     createNoopSessionManager(),
   );
 
-  assert.equal(exportState().public.economy.currency, "custom");
+  assert.equal(exportState().public.economy.currency, "gold-pound");
 });
 
 void test("configureCampaignTool rejects unknown timeline with allowed values in Chinese", () => {
@@ -46,15 +45,14 @@ void test("configureCampaignTool rejects unknown timeline with allowed values in
   assert.throws(
     () =>
       configureCampaignTool(
-        { presetId: "fsn_2004_fuyuki", timeline: "fgo", reason: "测试非法时间线。" },
+        { presetId: "tingen_1349", timeline: "fgo", reason: "测试非法时间线。" },
         createNoopSessionManager(),
       ),
     (error: unknown) => {
       const message = String(error);
       return (
         message.includes("timeline") &&
-        message.includes("必须是允许值之一") &&
-        message.includes("fsf")
+        message.includes("必须是允许值之一")
       );
     },
   );
@@ -64,7 +62,7 @@ void test("configureCampaignTool rejects missing reason with required-field erro
   resetState();
 
   assert.throws(
-    () => configureCampaignTool({ presetId: "fsn_2004_fuyuki" }, createNoopSessionManager()),
+    () => configureCampaignTool({ presetId: "tingen_1349" }, createNoopSessionManager()),
     (error: unknown) => String(error).includes("缺少必填字段") && String(error).includes("reason"),
   );
 });
@@ -74,17 +72,17 @@ void test("configureCampaignTool converts numeric strings and trims whitespace i
 
   configureCampaignTool(
     {
-      presetId: "fsn_2004_fuyuki",
-      startingFunds: "80000",
-      currency: "  PPT  ",
+      presetId: "tingen_1349",
+      startingFunds: "800",
+      currency: "  penny  ",
       reason: "  测试 Convert coercion 与 trim。  ",
     },
     createNoopSessionManager(),
   );
 
   const state = exportState();
-  assert.equal(state.public.economy.accessibleFunds[0]?.amount, 80000);
-  assert.equal(state.public.economy.currency, "custom");
+  assert.equal(state.public.economy.accessibleFunds[0]?.amount, 800);
+  assert.equal(state.public.economy.currency, "penny");
 });
 
 function createNoopSessionManager(): unknown {
