@@ -1,0 +1,91 @@
+[
+  {
+    "name": "全知权柄",
+    "description": "对万事万物「全知」（受部分高位象征影响）也「全能」，能完美模仿甚至优化任何一种不涉及「权柄」和「象征」的能力。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "all",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "全知碾压",
+        "type": "poison",
+        "stat": "当前理智",
+        "valueType": "fixed",
+        "power": {
+          "0": 8400,
+          "-2": 35000,
+          "-1": 21000,
+          "default": 8400
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "灾祸权柄",
+    "description": "具现化特定危险知识，能给予他人「疯狂」和「毁灭」。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "single",
+    "power": {
+      "0": 44400,
+      "-2": 185000,
+      "-1": 111000,
+      "default": 44400
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "灾祸侵蚀",
+        "type": "poison",
+        "stat": "当前人性",
+        "valueType": "fixed",
+        "power": {
+          "0": 16200,
+          "-2": 67500,
+          "-1": 40500,
+          "default": 16200
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "创造权柄",
+    "description": "只要不涉及不属于自己的象征和权柄，即可创造任何事物。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "星界阶梯权柄",
+    "description": "能在一定程度上影响星界汇聚的概念，象征知识一层层通向宇宙最本质的源头与危险。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "智慧权柄",
+    "description": "全知带来的终极智慧，能给出最具智慧的指引，做出最具智慧的选择。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "规律、学习与解析权柄",
+    "description": "彻底知晓、掌握并完美利用万物规律。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "神国",
+    "description": "被称为全知之塔/疯狂之塔。",
+    "type": "神之权柄"
+  }
+]

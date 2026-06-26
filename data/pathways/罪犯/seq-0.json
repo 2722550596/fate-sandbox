@@ -1,0 +1,99 @@
+[
+  {
+    "name": "部分堕落权柄",
+    "description": "制造让身处其中者必然堕落的环境，从深层自性上诱发并强制制造堕落。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "all",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "cost": {
+      "type": "currentHumanity",
+      "amount": 16200
+    },
+    "effects": [
+      {
+        "name": "堕落-理智削弱",
+        "type": "debuff",
+        "stat": "理智",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 5
+      },
+      {
+        "name": "堕落-人性削弱",
+        "type": "debuff",
+        "stat": "人性",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "部分污秽与部分污染权柄",
+    "description": "一切不洁事物的终极具现，带来身心精神污染与理智失控的必然结局。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "single",
+    "power": {
+      "0": 44400,
+      "-2": 185000,
+      "-1": 111000,
+      "default": 44400
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "污秽污染",
+        "type": "poison",
+        "stat": "当前理智",
+        "valueType": "fixed",
+        "power": {
+          "0": 16800,
+          "-2": 70000,
+          "-1": 42000,
+          "default": 16800
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "部分欲望与部分诅咒权柄",
+    "description": "诱发、催化与引爆欲望；掌控专注作用于精神和心灵领域的深渊诅咒。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "部分异类权柄",
+    "description": "向下制造出因个体和环境体现异变的恶魔，自己也拥有这些异变。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "下位权柄",
+    "description": "包含万物腐蚀的「腐蚀」权柄；掌控恶意的「恶意」权柄；掌握毒素的「毒素」权柄；掌控身体变化的「身体」权柄；掌握堕落、污染、毒素与腐蚀之火的「火焰」权柄。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "神国",
+    "description": "心灵渊海。本质上即是「深渊」，展现出不可名状且具备心之深渊象征的专属领域。",
+    "type": "神之权柄"
+  }
+]

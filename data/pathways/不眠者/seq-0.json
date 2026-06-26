@@ -1,0 +1,94 @@
+[
+  {
+    "name": "隐秘权柄（完整）",
+    "description": "可隐藏各方面痕迹、误导窥探占卜，能将事物变为「隐秘」或解除隐秘，直观掌握诸多隐秘；可将隐秘之地化为隐秘神国或封印之地",
+    "type": "神之权柄"
+  },
+  {
+    "name": "黑暗权柄（完整）",
+    "description": "可让目标入梦、安宁或永眠，能使目标被黑暗消融；因黑暗是宇宙基本象征，掌握此权柄者在黑暗中不死，可借助黑暗复活",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "all",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "黑暗消融",
+        "type": "poison",
+        "stat": "当前活力",
+        "valueType": "fixed",
+        "power": {
+          "0": 5550,
+          "-2": 23125,
+          "-1": 13875,
+          "default": 5550
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "恐惧权柄（完整）",
+    "description": "恐惧情绪的具现，与欲望母树权柄有交叉重合",
+    "type": "神之权柄",
+    "damageType": "mental",
+    "targetType": "all",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "cost": {
+      "type": "currentSanity",
+      "amount": 16800
+    },
+    "effects": [
+      {
+        "name": "恐惧具现-理智",
+        "type": "debuff",
+        "stat": "理智",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 5
+      },
+      {
+        "name": "恐惧具现-攻击",
+        "type": "debuff",
+        "stat": "attack",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "灵体灵性权柄（完整）",
+    "description": "灵体的归处与主宰，与伟大母亲、死神权柄有交叉重合",
+    "type": "神之权柄"
+  },
+  {
+    "name": "厄运和灾难权柄（完整）",
+    "description": "因厄运引发灾难，与魔女、猎人途径的灾难权柄及命运途径有交叉重合",
+    "type": "神之权柄"
+  }
+]

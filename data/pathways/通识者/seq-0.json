@@ -1,0 +1,104 @@
+[
+  {
+    "name": "现实知识权柄",
+    "description": "掌握且能修改现实世界已发现的全部知识（大陆层面立刻生效）。可剥夺目标的知识，或让知识变成潜伏的污染者。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "single",
+    "power": {
+      "0": 44400,
+      "-2": 185000,
+      "-1": 111000,
+      "default": 44400
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "知识污染",
+        "type": "poison",
+        "stat": "当前理智",
+        "valueType": "fixed",
+        "power": {
+          "0": 16800,
+          "-2": 70000,
+          "-1": 42000,
+          "default": 16800
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "教化权柄",
+    "description": "给予他人知识的权柄，极度强调启蒙、引导、考验和体系化。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "文明权柄",
+    "description": "掌控文明的兴衰与重量。可指定族群、国家或星球永远野蛮蒙昧，或使其快速迭代进化。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "规律权柄",
+    "description": "掌握偏现实部分的规律，通过修改世界运转规则使其更有利于自身。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "all",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "规律改写-防御",
+        "type": "debuff",
+        "stat": "defense",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 5
+      },
+      {
+        "name": "规律改写-速度",
+        "type": "debuff",
+        "stat": "speed",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "灵界导师权柄",
+    "description": "掌控灵界的信息汇聚规律，与「隐者」共享的权柄。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "学习、制造和解析权柄",
+    "description": "「学习」权柄让自身一学就会/他人学不会；「制造」权柄能组合出奇迹超凡之物；「解析」权柄能瞬间看透事物本质。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "神国",
+    "description": "被称为「机械天堂」或「文明墓园」、「完美之地」。",
+    "type": "神之权柄"
+  }
+]

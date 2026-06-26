@@ -1,0 +1,81 @@
+[
+  {
+    "name": "死亡权柄（完整）",
+    "description": "死亡上升到概念领域，生命、记忆、联系、存在烙印均可「死亡」，非凡特性也会短暂死亡",
+    "type": "神之权柄",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "damageType": "mystical",
+    "targetType": "all",
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "概念死亡",
+        "type": "poison",
+        "stat": "当前活力",
+        "valueType": "fixed",
+        "power": {
+          "0": 11100,
+          "-2": 46250,
+          "-1": 27750,
+          "default": 11100
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "苍白权柄（完整）",
+    "description": "凋零的极致，使精神、意志、非凡能力在苍白中平静、死寂",
+    "type": "神之权柄",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "damageType": "mystical",
+    "targetType": "all",
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "极致凋零",
+        "type": "debuff",
+        "stat": "灵性",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "奴役权柄（完整）",
+    "description": "万物的奴役者，对所有存在具备绝对奴役权",
+    "type": "神之权柄"
+  },
+  {
+    "name": "亡灵权柄（完整）",
+    "description": "亡灵存在的根源与主宰，掌控所有亡灵",
+    "type": "神之权柄"
+  },
+  {
+    "name": "终点权柄（完整）",
+    "type": "神之权柄",
+    "description": "所有生命的共同归宿，依托「门」途径能力衍生冥界"
+  }
+]

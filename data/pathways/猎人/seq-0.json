@@ -1,0 +1,94 @@
+[
+  {
+    "name": "神国",
+    "description": "征服一片地域作为领土，侵入者若无庇护将直接被奴役为士兵。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "战争权柄",
+    "description": "在星球内，通过注视即可引发战争和决定战争形态，可将力量共享给成员。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "征服权柄",
+    "description": "概念级的征服，可强行统御无机物、地理环境乃至抽象法则。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "all",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "征服权柄-攻击削弱",
+        "type": "debuff",
+        "stat": "attack",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 5
+      },
+      {
+        "name": "征服权柄-防御削弱",
+        "type": "debuff",
+        "stat": "defense",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "name": "毁灭权柄",
+    "description": "锁定并毁灭任何存在，上至星球下至真神，且被杀者基本无法复活。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "single",
+    "power": {
+      "0": 44400,
+      "-2": 185000,
+      "-1": 111000,
+      "default": 44400
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    }
+  },
+  {
+    "name": "祭祀权柄",
+    "description": "向源质祈求力量投影并降临（有污染风险），并能干扰星系内所有祭祀活动。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "男性权柄",
+    "description": "自身即为男性象征，掌握阳刚与繁衍之源，可强行转变万物性别为男性。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "魅力权柄",
+    "description": "极致的领袖魅力，是世间最有魅力的雄性。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "下位权柄",
+    "description": "包含掌控焚烧一切无形之火的「火焰」、主宰一切灾祸的「灾害」、永不畏惧的「勇气」权柄。",
+    "type": "神之权柄"
+  }
+]

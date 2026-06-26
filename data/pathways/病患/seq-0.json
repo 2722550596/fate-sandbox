@@ -1,0 +1,34 @@
+[
+  {
+    "name": "熵增权柄（完整）",
+    "description": "掌控「万物终朽」的核心权柄，遵循熵增定律，宇宙熵只会增加且不可逆转，视宇宙最终会因「疾病」腐烂死亡为必然结局",
+    "type": "神之权柄",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "damageType": "mystical",
+    "targetType": "all",
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "万物终朽",
+        "type": "poison",
+        "stat": "当前活力",
+        "valueType": "fixed",
+        "power": {
+          "0": 5550,
+          "-2": 23125,
+          "-1": 13875,
+          "default": 5550
+        },
+        "duration": 5
+      }
+    ]
+  }
+]

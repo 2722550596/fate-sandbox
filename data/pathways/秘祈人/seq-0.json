@@ -1,0 +1,109 @@
+[
+  {
+    "name": "真神形态-倒吊人",
+    "description": "执掌堕落领域的真神，为黑色阴影与蠕动血肉的集合体，有五个脑袋及对应影子；蕴含「承罪」「牺牲」概念与部分象征",
+    "type": "被动特性"
+  },
+  {
+    "name": "阴影之主权柄",
+    "description": "阴影世界的主宰，掌控阴影领域相关规则",
+    "type": "神之权柄"
+  },
+  {
+    "name": "暗之权柄",
+    "description": "偏向包容吞噬一切与堕落人心的黑暗，区别于黑夜女神的黑暗",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "all",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "cost": {
+      "type": "currentHumanity",
+      "amount": 16200
+    },
+    "effects": [
+      {
+        "name": "堕落人心",
+        "type": "poison",
+        "stat": "当前人性",
+        "valueType": "fixed",
+        "power": {
+          "0": 5550,
+          "-2": 337500,
+          "-1": 202500,
+          "default": 5550
+        },
+        "duration": 3
+      }
+    ]
+  },
+  {
+    "name": "堕落自性权柄",
+    "type": "神之权柄",
+    "description": "可使每个生灵的堕落自性具现",
+    "damageType": "mystical",
+    "targetType": "single",
+    "power": {
+      "0": 44400,
+      "-2": 185000,
+      "-1": 111000,
+      "default": 44400
+    },
+    "cost": {
+      "type": "currentHumanity",
+      "amount": 16200
+    },
+    "effects": [
+      {
+        "name": "堕落自性具现-防御",
+        "type": "debuff",
+        "stat": "defense",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 3
+      },
+      {
+        "name": "堕落自性具现-攻击",
+        "type": "debuff",
+        "stat": "attack",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 3
+      }
+    ]
+  },
+  {
+    "name": "污秽化身权柄",
+    "description": "自身被「混沌海」污染且能污染万物，与「暗」「堕落自性」结合可外显「混沌海」少许影响",
+    "type": "神之权柄"
+  },
+  {
+    "name": "异变权柄",
+    "description": "神力可在黑暗中凭空制造怪物，具备复活特殊性（血肉不灭质变）；可在一定程度上影响万事万物的变化，与「愚者」途径有部分交叉",
+    "type": "神之权柄"
+  },
+  {
+    "name": "替罪权柄",
+    "description": "可代替目标承受伤害与死亡；能让敌人主要攻击目标转向自身",
+    "type": "神之权柄"
+  },
+  {
+    "name": "倒吊人象征能力",
+    "description": "可通过牺牲自我换取确凿的希望",
+    "type": "神之权柄"
+  }
+]

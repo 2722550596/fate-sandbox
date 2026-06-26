@@ -1,0 +1,66 @@
+[
+  {
+    "name": "真理",
+    "description": "「见则花开灿烂，不见则花与心同寂」。拥有全知视野，其权柄决定存在的定义。被看见的事物才被允许存在，移开视线则事物归于虚无（彻底抹除）。",
+    "type": "神之权柄",
+    "power": {
+      "0": 44400,
+      "-2": 185000,
+      "-1": 111000,
+      "default": 44400
+    },
+    "damageType": "mystical",
+    "targetType": "single",
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "存在抹除",
+        "type": "poison",
+        "stat": "当前活力",
+        "valueType": "fixed",
+        "power": {
+          "0": 11100,
+          "-2": 46250,
+          "-1": 27750,
+          "default": 11100
+        },
+        "duration": 3
+      }
+    ]
+  },
+  {
+    "name": "维度与幻想",
+    "description": "全面掌控维度的所有规则，是一切幻想的源头，可创造无数画中世界，具备支配维度与幻想的至高权柄",
+    "type": "神之权柄",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "damageType": "mystical",
+    "targetType": "all",
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "维度压制",
+        "type": "debuff",
+        "stat": "defense",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 4
+      }
+    ]
+  }
+]

@@ -1,0 +1,76 @@
+[
+  {
+    "name": "「黄昏」权柄",
+    "description": "由「光」、「时空」与「衰败」衍生。能让物质、意志与虚空衰败消亡；仅存在本身就能弯折虚空引发万物衰败；能凝固黄昏、放缓时间流速；能使目标飞快衰败老死并克制复活；引发失控与虚弱，放缓「门」的开启。",
+    "type": "神之权柄",
+    "damageType": "physical",
+    "targetType": "all",
+    "power": {
+      "0": 33300,
+      "-2": 138750,
+      "-1": 83250,
+      "default": 33300
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 27000
+    },
+    "effects": [
+      {
+        "name": "衰败消亡",
+        "type": "poison",
+        "stat": "当前活力",
+        "valueType": "fixed",
+        "power": {
+          "0": 11100,
+          "-2": 46250,
+          "-1": 27750,
+          "default": 11100
+        },
+        "duration": 4
+      }
+    ]
+  },
+  {
+    "name": "「神圣」权柄",
+    "description": "执掌生命消亡的最终神圣，擅长净化，能精准分辨邪恶和堕落。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "「战斗」权柄",
+    "description": "统御「力量」、「巨大」、「摧毁」、「守护」与「技巧」。拥有最恐怖的力量与防御，且能剥夺对手的「技巧」，使对方只能凭本能战斗。",
+    "type": "神之权柄",
+    "damageType": "physical",
+    "targetType": "single",
+    "power": {
+      "0": 55500,
+      "-2": 231250,
+      "-1": 138750,
+      "default": 55500
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 27000
+    },
+    "effects": [
+      {
+        "name": "剥夺技巧",
+        "type": "debuff",
+        "stat": "defense",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 3
+      }
+    ]
+  },
+  {
+    "name": "「代行」权柄",
+    "description": "源质「永暗之河」中「奴役」象征的体现，能够略微调动与利用永暗之河的力量。",
+    "type": "神之权柄"
+  }
+]

@@ -1,0 +1,81 @@
+[
+  {
+    "name": "愚弄权柄",
+    "description": "又称「盲目痴愚」、「弄假成真」，可降低敌人智商、愚弄时间使能力滞后、愚弄历史使自身分割，回溯完美状态。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "single",
+    "power": {
+      "0": 44400,
+      "-2": 185000,
+      "-1": 111000,
+      "default": 44400
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    },
+    "effects": [
+      {
+        "name": "愚弄",
+        "type": "debuff",
+        "stat": "理智",
+        "valueType": "percentage",
+        "power": {
+          "0": 25,
+          "-2": 30,
+          "-1": 30,
+          "default": 25
+        },
+        "duration": 3
+      }
+    ]
+  },
+  {
+    "name": "嫁接权柄",
+    "description": "象征「诡异」和「变化」，将互不关联的概念甚至权柄重新组合，达成不可思议的真实效果。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "灵界掌控者",
+    "description": "掌握大部分灵界权柄，是灵体之线的至高主宰。",
+    "type": "非凡能力"
+  },
+  {
+    "name": "奇迹权柄",
+    "description": "具现化「不可思议」象征，引发无法解释的神迹。",
+    "type": "神之权柄",
+    "damageType": "mystical",
+    "targetType": "all",
+    "power": {
+      "0": 22200,
+      "-2": 92500,
+      "-1": 55500,
+      "default": 22200
+    },
+    "cost": {
+      "type": "currentSpirit",
+      "amount": 25800
+    }
+  },
+  {
+    "name": "历史权柄",
+    "description": "观测万物历史，并在过去无法改变的前提下，玩弄并利用历史。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "变形权柄",
+    "description": "变化象征的终极体现，可随意定义自身与万物的形态。",
+    "type": "神之权柄"
+  },
+  {
+    "name": "命运锚点",
+    "description": "所言即未来，虽表现方式可能扭曲，但定会成为命运节点。",
+    "type": "非凡能力"
+  },
+  {
+    "name": "诡秘之境",
+    "description": "神国，自带隐秘与不可理解特质的诡异领域。",
+    "type": "神之权柄"
+  }
+]

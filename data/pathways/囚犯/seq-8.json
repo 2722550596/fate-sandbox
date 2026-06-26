@@ -1,0 +1,58 @@
+[
+  {
+    "name": "爆发欲望以强化",
+    "description": "主动牺牲理智爆发欲望，以此换取所有方面力量的提高，并获得对干扰思绪、影响精神类非凡能力的强大抵抗力，期间头脑不清醒。",
+    "type": "非凡能力",
+    "damageType": "physical",
+    "targetType": "single",
+    "power": {
+      "0": 44400,
+      "1": 11100,
+      "2": 4440,
+      "3": 1480,
+      "4": 555,
+      "5": 222,
+      "6": 92,
+      "7": 37,
+      "8": 17,
+      "-2": 185000,
+      "-1": 111000,
+      "0.1": 33300,
+      "0.3": 22200,
+      "0.4": 20350,
+      "0.5": 18500,
+      "0.8": 14800,
+      "0.9": 12950,
+      "default": 17
+    },
+    "cost": {
+      "type": "currentSanity",
+      "amount": 15
+    },
+    "effects": [
+      {
+        "name": "欲望强化攻击",
+        "type": "buff",
+        "stat": "attack",
+        "valueType": "percentage",
+        "power": 5,
+        "duration": 3,
+        "effectTarget": "self"
+      },
+      {
+        "name": "欲望强化防御",
+        "type": "buff",
+        "stat": "defense",
+        "valueType": "percentage",
+        "power": 5,
+        "duration": 3,
+        "effectTarget": "self"
+      }
+    ]
+  },
+  {
+    "name": "失控诅咒",
+    "description": "频繁爆发欲望会导致精神经常处于低谷，比大部分超凡者更容易失控。",
+    "type": "被动特性"
+  }
+]
