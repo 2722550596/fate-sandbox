@@ -1,11 +1,11 @@
-import type { MemoryEvent, MemoryEventResult } from "../../core/memory/memory.ts";
+import type { MemoryEvent, MemoryEventResult } from "../../core/knowledge/memory.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { parseMemoryEvent } from "../../core/memory/memory-schema.ts";
-import { recordMemory } from "../../core/memory/memory.ts";
+import { parseMemoryEvent } from "../../core/knowledge/memory-schema.ts";
+import { recordMemory } from "../../core/knowledge/memory.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 

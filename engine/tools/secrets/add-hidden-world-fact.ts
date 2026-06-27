@@ -3,8 +3,8 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { parseAddHiddenWorldFactInput } from "../../core/secrets/secrets-schema.ts";
-import { configureHiddenWorldFact } from "../../core/secrets/secrets.ts";
+import { parseAddHiddenWorldFactInput } from "../../core/knowledge/secrets-schema.ts";
+import { configureHiddenWorldFact } from "../../core/knowledge/secrets.ts";
 import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 export function addHiddenWorldFactTool(params: unknown, sessionManager: unknown): ToolResult {

@@ -1,10 +1,10 @@
 import type { ScenePresenceInput } from "../../core/actor/actor.ts";
-import type { MemoryEvent } from "../../core/memory/memory.ts";
+import type { MemoryEvent } from "../../core/knowledge/memory.ts";
 import type { TurnCommitEvent, TurnCommitInput } from "../../core/state/turn-commit.ts";
 
 import { parseSequenceInput } from "../../core/actor/actor-schema.ts";
 import { parseEconomyEvent } from "../../core/economy/economy-schema.ts";
-import { parseMemoryEvent } from "../../core/memory/memory-schema.ts";
+import { parseMemoryEvent } from "../../core/knowledge/memory-schema.ts";
 import { parseSceneEvent } from "../../core/scene/scene-schema.ts";
 import { parseTurnTimePolicySchema } from "../../core/state/turn-time-schema.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";

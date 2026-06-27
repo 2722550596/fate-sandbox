@@ -1,5 +1,5 @@
 {
-  "nextId": 19,
+  "nextId": 25,
   "items": [
     {
       "id": 1,
@@ -77,6 +77,42 @@
       "done": false,
       "created": 1782548339,
       "tag": "refactor"
+    },
+    {
+      "id": 19,
+      "content": "Create engine/core/knowledge/ directory and move all files",
+      "done": true,
+      "created": 1782592397
+    },
+    {
+      "id": 20,
+      "content": "Update secrets.ts internal import (../memory/memory.ts → ./memory.ts)",
+      "done": true,
+      "created": 1782592397
+    },
+    {
+      "id": 21,
+      "content": "Update 4 engine/core/ files importing from memory/ or secrets/",
+      "done": true,
+      "created": 1782592397
+    },
+    {
+      "id": 22,
+      "content": "Update 5 engine/tools/ files importing from core/memory/ or core/secrets/",
+      "done": true,
+      "created": 1782592397
+    },
+    {
+      "id": 23,
+      "content": "Remove empty old directories engine/core/secrets/ and engine/core/memory/",
+      "done": true,
+      "created": 1782592397
+    },
+    {
+      "id": 24,
+      "content": "Run typecheck && lint && format:check && test",
+      "done": true,
+      "created": 1782592397
     }
   ]
 }

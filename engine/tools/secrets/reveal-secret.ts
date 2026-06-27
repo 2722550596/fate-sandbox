@@ -3,19 +3,19 @@ import type {
   ConfigureSequenceSecretsResult,
   RevealSecretResult,
   RevealSecretToolInput,
-} from "../../core/secrets/secrets.ts";
+} from "../../core/knowledge/secrets.ts";
 import type { State } from "../../core/state/state.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { parseRevealSecretToolInput } from "../../core/secrets/secrets-schema.ts";
+import { parseRevealSecretToolInput } from "../../core/knowledge/secrets-schema.ts";
 import {
   configureActorSecrets,
   configureSequenceSecrets,
   revealSecret,
-} from "../../core/secrets/secrets.ts";
+} from "../../core/knowledge/secrets.ts";
 import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 type RevealSecretToolResult =

@@ -1,5 +1,5 @@
 import type { ScenePresenceResult } from "../actor/actor.ts";
-import type { MemoryEvent, MemoryEventResult } from "../memory/memory.ts";
+import type { MemoryEvent, MemoryEventResult } from "../knowledge/memory.ts";
 import type { SituationKind, State } from "../state/state.ts";
 import type {
   SceneBeatBeginInput,
@@ -25,7 +25,7 @@ export type {
 } from "./scene-beat-schema.ts";
 
 import { setScenePresence } from "../actor/actor.ts";
-import { recordMemory } from "../memory/memory.ts";
+import { recordMemory } from "../knowledge/memory.ts";
 import { appendTurnLogEntry } from "../state/turn-log.ts";
 import { applyTurnTime } from "../state/turn-time.ts";
 import { createId } from "../utils/ids.ts";

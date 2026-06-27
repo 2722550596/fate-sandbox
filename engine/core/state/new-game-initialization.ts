@@ -1,5 +1,5 @@
 import type { ConfigureCampaignInput } from "../campaign/campaign.ts";
-import type { MemoryClaim } from "../memory/memory.ts";
+import type { MemoryClaim } from "../knowledge/memory.ts";
 import type { TypeBoxValidator } from "../utils/typebox-validation.ts";
 import type {
   ActorId,
@@ -19,7 +19,7 @@ import { Compile } from "typebox/compile";
 import { OUTFIT_STATE_SCHEMA } from "../actor/actor-schema.ts";
 import { setScenePresence, upsertActor } from "../actor/actor.ts";
 import { configureCampaign } from "../campaign/campaign.ts";
-import { recordMemory } from "../memory/memory.ts";
+import { recordMemory } from "../knowledge/memory.ts";
 import { createInitialState, PROTAGONIST_ACTOR_ID } from "./initial-state.ts";
 import {
   PATHWAY_ID_SCHEMA,

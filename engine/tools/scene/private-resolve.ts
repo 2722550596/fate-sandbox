@@ -3,8 +3,8 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { parsePrivateResolveEvent } from "../../core/secrets/secrets-schema.ts";
-import { privateResolve } from "../../core/secrets/secrets.ts";
+import { parsePrivateResolveEvent } from "../../core/knowledge/secrets-schema.ts";
+import { privateResolve } from "../../core/knowledge/secrets.ts";
 import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 export function privateResolveTool(params: unknown, sessionManager: unknown): ToolResult {
