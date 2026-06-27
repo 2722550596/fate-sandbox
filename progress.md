@@ -2,7 +2,8 @@
 
 > 基于 migration-plan-lotm.md 各 Phase/Milestone 逐项检查
 > 生成时间：2026-06-27（已核实待确认项）
-> LOTM路径在mnt/d/developpement/LOTM
+> LOTM路径在 mnt/d/developpement/LOTM
+> 计算逻辑以 `original/`（LOTM 原项目 JS 源代码）为准，见 docs/combat-analysis.md
 
 ---
 
@@ -11,7 +12,7 @@
 | 里程碑                        | 状态    | 完成度 |
 | ----------------------------- | ------- | ------ |
 | M1: 骨架可编译（Phase 1+9）   | ✅ 完成 | 100%   |
-| M2: 引擎核心可运行（Phase 2） | ✅ 大部 | ~85%   |
+| M2: 引擎核心可运行（Phase 2） | ✅ 大部 | ~90%   |
 | M3: 工具链可用（Phase 3）     | ✅ 完成 | 100%   |
 | M4: 数据可用（Phase 4）       | ✅ 完成 | 100%   |
 | M5: Prompt 可游玩（Phase 5）  | ❌ 未动 | 0%     |
@@ -87,13 +88,37 @@
 
 ### 新 LOTM 核心模块已创建
 
-| 文件                                  | 行数 | 内容                                                                                          |
-| ------------------------------------- | ---- | --------------------------------------------------------------------------------------------- |
-| `engine/core/judgment.ts`             | 133  | LOTM 判定系统：序列基准值表（普通人200~支柱5M）、DC 难度系数（0.08~0.4）、d100 判定、运气修正 |
-| `engine/core/attribute-calculator.ts` | 130  | 六维属性动态计算：攻击力/防御力计算（物理/神秘/精神/混合）                                    |
-| `engine/core/damage-calculator.ts`    | 60   | 伤害计算：神性修正、随机浮动 0.9~1.1                                                          |
-| `engine/core/skill-cost-manager.ts`   | 70   | 技能消耗管理：消耗检查与扣除                                                                  |
-| `engine/core/combat.ts`               | 104  | LOTM 战斗结算：combatant snapshot、roll 对战、伤害输出                                        |
+| 文件                      | 行数 | 内容                                                                                          |
+| ------------------------- | ---- | --------------------------------------------------------------------------------------------- |
+| `engine/core/judgment.ts` | 133  | LOTM 判定系统：序列基准值表（普通人200~支柱5M）、DC 难度系数（0.08~0.4）、d100 判定、运气修正 |
+
+### 战斗系统重构 ✅ 完成
+
+旧 standalone 文件（`attribute-calculator.ts`、`damage-calculator.ts`、`skill-cost-manager.ts`）已删除，
+换为模块化 combat/ 子目录，原 combat.ts 改为转发层：
+
+| 文件                                    | 行数 | 内容                                                        |
+| --------------------------------------- | ---- | ----------------------------------------------------------- |
+| `engine/core/combat/` (8 个模块)        | ~450 | 模块化 LOTM 战斗引擎                                        |
+| `engine/core/combat/models.ts`          | 174  | CombatantSnapshot, SkillDef, EffectInstance 等核心类型      |
+| `engine/core/combat/sequence-utils.ts`  | 85   | 序列等级解析、power 映射（解析链：精确→default→9→fallback） |
+| `engine/core/combat/attribute-calc.ts`  | 102  | 攻击/防御计算（specific×0.4 + maxStat×0.6 + buff/debuff）   |
+| `engine/core/combat/damage-calc.ts`     | 211  | 伤害公式（Ω×P×(A/D)×R×(1+M)）、自定义计算器、标签克制       |
+| `engine/core/combat/cost-manager.ts`    | 89   | 消耗检查与扣减（函数式，不修改输入）                        |
+| `engine/core/combat/effect-manager.ts`  | 292  | buff/debuff/poison/regen 创建、应用、生命周期管理           |
+| `engine/core/combat/condition-eval.ts`  | 94   | 条件参数评估（正则匹配，不用 eval）                         |
+| `engine/core/combat/combat-pipeline.ts` | 177  | 执行管线：cost→condition→damage→effects                     |
+
+### 配置系统 ✅ 完成
+
+| 文件                       | 内容                                                                     |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `engine/config/index.ts`   | 加载 data/config/\*.json，英文名导出，divinity/sequenceBaseline 辅助函数 |
+| `engine/config/pathway.ts` | 途径目录索引，整合途径矩阵+能力体系映射+per-sequence 能力 JSON           |
+
+战斗模块现已走配置而非硬编码（sequenceBaseline、divinity、tagDamageModifiers 等）。
+序列基准值来自 `data/config/序列基准.json`、神性来自 `data/config/神性.json` 等。
+lookup 对「途径」的查询重定向到 config/pathway.ts 的易读格式化输出，不再扫 JSON。
 
 ### 现有文件已修改
 
@@ -129,6 +154,25 @@
 ### 后台导演基础设施
 
 全部 8+ 个 `backstage-*.ts` 文件 ✅ 不变
+
+### engine/core/ 目录整理 ✅ 完成
+
+`engine/core/` 从 86 个散文件整理为 11 个领域子目录：
+
+```
+engine/core/
+├── actor/      20 文件 — 角色/人物系统
+├── backstage/  19 文件 — 后台导演/平行线
+├── campaign/    2 文件 — 战役配置
+├── combat/      8 文件 — 模块化战斗引擎
+├── economy/     3 文件 — 经济/货币
+├── hooks/       2 文件 — 钩子系统
+├── memory/      5 文件 — 记忆系统
+├── scene/       4 文件 — 场景系统
+├── secrets/     2 文件 — 秘密系统
+├── state/      18 文件 — 状态/回合/时间
+├── utils/      15 文件 — 工具函数/枚举
+```
 
 ---
 

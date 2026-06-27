@@ -144,7 +144,7 @@ interface AgeState {
 | —                                  | **新建** `status-effect.ts` + schema                 | 状态效果系统（buff/debuff/risk/flag，持续时间，效果结算）                   |
 | —                                  | **新建** `attribute-calculator.ts`                   | 六维属性动态计算（攻击力/防御力，按伤害类型）                               |
 | —                                  | **新建** `damage-calculator.ts`                      | 伤害计算（物理/神秘/精神/混合，神性修正）                                   |
-| —                                  | **新建** `skill-cost-manager.ts`                     | 技能消耗管理                                                                |
+| —                                  | **新建** `skill-cost-manager.ts`                     | 技能消耗管理（已删除，合并入 combat/ 模块）                                 |
 | `economy.ts` + schema              | **改写**                                             | 保留框架，替换货币为便士/金镑                                               |
 | `memory.ts` + schema               | 微调                                                 | 保留框架，移除型月特有记忆类型                                              |
 | `secret.ts` + schema               | 微调                                                 | 保留框架，替换 servant true name → sequence/途径秘密                        |
@@ -176,6 +176,9 @@ interface AgeState {
 | `skill-cost-manager.ts` (232行)                          | 技能消耗计算、资源扣减                             | `engine/core/skill-cost-manager.ts`   |
 | `hero.ts` (175行) + `move.ts` (321行)                    | 战斗角色/技能模型                                  | 合并进 `engine/core/combat.ts`        |
 | `codeact.ts` 中的 advance/roll/move_to/attempt_promotion | 时间推进/骰子/移动/晋升                            | 拆分进对应领域模块                    |
+
+**实际完成情况：** 上述 5 个 standalone 文件已删除，合并为 `engine/core/combat/` 模块化子目录（8 个文件、~450 行）。
+原 combat.ts 保持转发层。`engine/config/` 新增配置系统为战斗模块提供数据（序列基准值、神性等）。
 
 ### 2.3 序列/途径数据结构
 
@@ -556,3 +559,36 @@ LOTM 项目包含 `data/novel/` 目录（8 部，1400+ 章节 markdown）。
 - LOTM 有坐标系统（x, y 经纬度）
 - fate-sandbox 的 location 是结构化对象
 - 需要在 location state 中加入坐标字段
+
+---
+
+## 12. 源代码引用
+
+LOTM 原项目 JavaScript 源代码已提取到 `original/` 目录：
+
+| 子目录                           | 内容                                                              |
+| -------------------------------- | ----------------------------------------------------------------- |
+| `original/battle-engine/`        | 战斗引擎（core/、flow/、logic/、models/、systems/）共约 45K 行 JS |
+| `original/app-core/`             | 游戏核心（GameManager、ChronicleCore、SnapshotCorrection 等）     |
+| `original/game-systems/`         | 游戏子系统（SequenceAbilities、IndustrySystem、TradingSystem 等） |
+| `original/data-storage/`         | 数据持久化（CloudSave、GameDatabase、SchemaValidation 等）        |
+| `original/ui-components/`        | UI 组件（BattleUI、FactionUI、WorldMap 等）                       |
+| `original/misc/`                 | 杂项工具（DynamicPropertyDetection、UtilityFunctions 等）         |
+| `original/_discard-performance/` | 弃用的性能优化代码                                                |
+
+**所有数值逻辑（伤害公式、攻防计算、技能消耗、条件参数评估、序列基准值等）
+以 `original/` 中的 JS 源代码为唯一权威参考。**
+
+`docs/combat-analysis.md`（1129 行）是对 battle-engine/ 的完整分析文档，
+包含公式推导、函数映射表、属性映射表。
+
+### 使用原则
+
+1. **公式完全还原** — 核心公式（如伤害 `D = floor(Ω × P × (A/D) × R × (1 + M))`）
+   直接在 JS 中确认后再实现，不自行推导。
+2. **变量名保留** — 代码中的变量名尽量保留原意以方便交叉验证。
+3. **架构不搬运** — 只提取数值公式和领域逻辑，不搬运行时框架（TurnManager、
+   CPUManager、BattleManager 等由 LLM 工具控制的部分不实现）。
+4. **数据格式自由** — 原 JS 的内联数据（power 映射表、消耗定义等）可以转换
+   为 config JSON 或 MD frontmatter，但数值本身必须与源码一致。
+5. **分歧裁决** — 任何公式/数值争议以 `original/` 代码为准。
