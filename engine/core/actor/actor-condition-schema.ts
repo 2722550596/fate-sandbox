@@ -5,12 +5,7 @@ import type { TypeBoxValidator } from "../utils/typebox-validation.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import {
-  stringEnumSchema,
-  TRACKED_ITEM_CONDITION_SCHEMA,
-  TRACKED_ITEM_KIND_SCHEMA,
-  TRACKED_ITEM_VISIBILITY_SCHEMA,
-} from "../state/state-enum-schemas.ts";
+import { stringEnumSchema } from "../state/state-enum-schemas.ts";
 import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../utils/typebox-validation.ts";
 import { OUTFIT_STATE_SCHEMA } from "./actor-schema.ts";
 
@@ -27,9 +22,6 @@ export const ACTOR_CONDITION_EVENT_KINDS = [
   "resolve-condition",
   "update-wound",
   "change-outfit",
-  "transfer-tracked-item",
-  "update-tracked-item",
-  "add-tracked-item",
 ] as const;
 const ACTOR_CONDITION_EVENT_KIND_SCHEMA = stringEnumSchema(ACTOR_CONDITION_EVENT_KINDS);
 
@@ -77,52 +69,17 @@ const CHANGE_OUTFIT_EVENT_SCHEMA = Type.Object({
   reason: Type.String({ minLength: 1 }),
 });
 
-const TRANSFER_TRACKED_ITEM_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("transfer-tracked-item"),
-  itemId: Type.String({ minLength: 1 }),
-  holderActorId: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
-  reason: Type.String({ minLength: 1 }),
-});
-
-const UPDATE_TRACKED_ITEM_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("update-tracked-item"),
-  itemId: Type.String({ minLength: 1 }),
-  condition: Type.Optional(TRACKED_ITEM_CONDITION_SCHEMA),
-  holderActorId: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),
-  ownerActorId: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),
-  notes: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
-  reason: Type.String({ minLength: 1 }),
-});
-
-const ADD_TRACKED_ITEM_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("add-tracked-item"),
-  label: Type.String({ minLength: 1 }),
-  itemKind: TRACKED_ITEM_KIND_SCHEMA,
-  holderActorId: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
-  ownerActorId: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
-  condition: TRACKED_ITEM_CONDITION_SCHEMA,
-  visibility: TRACKED_ITEM_VISIBILITY_SCHEMA,
-  notes: Type.Array(Type.String({ minLength: 1 })),
-  reason: Type.String({ minLength: 1 }),
-});
-
 export type ActorConditionEvent =
   | Static<typeof ADD_AFFLICTION_EVENT_SCHEMA>
   | Static<typeof RESOLVE_CONDITION_EVENT_SCHEMA>
   | Static<typeof UPDATE_WOUND_EVENT_SCHEMA>
-  | Static<typeof CHANGE_OUTFIT_EVENT_SCHEMA>
-  | Static<typeof TRANSFER_TRACKED_ITEM_EVENT_SCHEMA>
-  | Static<typeof UPDATE_TRACKED_ITEM_EVENT_SCHEMA>
-  | Static<typeof ADD_TRACKED_ITEM_EVENT_SCHEMA>;
+  | Static<typeof CHANGE_OUTFIT_EVENT_SCHEMA>;
 
 const ACTOR_CONDITION_EVENT_KIND_VALIDATOR = Compile(ACTOR_CONDITION_EVENT_KIND_SCHEMA);
 const ADD_AFFLICTION_EVENT_VALIDATOR = Compile(ADD_AFFLICTION_EVENT_SCHEMA);
 const RESOLVE_CONDITION_EVENT_VALIDATOR = Compile(RESOLVE_CONDITION_EVENT_SCHEMA);
 const UPDATE_WOUND_EVENT_VALIDATOR = Compile(UPDATE_WOUND_EVENT_SCHEMA);
 const CHANGE_OUTFIT_EVENT_VALIDATOR = Compile(CHANGE_OUTFIT_EVENT_SCHEMA);
-const TRANSFER_TRACKED_ITEM_EVENT_VALIDATOR = Compile(TRANSFER_TRACKED_ITEM_EVENT_SCHEMA);
-const UPDATE_TRACKED_ITEM_EVENT_VALIDATOR = Compile(UPDATE_TRACKED_ITEM_EVENT_SCHEMA);
-const ADD_TRACKED_ITEM_EVENT_VALIDATOR = Compile(ADD_TRACKED_ITEM_EVENT_SCHEMA);
 
 // Compile 必须在独立常量上调用（satisfies 上下文会干扰泛型推导）。
 const ACTOR_CONDITION_EVENT_VARIANT_VALIDATORS = {
@@ -130,9 +87,6 @@ const ACTOR_CONDITION_EVENT_VARIANT_VALIDATORS = {
   "resolve-condition": RESOLVE_CONDITION_EVENT_VALIDATOR,
   "update-wound": UPDATE_WOUND_EVENT_VALIDATOR,
   "change-outfit": CHANGE_OUTFIT_EVENT_VALIDATOR,
-  "transfer-tracked-item": TRANSFER_TRACKED_ITEM_EVENT_VALIDATOR,
-  "update-tracked-item": UPDATE_TRACKED_ITEM_EVENT_VALIDATOR,
-  "add-tracked-item": ADD_TRACKED_ITEM_EVENT_VALIDATOR,
 } satisfies Record<ActorConditionEvent["kind"], TypeBoxValidator<ActorConditionEvent>>;
 
 export function parseActorConditionEvent(value: unknown, fieldName: string): ActorConditionEvent {

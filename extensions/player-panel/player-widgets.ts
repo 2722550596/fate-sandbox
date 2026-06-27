@@ -7,7 +7,6 @@
 
 import type { PublicGameState } from "../../engine/core/state/state.ts";
 
-import { actorDisplayName } from "../../engine/core/actor/actor-display.ts";
 import { recentPlayerKnownRelationshipSignals } from "../../engine/core/relationship-signal.ts";
 import { formatHumanTime } from "../../engine/core/state/date-time.ts";
 
@@ -73,7 +72,7 @@ export function buildRelationsMarkdown(publicState: PublicGameState): string {
   if (presentImpressions.length > 0) {
     sections.push("### 印象", "");
     for (const card of presentImpressions) {
-      const name = actorDisplayName(publicState, card.actorId);
+      const name = publicState.actors[card.actorId]?.presentation.renderName ?? card.actorId;
       sections.push(`**${name}**`);
       sections.push(`- 气场：${card.presence}`);
       sections.push(`- 行动风格：${card.actionStyle}`);
@@ -90,8 +89,9 @@ export function buildRelationsMarkdown(publicState: PublicGameState): string {
   if (signals.length > 0) {
     sections.push("### 最近关系变化", "");
     for (const signal of signals) {
-      const actor = actorDisplayName(publicState, signal.actorId);
-      const target = actorDisplayName(publicState, signal.targetActorId);
+      const actor = publicState.actors[signal.actorId]?.presentation.renderName ?? signal.actorId;
+      const target =
+        publicState.actors[signal.targetActorId]?.presentation.renderName ?? signal.targetActorId;
       sections.push(`- **${actor}** → **${target}**：${signal.signal}`);
       sections.push(`  - 解读：${signal.interpretation}`);
       sections.push(`  - 边界：${signal.boundary}`);

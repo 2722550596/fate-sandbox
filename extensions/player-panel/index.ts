@@ -9,7 +9,7 @@ import {
   buildInventoryMarkdown,
   buildStatusMarkdown,
 } from "../../engine/core/backstage/public-projection.ts";
-import { syncStateFromSessionManager } from "../../engine/core/state/session-hydration.ts";
+import { syncStateFromSessionManager } from "../../engine/core/state/session-persistence.ts";
 import { getPublicState } from "../../engine/core/state/state-store.ts";
 import {
   buildHooksMarkdown,

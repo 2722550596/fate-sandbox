@@ -1,5 +1,5 @@
 {
-  "nextId": 16,
+  "nextId": 19,
   "items": [
     {
       "id": 1,
@@ -56,6 +56,27 @@
       "done": true,
       "created": 1782543892,
       "tag": "Schema 同步"
+    },
+    {
+      "id": 16,
+      "content": "Phase 1a: 删 actor-display.ts，内联到 4 个消费点",
+      "done": false,
+      "created": 1782548334,
+      "tag": "refactor"
+    },
+    {
+      "id": 17,
+      "content": "Phase 1b: ensure-public-npc 改名 init-npc（4 个文件纯替换）",
+      "done": false,
+      "created": 1782548337,
+      "tag": "refactor"
+    },
+    {
+      "id": 18,
+      "content": "Phase 2: 把 changeOutfit 搬进 actor-impression.ts",
+      "done": false,
+      "created": 1782548339,
+      "tag": "refactor"
     }
   ]
 }

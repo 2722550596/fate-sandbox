@@ -52,6 +52,7 @@ const OBLIGATION_KIND_GUIDANCE: Record<TurnObligationKind, string> = {
   sequence: "sequence 事件（upsert-sequence 或 commit_turn）",
   memory: "memory 事件（record_memory 或 commit_turn）",
   "reveal-secret": "reveal_secret 工具",
+  "tracked-item": "tracked-item 事件（update_tracked_item 或 commit_turn）",
 };
 
 /** 对账失败时的拒绝文案：列出每条欠账与对应的落地路径。 */

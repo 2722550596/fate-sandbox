@@ -5,10 +5,9 @@
  * pre-response 注入时按 scene.presentActorIds 路由。
  */
 
-import type { ActorImpression, State } from "../state/state.ts";
+import type { ActorImpression, OutfitState, State } from "../state/state.ts";
 
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
-import { actorDisplayName } from "./actor-display.ts";
 
 export interface UpsertActorImpressionInput {
   actorId: string;
@@ -16,6 +15,8 @@ export interface UpsertActorImpressionInput {
   actionStyle: string;
   relationshipPosture: string;
   voiceMaterial: string;
+  /** 可选：更新 actor 的正文固定用名 */
+  renderName?: string;
 }
 
 export function upsertActorImpression(
@@ -23,7 +24,8 @@ export function upsertActorImpression(
   input: UpsertActorImpressionInput,
 ): ActorImpression {
   const actorId = assertNonEmptyString(input.actorId, "actorId");
-  if (draft.public.actors[actorId] === undefined) {
+  const actor = draft.public.actors[actorId];
+  if (actor === undefined) {
     throw new Error(`actor ${actorId} 不存在，无法写入 impression。`);
   }
   const card: ActorImpression = {
@@ -35,6 +37,9 @@ export function upsertActorImpression(
     updatedAt: draft.public.clock.currentAt,
   };
   draft.public.actorImpressions[actorId] = card;
+  if (input.renderName !== undefined) {
+    actor.presentation.renderName = assertNonEmptyString(input.renderName, "renderName");
+  }
   return card;
 }
 
@@ -55,7 +60,7 @@ export function formatPresenceImpressionCards(state: State): string | null {
   if (cards.length === 0) return null;
   const lines: string[] = [];
   for (const card of cards) {
-    const name = actorDisplayName(state.public, card.actorId);
+    const name = state.public.actors[card.actorId]?.presentation.renderName ?? card.actorId;
     lines.push(
       `【${name}】`,
       `  气场：${card.presence}`,
@@ -68,4 +73,22 @@ export function formatPresenceImpressionCards(state: State): string | null {
     lines.push("");
   }
   return lines.join("\n").trimEnd();
+}
+
+/**
+ * 更新 actor 的 outfit（外观/装备）。
+ */
+export function changeActorOutfit(
+  draft: State,
+  actorId: string,
+  outfit: OutfitState,
+  reason: string,
+): { message: string } {
+  assertNonEmptyString(reason, "reason");
+  const actor = draft.public.actors[actorId];
+  if (actor === undefined) {
+    throw new Error(`actor 不存在: ${actorId}`);
+  }
+  actor.presentation.outfit = outfit;
+  return { message: "外观装备已更新。" };
 }

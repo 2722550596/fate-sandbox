@@ -123,7 +123,7 @@ const OUTFIT_STATE_SCHEMA = Type.Object({
 });
 
 const PRESENTATION_STATE_SCHEMA = Type.Object({
-  internalName: NON_EMPTY_STRING_SCHEMA,
+  canonicalName: NON_EMPTY_STRING_SCHEMA,
   renderName: NON_EMPTY_STRING_SCHEMA,
   apparentAge: NON_EMPTY_STRING_SCHEMA,
   outfit: OUTFIT_STATE_SCHEMA,
@@ -347,6 +347,7 @@ export const TURN_OBLIGATION_KINDS = [
   "sequence",
   "memory",
   "reveal-secret",
+  "tracked-item",
 ] as const;
 
 export const HOOK_STATUSES = ["active", "parked", "paid", "escalated", "retired"] as const;
@@ -438,10 +439,11 @@ const ACTOR_SECRET_SLOTS_SCHEMA = Type.Object({
   unrevealedAffiliations: Type.Array(STRING_SECRET_SLOT_SCHEMA),
 });
 
-const SECRET_CAMPAIGN_FACT_SCHEMA = Type.Object({
+const HIDDEN_WORLD_FACT_SCHEMA = Type.Object({
   id: NON_EMPTY_STRING_SCHEMA,
   text: NON_EMPTY_STRING_SCHEMA,
   relatedActorIds: NON_EMPTY_STRING_ARRAY_SCHEMA,
+  revealConditions: NON_EMPTY_STRING_ARRAY_SCHEMA,
   revealState: SECRET_REVEAL_STATE_SCHEMA,
 });
 
@@ -530,7 +532,7 @@ const BACKSTAGE_REVIEW_ENTRY_SCHEMA = Type.Object({
 
 export const SECRET_GAME_STATE_SCHEMA = Type.Object({
   actorStates: Type.Record(Type.String(), SECRET_ACTOR_STATE_SCHEMA),
-  campaignSecrets: Type.Array(SECRET_CAMPAIGN_FACT_SCHEMA),
+  hiddenWorldFacts: Type.Array(HIDDEN_WORLD_FACT_SCHEMA),
   secretEventLog: Type.Array(SECRET_EVENT_MEMORY_SCHEMA),
   offscreenEventLog: Type.Array(OFFSCREEN_EVENT_SCHEMA),
   factionClocks: Type.Array(FACTION_CLOCK_SCHEMA),

@@ -31,13 +31,7 @@ export function getStateSchemaTool(): ToolResult {
       "reveal_secret",
       "private_resolve",
     ],
-    debugOnly: [
-      "get_state_schema",
-      "migrate_state",
-      "override_locked_fact",
-      "patch_state",
-      "reset_state",
-    ],
+    debugOnly: ["get_state_schema", "override_locked_fact", "patch_state", "reset_state"],
     forbidden: "常规玩法禁止 raw JSON Patch；必须使用领域事件工具。",
   };
   return textResult(JSON.stringify(schema, null, 2));

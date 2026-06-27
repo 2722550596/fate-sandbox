@@ -14,7 +14,7 @@ import {
   upsertActorImpression,
   type UpsertActorImpressionInput,
 } from "../../core/actor/actor-impression.ts";
-import { hydrateStateFromSessionManager } from "../../core/state/session-hydration.ts";
+import { hydrateStateFromSessionManager } from "../../core/state/session-persistence.ts";
 import { commitState, getState } from "../../core/state/state-store.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { textResult } from "../runtime/tool-result.ts";
@@ -43,6 +43,7 @@ function parseToolInput(params: unknown): UpsertActorImpressionInput {
     actionStyle: requireString(params["actionStyle"], "actionStyle"),
     relationshipPosture: requireString(params["relationshipPosture"], "relationshipPosture"),
     voiceMaterial: requireString(params["voiceMaterial"], "voiceMaterial"),
+    renderName: optionalString(params["renderName"]),
   };
 }
 
@@ -53,10 +54,17 @@ function requireString(value: unknown, field: string): string {
   return value.trim();
 }
 
+function optionalString(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return undefined;
+  }
+  return value.trim();
+}
+
 export const updateActorImpressionToolDefinition: FateToolDefinition = {
   name: "update_actor_impression",
   description:
-    "蒸馏或更新一个 NPC 的印象卡（voice/posture/texture 快照）。印象卡在该 actor 在场时自动注入 pre-response，保证 compaction 后 NPC 声音一致性。\n\n" +
+    "蒸馏或更新一个 NPC 的印象卡（voice/posture/texture 快照），并可选的更新其 renderName（正文用名）。印象卡在该 actor 在场时自动注入 pre-response，保证 compaction 后 NPC 声音一致性。\n\n" +
     "【何时调用】\n" +
     "- Beat 结束或 arc 转换时，为重要在场 NPC 写/更新印象卡\n" +
     "- NPC 态度、关系、情绪发生重大变化时\n" +
@@ -74,6 +82,10 @@ export const updateActorImpressionToolDefinition: FateToolDefinition = {
         "语癖/对话范例（必填）：2-3 句该角色口吻的具体示例台词 + 用词/断句/语气特征 + 典型闪避或调侪方式；" +
         "要具体到「只有这个角色会这么说」，禁止写抽象中性描述（如「说话直接/语气冷淡」）。从 canon 语感蒸馏，随情绪变化更新",
     }),
+    renderName: Type.Optional(Type.String({
+      description:
+        "可选：更新 actor 的正文固定用名。LOTM 身份切换时使用（如夏洛克→格尔曼→梅林）。",
+    })),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     updateActorImpressionTool(params, ctx.sessionManager),

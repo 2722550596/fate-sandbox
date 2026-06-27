@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createInitialState } from "../state/state-store.ts";
+import { createInitialState } from "../state/initial-state.ts";
 import {
   buildBackstageContextBlock,
   buildBackstageDirectorPrompt,
@@ -34,10 +34,11 @@ void test("buildBackstageDirectorPrompt composes persona + safe context + assemb
 
 void test("buildBackstageDirectorPrompt carries privateFacts (hidden knowledge by design)", () => {
   const draft = createInitialState();
-  draft.secrets.campaignSecrets.push({
+  draft.secrets.hiddenWorldFacts.push({
     id: "secret-1",
     text: "Caster secretly drains townsfolk prana",
     relatedActorIds: [],
+    revealConditions: [],
     revealState: "hidden",
   });
 
@@ -52,10 +53,11 @@ void test("buildBackstageDirectorPrompt carries privateFacts (hidden knowledge b
 
 void test("buildBackstageContextBlock is a closed, secret-free safe projection", () => {
   const draft = createInitialState();
-  draft.secrets.campaignSecrets.push({
+  draft.secrets.hiddenWorldFacts.push({
     id: "secret-2",
     text: "hidden grail corruption codeword zzz-secret",
     relatedActorIds: [],
+    revealConditions: [],
     revealState: "hidden",
   });
 

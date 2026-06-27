@@ -190,30 +190,36 @@ void test("findSecretLeaks returns empty on no match and empty secret", () => {
   assert.deepEqual(findSecretLeaks("任意文本", [""]), []);
 });
 
-void test("collectUnrevealedSecretStrings extracts only unrevealed names", () => {
+void test("collectUnrevealedSecretStrings extracts only unrevealed secrets", () => {
   const secrets = {
     actorStates: {
-      saber: {
-        actorId: "saber",
+      alice: {
+        actorId: "alice",
         secrets: {
-          actorId: "saber",
-          trueName: { value: "两仪式", revealState: "hidden", revealConditions: [] },
-          hiddenNoblePhantasms: [
-            { value: { name: "无垢识·空之境界" }, revealState: "revealed", revealConditions: [] },
-            { value: { name: "唯识·直死之魔眼" }, revealState: "hidden", revealConditions: [] },
+          actorId: "alice",
+          pathwaySecret: { value: "命运之轮", revealState: "hidden", revealConditions: [] },
+          sequenceSecret: { value: "序列4", revealState: "revealed", revealConditions: [] },
+          privateMotives: [
+            { value: "寻找失落的典籍", revealState: "hidden", revealConditions: [] },
+          ],
+          unrevealedAffiliations: [
+            { value: "神秘学会", revealState: "hidden", revealConditions: [] },
           ],
         },
       },
     },
   };
   const out = collectUnrevealedSecretStrings(secrets);
-  assert.deepEqual(out.toSorted(), ["两仪式", "唯识·直死之魔眼"].toSorted());
+  assert.deepEqual(out.toSorted(), ["命运之轮", "寻找失落的典籍", "神秘学会"].toSorted());
 });
 
-void test("collectUnrevealedSecretStrings skips revealed true names", () => {
+void test("collectUnrevealedSecretStrings skips revealed secrets", () => {
   const out = collectUnrevealedSecretStrings({
     actorStates: {
-      a: { actorId: "a", secrets: { trueName: { value: "尼禄", revealState: "revealed" } } },
+      a: {
+        actorId: "a",
+        secrets: { pathwaySecret: { value: "命运之轮", revealState: "revealed" } },
+      },
     },
   });
   assert.deepEqual(out, []);

@@ -9,7 +9,7 @@ import type { ContextEvent, ExtensionAPI } from "@earendil-works/pi-coding-agent
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { syncStateFromSessionManager } from "./engine/core/state/session-hydration.ts";
+import { syncStateFromSessionManager } from "./engine/core/state/session-persistence.ts";
 import { exportState } from "./engine/core/state/state-store.ts";
 import { isRecord } from "./engine/core/utils/typebox-validation.ts";
 import { PROSE_CUSTOM_TYPE } from "./engine/direction/render-turn.ts";

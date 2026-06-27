@@ -6,7 +6,11 @@ import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
 import { stringEnumSchema } from "../state/state-enum-schemas.ts";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../utils/typebox-validation.ts";
+import {
+  parseTaggedTypeBoxUnion,
+  parseTypeBoxValue,
+  trimStringsDeep,
+} from "../utils/typebox-validation.ts";
 
 /**
  * Secrets 领域（reveal_secret 工具）边界 schema：单一事实来源。
@@ -118,6 +122,31 @@ export function parsePrivateResolveEvent(value: unknown, fieldName: string): Pri
     PRIVATE_RESOLVE_EVENT_KIND_VALIDATOR,
     PRIVATE_RESOLVE_EVENT_VARIANT_VALIDATORS,
   );
+}
+
+// ─── add_hidden_world_fact 工具 ─────────────────────────────
+
+export const ADD_HIDDEN_WORLD_FACT_SCHEMA = Type.Object({
+  text: Type.String({ minLength: 1, description: "世界隐藏事实内容" }),
+  revealConditions: Type.Array(Type.String({ minLength: 1 })),
+  relatedActorIds: Type.Array(Type.String({ minLength: 1 })),
+  reason: Type.String({ minLength: 1 }),
+});
+
+export interface AddHiddenWorldFactInput {
+  text: string;
+  revealConditions: string[];
+  relatedActorIds: string[];
+  reason: string;
+}
+
+const ADD_HIDDEN_WORLD_FACT_VALIDATOR = Compile(ADD_HIDDEN_WORLD_FACT_SCHEMA);
+
+export function parseAddHiddenWorldFactInput(
+  value: unknown,
+  fieldName: string,
+): AddHiddenWorldFactInput {
+  return parseTypeBoxValue(trimStringsDeep(value), fieldName, ADD_HIDDEN_WORLD_FACT_VALIDATOR);
 }
 
 export function parseRevealSecretToolInput(

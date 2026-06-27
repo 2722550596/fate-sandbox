@@ -9,12 +9,14 @@ import { parseSceneEvent } from "../../core/scene/scene-schema.ts";
 import { parseTurnTimePolicySchema } from "../../core/state/turn-time-schema.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { normalizeActorConditionEvent } from "../actor/actor-condition-normalizer.ts";
+import { normalizeTrackedItemEvent } from "../actor/tracked-item-normalizer.ts";
 
 const DEFAULT_SUMMARY = "本轮状态变化。";
 const TURN_EVENT_KINDS = [
   "scene",
   "scene-presence",
   "actor-condition",
+  "tracked-item",
   "sequence",
   "economy",
   "memory",
@@ -54,6 +56,14 @@ function normalizeTurnCommitEvent(value: unknown, summary: string): TurnCommitEv
           summary,
         ),
       };
+    case "tracked-item":
+      return {
+        kind: normalizedKind,
+        event: normalizeTrackedItemEvent(
+          withReason(extractDomainEvent(event, "tracked-item.event"), summary),
+          summary,
+        ),
+      };
     case "sequence":
       return {
         kind: normalizedKind,
@@ -74,7 +84,7 @@ function normalizeTurnCommitEvent(value: unknown, summary: string): TurnCommitEv
       return { kind: normalizedKind, event: normalizeMemoryTurnEvent(event) };
     default:
       throw new Error(
-        `非法 commit_turn event.kind: ${formatUnknown(event["kind"])}。允许: scene / scene-presence / actor-condition / sequence / economy / memory。`,
+        `非法 commit_turn event.kind: ${formatUnknown(event["kind"])}。允许: scene / scene-presence / actor-condition / tracked-item / sequence / economy / memory。`,
       );
   }
 }

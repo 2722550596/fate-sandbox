@@ -35,7 +35,7 @@ function prepareUpsertActorParams(params: unknown): unknown {
     case "setup-protagonist":
       return { ...params, actor: normalizeSetupProtagonistActor(params["actor"]) };
     case "upsert-public-npc":
-    case "ensure-public-npc":
+    case "init-npc":
       return { ...params, npc: normalizeNpcInput(params["npc"]) };
     case "upsert-sequence":
       return { ...params, sequence: normalizeSequenceInput(params["sequence"]) };
@@ -68,7 +68,7 @@ function normalizeSetupProtagonistActor(actor: unknown): PublicActorState {
   }
   const presentation = normalized["presentation"];
   if (isRecord(presentation) && presentation["renderName"] === undefined) {
-    presentation["renderName"] = presentation["internalName"];
+    presentation["renderName"] = presentation["canonicalName"];
   }
   assertPublicActorStateCandidate(normalized);
   return normalized;
@@ -125,7 +125,7 @@ export const upsertActorToolDefinition: FateToolDefinition = {
   description:
     "将 protagonist、公开 NPC 或序列信息写入 public actor registry。\n\n" +
     "【使用边界】\n" +
-    "- 重要 NPC 只需可被 scene/presence 引用：ensure-public-npc\n" +
+    "- 重要 NPC 只需可被 scene/presence 引用：init-npc\n" +
     "- 重要 NPC 需要完整公开投影：upsert-public-npc\n" +
     "- 开局确认玩家角色：setup-protagonist\n" +
     "- 更新角色序列信息：upsert-sequence\n\n" +
@@ -134,7 +134,7 @@ export const upsertActorToolDefinition: FateToolDefinition = {
     "- 把本局不需要追踪的角色全量写进 state",
   parameters: Type.Object({
     kind: Type.String({
-      description: "setup-protagonist / ensure-public-npc / upsert-public-npc / upsert-sequence",
+      description: "setup-protagonist / init-npc / upsert-public-npc / upsert-sequence",
     }),
     actor: Type.Optional(publicActorSchema()),
     npc: Type.Optional(loosePublicNpcSchema()),
@@ -148,18 +148,18 @@ export const upsertActorToolDefinition: FateToolDefinition = {
 function loosePublicNpcSchema(): ReturnType<typeof Type.Object> {
   return Type.Object({
     id: Type.Optional(Type.String({ description: "upsert-public-npc：actor id" })),
-    actorId: Type.Optional(Type.String({ description: "ensure-public-npc：actor id" })),
+    actorId: Type.Optional(Type.String({ description: "init-npc：actor id" })),
     kind: Type.Optional(
       Type.String({ description: "upsert-public-npc：human / beyonder / creature / other" }),
     ),
     npcKind: Type.Optional(
-      Type.String({ description: "ensure-public-npc：human / beyonder / creature / other" }),
+      Type.String({ description: "init-npc：human / beyonder / creature / other" }),
     ),
-    internalName: Type.String({
+    canonicalName: Type.String({
       description: "内部/绑定层用名（可含玩家尚未得知的真名）；正文不直接使用",
     }),
     renderName: Type.Optional(
-      Type.String({ description: "正文固定用名；缺省时拷贝 internalName" }),
+      Type.String({ description: "正文固定用名；缺省时拷贝 canonicalName" }),
     ),
     publicIdentity: Type.String({ description: "玩家当前可知的身份摘要" }),
     apparentAge: Type.Optional(Type.String()),
@@ -222,7 +222,7 @@ function publicActorSchema(): ReturnType<typeof Type.Object> {
       lockedFacts: Type.Array(Type.Object({ id: Type.String(), text: Type.String() })),
     }),
     presentation: Type.Object({
-      internalName: Type.String(),
+      canonicalName: Type.String(),
       renderName: Type.Optional(Type.String()),
       apparentAge: Type.String(),
       outfit: Type.Object({ label: Type.String(), details: Type.String() }),

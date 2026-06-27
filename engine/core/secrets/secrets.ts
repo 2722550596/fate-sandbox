@@ -1,6 +1,7 @@
 import type {
   ActorId,
   ActorSecretSlots,
+  HiddenWorldFact,
   OffscreenEvent,
   SecretSlot,
   State,
@@ -14,13 +15,15 @@ import type {
 } from "./secrets-schema.ts";
 
 import { getActorSecretSlots, setActorSecretSlots } from "../actor/secret-actor-state.ts";
-import { inferOffscreenPressureType } from "../backstage/offscreen-pressure.ts";
+
 import { recordMemory } from "../memory/memory.ts";
 import { settleOldestObligation } from "../obligations.ts";
 import { recordOffscreenEvent } from "../offscreen-event.ts";
+import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 
 export type {
+  AddHiddenWorldFactInput,
   ConfigureActorSecretsInput,
   ConfigureSequenceSecretsInput,
   PrivateResolveEvent,
@@ -34,6 +37,10 @@ export interface ConfigureSequenceSecretsResult {
 }
 
 export interface ConfigureActorSecretsResult {
+  message: string;
+}
+
+export interface ConfigureHiddenWorldFactResult {
   message: string;
 }
 
@@ -124,6 +131,37 @@ export function configureActorSecrets(
   return { message: `actor secrets 已配置：${input.actorId}。` };
 }
 
+export function configureHiddenWorldFact(
+  draft: State,
+  input: import("./secrets-schema.ts").AddHiddenWorldFactInput,
+): ConfigureHiddenWorldFactResult {
+  assertNonEmptyString(input.text, "text");
+  assertNonEmptyString(input.reason, "reason");
+
+  const existing = draft.secrets.hiddenWorldFacts.find((fact) => fact.text === input.text);
+  if (existing !== undefined) {
+    existing.revealConditions = mergeRevealConditions(
+      existing.revealConditions,
+      input.revealConditions,
+    );
+    if (input.relatedActorIds.length > 0) {
+      existing.relatedActorIds = input.relatedActorIds;
+    }
+    return { message: `世界事实已更新：${input.text}` };
+  }
+
+  draft.secrets.hiddenWorldFacts.push({
+    id: createId(draft, "world-fact"),
+    text: input.text,
+    relatedActorIds: input.relatedActorIds,
+    revealConditions: [
+      ...new Set(input.revealConditions.map((c: string) => c.trim()).filter(Boolean)),
+    ],
+    revealState: "hidden",
+  });
+  return { message: `世界事实已记录：${input.text}` };
+}
+
 export function revealSecret(draft: State, event: RevealSecretEvent): RevealSecretResult {
   const evidence = event.kind === "claim-reveal" ? event.evidence : event.evidence;
   assertNonEmptyString(evidence, "evidence");
@@ -156,6 +194,33 @@ export function revealSecret(draft: State, event: RevealSecretEvent): RevealSecr
   return result;
 }
 
+function tryRevealWorldFact(fact: HiddenWorldFact, event: RevealSecretEvent): boolean {
+  if (fact.revealState === "revealed") return false;
+  const needle = event.kind === "claim-reveal" ? event.claim : event.trigger;
+  const evidence = revealEvidenceText(event);
+  const normalizedNeedle = needle.toLowerCase();
+  const normalizedEvidence = evidence.toLowerCase();
+  const textMatch =
+    fact.text.toLowerCase().includes(normalizedNeedle) ||
+    fact.revealConditions.some((c) => normalizedNeedle.includes(c.toLowerCase()));
+  const evidenceMatch = fact.revealConditions.some((c) =>
+    normalizedEvidence.includes(c.toLowerCase()),
+  );
+  return textMatch && evidenceMatch;
+}
+
+function markWorldFactForeshadowed(draft: State, evidence: string): boolean {
+  let marked = false;
+  for (const fact of draft.secrets.hiddenWorldFacts) {
+    if (fact.revealState !== "hidden") continue;
+    if (fact.revealConditions.some((c) => evidence.toLowerCase().includes(c.toLowerCase()))) {
+      fact.revealState = "foreshadowed";
+      marked = true;
+    }
+  }
+  return marked;
+}
+
 function applyRevealSecret(
   draft: State,
   event: RevealSecretEvent,
@@ -182,6 +247,30 @@ function applyRevealSecret(
   if (markForeshadowed(slots, evidence)) {
     return { outcome: "foreshadowed", playerSafeMessage: "线索成立，但尚不足以完全揭示。" };
   }
+  // 扫描隐藏世界事实
+  const protagonistId = draft.public.protagonistActorId;
+  for (const fact of draft.secrets.hiddenWorldFacts) {
+    const actorMatches =
+      fact.relatedActorIds.length === 0
+        ? event.actorId === protagonistId
+        : fact.relatedActorIds.includes(event.actorId);
+    if (!actorMatches) continue;
+    if (tryRevealWorldFact(fact, event)) {
+      fact.revealState = "revealed";
+      return {
+        outcome: "revealed",
+        playerSafeMessage: "世界隐藏事实已经揭示。",
+      };
+    }
+  }
+
+  if (markWorldFactForeshadowed(draft, evidence)) {
+    return {
+      outcome: "foreshadowed",
+      playerSafeMessage: "线索成立，但尚不足以完全揭示。",
+    };
+  }
+
   return {
     outcome: "insufficient-evidence",
     playerSafeMessage: "证据不足，暂不能确认隐藏事实。",
@@ -333,7 +422,7 @@ function hiddenReaction(
       consequences: [],
       futureHooks: [],
       createdFrom: "gm",
-      pressureType: inferOffscreenPressureType([event.actorId], event.publicContext),
+      pressureType: "private-resolve",
       pressureSlotId: null,
     });
   }

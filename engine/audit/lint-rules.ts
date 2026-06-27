@@ -332,7 +332,7 @@ export function lintFinalProse(prose: string): LintFinding[] {
 }
 
 /**
- * 扫描正文是否泄漏未揭示秘密字符串（真名 / 隐藏宝具名）。
+ * 扫描正文是否泄漏未揭示秘密字符串。
  * 命中即 block 级 finding。
  */
 export function findSecretLeaks(text: string, unrevealedSecrets: readonly string[]): LintFinding[] {
@@ -372,13 +372,18 @@ function pickString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 }
 
-function pickNoblePhantasmName(value: unknown): string | undefined {
-  return isRecord(value) ? pickString(value["name"]) : undefined;
+function collectUnrevealedArrayValues(entries: unknown, out: Set<string>): void {
+  if (!Array.isArray(entries)) return;
+  for (const entry of entries) {
+    const value = readUnrevealedValue(entry, pickString);
+    if (value !== undefined) out.add(value);
+  }
 }
 
 /**
  * 从持久化 state 的 `secrets` 域提取所有未揭示（revealState !== "revealed"）的
- * 真名与隐藏宝具名字符串。输入按 unknown 处理（来自 JSONL 快照，不可信任形状）。
+ * 途径秘密、序列秘密、私密动机与未公开阵营字符串。
+ * 输入按 unknown 处理（来自 JSONL 快照，不可信任形状）。
  */
 export function collectUnrevealedSecretStrings(secrets: unknown): string[] {
   if (!isRecord(secrets)) return [];
@@ -390,15 +395,15 @@ export function collectUnrevealedSecretStrings(secrets: unknown): string[] {
     if (!isRecord(bundle)) continue;
     const entry = bundle["secrets"];
     if (!isRecord(entry)) continue;
-    const trueName = readUnrevealedValue(entry["trueName"], pickString);
-    if (trueName !== undefined) out.add(trueName);
-    const noblePhantasms = entry["hiddenNoblePhantasms"];
-    if (Array.isArray(noblePhantasms)) {
-      for (const np of noblePhantasms) {
-        const name = readUnrevealedValue(np, pickNoblePhantasmName);
-        if (name !== undefined) out.add(name);
-      }
-    }
+
+    const pathwayValue = readUnrevealedValue(entry["pathwaySecret"], pickString);
+    if (pathwayValue !== undefined) out.add(pathwayValue);
+
+    const sequenceValue = readUnrevealedValue(entry["sequenceSecret"], pickString);
+    if (sequenceValue !== undefined) out.add(sequenceValue);
+
+    collectUnrevealedArrayValues(entry["privateMotives"], out);
+    collectUnrevealedArrayValues(entry["unrevealedAffiliations"], out);
   }
   return [...out];
 }

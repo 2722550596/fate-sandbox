@@ -2,7 +2,7 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { persistStateAfterCommit } from "../../core/state/state-persistence.ts";
+import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
 import { resetState } from "../../core/state/state-store.ts";
 import { assertNonEmptyString, isRecord } from "../../core/utils/typebox-validation.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";

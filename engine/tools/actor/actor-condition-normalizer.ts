@@ -70,14 +70,6 @@ function withNullableDefaults(input: Record<string, unknown>): Record<string, un
   switch (input["kind"]) {
     case "add-affliction":
       return { ...input, expectedDuration: input["expectedDuration"] ?? null };
-    case "transfer-tracked-item":
-      return { ...input, holderActorId: input["holderActorId"] ?? null };
-    case "add-tracked-item":
-      return {
-        ...input,
-        holderActorId: input["holderActorId"] ?? null,
-        ownerActorId: input["ownerActorId"] ?? null,
-      };
     default:
       return input;
   }

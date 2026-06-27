@@ -77,7 +77,7 @@ export const ACTOR_ROLE_SCHEMA = Type.Union([SOCIAL_ROLE_SCHEMA, FACTION_ROLE_SC
 export const PUBLIC_NPC_INPUT_SCHEMA = Type.Object({
   id: Type.String({ minLength: 1 }),
   kind: ACTOR_KIND_SCHEMA,
-  internalName: Type.String({ minLength: 1 }),
+  canonicalName: Type.String({ minLength: 1 }),
   renderName: Type.Optional(Type.String({ minLength: 1 })),
   publicIdentity: Type.String({ minLength: 1 }),
   apparentAge: Type.String({ minLength: 1 }),
@@ -92,7 +92,7 @@ export type PublicNpcInput = Static<typeof PUBLIC_NPC_INPUT_SCHEMA>;
 export const PUBLIC_NPC_SKELETON_INPUT_SCHEMA = Type.Object({
   actorId: Type.String({ minLength: 1 }),
   npcKind: Type.Optional(ACTOR_KIND_SCHEMA),
-  internalName: Type.String({ minLength: 1 }),
+  canonicalName: Type.String({ minLength: 1 }),
   renderName: Type.Optional(Type.String({ minLength: 1 })),
   publicIdentity: Type.String({ minLength: 1 }),
   apparentAge: Type.Optional(Type.String({ minLength: 1 })),
@@ -128,7 +128,7 @@ const PUBLIC_ACTOR_STATE_DELEGATED_SCHEMA = Type.Unsafe<PublicActorState>({});
 export const ACTOR_REGISTRY_KINDS = [
   "setup-protagonist",
   "upsert-public-npc",
-  "ensure-public-npc",
+  "init-npc",
   "upsert-sequence",
 ] as const;
 const ACTOR_REGISTRY_KIND_SCHEMA = stringEnumSchema(ACTOR_REGISTRY_KINDS);
@@ -145,8 +145,8 @@ const UPSERT_PUBLIC_NPC_INPUT_SCHEMA = Type.Object({
   reason: Type.String({ minLength: 1 }),
 });
 
-const ENSURE_PUBLIC_NPC_INPUT_SCHEMA = Type.Object({
-  kind: Type.Literal("ensure-public-npc"),
+const INIT_NPC_INPUT_SCHEMA = Type.Object({
+  kind: Type.Literal("init-npc"),
   npc: PUBLIC_NPC_SKELETON_INPUT_SCHEMA,
   reason: Type.String({ minLength: 1 }),
 });
@@ -160,19 +160,19 @@ const UPSERT_SEQUENCE_INPUT_SCHEMA = Type.Object({
 export type ActorRegistryInput =
   | Static<typeof SETUP_PROTAGONIST_INPUT_SCHEMA>
   | Static<typeof UPSERT_PUBLIC_NPC_INPUT_SCHEMA>
-  | Static<typeof ENSURE_PUBLIC_NPC_INPUT_SCHEMA>
+  | Static<typeof INIT_NPC_INPUT_SCHEMA>
   | Static<typeof UPSERT_SEQUENCE_INPUT_SCHEMA>;
 
 const ACTOR_REGISTRY_KIND_VALIDATOR = Compile(ACTOR_REGISTRY_KIND_SCHEMA);
 const SETUP_PROTAGONIST_INPUT_VALIDATOR = Compile(SETUP_PROTAGONIST_INPUT_SCHEMA);
 const UPSERT_PUBLIC_NPC_INPUT_VALIDATOR = Compile(UPSERT_PUBLIC_NPC_INPUT_SCHEMA);
-const ENSURE_PUBLIC_NPC_INPUT_VALIDATOR = Compile(ENSURE_PUBLIC_NPC_INPUT_SCHEMA);
+const INIT_NPC_INPUT_VALIDATOR = Compile(INIT_NPC_INPUT_SCHEMA);
 const UPSERT_SEQUENCE_INPUT_VALIDATOR = Compile(UPSERT_SEQUENCE_INPUT_SCHEMA);
 
 const ACTOR_REGISTRY_VARIANT_VALIDATORS = {
   "setup-protagonist": SETUP_PROTAGONIST_INPUT_VALIDATOR,
   "upsert-public-npc": UPSERT_PUBLIC_NPC_INPUT_VALIDATOR,
-  "ensure-public-npc": ENSURE_PUBLIC_NPC_INPUT_VALIDATOR,
+  "init-npc": INIT_NPC_INPUT_VALIDATOR,
   "upsert-sequence": UPSERT_SEQUENCE_INPUT_VALIDATOR,
 } satisfies Record<ActorRegistryInput["kind"], TypeBoxValidator<ActorRegistryInput>>;
 

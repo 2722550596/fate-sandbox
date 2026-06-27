@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createInitialState } from "../state/state-store.ts";
+import { createInitialState } from "../state/initial-state.ts";
 import { generateSeed, seededRandomFloat, seededRandomInt } from "./seeded-rng.ts";
 
 void test("seededRandomInt is deterministic for same seed and counter", () => {

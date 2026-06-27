@@ -137,8 +137,8 @@ function buildKnownFacts(state: State, input: AssembleParallelLineInput): string
 
 function buildPrivateFacts(state: State, input: AssembleParallelLineInput): string[] {
   const facts: string[] = [];
-  // 从 secret campaign facts
-  for (const secret of state.secrets.campaignSecrets) {
+  // 从隐藏世界事实
+  for (const secret of state.secrets.hiddenWorldFacts) {
     if (secret.revealState !== "revealed") {
       facts.push(secret.text);
     }

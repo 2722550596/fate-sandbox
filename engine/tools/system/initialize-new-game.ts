@@ -3,8 +3,10 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { initializeNewGame } from "../../core/state/new-game-initialization.ts";
-import { parseNewGameInitializationInput } from "../../core/state/new-game-schema.ts";
+import {
+  initializeNewGame,
+  parseNewGameInitializationInput,
+} from "../../core/state/new-game-initialization.ts";
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function initializeNewGameTool(params: unknown, sessionManager: unknown): ToolResult {
@@ -43,7 +45,7 @@ export const initializeNewGameToolDefinition: FateToolDefinition = {
     }),
     protagonist: Type.Unknown({
       description:
-        "human: internalName/renderName/publicIdentity/background/apparentAge/outfit/demeanor；beyonder additionally pathway/sequence/trueNameDisplay。renderName 是正文固定用名，中文名优先。",
+        "human: canonicalName/renderName/publicIdentity/background/apparentAge/outfit/demeanor；beyonder additionally pathway/sequence/trueNameDisplay。renderName 是正文固定用名，中文名优先。",
     }),
     presence: Type.Optional(
       Type.Object({

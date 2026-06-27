@@ -16,7 +16,7 @@ import { buildBackstageDirectorPrompt } from "../../core/backstage/backstage-dir
 import { recordPendingHarvest } from "../../core/backstage/backstage-pending.ts";
 import { spawnBackstageDirector } from "../../core/backstage/backstage-spawn.ts";
 import { type AssembleParallelLineInput } from "../../core/backstage/parallel-line-assembler.ts";
-import { hydrateStateFromSessionManager } from "../../core/state/session-hydration.ts";
+import { hydrateStateFromSessionManager } from "../../core/state/session-persistence.ts";
 import { getState } from "../../core/state/state-store.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { runDomainEventTool } from "../system/domain-tool-runner.ts";

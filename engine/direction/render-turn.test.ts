@@ -151,19 +151,19 @@ void test("buildRendererMessages injects actor render names", () => {
     parseDirectionPacket(PACKET_ARGS, "packet"),
     undefined,
     [
-      { actorId: "manaka_sajyou_labyrinth", internalName: "Manaka Sajyou", renderName: "沙条爱歌" },
-      { actorId: "saber", internalName: "Saber", renderName: "Saber" },
+      { actorId: "manaka_sajyou_labyrinth", canonicalName: "Manaka Sajyou", renderName: "沙条爱歌" },
+      { actorId: "saber", canonicalName: "Saber", renderName: "Saber" },
     ],
   );
 
   const final = messages.at(-1)?.text ?? "";
   assert.match(final, /# Actor Render Names \(binding\)/);
-  // 隐藏真名条目：internalName 与 renderName 不同，两者都出现。
-  assert.match(final, /internalName=Manaka Sajyou; renderName=沙条爱歌/);
-  assert.match(final, /When an entry also lists internalName/);
-  // 同名条目（常见情况）：只绑定 renderName，不能出现 internalName=（否则等于禁止正文用该名）。
+  // 隐藏真名条目：canonicalName 与 renderName 不同，两者都出现。
+  assert.match(final, /canonicalName=Manaka Sajyou; renderName=沙条爱歌/);
+  assert.match(final, /When an entry also lists canonicalName/);
+  // 同名条目（常见情况）：只绑定 renderName，不能出现 canonicalName=（否则等于禁止正文用该名）。
   assert.match(final, /- saber: renderName=Saber/);
-  assert.doesNotMatch(final, /- saber: internalName=/);
+  assert.doesNotMatch(final, /- saber: canonicalName=/);
   assert.match(final, /Use each renderName exactly for every appearance in Chinese prose/);
 });
 

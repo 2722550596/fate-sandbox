@@ -119,7 +119,8 @@ export type TurnObligationKind =
   | "equipment"
   | "sequence"
   | "memory"
-  | "reveal-secret";
+  | "reveal-secret"
+  | "tracked-item";
 
 export interface TurnObligation {
   id: string;
@@ -131,7 +132,7 @@ export interface TurnObligation {
 
 export interface SecretGameState {
   actorStates: Record<ActorId, SecretActorState>;
-  campaignSecrets: SecretCampaignFact[];
+  hiddenWorldFacts: HiddenWorldFact[];
   secretEventLog: SecretEventMemory[];
   offscreenEventLog: OffscreenEvent[];
   factionClocks: FactionClock[];
@@ -371,7 +372,7 @@ export interface LockedFact {
 }
 
 export interface PresentationState {
-  internalName: string;
+  canonicalName: string;
   renderName: string;
   apparentAge: string;
   outfit: OutfitState;
@@ -556,10 +557,11 @@ export interface SecretSlot<T> {
   revealConditions: string[];
 }
 
-export interface SecretCampaignFact {
+export interface HiddenWorldFact {
   id: string;
   text: string;
   relatedActorIds: string[];
+  revealConditions: string[];
   revealState: "hidden" | "foreshadowed" | "revealed";
 }
 

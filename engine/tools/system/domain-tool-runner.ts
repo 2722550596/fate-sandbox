@@ -1,6 +1,6 @@
 import type { State } from "../../core/state/state.ts";
 
-import { persistStateAfterCommit } from "../../core/state/state-persistence.ts";
+import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
 import { cloneState, commitState } from "../../core/state/state-store.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 

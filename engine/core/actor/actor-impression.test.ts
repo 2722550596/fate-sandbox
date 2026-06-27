@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createInitialState } from "../state/state-store.ts";
+import { createInitialState } from "../state/initial-state.ts";
 import {
   formatPresenceImpressionCards,
   presentActorImpressions,
@@ -16,7 +16,7 @@ function addTestNpc(draft: ReturnType<typeof createInitialState>, actorId: strin
     sequence: null,
     identity: { publicIdentity: actorId, background: "", lockedFacts: [] },
     presentation: {
-      internalName: actorId.charAt(0).toUpperCase() + actorId.slice(1),
+      canonicalName: actorId.charAt(0).toUpperCase() + actorId.slice(1),
       renderName: actorId.charAt(0).toUpperCase() + actorId.slice(1),
       apparentAge: "20s",
       outfit: { label: "default", details: "" },

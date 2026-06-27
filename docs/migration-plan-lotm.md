@@ -155,7 +155,6 @@ interface AgeState {
 | `actor-agenda.ts`                  | 微调                                                 | 保留框架                                                                    |
 | `actor-condition.ts` + schema      | **改写**                                             | 替换 wound/outfit 为 LOTM 状态效果                                          |
 | `actor-impression.ts`              | 不变                                                 | 保留                                                                        |
-| `actor-display.ts`                 | 微调                                                 | 适配 LOTM 角色展示                                                          |
 | `relationship-signal.ts`           | 不变                                                 | 保留                                                                        |
 | `hooks.ts`                         | 不变                                                 | 保留                                                                        |
 | `turn-commit.ts`                   | 微调                                                 | event kind 枚举适配 LOTM                                                    |

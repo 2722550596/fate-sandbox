@@ -16,8 +16,8 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 import { Type } from "typebox";
 
 import { upsertActor } from "../../core/actor/actor.ts";
+import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
 import { SEQUENCE_RANKS, PATHWAY_IDS } from "../../core/state/state-enum-schemas.ts";
-import { persistStateAfterCommit } from "../../core/state/state-persistence.ts";
 import { cloneState, commitState } from "../../core/state/state-store.ts";
 import { assertOneOfString } from "../../core/utils/string-enum.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";

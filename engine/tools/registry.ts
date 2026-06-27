@@ -8,6 +8,7 @@ import { setScenePresenceToolDefinition } from "./actor/set-scene-presence.ts";
 import { updateActorAgendaToolDefinition } from "./actor/update-actor-agenda.ts";
 import { updateActorConditionToolDefinition } from "./actor/update-actor-condition.ts";
 import { updateActorImpressionToolDefinition } from "./actor/update-actor-impression.ts";
+import { updateTrackedItemToolDefinition } from "./actor/update-tracked-item.ts";
 import { upsertActorToolDefinition } from "./actor/upsert-actor.ts";
 import { harvestBackstageCandidateToolDefinition } from "./backstage/harvest-backstage-candidate.ts";
 import { manageFactionClockToolDefinition } from "./backstage/manage-faction-clock.ts";
@@ -15,7 +16,6 @@ import { recordOffscreenEventToolDefinition } from "./backstage/record-offscreen
 import { resolveBackstageLineToolDefinition } from "./backstage/resolve-backstage-line.ts";
 import { runParallelLineToolDefinition } from "./backstage/run-parallel-line.ts";
 import { getStateSchemaToolDefinition } from "./debug/get-state-schema.ts";
-import { migrateStateToolDefinition } from "./debug/migrate-state.ts";
 import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact.ts";
 import { resetStateToolDefinition } from "./debug/reset-state.ts";
 import { updateEconomyToolDefinition } from "./economy/update-economy.ts";
@@ -30,8 +30,8 @@ import { commitTurnToolDefinition } from "./scene/commit-turn.ts";
 import { privateResolveToolDefinition } from "./scene/private-resolve.ts";
 import { progressSceneBeatToolDefinition } from "./scene/progress-scene-beat.ts";
 import { submitDirectionPacketToolDefinition } from "./scene/submit-direction-packet.ts";
+import { addHiddenWorldFactToolDefinition } from "./secrets/add-hidden-world-fact.ts";
 import { revealSecretToolDefinition } from "./secrets/reveal-secret.ts";
-import { configureCampaignToolDefinition } from "./system/configure-campaign.ts";
 import { getStatusToolDefinition } from "./system/get-status.ts";
 import { initializeNewGameToolDefinition } from "./system/initialize-new-game.ts";
 import { patchStateToolDefinition } from "./system/patch-state.ts";
@@ -40,7 +40,6 @@ import { updateHookToolDefinition } from "./system/update-hook.ts";
 /** 全部 Domain Event Tool 契约清单；契约本体与实现同文件维护。 */
 const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
   initializeNewGameToolDefinition,
-  configureCampaignToolDefinition,
   commitTurnToolDefinition,
   progressSceneBeatToolDefinition,
   getStatusToolDefinition,
@@ -54,6 +53,8 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
   recallMemoryToolDefinition,
   updateActorImpressionToolDefinition,
   updateActorConditionToolDefinition,
+  updateTrackedItemToolDefinition,
+  addHiddenWorldFactToolDefinition,
   setScenePresenceToolDefinition,
   upsertActorToolDefinition,
   updateEconomyToolDefinition,
@@ -67,7 +68,7 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
   lookupToolDefinition,
   patchStateToolDefinition,
   overrideLockedFactToolDefinition,
-  migrateStateToolDefinition,
+
   resetStateToolDefinition,
   getStateSchemaToolDefinition,
   updateCorruptionToolDefinition,

@@ -109,7 +109,7 @@ interface ScheduledEvent {
 落地清单：
 
 - `run_parallel_line` 领域工具（`tools/state/run-parallel-line.ts`）：GM 只传 `lineId + timeWindow + 可选偏好`，engine 从 secret state、actor agenda、offscreenEventLog、pressure palette 自动装配完整 `ParallelLineInput`，返回可直接传给 `parallel-line` 子代理的 JSON。
-- engine-side assembler（`engine/core/parallel-line-assembler.ts`）：自动提取 knownFacts（public memory eventLog + pinnedFacts）、privateFacts（campaignSecrets 未 reveal）、actorGoals（actorAgendas）、forbiddenEscalations（storyWindow 自动合并）、recentOffscreenEvents（最近 6 条 + pressureType 分类）、pressure palette（带 recentUses + coolingDown）。
+- engine-side assembler（`engine/core/parallel-line-assembler.ts`）：自动提取 knownFacts（public memory eventLog + pinnedFacts）、privateFacts（hiddenWorldFacts 未 reveal）、actorGoals（actorAgendas）、forbiddenEscalations（storyWindow 自动合并）、recentOffscreenEvents（最近 6 条 + pressureType 分类）、pressure palette（带 recentUses + coolingDown）。
 - `ParallelLineOutput` TypeBox 验证器（`engine/core/parallel-line-output-schema.ts`）：子代理返回裸 JSON 字符串由 TypeBox 严格验证，解析失败抛 Error 让调用方重试——从 prompt 恳求变成代码验收。
 - `ParallelLineInput` / `ParallelLineOutput` 扩展：新增 `recentOffscreenEvents`、`excludedActorIds`、`excludedPressureTypes`、`preferredPressureType`、`majorBeatEnd`、`arcTransition`；输出新增 `timelineId`、`toneDriftRisk`、`genreFitNotes`。
 - `gm-tool-policy.md` parallel-line 小节改为 `run_parallel_line` 工具装配流程。
@@ -421,7 +421,7 @@ interface ActorRef {
 
 落地路线：
 
-1. 先建 name→id resolver（模糊匹配 renderName/internalName，参考 `scene.ts` 的 `findEntryBySummary`），作为工具入口的 actor 引用缓冲。
+1. 先建 name→id resolver（模糊匹配 renderName/canonicalName，参考 `scene.ts` 的 `findEntryBySummary`），作为工具入口的 actor 引用缓冲。
 2. `upsert-public-npc` / `upsert-servant` 改为系统生成 id，返回给 LLM；id 字段从输入降级为可选诊断输出。
 3. 种子主角 id 从 `state-store.ts` 单点常量（已收敛，见 commit `007e5cb`）改为中性生成值。
 4. 清扠20+ 个测试 fixture 里假设主角 id=`protagonist` 的处，改引用 `state.public.protagonistActorId`。

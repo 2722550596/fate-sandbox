@@ -71,4 +71,4 @@
 - Removed: FATE*RANK*_, NOBLE*PHANTASM*_, SERVANT*SKILL*_, FATE*PARAMS*_, COMMAND*SPELL*_, MASTER*ROLE*_
 - Removed: ServantInput, SERVANT_INPUT_SCHEMA, UPSERT_SERVANT variant
 - Added: SequenceInput, SEQUENCE_INPUT_SCHEMA, UPSERT_SEQUENCE variant
-- ACTOR_REGISTRY_KINDS: "setup-protagonist" | "upsert-public-npc" | "ensure-public-npc" | "upsert-sequence"
+- ACTOR_REGISTRY_KINDS: "setup-protagonist" | "upsert-public-npc" | "init-npc" | "upsert-sequence"

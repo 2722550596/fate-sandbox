@@ -286,21 +286,26 @@ void test("groupTurns takes fsn-prose custom message as final prose in two-pass 
 void test("measureLint reports prose violations and secret leaks", () => {
   const secrets = {
     actorStates: {
-      saber: {
-        actorId: "saber",
-        secrets: { trueName: { value: "两仪式", revealState: "hidden" }, hiddenNoblePhantasms: [] },
+      alice: {
+        actorId: "alice",
+        secrets: {
+          pathwaySecret: { value: "命运之轮", revealState: "hidden" },
+          sequenceSecret: { value: "序列4", revealState: "hidden" },
+          privateMotives: [],
+          unrevealedAffiliations: [],
+        },
       },
     },
   };
   const jsonl = buildJsonl([
     { kind: "state", secrets },
-    ...plainTurn("c1", { prose: "好的，以下是剧情。她说：你就是两仪式吧。" }),
+    ...plainTurn("c1", { prose: "好的，以下是剧情。她说：你就是命运之轮吧。" }),
   ]);
   const lint = measureLint(groupTurns(reconstructActivePath(parseSessionJsonl(jsonl))));
   assert.equal(lint.turnsWithFindings, 1);
   assert.ok((lint.findingsByRule["opening-delivery-wrapper"] ?? 0) >= 1);
   assert.equal(lint.blockFindings.length, 1);
-  assert.equal(lint.blockFindings[0]?.finding.match, "两仪式");
+  assert.equal(lint.blockFindings[0]?.finding.match, "命运之轮");
 });
 
 void test("measureLint reports underlength two-pass prose from packet context", () => {
@@ -331,7 +336,14 @@ void test("measureLint reports underlength two-pass prose from packet context", 
 void test("measureLint uses latest secrets snapshot inside the turn", () => {
   const secrets = {
     actorStates: {
-      a: { actorId: "a", secrets: { trueName: { value: "美狄亚", revealState: "hidden" } } },
+      a: {
+        actorId: "a",
+        secrets: {
+          pathwaySecret: { value: "命运之轮", revealState: "hidden" },
+          privateMotives: [],
+          unrevealedAffiliations: [],
+        },
+      },
     },
   };
   // 秘密在轮内才配置（state 快照出现在 toolResult 后）
@@ -340,7 +352,7 @@ void test("measureLint uses latest secrets snapshot inside the turn", () => {
     { kind: "assistant", toolCalls: [{ id: "c1", name: "reveal_secret", args: {} }] },
     { kind: "toolResult", toolCallId: "c1" },
     { kind: "state", secrets },
-    { kind: "assistant", text: "幕后，美狄亚冷笑。" },
+    { kind: "assistant", text: "幕后，命运之轮冷笑。" },
   ]);
   const lint = measureLint(groupTurns(reconstructActivePath(parseSessionJsonl(jsonl))));
   assert.equal(lint.blockFindings.length, 1);

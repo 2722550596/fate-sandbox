@@ -54,8 +54,8 @@ export function upsertActor(draft: State, input: ActorRegistryInput): UpsertActo
       return upsertProtagonist(draft, input);
     case "upsert-public-npc":
       return upsertPublicNpc(draft, input);
-    case "ensure-public-npc":
-      return ensurePublicNpc(draft, input);
+    case "init-npc":
+      return initNpc(draft, input);
     case "upsert-sequence":
       return upsertSequence(draft, input);
     default:
@@ -85,12 +85,12 @@ function upsertPublicNpc(
   return { message: `public npc 已写入：${actor.id}。` };
 }
 
-function ensurePublicNpc(
+function initNpc(
   draft: State,
-  input: Extract<ActorRegistryInput, { kind: "ensure-public-npc" }>,
+  input: Extract<ActorRegistryInput, { kind: "init-npc" }>,
 ): UpsertActorResult {
   assertNonEmptyString(input.reason, "reason");
-  const actor = toSafePublicActorFromSkeleton(input.npc);
+  const actor = toInitNpcActor(input.npc);
   if (draft.public.actors[actor.id] !== undefined) {
     return { message: `actor 已存在：${actor.id}。` };
   }
@@ -198,8 +198,8 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
       lockedFacts: [],
     },
     presentation: {
-      internalName: assertNonEmptyString(npc.internalName, "npc.internalName"),
-      renderName: assertNonEmptyString(npc.renderName ?? npc.internalName, "npc.renderName"),
+      canonicalName: assertNonEmptyString(npc.canonicalName, "npc.canonicalName"),
+      renderName: assertNonEmptyString(npc.renderName ?? npc.canonicalName, "npc.renderName"),
       apparentAge: assertNonEmptyString(npc.apparentAge, "npc.apparentAge"),
       outfit: npc.outfit,
       demeanor: assertNonEmptyString(npc.demeanor, "npc.demeanor"),
@@ -224,11 +224,11 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
   }
 }
 
-function toSafePublicActorFromSkeleton(npc: PublicNpcSkeletonInput): PublicActorState {
+function toInitNpcActor(npc: PublicNpcSkeletonInput): PublicActorState {
   return toSafePublicActor({
     id: npc.actorId,
     kind: npc.npcKind ?? "human",
-    internalName: npc.internalName,
+    canonicalName: npc.canonicalName,
     publicIdentity: npc.publicIdentity,
     apparentAge: npc.apparentAge ?? "玩家可见年龄未确认",
     outfit: npc.outfit ?? {

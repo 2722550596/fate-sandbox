@@ -6,12 +6,12 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
+import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
 import {
   PATHWAY_ID_SCHEMA,
   SEQUENCE_RANK_SCHEMA,
   stringEnumSchema,
 } from "../../core/state/state-enum-schemas.ts";
-import { persistStateAfterCommit } from "../../core/state/state-persistence.ts";
 import { cloneState, commitState } from "../../core/state/state-store.ts";
 import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../../core/utils/typebox-validation.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";

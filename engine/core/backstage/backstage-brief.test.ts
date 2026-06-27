@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createInitialState } from "../state/state-store.ts";
+import { createInitialState } from "../state/initial-state.ts";
 import { buildBackstageGmBrief } from "./backstage-brief.ts";
 import { recordPendingHarvest } from "./backstage-pending.ts";
 

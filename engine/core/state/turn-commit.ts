@@ -1,4 +1,6 @@
 import type { ActorConditionEvent, ActorConditionEventResult } from "../actor/actor-condition.ts";
+import type { TrackedItemEventResult } from "../actor/tracked-item.ts";
+import type { TrackedItemEvent } from "../actor/tracked-item-schema.ts";
 import type { SequenceInput } from "../actor/actor-schema.ts";
 import type { ScenePresenceInput, ScenePresenceResult } from "../actor/actor.ts";
 import type { EconomyEvent, EconomyEventResult } from "../economy/economy.ts";
@@ -7,6 +9,7 @@ import type { SceneEvent, SceneEventResult } from "../scene/scene.ts";
 import type { State, TurnTimePolicy } from "./state.ts";
 
 import { updateActorCondition } from "../actor/actor-condition.ts";
+import { applyTrackedItemEvent } from "../actor/tracked-item.ts";
 import { setScenePresence, upsertActor } from "../actor/actor.ts";
 import { updateEconomy } from "../economy/economy.ts";
 import { collectBackstageDueNotices } from "../faction-clock.ts";
@@ -27,6 +30,7 @@ export type TurnCommitEvent =
   | { kind: "scene"; event: SceneEvent }
   | { kind: "scene-presence"; event: ScenePresenceInput }
   | { kind: "actor-condition"; event: ActorConditionEvent }
+  | { kind: "tracked-item"; event: TrackedItemEvent }
   | { kind: "sequence"; event: SequenceEvent }
   | { kind: "economy"; event: EconomyEvent }
   | { kind: "memory"; event: MemoryEvent };
@@ -41,6 +45,7 @@ export type TurnCommitEventResult =
   | { kind: "scene"; result: SceneEventResult }
   | { kind: "scene-presence"; result: ScenePresenceResult }
   | { kind: "actor-condition"; result: ActorConditionEventResult }
+  | { kind: "tracked-item"; result: TrackedItemEventResult }
   | { kind: "sequence"; result: SequenceEventResult }
   | { kind: "economy"; result: EconomyEventResult }
   | { kind: "memory"; result: MemoryEventResult };
@@ -83,6 +88,8 @@ function applyTurnEvent(draft: State, event: TurnCommitEvent): TurnCommitEventRe
       return { kind: event.kind, result: setScenePresence(draft, event.event) };
     case "actor-condition":
       return { kind: event.kind, result: updateActorCondition(draft, event.event) };
+    case "tracked-item":
+      return { kind: event.kind, result: applyTrackedItemEvent(draft, event.event) };
     case "sequence":
       return { kind: event.kind, result: applySequenceEvent(draft, event.event) };
     case "economy":

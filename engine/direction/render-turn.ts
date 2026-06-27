@@ -66,7 +66,7 @@ export interface RendererMessage {
 
 export interface RendererNameEntry {
   actorId: string;
-  internalName: string;
+  canonicalName: string;
   renderName: string;
 }
 
@@ -141,7 +141,7 @@ function buildRendererNameSection(nameEntries: readonly RendererNameEntry[]): st
   if (nameEntries.length === 0) {
     return [];
   }
-  const hasHiddenInternal = nameEntries.some((entry) => entry.internalName !== entry.renderName);
+  const hasHiddenInternal = nameEntries.some((entry) => entry.canonicalName !== entry.renderName);
   const lines = [
     "# Actor Render Names (binding)",
     "",
@@ -149,14 +149,14 @@ function buildRendererNameSection(nameEntries: readonly RendererNameEntry[]): st
   ];
   if (hasHiddenInternal) {
     lines.push(
-      "When an entry also lists internalName, that label is an internal/binding identity (it may hold a not-yet-revealed true name) and must never appear in prose.",
+      "When an entry also lists canonicalName, that label is an internal/binding identity (it may hold a not-yet-revealed true name) and must never appear in prose.",
     );
   }
   for (const entry of nameEntries) {
     lines.push(
-      entry.internalName === entry.renderName
+      entry.canonicalName === entry.renderName
         ? `- ${entry.actorId}: renderName=${entry.renderName}`
-        : `- ${entry.actorId}: internalName=${entry.internalName}; renderName=${entry.renderName}`,
+        : `- ${entry.actorId}: canonicalName=${entry.canonicalName}; renderName=${entry.renderName}`,
     );
   }
   lines.push("");

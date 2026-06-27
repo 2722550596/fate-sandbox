@@ -14,7 +14,7 @@ import { getMarkdownTheme } from "@earendil-works/pi-coding-agent";
 import { Markdown, Text } from "@earendil-works/pi-tui";
 
 import { collectUnrevealedSecretStrings } from "../../engine/audit/lint-rules.ts";
-import { syncStateFromSessionManager } from "../../engine/core/state/session-hydration.ts";
+import { syncStateFromSessionManager } from "../../engine/core/state/session-persistence.ts";
 import { getState } from "../../engine/core/state/state-store.ts";
 import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 import { loadProseDigests, saveProseDigest } from "../../engine/direction/prose-digest-store.ts";
@@ -148,14 +148,14 @@ interface RenderedProse {
 
 function rendererNameEntries(state: ReturnType<typeof getState>): Array<{
   actorId: string;
-  internalName: string;
+  canonicalName: string;
   renderName: string;
 }> {
   // 每个具名 actor 都需要绑定 renderName，防止渲染器重新音译（例：Manaka 被随机译成不同中文）。
-  // 不能只在 renderName !== internalName 时才发；那样同名（常见情况）会丢掉所有锚点。
+  // 不能只在 renderName !== canonicalName 时才发；那样同名（常见情况）会丢掉所有锚点。
   return Object.values(state.public.actors).map((actor) => ({
     actorId: actor.id,
-    internalName: actor.presentation.internalName,
+    canonicalName: actor.presentation.canonicalName,
     renderName: actor.presentation.renderName,
   }));
 }

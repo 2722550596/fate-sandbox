@@ -1,6 +1,5 @@
 import type { PublicGameState } from "../state/state.ts";
 
-import { actorDisplayName } from "../actor/actor-display.ts";
 import { formatHookLedger } from "../hooks/hooks.ts";
 import { recentPlayerKnownRelationshipSignals } from "../relationship-signal.ts";
 import { formatHumanTime } from "../state/date-time.ts";
@@ -217,14 +216,14 @@ function formatRecentRelationshipSignals(publicState: PublicGameState): string {
     : recent
         .map(
           (signal) =>
-            `${actorDisplayName(publicState, signal.actorId)}→${actorDisplayName(publicState, signal.targetActorId)}：${signal.signal}（边界：${signal.boundary}）`,
+            `${publicState.actors[signal.actorId]?.presentation.renderName ?? signal.actorId}→${publicState.actors[signal.targetActorId]?.presentation.renderName ?? signal.targetActorId}：${signal.signal}（边界：${signal.boundary}）`,
         )
         .join("；");
 }
 
 function formatPresentActors(publicState: PublicGameState): string {
-  const names = publicState.scene.presentActorIds.map((actorId) =>
-    actorDisplayName(publicState, actorId),
+  const names = publicState.scene.presentActorIds.map(
+    (actorId) => publicState.actors[actorId]?.presentation.renderName ?? actorId,
   );
   return names.length === 0 ? "无" : names.join("、");
 }
@@ -253,7 +252,7 @@ function formatTrackedItems(publicState: PublicGameState): string {
       const holder =
         item.holderActorId === null
           ? "未随身持有"
-          : actorDisplayName(publicState, item.holderActorId);
+          : (publicState.actors[item.holderActorId]?.presentation.renderName ?? item.holderActorId);
       const notes = item.notes.length === 0 ? "" : `；${item.notes.join("；")}`;
       return `- ${item.label}（${holder}；${item.condition}${notes}）`;
     })
