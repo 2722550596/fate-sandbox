@@ -15,11 +15,11 @@ import { isRecord } from "./engine/core/utils/typebox-validation.ts";
 import { PROSE_CUSTOM_TYPE } from "./engine/direction/render-turn.ts";
 import { stripLeakedSettlementProse } from "./engine/direction/settlement-prose-firewall.ts";
 import { buildSystemPrompt, injectGmPromptMessages } from "./engine/gm-prompt/injection.ts";
+import { registerAllTools } from "./engine/tools/registry.ts";
 import {
   buildTimelineStateContextBlock,
   injectTimelineContextIntoSubagentInput,
 } from "./extensions/subagents/timeline/task-injection.ts";
-import { registerAllTools } from "./tools/registry.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

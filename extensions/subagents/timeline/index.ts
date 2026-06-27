@@ -3,7 +3,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 
 export { buildTimelineStateContextFromRaw as buildTimelineStateContext } from "../../../engine/core/state/state-file-projection.ts";
-import { lookupTool } from "../../../tools/lookup/lookup.ts";
+import { lookupTool } from "../../../engine/tools/lookup/lookup.ts";
 
 /**
  * timeline 子代理运行时 extension：只提供 lookup 工具。
