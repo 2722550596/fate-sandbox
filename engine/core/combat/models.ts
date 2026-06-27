@@ -188,9 +188,19 @@ export interface CombatActionResult {
   appliedEffects: EffectInstance[];
   formula: string;
   details: string;
+  /** 消耗扣减明细（用于同步回 actor stats） */
+  costDeductions: CostDeduction[];
 }
 
 /** 伤害计算结果（内部用） */
+
+/** 单次消耗扣减记录 */
+export interface CostDeduction {
+  /** 被扣减的属性名（StatsValues 的 key） */
+  attribute: keyof StatsValues;
+  /** 扣减量 */
+  deductedAmount: number;
+}
 export interface DamageCalcResult {
   damage: number;
   targetAttribute: "vitality" | "sanity";

@@ -51,10 +51,11 @@ export function resolveCombatTool(params: unknown, sessionManager: unknown): Ret
       // 应用战斗结果到 state
       if (result.canAfford) {
         // 扣减攻击方消耗
-        if (result.costMessage !== "无消耗") {
-          // cost 已由 executeCombatAction 内部通过 deductCost 处理，
-          // 但 deductCost 返回的 newStats 仅在战斗管线内使用。
-          // 这里需要从战斗结果反推消耗，写入 actor.stats.current
+        for (const deduction of result.costDeductions) {
+          attackerActor.stats.current[deduction.attribute] = Math.max(
+            0,
+            attackerActor.stats.current[deduction.attribute] - deduction.deductedAmount,
+          );
         }
 
         // 伤害写入防御方 current

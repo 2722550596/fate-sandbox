@@ -13,6 +13,7 @@ import type {
   CombatActionResult,
   CombatActionInput,
   CombatantSnapshot,
+  CostDeduction,
   EffectInstance,
   SkillDef,
 } from "./models.ts";
@@ -44,6 +45,7 @@ export function executeCombatAction(input: CombatActionInput): CombatActionResul
       appliedEffects: [],
       formula: "",
       details: `消耗不足：${costCheck.message}`,
+      costDeductions: [],
     };
   }
 
@@ -63,9 +65,18 @@ export function executeCombatAction(input: CombatActionInput): CombatActionResul
     stats: costDeduction.newStats,
   };
 
+  // 计算消耗扣减明细
+  const costDeductions: CostDeduction[] = [];
+  for (const attrKey of ["vitality", "agility", "spirituality", "sanity", "humanity", "luck"] as const) {
+    const diff = attacker.stats[attrKey] - costDeduction.newStats[attrKey];
+    if (diff > 0) {
+      costDeductions.push({ attribute: attrKey, deductedAmount: diff });
+    }
+  }
+
   // 4. 判断是否治疗
   if (effectiveSkill.isHeal) {
-    return executeHeal(updatedAttacker, defender, effectiveSkill, costDeduction.message);
+    return executeHeal(updatedAttacker, defender, effectiveSkill, costDeduction.message, costDeductions);
   }
 
   // 5. 计算伤害
@@ -79,6 +90,7 @@ export function executeCombatAction(input: CombatActionInput): CombatActionResul
   );
   const uniqueEffects = dedupeEffects(newDefenderEffects);
 
+
   const details = [damageResult.formula, costDeduction.message, ...effectLogs].join(" | ");
 
   return {
@@ -87,6 +99,7 @@ export function executeCombatAction(input: CombatActionInput): CombatActionResul
     damage: damageResult.damage,
     targetAttribute: damageResult.targetAttribute,
     appliedEffects: uniqueEffects,
+    costDeductions,
     formula: damageResult.formula,
     details,
   };
@@ -101,6 +114,7 @@ function executeHeal(
   defender: CombatantSnapshot,
   skill: SkillDef,
   costMessage: string,
+  costDeductions: CostDeduction[],
 ): CombatActionResult {
   const healAmt = resolvePowerMap(
     typeof skill.healAmt === "object" ? skill.healAmt : undefined,
@@ -134,6 +148,7 @@ function executeHeal(
     damage: -actualHeal,
     targetAttribute: "vitality",
     appliedEffects: uniqueEffects,
+    costDeductions,
     formula,
     details: `${formula} | ${costMessage}`,
   };
