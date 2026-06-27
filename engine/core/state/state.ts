@@ -327,6 +327,7 @@ export interface ActorBase {
   identity: IdentityState;
   presentation: PresentationState;
   condition: ConditionState;
+  equipment: EquipmentSlots;
   inventory: InventoryState;
   abilities: AbilityState[];
   relationshipToProtagonist: RelationshipState;
@@ -478,13 +479,36 @@ export interface AgeState {
 }
 
 // ---------------------------------------------------------------------------
+// Equipment — 装备栏
+// ---------------------------------------------------------------------------
+
+export interface EquipmentItemData {
+  id: string;
+  name: string;
+  type: "武器" | "衣物" | "饰品" | "封印物";
+  sequenceRank: SequenceRank;
+  pathway: string;
+  sequenceName: string;
+  trait: string | null;
+  tags: TagEntry[];
+  modifiers: StatsValues;
+}
+
+export interface EquipmentSlots {
+  weapon: EquipmentItemData | null;
+  clothing: EquipmentItemData | null;
+  accessory: EquipmentItemData | null;
+  sealedArtifact: EquipmentItemData | null;
+}
+
+// ---------------------------------------------------------------------------
 // Inventory & Abilities
 // ---------------------------------------------------------------------------
 
 export interface InventoryState {
   ordinaryItems: string[];
+  storedEquipment: EquipmentItemData[];
 }
-
 export interface AbilityState {
   id: string;
   label: string;
@@ -630,4 +654,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 3;
+export const CURRENT_STATE_SCHEMA_VERSION = 4;

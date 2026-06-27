@@ -175,8 +175,37 @@ const CONDITION_STATE_SCHEMA = Type.Object({
 // Inventory & Abilities
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Equipment
+// ---------------------------------------------------------------------------
+
+const EQUIPMENT_ITEM_DATA_SCHEMA = Type.Object({
+  id: NON_EMPTY_STRING_SCHEMA,
+  name: NON_EMPTY_STRING_SCHEMA,
+  type: Type.Union([
+    Type.Literal("武器"),
+    Type.Literal("衣物"),
+    Type.Literal("饰品"),
+    Type.Literal("封印物"),
+  ]),
+  sequenceRank: SEQUENCE_RANK_SCHEMA,
+  pathway: NON_EMPTY_STRING_SCHEMA,
+  sequenceName: NON_EMPTY_STRING_SCHEMA,
+  trait: nullable(NON_EMPTY_STRING_SCHEMA),
+  tags: Type.Array(TAG_ENTRY_SCHEMA),
+  modifiers: STATS_VALUES_SCHEMA,
+});
+
+const EQUIPMENT_SLOTS_SCHEMA = Type.Object({
+  weapon: nullable(EQUIPMENT_ITEM_DATA_SCHEMA),
+  clothing: nullable(EQUIPMENT_ITEM_DATA_SCHEMA),
+  accessory: nullable(EQUIPMENT_ITEM_DATA_SCHEMA),
+  sealedArtifact: nullable(EQUIPMENT_ITEM_DATA_SCHEMA),
+});
+
 const INVENTORY_STATE_SCHEMA = Type.Object({
   ordinaryItems: NON_EMPTY_STRING_ARRAY_SCHEMA,
+  storedEquipment: Type.Array(EQUIPMENT_ITEM_DATA_SCHEMA),
 });
 
 const ABILITY_STATE_SCHEMA = Type.Object({
@@ -219,6 +248,7 @@ const ACTOR_BASE_PROPERTIES = {
   identity: IDENTITY_STATE_SCHEMA,
   presentation: PRESENTATION_STATE_SCHEMA,
   condition: CONDITION_STATE_SCHEMA,
+  equipment: EQUIPMENT_SLOTS_SCHEMA,
   inventory: INVENTORY_STATE_SCHEMA,
   abilities: Type.Array(ABILITY_STATE_SCHEMA),
   relationshipToProtagonist: RELATIONSHIP_STATE_SCHEMA,

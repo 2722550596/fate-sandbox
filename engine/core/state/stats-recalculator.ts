@@ -8,8 +8,7 @@
 // 移植自原始 AttributeCalculator.recalculateAllSixDimStats()
 // ---------------------------------------------------------------------------
 
-import type { CharacterStats } from "./state.ts";
-import type { StatusEffectState } from "./state.ts";
+import type { CharacterStats, EquipmentSlots, StatusEffectState } from "./state.ts";
 
 /** 受 buff/debuff 影响的六维属性名 */
 const SIX_DIM_KEYS = [
@@ -40,6 +39,7 @@ const SIX_DIM_KEYS = [
 export function recalculateMaxStats(
   stats: CharacterStats,
   statusEffects: readonly StatusEffectState[],
+  equipment?: EquipmentSlots,
 ): void {
   for (const key of SIX_DIM_KEYS) {
     const baseValue = stats.base[key];
@@ -66,6 +66,44 @@ export function recalculateMaxStats(
     }
   }
 
-  // luck 不受影响
+  // luck 不受效果影响
   stats.max.luck = stats.base.luck;
+
+  // 叠加装备加成
+  if (equipment) {
+    applyEquipmentModifiers(stats, equipment);
+  }
+}
+
+/**
+ * 将装备栏中所有已装备物品的 modifiers 叠加到 stats.max。
+ */
+function applyEquipmentModifiers(
+  stats: CharacterStats,
+  equipment: EquipmentSlots,
+): void {
+  const allSlots = [
+    equipment.weapon,
+    equipment.clothing,
+    equipment.accessory,
+    equipment.sealedArtifact,
+  ];
+
+  for (const slot of allSlots) {
+    if (slot === null) continue;
+    const mod = slot.modifiers;
+    stats.max.vitality += mod.vitality;
+    stats.max.agility += mod.agility;
+    stats.max.spirituality += mod.spirituality;
+    stats.max.sanity += mod.sanity;
+    stats.max.humanity += mod.humanity;
+    stats.max.luck += mod.luck;
+  }
+
+  // 钳制 current
+  for (const key of ["vitality", "agility", "spirituality", "sanity", "humanity", "luck"] as const) {
+    if (stats.current[key] > stats.max[key]) {
+      stats.current[key] = stats.max[key];
+    }
+  }
 }

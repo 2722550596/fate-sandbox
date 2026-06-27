@@ -11,9 +11,11 @@ import { renderDomainToolResult } from "./runtime/tool-render.ts";
 import { attemptPromotionToolDefinition } from "./state/attempt-promotion.ts";
 import { commitTurnToolDefinition } from "./state/commit-turn.ts";
 import { configureCampaignToolDefinition } from "./state/configure-campaign.ts";
+import { createEquipmentToolDefinition } from "./state/create-equipment.ts";
 import { getStatusToolDefinition } from "./state/get-status.ts";
 import { harvestBackstageCandidateToolDefinition } from "./state/harvest-backstage-candidate.ts";
 import { initializeNewGameToolDefinition } from "./state/initialize-new-game.ts";
+import { manageEquipmentToolDefinition } from "./state/manage-equipment.ts";
 import { manageFactionClockToolDefinition } from "./state/manage-faction-clock.ts";
 import { moveToToolDefinition } from "./state/move-to.ts";
 import { patchStateToolDefinition } from "./state/patch-state.ts";
@@ -76,6 +78,8 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
   moveToToolDefinition,
   resolveCombatToolDefinition,
   rollDiceToolDefinition,
+  createEquipmentToolDefinition,
+  manageEquipmentToolDefinition,
 ];
 
 export function registerAllTools(pi: ExtensionAPI): void {

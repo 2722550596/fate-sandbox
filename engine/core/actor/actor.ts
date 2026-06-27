@@ -203,7 +203,8 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
       demeanor: assertNonEmptyString(npc.demeanor, "npc.demeanor"),
     },
     condition: { statusEffects: [] },
-    inventory: { ordinaryItems: npc.ordinaryItems },
+    equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
+    inventory: { ordinaryItems: npc.ordinaryItems, storedEquipment: [] },
     abilities: [],
     relationshipToProtagonist: npc.relationshipToProtagonist,
   };

@@ -232,7 +232,8 @@ function createInitialProtagonist(): HumanActorState {
       demeanor: "由玩家行动定义。",
     },
     condition: { statusEffects: [] },
-    inventory: { ordinaryItems: [] },
+    equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
+    inventory: { ordinaryItems: [], storedEquipment: [] },
     abilities: [],
     relationshipToProtagonist: { stance: "self", summary: "玩家本人。" },
   };

@@ -5,11 +5,11 @@
 // 以及根据 pathway 查所有序列的功能。
 // ---------------------------------------------------------------------------
 
+import type { SequenceRank } from "./state/state-enum-schemas.ts";
+
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-
-import type { SequenceRank } from "./state/state-enum-schemas.ts";
 
 // ===========================================================================
 // 配置加载

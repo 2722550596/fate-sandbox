@@ -22,10 +22,10 @@ export function resolveCombatTool(params: unknown, sessionManager: unknown): Ret
       const attActor = draft.public.actors[input.attackerId];
       const defActor = draft.public.actors[input.defenderId];
       if (attActor && attActor.stats) {
-        recalculateMaxStats(attActor.stats, attActor.condition.statusEffects);
+        recalculateMaxStats(attActor.stats, attActor.condition.statusEffects, attActor.equipment);
       }
       if (defActor && defActor.stats) {
-        recalculateMaxStats(defActor.stats, defActor.condition.statusEffects);
+        recalculateMaxStats(defActor.stats, defActor.condition.statusEffects, defActor.equipment);
       }
 
       const attackerActor = draft.public.actors[input.attackerId];
