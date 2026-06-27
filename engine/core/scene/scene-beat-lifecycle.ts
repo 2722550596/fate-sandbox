@@ -26,8 +26,8 @@ export type {
 
 import { setScenePresence } from "../actor/actor.ts";
 import { recordMemory } from "../knowledge/memory.ts";
-import { appendTurnLogEntry } from "../state/turn-log.ts";
-import { applyTurnTime } from "../state/turn-time.ts";
+import { appendTurnLogEntry } from "../turn/turn-log.ts";
+import { applyTurnTime } from "../turn/turn-time.ts";
 import { createId } from "../utils/ids.ts";
 import { beginSceneBeat, transitionSceneBeat, updateScene } from "./scene.ts";
 

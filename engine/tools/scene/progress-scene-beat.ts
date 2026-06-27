@@ -8,8 +8,8 @@ import {
   recordCanonicalTurnForBackstage,
 } from "../../core/backstage/backstage-obligation.ts";
 import { formatPendingHarvestReminder } from "../../core/backstage/backstage-pending.ts";
-import { collectBackstageDueNotices } from "../../core/faction-clock.ts";
-import { assertNoOpenObligations } from "../../core/obligations.ts";
+import { collectBackstageDueNotices } from "../../core/backstage/faction-clock.ts";
+import { assertNoOpenObligations } from "../../core/ledger/obligations.ts";
 import { progressSceneBeat } from "../../core/scene/scene-beat-lifecycle.ts";
 import { parseSceneBeatProgressInput } from "../../core/scene/scene-beat-schema.ts";
 import { runDomainEventTool } from "../system/domain-tool-runner.ts";

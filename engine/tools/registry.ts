@@ -8,7 +8,7 @@ import { setScenePresenceToolDefinition } from "./actor/set-scene-presence.ts";
 import { updateActorAgendaToolDefinition } from "./actor/update-actor-agenda.ts";
 import { updateActorConditionToolDefinition } from "./actor/update-actor-condition.ts";
 import { updateActorImpressionToolDefinition } from "./actor/update-actor-impression.ts";
-import { updateTrackedItemToolDefinition } from "./actor/update-tracked-item.ts";
+import { updateTrackedItemToolDefinition } from "./inventory/update-tracked-item.ts";
 import { upsertActorToolDefinition } from "./actor/upsert-actor.ts";
 import { harvestBackstageCandidateToolDefinition } from "./backstage/harvest-backstage-candidate.ts";
 import { manageFactionClockToolDefinition } from "./backstage/manage-faction-clock.ts";

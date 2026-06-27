@@ -1,7 +1,7 @@
 import type { PublicActorState, State } from "../state/state.ts";
 import type { ActorConditionEvent } from "./actor-condition-schema.ts";
 
-import { settleOldestObligation } from "../obligations.ts";
+import { settleOldestObligation } from "../ledger/obligations.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 import { changeActorOutfit } from "./actor-impression.ts";

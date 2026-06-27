@@ -3,19 +3,19 @@ import type {
   OffscreenEventSource,
   OffscreenEventVisibility,
   State,
-} from "./state/state.ts";
+} from "../state/state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 
 import {
   OFFSCREEN_EVENT_SOURCES,
   OFFSCREEN_EVENT_VISIBILITIES,
-} from "./state/state-enum-schemas.ts";
-import { createId } from "./utils/ids.ts";
-import { assertOneOfString } from "./utils/string-enum.ts";
-import { assertIsoDateString, assertNonEmptyString } from "./utils/typebox-validation.ts";
+} from "../state/state-enum-schemas.ts";
+import { createId } from "../utils/ids.ts";
+import { assertOneOfString } from "../utils/string-enum.ts";
+import { assertIsoDateString, assertNonEmptyString } from "../utils/typebox-validation.ts";
 
-export type { OffscreenEventSource, OffscreenEventVisibility } from "./state/state.ts";
+export type { OffscreenEventSource, OffscreenEventVisibility } from "../state/state.ts";
 
 export type RecordOffscreenEventInput = Omit<OffscreenEvent, "id" | "pressureSlotId"> & {
   pressureSlotId?: string | null;

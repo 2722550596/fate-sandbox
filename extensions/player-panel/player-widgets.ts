@@ -7,7 +7,7 @@
 
 import type { PublicGameState } from "../../engine/core/state/state.ts";
 
-import { recentPlayerKnownRelationshipSignals } from "../../engine/core/relationship-signal.ts";
+import { recentPlayerKnownRelationshipSignals } from "../../engine/core/actor/relationship-signal.ts";
 import { formatHumanTime } from "../../engine/core/state/date-time.ts";
 
 // ─── /relations ──────────────────────────────────────────────────

@@ -8,7 +8,7 @@ import { Container, Markdown, matchesKey, Text } from "@earendil-works/pi-tui";
 import {
   buildInventoryMarkdown,
   buildStatusMarkdown,
-} from "../../engine/core/backstage/public-projection.ts";
+} from "../../engine/core/state/public-projection.ts";
 import { syncStateFromSessionManager } from "../../engine/core/state/session-persistence.ts";
 import { getPublicState } from "../../engine/core/state/state-store.ts";
 import {

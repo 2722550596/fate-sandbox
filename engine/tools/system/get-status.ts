@@ -2,7 +2,7 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { buildGmBrief } from "../../core/backstage/public-projection.ts";
+import { buildGmBrief } from "../../core/state/public-projection.ts";
 import { hydrateStateFromSessionManager } from "../../core/state/session-persistence.ts";
 import { getState } from "../../core/state/state-store.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";

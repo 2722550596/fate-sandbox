@@ -16,7 +16,7 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { settleOldestObligation } from "../../core/obligations.ts";
+import { settleOldestObligation } from "../../core/ledger/obligations.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 

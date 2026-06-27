@@ -8,7 +8,7 @@ import type {
 import type { MemoryClaim, MemoryEvent } from "./memory-schema.ts";
 
 import { allActorSecretSlots } from "../actor/secret-actor-state.ts";
-import { settleOldestObligation } from "../obligations.ts";
+import { settleOldestObligation } from "../ledger/obligations.ts";
 import { createId } from "../utils/ids.ts";
 import { assertIsoDateString, assertNonEmptyString } from "../utils/typebox-validation.ts";
 

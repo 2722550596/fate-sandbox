@@ -5,7 +5,7 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { recordRelationshipSignal } from "../../core/relationship-signal.ts";
+import { recordRelationshipSignal } from "../../core/actor/relationship-signal.ts";
 import { stringEnumSchema } from "../../core/state/state-enum-schemas.ts";
 import { RELATIONSHIP_SIGNAL_VISIBILITIES } from "../../core/state/state-schema.ts";
 import { assertNonEmptyString, parseTypeBoxValue } from "../../core/utils/typebox-validation.ts";

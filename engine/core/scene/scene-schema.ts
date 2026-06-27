@@ -10,7 +10,7 @@ import {
   SITUATION_KIND_SCHEMA,
   stringEnumSchema,
 } from "../state/state-enum-schemas.ts";
-import { LOCATION_STATE_SCHEMA } from "../state/turn-time-schema.ts";
+import { LOCATION_STATE_SCHEMA } from "../turn/turn-time-schema.ts";
 import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../utils/typebox-validation.ts";
 
 /**

@@ -11,7 +11,7 @@ import {
   TIMELINE_ID_SCHEMA,
   TIMEZONE_ID_SCHEMA,
 } from "../state/state-enum-schemas.ts";
-import { LOCATION_STATE_SCHEMA } from "../state/turn-time-schema.ts";
+import { LOCATION_STATE_SCHEMA } from "../turn/turn-time-schema.ts";
 import { parseTypeBoxValue, trimStringsDeep } from "../utils/typebox-validation.ts";
 
 /**

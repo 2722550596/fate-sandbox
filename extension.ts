@@ -19,7 +19,7 @@ import { registerAllTools } from "./engine/tools/registry.ts";
 import {
   buildTimelineStateContextBlock,
   injectTimelineContextIntoSubagentInput,
-} from "./extensions/subagents/timeline/task-injection.ts";
+} from "./extensions/subagents/task-injection.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

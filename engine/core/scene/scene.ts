@@ -10,7 +10,7 @@ import type {
 import type { SceneBeatThreatInput } from "./scene-beat-schema.ts";
 import type { SceneEvent } from "./scene-schema.ts";
 
-import { settleOldestObligation } from "../obligations.ts";
+import { settleOldestObligation } from "../ledger/obligations.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 

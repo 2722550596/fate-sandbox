@@ -5,7 +5,7 @@ import type {
 } from "../state/state-enum-schemas.ts";
 import type { State } from "../state/state.ts";
 
-import { settleOldestObligation } from "../obligations.ts";
+import { settleOldestObligation } from "../ledger/obligations.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 

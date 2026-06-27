@@ -1,0 +1,16 @@
+{
+  "typescript-language-server": {
+    "command": "typescript-language-server",
+    "args": ["--stdio"],
+    "fileTypes": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+    "rootMarkers": ["package.json", "tsconfig.json"],
+    "initOptions": {
+      "hostInfo": "omp-coding-agent",
+      "preferences": {
+        "includeInlayParameterNameHints": "all",
+        "includeInlayVariableTypeHints": true,
+        "includeInlayFunctionParameterTypeHints": true
+      }
+    }
+  }
+}

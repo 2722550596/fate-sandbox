@@ -1,5 +1,5 @@
 import type { SceneEventResult } from "../scene/scene.ts";
-import type { State, TurnTimePolicy } from "./state.ts";
+import type { State, TurnTimePolicy } from "../state/state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 

@@ -29,7 +29,7 @@ import {
   TRACKED_ITEM_KIND_SCHEMA,
   TRACKED_ITEM_VISIBILITY_SCHEMA,
 } from "./state-enum-schemas.ts";
-import { LOCATION_STATE_SCHEMA } from "./turn-time-schema.ts";
+import { LOCATION_STATE_SCHEMA } from "../turn/turn-time-schema.ts";
 import { isRecord, parseTypeBoxValue, trimStringsDeep } from "../utils/typebox-validation.ts";
 
 const NON_EMPTY_STRING_SCHEMA = Type.String({ minLength: 1 });

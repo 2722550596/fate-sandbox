@@ -13,7 +13,7 @@ import {
   payHook,
   retireHook,
   surfaceHook,
-} from "../../core/hooks/hooks.ts";
+} from "../../core/ledger/hooks.ts";
 import {
   assertNonEmptyString,
   isRecord,

@@ -3,8 +3,8 @@ import type { RecordOffscreenEventInput } from "./offscreen-event.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { OFFSCREEN_EVENT_SOURCE_SCHEMA, stringEnumSchema } from "./state/state-enum-schemas.ts";
-import { parseTypeBoxValue, trimStringsDeep } from "./utils/typebox-validation.ts";
+import { OFFSCREEN_EVENT_SOURCE_SCHEMA, stringEnumSchema } from "../state/state-enum-schemas.ts";
+import { parseTypeBoxValue, trimStringsDeep } from "../utils/typebox-validation.ts";
 
 /**
  * record_offscreen_event 工具边界 schema。

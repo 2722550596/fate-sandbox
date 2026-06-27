@@ -1,6 +1,6 @@
-import type { TrackedItemEvent } from "../../core/actor/tracked-item-schema.ts";
+import type { TrackedItemEvent } from "../../core/inventory/tracked-item-schema.ts";
 
-import { parseTrackedItemEvent } from "../../core/actor/tracked-item-schema.ts";
+import { parseTrackedItemEvent } from "../../core/inventory/tracked-item-schema.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
 
 export function normalizeTrackedItemEvent(

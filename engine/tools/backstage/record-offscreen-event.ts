@@ -8,8 +8,8 @@ import {
   settleOldestBackstageObligation,
 } from "../../core/backstage/backstage-obligation.ts";
 import { clearPendingHarvestByLine } from "../../core/backstage/backstage-pending.ts";
-import { parseRecordOffscreenEventInput } from "../../core/offscreen-event-schema.ts";
-import { recordOffscreenEvent } from "../../core/offscreen-event.ts";
+import { parseRecordOffscreenEventInput } from "../../core/knowledge/offscreen-event-schema.ts";
+import { recordOffscreenEvent } from "../../core/knowledge/offscreen-event.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 

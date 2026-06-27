@@ -13,7 +13,7 @@ import {
   retireFactionClock,
   scheduleEvent,
   upsertFactionClock,
-} from "../../core/faction-clock.ts";
+} from "../../core/backstage/faction-clock.ts";
 import { stringEnumSchema } from "../../core/state/state-enum-schemas.ts";
 import { FACTION_CLOCK_VISIBILITIES } from "../../core/state/state-schema.ts";
 import {

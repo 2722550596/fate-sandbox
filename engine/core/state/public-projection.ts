@@ -1,8 +1,8 @@
-import type { PublicGameState } from "../state/state.ts";
+import type { PublicGameState } from "./state.ts";
 
-import { formatHookLedger } from "../hooks/hooks.ts";
-import { recentPlayerKnownRelationshipSignals } from "../relationship-signal.ts";
-import { formatHumanTime } from "../state/date-time.ts";
+import { formatHookLedger } from "../ledger/hooks.ts";
+import { recentPlayerKnownRelationshipSignals } from "../actor/relationship-signal.ts";
+import { formatHumanTime } from "./date-time.ts";
 
 export function buildGmBrief(publicState: PublicGameState): string {
   const protagonist = publicState.actors[publicState.protagonistActorId];

@@ -15,8 +15,8 @@ import type {
 } from "./secrets-schema.ts";
 
 import { getActorSecretSlots, setActorSecretSlots } from "../actor/secret-actor-state.ts";
-import { settleOldestObligation } from "../obligations.ts";
-import { recordOffscreenEvent } from "../offscreen-event.ts";
+import { settleOldestObligation } from "../ledger/obligations.ts";
+import { recordOffscreenEvent } from "./offscreen-event.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 import { recordMemory } from "./memory.ts";

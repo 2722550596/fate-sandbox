@@ -3,7 +3,7 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { applyTrackedItemEvent } from "../../core/actor/tracked-item.ts";
+import { applyTrackedItemEvent } from "../../core/inventory/tracked-item.ts";
 import { resultDetails, runDomainEventTool } from "../system/domain-tool-runner.ts";
 import { normalizeTrackedItemEvent } from "./tracked-item-normalizer.ts";
 

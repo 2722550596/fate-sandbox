@@ -3,11 +3,11 @@ import type {
   RelationshipSignal,
   RelationshipSignalVisibility,
   State,
-} from "./state/state.ts";
+} from "../state/state.ts";
 
-import { allActorSecretSlots } from "./actor/secret-actor-state.ts";
-import { createId } from "./utils/ids.ts";
-import { assertNonEmptyString, isRecord } from "./utils/typebox-validation.ts";
+import { allActorSecretSlots } from "./secret-actor-state.ts";
+import { createId } from "../utils/ids.ts";
+import { assertNonEmptyString, isRecord } from "../utils/typebox-validation.ts";
 
 export interface RecordRelationshipSignalInput {
   actorId: ActorId;

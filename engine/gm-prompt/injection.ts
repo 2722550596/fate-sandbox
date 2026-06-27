@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import { formatPresenceImpressionCards } from "../core/actor/actor-impression.ts";
 import { buildBackstageGmBrief } from "../core/backstage/backstage-brief.ts";
-import { buildGmBrief } from "../core/backstage/public-projection.ts";
+import { buildGmBrief } from "../core/state/public-projection.ts";
 import { getPublicState, getState } from "../core/state/state-store.ts";
 import { isRecord } from "../core/utils/typebox-validation.ts";
 import {

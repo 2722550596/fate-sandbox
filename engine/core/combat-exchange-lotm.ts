@@ -21,7 +21,7 @@ import { Type } from "typebox";
 import { noNumberNarrativeHint } from "../tools/runtime/narrative-hints.ts";
 import { runDomainEventTool } from "../tools/system/domain-tool-runner.ts";
 import { compareLOTMRanks } from "./lotm-rank.ts";
-import { recordObligation } from "./obligations.ts";
+import { recordObligation } from "./ledger/obligations.ts";
 import { SEQUENCE_RANKS } from "./state/state-enum-schemas.ts";
 import { seededRandomInt } from "./utils/seeded-rng.ts";
 import { assertOneOfString, assertOptionalOneOfString } from "./utils/string-enum.ts";
