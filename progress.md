@@ -8,15 +8,15 @@
 
 ## 总体进度
 
-| 里程碑                        | 状态             | 完成度 |
-| ----------------------------- | ---------------- | ------ |
-| M1: 骨架可编译（Phase 1+9）   | ✅ 完成          | 100%   |
-| M2: 引擎核心可运行（Phase 2） | ✅ 大部          | ~85%   |
-| M3: 工具链可用（Phase 3）     | ✅ 完成          | 100%   |
-| M4: 数据可用（Phase 4）       | ✅ 完成          | 100%   |
-| M5: Prompt 可游玩（Phase 5）  | ❌ 未动          | 0%     |
-| M6: 高级功能（Phase 6-7）     | ❌ 未动          | 0%     |
-| M7: 发布就绪（Phase 9 余项）  | ❌ 未动          | 0%     |
+| 里程碑                        | 状态    | 完成度 |
+| ----------------------------- | ------- | ------ |
+| M1: 骨架可编译（Phase 1+9）   | ✅ 完成 | 100%   |
+| M2: 引擎核心可运行（Phase 2） | ✅ 大部 | ~85%   |
+| M3: 工具链可用（Phase 3）     | ✅ 完成 | 100%   |
+| M4: 数据可用（Phase 4）       | ✅ 完成 | 100%   |
+| M5: Prompt 可游玩（Phase 5）  | ❌ 未动 | 0%     |
+| M6: 高级功能（Phase 6-7）     | ❌ 未动 | 0%     |
+| M7: 发布就绪（Phase 9 余项）  | ❌ 未动 | 0%     |
 
 ---
 
@@ -159,13 +159,12 @@
 
 ### ✅ 已完成的新工具
 
-| 工具名              | 迁移计划要求                         | 状态       |
-| ------------------- | ------------------------------------ | ---------- |
-| `attempt_promotion` | 序列晋升（魔药消化、仪式、失控风险） | ✅ 已创建  |
-| `roll_dice`         | 独立骰子工具                         | ✅ 已创建  |
-| `move_to`           | 位置移动（含坐标）                   | ✅ 已创建  |
+| 工具名              | 迁移计划要求                             | 状态      |
+| ------------------- | ---------------------------------------- | --------- |
+| `attempt_promotion` | 序列晋升（魔药消化、仪式、失控风险）     | ✅ 已创建 |
+| `roll_dice`         | 独立骰子工具                             | ✅ 已创建 |
+| `move_to`           | 位置移动（含坐标）                       | ✅ 已创建 |
 | `resolve_combat`    | 战斗结算（替代 resolve_combat_exchange） | ✅ 已创建 |
-
 
 ### ✅ 工具层残留 Fate 引用 —— 已全部清理
 
@@ -191,6 +190,7 @@
 ### 架构变更
 
 从硬编码 JSON 切换为 **目录 + Markdown + Frontmatter** 架构：
+
 - 每个实体一个 .md 文件，frontmatter 存元数据（title/type/tags/aliases）
 - 按类别分目录：characters/、locations/、organizations/、items/、pathways/、lore/、mechanics/
 - lookup 引擎启动时扫描 data/ 下所有 .md，解析 frontmatter + 正文，构建内存索引
@@ -198,16 +198,16 @@
 
 ### 数据量统计
 
-| 目录 | 文件数 | 说明 |
-| --- | --- | --- |
-| characters/ | 59 | 核心 NPC + 角色 |
-| locations/  | 82 | 城市、区域、地标 |
-| organizations/ | 18 | 教会、组织、学派 |
-| items/ | 41 | 封印物、源质、奇特物品 |
-| pathways/ | 6 | 途径定义 |
-| lore/ | 15 | 世界观、历史、文风指南 |
-| mechanics/ | 23 | 判定、魔药、仪式、神性等规则 |
-| economy.md | 1 | 经济/货币规则（5 条目合并） |
+| 目录           | 文件数 | 说明                         |
+| -------------- | ------ | ---------------------------- |
+| characters/    | 59     | 核心 NPC + 角色              |
+| locations/     | 82     | 城市、区域、地标             |
+| organizations/ | 18     | 教会、组织、学派             |
+| items/         | 41     | 封印物、源质、奇特物品       |
+| pathways/      | 6      | 途径定义                     |
+| lore/          | 15     | 世界观、历史、文风指南       |
+| mechanics/     | 23     | 判定、魔药、仪式、神性等规则 |
+| economy.md     | 1      | 经济/货币规则（5 条目合并）  |
 
 ### 已删除的旧 JSON 文件
 
@@ -339,18 +339,18 @@ tests 342 | suites 6 | pass 341 | fail 0 | skipped 1 | duration_ms 6384ms
 
 ## 执行时序总结
 
-| 步骤                                 | 完成情况                                                               |
-| ------------------------------------ | ---------------------------------------------------------------------- |
-| 项目基础配置 (Phase 9 部分)          | ✅ package.json 已改                                                   |
-| State Schema (Phase 1)               | ✅ 完整重写，typecheck 零错，341 测试通过                              |
-| Engine Core 领域模块 (Phase 2)       | ✅ 核心数值逻辑已实现，旧 Fate 模块已清                                |
-| **~~Tools"工具层"断层~~（Phase 3）** | ✅ 已修复（工具描述/schema + 12 处残留引用 + pressure 关键词全部清理） |
+| 步骤                                 | 完成情况                                                                   |
+| ------------------------------------ | -------------------------------------------------------------------------- |
+| 项目基础配置 (Phase 9 部分)          | ✅ package.json 已改                                                       |
+| State Schema (Phase 1)               | ✅ 完整重写，typecheck 零错，341 测试通过                                  |
+| Engine Core 领域模块 (Phase 2)       | ✅ 核心数值逻辑已实现，旧 Fate 模块已清                                    |
+| **~~Tools"工具层"断层~~（Phase 3）** | ✅ 已修复（工具描述/schema + 12 处残留引用 + pressure 关键词全部清理）     |
 | **新工具缺失（Phase 3）**            | ✅ `attempt_promotion` / `roll_dice` / `move_to` / `resolve_combat` 已完成 |
-| **Data 半迁移（Phase 4）**           | ✅ 目录+MD 架构，244 个 MD 文件，旧 JSON 已全部删除 |
-| Agents/Prompts (Phase 5)             | ❌ 完全未动                                                            |
-| Skills (Phase 6)                     | ❌ 完全未动                                                            |
-| Extensions/Subagents (Phase 7)       | ❌ 完全未动                                                            |
-| 新测试 (Phase 8)                     | ❌ 5 个引擎逻辑测试未创建                                              |
+| **Data 半迁移（Phase 4）**           | ✅ 目录+MD 架构，244 个 MD 文件，旧 JSON 已全部删除                        |
+| Agents/Prompts (Phase 5)             | ❌ 完全未动                                                                |
+| Skills (Phase 6)                     | ❌ 完全未动                                                                |
+| Extensions/Subagents (Phase 7)       | ❌ 完全未动                                                                |
+| 新测试 (Phase 8)                     | ❌ 5 个引擎逻辑测试未创建                                                  |
 
 ### 建议下一步行动
 
@@ -358,4 +358,3 @@ tests 342 | suites 6 | pass 341 | fail 0 | skipped 1 | duration_ms 6384ms
 2. ✅ ~~补新工具（Phase 3）~~ **`attempt_promotion`、`roll_dice`、`move_to`、`resolve_combat` 已创建**
 3. ✅ ~~补数据（Phase 4）~~ **已替换为目录+MD 架构，244 个文件**
 4. **写测试（Phase 8）：** judgment、damage-calculator、attribute-calculator、status-effect、sequence-promotion
-

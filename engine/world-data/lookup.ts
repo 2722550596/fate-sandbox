@@ -1,6 +1,5 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { extname, join, relative, sep } from "node:path";
-import { dirname } from "node:path";
+import { dirname, extname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseFrontmatter } from "./frontmatter.ts";
@@ -116,7 +115,9 @@ function buildDocIndex(): MdDocument[] {
 
   // 扫描 data/ 根目录的独立 .md 文件（如 economy.md, narrative.md）
   try {
-    const rootFiles = readdirSync(DATA_ROOT).filter((f) => extname(f).toLowerCase() === ".md" && f !== "NOTICE.md");
+    const rootFiles = readdirSync(DATA_ROOT).filter(
+      (f) => extname(f).toLowerCase() === ".md" && f !== "NOTICE.md",
+    );
     for (const file of rootFiles) {
       const filePath = join(DATA_ROOT, file);
       if (statSync(filePath).isFile()) {
@@ -212,9 +213,7 @@ function lookupAll(docs: MdDocument[], query: string, category?: LookupKind): Ma
     candidates = docs.filter((d) => d.kind === category);
   }
 
-  return fuzzyMatchEntries(candidates, query)
-    .toSorted(compareMatches)
-    .slice(0, MAX_FUZZY_RESULTS);
+  return fuzzyMatchEntries(candidates, query).toSorted(compareMatches).slice(0, MAX_FUZZY_RESULTS);
 }
 
 function fuzzyMatchEntries(docs: MdDocument[], query: string): MatchedEntry[] {
@@ -300,9 +299,10 @@ function makeMatch(doc: MdDocument, score: number, reason: string): MatchedEntry
   return {
     kind: doc.kind,
     key: doc.title,
-    text: doc.body.length > BODY_PREVIEW_LENGTH
-      ? doc.body.slice(0, BODY_PREVIEW_LENGTH).replace(/\s+\S*$/, "") + "…"
-      : doc.body,
+    text:
+      doc.body.length > BODY_PREVIEW_LENGTH
+        ? doc.body.slice(0, BODY_PREVIEW_LENGTH).replace(/\s+\S*$/, "") + "…"
+        : doc.body,
     score,
     reason,
   };

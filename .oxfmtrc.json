@@ -19,6 +19,7 @@
     ".pi/agent",
     ".pi/npm",
     ".pi-lens",
-    "spikes/pi-actors/*.md"
+    "spikes/pi-actors/*.md",
+    "original"
   ]
 }

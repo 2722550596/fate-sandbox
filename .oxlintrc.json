@@ -30,7 +30,16 @@
     "unicorn/consistent-function-scoping": "error",
     "unicorn/require-module-specifiers": "off"
   },
-  "ignorePatterns": ["node_modules", "dist", "sessions", "state", ".pi/agent", ".pi/npm"],
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "sessions",
+    "state",
+    ".pi/agent",
+    ".pi/npm",
+    "original",
+    "original.js"
+  ],
   "options": {
     "typeAware": true
   }
