@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { listPathways, getPathway } from "../config/pathway.ts";
 import { parseFrontmatter } from "./frontmatter.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -50,7 +51,6 @@ const DIR_KIND_MAP: Record<string, LookupKind> = {
   characters: "角色",
   locations: "地点",
   organizations: "组织",
-  pathways: "途径",
   items: "物品",
   lore: "设定",
   mechanics: "机制",
@@ -67,6 +67,11 @@ let cachedDocIndex: MdDocument[] | null = null;
 // ---------------------------------------------------------------------------
 
 export function lookupWorldData(request: LookupRequest): LookupResult {
+  // 途径走 pathway 索引（易读格式化输出），不走 MD 文件扫描
+  if (request.category === "途径") {
+    return lookupPathway(request.query);
+  }
+
   const query = normalizeQuery(request.query);
   const docs = getDocIndex();
   const matches = lookupAll(docs, query, request.category);
@@ -206,6 +211,53 @@ function typeToKind(type: string | undefined): LookupKind | undefined {
 const MAX_FUZZY_RESULTS = 5;
 const MIN_FUZZY_SCORE = 52;
 const BODY_PREVIEW_LENGTH = 600;
+
+/** 途径查询：通过 config/pathway.ts 返回易读格式化输出 */
+function lookupPathway(query: string): LookupResult {
+  const normalized = query.trim();
+
+  // 列出所有途径
+  if (normalized === "" || normalized === "列表" || normalized === "all") {
+    const names = listPathways();
+    const lines = names.map((name) => {
+      const pw = getPathway(name);
+      if (!pw) return `- ${name}`;
+      const seqCount = pw.abilities.length;
+      const stats = pw.baselineStats ? `[${pw.baselineStats.join(", ")}]` : "未知";
+      return `- ${name}（${seqCount} 序列，基础六维: ${stats}）`;
+    });
+    return { text: `## 途径列表（共 ${names.length} 个）\n${lines.join("\n")}` };
+  }
+
+  // 精确匹配途径名
+  const pathway = getPathway(normalized);
+  if (pathway) {
+    const lines: string[] = [];
+    lines.push(`# ${pathway.name}`);
+    if (pathway.baselineStats) {
+      const [v, a, sp, sa, h, l] = pathway.baselineStats;
+      lines.push(`基础六维：活力=${v} 敏捷=${a} 灵性=${sp} 理智=${sa} 人性=${h} 运气=${l}`);
+    }
+    lines.push("");
+    lines.push("## 序列能力");
+    for (const entry of pathway.abilities) {
+      const skillNames = entry.data.map((s) => s.name).join(", ");
+      lines.push(`- **${entry.sequence}**: ${skillNames}`);
+    }
+    return { text: lines.join("\n") };
+  }
+
+  // 模糊匹配尝试
+  const allPaths = listPathways();
+  const matches = allPaths.filter((n) => n.includes(normalized));
+  if (matches.length > 0) {
+    return {
+      text: `未找到精确匹配「${normalized}」，相近途径：${matches.join("、")}。请用准确名称查询。`,
+    };
+  }
+
+  return { text: `未找到途径「${normalized}」。可用「途径/列表」查看全部。` };
+}
 
 function lookupAll(docs: MdDocument[], query: string, category?: LookupKind): MatchedEntry[] {
   let candidates = docs;
