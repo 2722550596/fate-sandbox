@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { SequenceRank } from "../state/state-enum-schemas.ts";
+import type { SequenceRank } from "./state/state-enum-schemas.ts";
 
 // ===========================================================================
 // 配置加载
