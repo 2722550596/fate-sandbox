@@ -27,12 +27,8 @@ function loadConfig<T>(filename: string): T {
 // 类型定义
 // ===========================================================================
 
-/** 神性：序列范围 → 神性倍率 */
-export interface DivinityEntry {
-  min: number;
-  max: number;
-  val: number;
-}
+/** 神性：序列索引 → 神性倍率（写法同序列基准.json） */
+export type DivinityConfig = Record<string, number>;
 
 /** 标签克制关系 */
 export type TagRelations = Record<string, Record<string, number>>;
@@ -58,8 +54,8 @@ export type SequenceTagsMapping = Record<string, SequenceTagDef>;
 /** 序列基准值：序列等级 → 基础属性总值 */
 export const sequenceBaseline = loadConfig<SequenceBaseline>("序列基准.json");
 
-/** 神性倍率：序列范围 → Ω 值 */
-export const divinity = loadConfig<DivinityEntry[]>("神性.json");
+/** 神性倍率：序列索引 → Ω 值 */
+export const divinity = loadConfig<DivinityConfig>("神性.json");
 
 /** 标签伤害修正：攻方标签 → 守方标签 → 修正系数 */
 export const tagDamageModifiers = loadConfig<TagRelations>("标签伤害修正.json");
@@ -77,14 +73,9 @@ export const sequenceTagsMapping = loadConfig<SequenceTagsMapping>("标签映射
 // 辅助函数
 // ===========================================================================
 
-/** 根据序列索引查找神性倍率（Ω） */
+/** 根据序列索引查找神性倍率（Ω），找不到返回 1.0 */
 export function getDivinityValue(sequenceRankIndex: number): number {
-  for (const entry of divinity) {
-    if (sequenceRankIndex >= entry.min && sequenceRankIndex <= entry.max) {
-      return entry.val;
-    }
-  }
-  return 1.0;
+  return divinity[String(sequenceRankIndex)] ?? 1.0;
 }
 
 /**
