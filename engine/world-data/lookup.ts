@@ -241,8 +241,15 @@ function lookupPathway(query: string): LookupResult {
     lines.push("");
     lines.push("## 序列能力");
     for (const entry of pathway.abilities) {
-      const skillNames = entry.data.map((s) => s.name).join(", ");
-      lines.push(`- **${entry.sequence}**: ${skillNames}`);
+      const linesForSeq: string[] = [];
+      linesForSeq.push(`### ${entry.sequence}`);
+      for (const skill of entry.data) {
+        const desc = skill.description ? `：${skill.description}` : "";
+        const costInfo = skill.cost ? ` [消耗 ${skill.cost.amount} ${skill.cost.type}]` : "";
+        const damageInfo = skill.damageType ? ` (${skill.damageType})` : "";
+        linesForSeq.push(`- **${skill.name}**${damageInfo}${costInfo}${desc}`);
+      }
+      lines.push(linesForSeq.join("\n"));
     }
     return { text: lines.join("\n") };
   }
