@@ -7,36 +7,12 @@
   {
     "name": "部分雷霆权柄（电与磁，造物象征衍化）",
     "description": "掌控电与磁力量，可释放强烈电磁风暴破坏所有信息结构",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    }
+    "type": "神之权柄"
   },
   {
     "name": "暴君权柄",
     "description": "万王之王，下分威慑、愤怒权柄与部分恐惧权柄，往下衍化出「歌唱」能力",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    }
+    "type": "神之权柄"
   },
   {
     "name": "水之权柄（含海洋、部分水生生物权柄）",

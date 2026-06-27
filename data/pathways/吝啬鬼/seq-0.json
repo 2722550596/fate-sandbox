@@ -2,34 +2,7 @@
   {
     "name": "有情众生主宰权柄",
     "description": "作为有情众生的主宰者，如同「父亲」般存在，既是愤怒的责骂者，也是痛苦的呓语者；其嘶吼永恒回荡于欲望与感情领域，促使有情众生沉沦堕落、追逐虚幻",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "主父嘶吼",
-        "type": "poison",
-        "stat": "当前理智",
-        "valueType": "fixed",
-        "power": {
-          "0": 8400,
-          "-2": 35000,
-          "-1": 21000,
-          "default": 5550
-        },
-        "duration": 3
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "不灭特性（欲望关联）",

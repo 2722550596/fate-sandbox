@@ -12,79 +12,12 @@
   {
     "name": "暗之权柄",
     "description": "偏向包容吞噬一切与堕落人心的黑暗，区别于黑夜女神的黑暗",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentHumanity",
-      "amount": 16200
-    },
-    "effects": [
-      {
-        "name": "堕落人心",
-        "type": "poison",
-        "stat": "当前人性",
-        "valueType": "fixed",
-        "power": {
-          "0": 5550,
-          "-2": 337500,
-          "-1": 202500,
-          "default": 5550
-        },
-        "duration": 3
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "堕落自性权柄",
     "type": "神之权柄",
-    "description": "可使每个生灵的堕落自性具现",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentHumanity",
-      "amount": 16200
-    },
-    "effects": [
-      {
-        "name": "堕落自性具现-防御",
-        "type": "debuff",
-        "stat": "defense",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 3
-      },
-      {
-        "name": "堕落自性具现-攻击",
-        "type": "debuff",
-        "stat": "attack",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 3
-      }
-    ]
+    "description": "可使每个生灵的堕落自性具现"
   },
   {
     "name": "污秽化身权柄",

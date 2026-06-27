@@ -12,60 +12,7 @@
   {
     "name": "直指本源",
     "description": "其声音与意念能无视秘偶、分身、历史投影及任何物理防御，直接作用于目标的源质、唯一性或非凡特性内部。通过传递疯狂与植入意念，从根本上污染目标的本质",
-    "type": "神之权柄",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "damageType": "mystical",
-    "targetType": "single",
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "本源污染",
-        "type": "poison",
-        "stat": "当前灵性",
-        "valueType": "fixed",
-        "power": {
-          "0": 11100,
-          "-2": 53750,
-          "-1": 33750,
-          "default": 11100
-        },
-        "duration": 5
-      },
-      {
-        "name": "精神权柄压制-防御",
-        "type": "debuff",
-        "stat": "defense",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      },
-      {
-        "name": "精神权柄压制-攻击",
-        "type": "debuff",
-        "stat": "attack",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "无形之躯",

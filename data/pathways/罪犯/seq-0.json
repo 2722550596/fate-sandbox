@@ -2,79 +2,12 @@
   {
     "name": "部分堕落权柄",
     "description": "制造让身处其中者必然堕落的环境，从深层自性上诱发并强制制造堕落。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentHumanity",
-      "amount": 16200
-    },
-    "effects": [
-      {
-        "name": "堕落-理智削弱",
-        "type": "debuff",
-        "stat": "理智",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      },
-      {
-        "name": "堕落-人性削弱",
-        "type": "debuff",
-        "stat": "人性",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "部分污秽与部分污染权柄",
     "description": "一切不洁事物的终极具现，带来身心精神污染与理智失控的必然结局。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "污秽污染",
-        "type": "poison",
-        "stat": "当前理智",
-        "valueType": "fixed",
-        "power": {
-          "0": 16800,
-          "-2": 70000,
-          "-1": 42000,
-          "default": 16800
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "部分欲望与部分诅咒权柄",

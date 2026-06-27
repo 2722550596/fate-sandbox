@@ -3,7 +3,7 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 
 import { assertNonEmptyString, isRecord } from "../../core/utils/typebox-validation.ts";
-import { lookupWorldData } from "../../world-data/lookup.ts";
+import { lookupWorldData } from "./world-data.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export function lookupTool(params: unknown): ToolResult {

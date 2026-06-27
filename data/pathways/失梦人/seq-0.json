@@ -2,19 +2,7 @@
   {
     "name": "命运权柄（完整掌控）",
     "description": "完全掌控编织命运、汇聚命运、裁决命运的权柄，是命运领域的核心掌控者",
-    "type": "神之权柄",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "damageType": "mixed",
-    "targetType": "single",
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    }
+    "type": "神之权柄"
   },
   {
     "name": "命运关联永生",

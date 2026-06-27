@@ -2,34 +2,7 @@
   {
     "name": "愚弄权柄",
     "description": "又称「盲目痴愚」、「弄假成真」，可降低敌人智商、愚弄时间使能力滞后、愚弄历史使自身分割，回溯完美状态。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "愚弄",
-        "type": "debuff",
-        "stat": "理智",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 3
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "嫁接权柄",
@@ -44,19 +17,7 @@
   {
     "name": "奇迹权柄",
     "description": "具现化「不可思议」象征，引发无法解释的神迹。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    }
+    "type": "神之权柄"
   },
   {
     "name": "历史权柄",

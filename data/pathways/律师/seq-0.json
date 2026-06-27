@@ -2,79 +2,12 @@
   {
     "name": "「独裁者」权柄及其下位的「扭曲」、「利用」、「定义」、「阶层」等权柄",
     "description": "通过利用秩序的漏洞或扭曲秩序的本意，让秩序为自己的目的服务，可扭曲「死亡」的秩序实现真正的复活",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "独裁者权柄",
-        "type": "debuff",
-        "stat": "defense",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "大部分「混乱」权柄",
     "description": "能让秩序和规则本身都陷入混乱，也能在荒芜死寂的地方重建起可供人类生存的一整套秩序",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "混乱权柄-攻击削弱",
-        "type": "debuff",
-        "stat": "attack",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      },
-      {
-        "name": "混乱权柄-防御削弱",
-        "type": "debuff",
-        "stat": "defense",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "神国（秩序地狱/伪法天堂）",

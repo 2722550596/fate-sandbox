@@ -2,34 +2,7 @@
   {
     "name": "轮回与宿命权柄（完整）",
     "description": "掌握完整的轮回与宿命权柄，实现过去、现在、未来及原因、过程、结果的一体化",
-    "type": "神之权柄",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "damageType": "mystical",
-    "targetType": "all",
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "宿命轮回",
-        "type": "poison",
-        "stat": "当前活力",
-        "valueType": "fixed",
-        "power": {
-          "0": 5550,
-          "-2": 23125,
-          "-1": 13875,
-          "default": 5550
-        },
-        "duration": 3
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "旧日关联",

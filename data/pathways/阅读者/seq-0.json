@@ -2,66 +2,12 @@
   {
     "name": "全知权柄",
     "description": "对万事万物「全知」（受部分高位象征影响）也「全能」，能完美模仿甚至优化任何一种不涉及「权柄」和「象征」的能力。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "全知碾压",
-        "type": "poison",
-        "stat": "当前理智",
-        "valueType": "fixed",
-        "power": {
-          "0": 8400,
-          "-2": 35000,
-          "-1": 21000,
-          "default": 8400
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "灾祸权柄",
     "description": "具现化特定危险知识，能给予他人「疯狂」和「毁灭」。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "灾祸侵蚀",
-        "type": "poison",
-        "stat": "当前人性",
-        "valueType": "fixed",
-        "power": {
-          "0": 16200,
-          "-2": 67500,
-          "-1": 40500,
-          "default": 16200
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "创造权柄",

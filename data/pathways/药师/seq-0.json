@@ -2,92 +2,12 @@
   {
     "name": "月亮权柄",
     "description": "掌控月相变化：血月（放出怪物恶灵）、红月（增强阴性与法术）、银月（切断红月联系使相关能力失效）、满月（生命滋长平复情绪）、缺月（黑暗与诡异横生）。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "月亮权柄-理智削弱",
-        "type": "debuff",
-        "stat": "理智",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      },
-      {
-        "name": "月亮权柄-理智侵蚀",
-        "type": "poison",
-        "stat": "当前理智",
-        "valueType": "fixed",
-        "power": {
-          "0": 16800,
-          "-2": 70000,
-          "-1": 42000,
-          "default": 16800
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "灵性权柄",
     "description": "作为灵性的根源，可让目标群体灵性爆发失控，或使其灵性无法恢复并极速消耗。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "灵性权柄-灵性削弱",
-        "type": "debuff",
-        "stat": "灵性",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      },
-      {
-        "name": "灵性权柄-灵性消耗",
-        "type": "poison",
-        "stat": "当前灵性",
-        "valueType": "fixed",
-        "power": {
-          "0": 25800,
-          "-2": 107500,
-          "-1": 64500,
-          "default": 25800
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "生命权柄",

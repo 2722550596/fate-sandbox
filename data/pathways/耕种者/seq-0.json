@@ -7,68 +7,12 @@
   {
     "name": "大地权柄（核心）",
     "description": "由「万物之母」和「污秽的母巢」两个象征衍化而来。应用：能令大地碎裂，使目标坠入地心的混沌海；可借助大地力量引发地质灾害，掌控大地结构变化",
-    "type": "神之权柄",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "damageType": "mystical",
-    "targetType": "all",
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "大地震荡",
-        "type": "debuff",
-        "stat": "speed",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 3
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "自然权柄（核心）",
     "description": "由「根源之神」象征衍化而来。已经成为「现实世界」的一部分，难以被彻底摧毁和真正封印。除非序列0真神自己愿意，或被其他存在取代，或其意识回归于星空外的堕落母神。应用：能令植物疯狂生长，形成可隔绝真神攻击的自然屏障",
-    "type": "神之权柄",
-    "isHeal": true,
-    "healAmt": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "healType": "活力",
-    "healValueType": "fixed",
-    "targetType": "allAlly",
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "自然屏障",
-        "type": "buff",
-        "stat": "defense",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 3
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "母亲（核心）",

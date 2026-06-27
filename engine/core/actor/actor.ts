@@ -8,7 +8,6 @@ import type {
   ScenePresenceInput,
 } from "./actor-schema.ts";
 
-import { sequenceTagsMapping } from "../../config/index.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 import { deleteSecretActorState } from "./secret-actor-state.ts";
 
@@ -156,11 +155,10 @@ export function removeActorEverywhere(draft: State, actorId: ActorId): void {
   );
 }
 
-function resolveSequenceTagsForActor(sequenceName: string): TagEntry[] {
-  const def = sequenceTagsMapping[sequenceName];
-  if (!def) return [];
-  return def.tags.map((name) => ({ name, duration: def.duration, stacks: 1 }));
+function resolveSequenceTagsForActor(_sequenceName: string): TagEntry[] {
+  return [];
 }
+
 
 function assertActorHasNoBlockingReferences(publicState: PublicGameState, actorId: ActorId): void {
   for (const [itemId, item] of Object.entries(publicState.trackedItems)) {
@@ -189,7 +187,7 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
     id: assertNonEmptyString(npc.id, "npc.id"),
     roles: npc.publicRoles,
     sequence: null,
-    stats: null,
+
     identity: {
       publicIdentity: assertNonEmptyString(npc.publicIdentity, "npc.publicIdentity"),
       background: assertNonEmptyString(npc.publicIdentity, "npc.publicIdentity"),

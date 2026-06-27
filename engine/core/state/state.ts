@@ -18,8 +18,6 @@ import type {
   TrackedItemCondition,
   TrackedItemKind,
   TrackedItemVisibility,
-  ValueType,
-  StatusEffectType,
 } from "./state-enum-schemas.ts";
 
 export type {
@@ -49,13 +47,11 @@ export type {
   SceneThreatSeverity,
   SequenceRank,
   SituationKind,
-  StatusEffectType,
   TimelineId,
   TimeZoneId,
   TrackedItemCondition,
   TrackedItemKind,
   TrackedItemVisibility,
-  ValueType,
 } from "./state-enum-schemas.ts";
 
 export type ActorId = string;
@@ -323,11 +319,9 @@ export interface ActorBase {
   kind: ActorKind;
   roles: ActorRole[];
   sequence: SequenceState | null;
-  stats: CharacterStats | null;
   identity: IdentityState;
   presentation: PresentationState;
   condition: ConditionState;
-  equipment: EquipmentSlots;
   inventory: InventoryState;
   abilities: AbilityState[];
   relationshipToProtagonist: RelationshipState;
@@ -398,18 +392,14 @@ export interface RelationshipState {
 // ---------------------------------------------------------------------------
 
 export interface ConditionState {
-  statusEffects: StatusEffectState[];
+  afflictions: AfflictionState[];
 }
 
-export interface StatusEffectState {
+export interface AfflictionState {
   id: string;
-  name: string;
-  type: StatusEffectType;
-  affectedAttribute: string;
-  valueType: ValueType;
-  value: number;
-  duration: number;
   source: string;
+  text: string;
+  expectedDuration: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -418,8 +408,6 @@ export interface StatusEffectState {
 
 export interface TagEntry {
   name: string;
-  duration: number;
-  stacks: number;
 }
 
 export interface SequenceState {
@@ -430,32 +418,12 @@ export interface SequenceState {
   divinity: number;
   digestionProgress: number;
   lossOfControlProgress: number;
+  /** 序列标签（叙事参考，不影响引擎计算） */
   tags: TagEntry[];
 }
 
-// ---------------------------------------------------------------------------
-// Stats — 六维属性三层模型
-//
-// 每个 actor 持有一组 stats，三层含义：
-//   base    — 纯配置运算（序列基准 × 序列权重），只随序列晋升改变
-//   max     — base + 效果修正（buff/debuff），调用 recalculateMaxStats 更新
-//   current — 受伤害/治疗直接影响，被 max 钳制
-// ---------------------------------------------------------------------------
 
-export interface CharacterStats {
-  base: StatsValues;
-  max: StatsValues;
-  current: StatsValues;
-}
 
-export interface StatsValues {
-  vitality: number;
-  agility: number;
-  spirituality: number;
-  sanity: number;
-  humanity: number;
-  luck: number;
-}
 
 // ---------------------------------------------------------------------------
 // Source Castle — LOTM 源堡
@@ -479,63 +447,11 @@ export interface AgeState {
 }
 
 // ---------------------------------------------------------------------------
-// Equipment — 装备栏
-// ---------------------------------------------------------------------------
-
-export interface EquipmentItemData {
-  id: string;
-  name: string;
-  type: "武器" | "衣物" | "饰品" | "封印物";
-  sequenceRank: SequenceRank;
-  pathway: string;
-  sequenceName: string;
-  trait: string | null;
-  tags: TagEntry[];
-  modifiers: StatsValues;
-}
-
-export interface EquipmentSlots {
-  weapon: EquipmentItemData | null;
-  clothing: EquipmentItemData | null;
-  accessory: EquipmentItemData | null;
-  sealedArtifact: EquipmentItemData | null;
-}
-
-// ─── 消耗品 ───────────────────────────────────────────
-
-export interface ConsumableItemData {
-  id: string;
-  name: string;
-  sequenceRank: SequenceRank;
-  type: string;
-  effect: "杀伤" | "恢复" | "增益";
-  targetAttribute?: string;
-  damageBonus?: number;
-  statChanges?: Record<string, number>;
-  sourceAttribute?: string;
-  sourceCost?: number;
-  description: string;
-  quantity: number;
-}
-
-// ─── 杂物 ────────────────────────────────────────────
-
-export interface MiscItemData {
-  id: string;
-  name: string;
-  sequenceRank: SequenceRank;
-  description: string;
-  quantity: number;
-}
-
-// ---------------------------------------------------------------------------
-// Inventory & Abilities
+// Inventory — 叙事物品清单
 // ---------------------------------------------------------------------------
 
 export interface InventoryState {
-  storedEquipment: EquipmentItemData[];
-  consumables: ConsumableItemData[];
-  misc: MiscItemData[];
+  items: string[];
 }
 
 export interface AbilityState {

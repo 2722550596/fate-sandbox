@@ -2,52 +2,12 @@
   {
     "name": "'空想'权柄（幻想成真权柄）",
     "description": "想象的物品必具现，幻想的国度必降临，宣称的未来必实现；可分离两份序列1特性，用空想特性替代以保位格力量；充分掌握概念可在一定程度上全能，但无法抗拒消除虚幻、刺破空想的权柄；初步驾驭混沌海并容纳第二份唯一性后，可短时间超越序列，拥有半个旧日实力",
-    "type": "神之权柄",
-    "damageType": "mental",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentHumanity",
-      "amount": 16200
-    },
-    "conditionalParams": [
-      {
-        "condition": "target.当前理智 == 0",
-        "params": {
-          "damageType": "mystical"
-        }
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "'心灵'权柄",
     "description": "心灵世界之主，管辖每个人的心灵岛屿和集体潜意识大海",
-    "type": "神之权柄",
-    "damageType": "mental",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentHumanity",
-      "amount": 16200
-    },
-    "conditionalParams": [
-      {
-        "condition": "target.当前理智 == 0",
-        "params": {
-          "damageType": "mystical"
-        }
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "'洞察'权柄",

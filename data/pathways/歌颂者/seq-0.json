@@ -7,19 +7,7 @@
   {
     "name": "光权柄（完整）",
     "description": "「光在我在」，照亮并摧毁目标，掌控能量本质，是全知全能者的能量基石",
-    "type": "神之权柄",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "damageType": "mystical",
-    "targetType": "single",
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    }
+    "type": "神之权柄"
   },
   {
     "name": "秩序权柄（完整）",
@@ -29,19 +17,7 @@
   {
     "name": "太阳权柄（下位）",
     "description": "由神圣与光权柄混合衍生，创造符合现实与神秘学定义的真太阳，释放星系级光热与超高温火焰，净化污秽邪恶",
-    "type": "神之权柄",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "damageType": "mystical",
-    "targetType": "all",
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    }
+    "type": "神之权柄"
   },
   {
     "name": "契约权柄（下位）",

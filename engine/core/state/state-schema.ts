@@ -22,14 +22,12 @@ import {
   SCENE_THREAT_SEVERITY_SCHEMA,
   SEQUENCE_RANK_SCHEMA,
   SITUATION_KIND_SCHEMA,
-  STATUS_EFFECT_TYPE_SCHEMA,
   stringEnumSchema,
   TIMELINE_ID_SCHEMA,
   TIMEZONE_ID_SCHEMA,
   TRACKED_ITEM_CONDITION_SCHEMA,
   TRACKED_ITEM_KIND_SCHEMA,
   TRACKED_ITEM_VISIBILITY_SCHEMA,
-  VALUE_TYPE_SCHEMA,
 } from "./state-enum-schemas.ts";
 import { LOCATION_STATE_SCHEMA } from "./turn-time-schema.ts";
 import { isRecord, parseTypeBoxValue, trimStringsDeep } from "../utils/typebox-validation.ts";
@@ -91,29 +89,9 @@ export const SCENE_STATE_SCHEMA = Type.Object({
   lastResolvedAt: ISO_INSTANT_SCHEMA,
 });
 
-// ---------------------------------------------------------------------------
-// Stats — 六维属性三层模型
-// ---------------------------------------------------------------------------
-
-const STATS_VALUES_SCHEMA = Type.Object({
-  vitality: Type.Number({ minimum: 0 }),
-  agility: Type.Number({ minimum: 0 }),
-  spirituality: Type.Number({ minimum: 0 }),
-  sanity: Type.Number({ minimum: 0 }),
-  humanity: Type.Number({ minimum: 0 }),
-  luck: Type.Number({ minimum: 0 }),
-});
-
-const CHARACTER_STATS_SCHEMA = Type.Object({
-  base: STATS_VALUES_SCHEMA,
-  max: STATS_VALUES_SCHEMA,
-  current: STATS_VALUES_SCHEMA,
-});
 
 const TAG_ENTRY_SCHEMA = Type.Object({
   name: NON_EMPTY_STRING_SCHEMA,
-  duration: Type.Integer({ minimum: 0 }),
-  stacks: Type.Integer({ minimum: 1 }),
 });
 
 const SEQUENCE_STATE_SCHEMA = Type.Object({
@@ -153,22 +131,18 @@ const PRESENTATION_STATE_SCHEMA = Type.Object({
 });
 
 // ---------------------------------------------------------------------------
-// Condition — Status Effects
+// Condition — Afflictions (narrative)
 // ---------------------------------------------------------------------------
 
-const STATUS_EFFECT_STATE_SCHEMA = Type.Object({
+const AFFLICTION_STATE_SCHEMA = Type.Object({
   id: NON_EMPTY_STRING_SCHEMA,
-  name: NON_EMPTY_STRING_SCHEMA,
-  type: STATUS_EFFECT_TYPE_SCHEMA,
-  affectedAttribute: NON_EMPTY_STRING_SCHEMA,
-  valueType: VALUE_TYPE_SCHEMA,
-  value: Type.Number(),
-  duration: Type.Integer({ minimum: 0 }),
   source: NON_EMPTY_STRING_SCHEMA,
+  text: NON_EMPTY_STRING_SCHEMA,
+  expectedDuration: nullable(NON_EMPTY_STRING_SCHEMA),
 });
 
 const CONDITION_STATE_SCHEMA = Type.Object({
-  statusEffects: Type.Array(STATUS_EFFECT_STATE_SCHEMA),
+  afflictions: Type.Array(AFFLICTION_STATE_SCHEMA),
 });
 
 // ---------------------------------------------------------------------------
@@ -176,60 +150,11 @@ const CONDITION_STATE_SCHEMA = Type.Object({
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// Equipment
+// Inventory — 叙事物品清单
 // ---------------------------------------------------------------------------
 
-const EQUIPMENT_ITEM_DATA_SCHEMA = Type.Object({
-  id: NON_EMPTY_STRING_SCHEMA,
-  name: NON_EMPTY_STRING_SCHEMA,
-  type: Type.Union([
-    Type.Literal("武器"),
-    Type.Literal("衣物"),
-    Type.Literal("饰品"),
-    Type.Literal("封印物"),
-  ]),
-  sequenceRank: SEQUENCE_RANK_SCHEMA,
-  pathway: NON_EMPTY_STRING_SCHEMA,
-  sequenceName: NON_EMPTY_STRING_SCHEMA,
-  trait: nullable(NON_EMPTY_STRING_SCHEMA),
-  tags: Type.Array(TAG_ENTRY_SCHEMA),
-  modifiers: STATS_VALUES_SCHEMA,
-});
-
-const EQUIPMENT_SLOTS_SCHEMA = Type.Object({
-  weapon: nullable(EQUIPMENT_ITEM_DATA_SCHEMA),
-  clothing: nullable(EQUIPMENT_ITEM_DATA_SCHEMA),
-  accessory: nullable(EQUIPMENT_ITEM_DATA_SCHEMA),
-  sealedArtifact: nullable(EQUIPMENT_ITEM_DATA_SCHEMA),
-});
-
-const CONSUMABLE_ITEM_DATA_SCHEMA = Type.Object({
-  id: NON_EMPTY_STRING_SCHEMA,
-  name: NON_EMPTY_STRING_SCHEMA,
-  sequenceRank: SEQUENCE_RANK_SCHEMA,
-  type: NON_EMPTY_STRING_SCHEMA,
-  effect: stringEnumSchema(["杀伤", "恢复", "增益"]),
-  targetAttribute: Type.Optional(NON_EMPTY_STRING_SCHEMA),
-  damageBonus: Type.Optional(Type.Number()),
-  statChanges: Type.Optional(Type.Record(Type.String(), Type.Number())),
-  sourceAttribute: Type.Optional(NON_EMPTY_STRING_SCHEMA),
-  sourceCost: Type.Optional(Type.Number()),
-  description: NON_EMPTY_STRING_SCHEMA,
-  quantity: NON_NEGATIVE_INTEGER_SCHEMA,
-});
-
-const MISC_ITEM_DATA_SCHEMA = Type.Object({
-  id: NON_EMPTY_STRING_SCHEMA,
-  name: NON_EMPTY_STRING_SCHEMA,
-  sequenceRank: SEQUENCE_RANK_SCHEMA,
-  description: NON_EMPTY_STRING_SCHEMA,
-  quantity: NON_NEGATIVE_INTEGER_SCHEMA,
-});
-
 const INVENTORY_STATE_SCHEMA = Type.Object({
-  storedEquipment: Type.Array(EQUIPMENT_ITEM_DATA_SCHEMA),
-  consumables: Type.Array(CONSUMABLE_ITEM_DATA_SCHEMA),
-  misc: Type.Array(MISC_ITEM_DATA_SCHEMA),
+  items: Type.Array(NON_EMPTY_STRING_SCHEMA),
 });
 
 const ABILITY_STATE_SCHEMA = Type.Object({
@@ -268,11 +193,10 @@ const ACTOR_BASE_PROPERTIES = {
   id: NON_EMPTY_STRING_SCHEMA,
   roles: Type.Array(ACTOR_ROLE_SCHEMA),
   sequence: nullable(SEQUENCE_STATE_SCHEMA),
-  stats: nullable(CHARACTER_STATS_SCHEMA),
+
   identity: IDENTITY_STATE_SCHEMA,
   presentation: PRESENTATION_STATE_SCHEMA,
   condition: CONDITION_STATE_SCHEMA,
-  equipment: EQUIPMENT_SLOTS_SCHEMA,
   inventory: INVENTORY_STATE_SCHEMA,
   abilities: Type.Array(ABILITY_STATE_SCHEMA),
   relationshipToProtagonist: RELATIONSHIP_STATE_SCHEMA,

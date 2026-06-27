@@ -355,7 +355,6 @@ LOTM 项目包含 `data/novel/` 目录（8 部，1400+ 章节 markdown）。
 
 - 第二人称叙事
 - 维多利亚时代都市与神秘学并存的世界感
-- 不裸露公式、DC、d100、成功率
 - 尊重玩家选择，允许失败带来后果
 - 序列晋升必须调用工具
 - 判定难度固定枚举
@@ -393,7 +392,7 @@ LOTM 项目包含 `data/novel/` 目录（8 部，1400+ 章节 markdown）。
 
 | 扩展                  | 操作                                                   |
 | --------------------- | ------------------------------------------------------ |
-| `player-panel/`       | **改写**：UI panel 适配 LOTM 字段（序列、六维、源堡…） |
+| `player-panel/`       | **改写**：UI panel 适配 LOTM 字段（序列等） |
 | `player-choices/`     | 不变                                                   |
 | `rewind/`             | 不变                                                   |
 | `two-pass-render/`    | 不变                                                   |
@@ -429,7 +428,6 @@ LOTM 项目包含 `data/novel/` 目录（8 部，1400+ 章节 markdown）。
 | --------------------------------- | ---------------------------------------- |
 | `judgment.test.ts`                | 序列基准值、DC 计算、d100 判定、运气修正 |
 | `damage-calculator.test.ts`       | 四种伤害类型、神性修正、buff/debuff 修正 |
-| `status-effect.test.ts`           | 效果应用、持续时间递减、属性修正叠加     |
 | `attribute-calculator.test.ts`    | 攻击力/防御力计算、各种伤害类型          |
 | `sequence-promotion.test.ts`      | 晋升成功/失败、消化进度、失控风险        |
 | `state-schema.test.ts`            | LOTM state schema 校验                   |
@@ -526,26 +524,26 @@ LOTM 项目包含 `data/novel/` 目录（8 部，1400+ 章节 markdown）。
 
 ### 11.1 数据迁移风险
 
-- LOTM 原数据是世界书格式（comment/content/keys），需要确认是保留原格式还是结构化
+- LOTM 原数据是世界书格式（comment/content/keys），需要确认是保留原格式还是结构化（已经改为MD，可读性更强）
 
 ### 11.2 数值平衡风险
 
 - LOTM 原项目的判定/伤害公式来自 SillyTavern 角色卡的 JS 脚本
-- 迁移到领域事件工具后，公式不变但调用方式变了
-- 需要验证：同样的属性/序列/难度，产出的判定结果一致
+- 迁移到领域事件工具后，不要用复杂公式了，没必要，直接用简单的计算
 
 ### 11.3 工具粒度变化
 
 - LOTM 原项目用单一 `code_act` 执行任意 JS
 - fate-sandbox 用 30+ 窄领域事件工具
-- 迁移后 GM 不能再写任意代码，必须走工具
+- 迁移后不要再用复杂的逻辑了，直接用领域事件逻辑
+- GM 不能再写任意代码，必须走工具
 - 这意味着 prompt 中的工具路由说明需要非常清晰
 - 也意味着需要让 GM prompt 粒度与 fate-sandbox 对齐
 
 ### 11.4 后台导演适配
 
 - fate-sandbox 的后台导演是为型月多阵营圣杯战争设计的
-- LOTM 的世界运转逻辑不同（非凡者社会、教会/值夜人/机械之心等势力）
+- LOTM 的世界运转逻辑不同（非凡者社会、教会/值夜者/机械之心等势力）
 - 导演 persona 和 prompt 需要重写（但可以直接仿制）
 
 ### 11.5 时间系统
@@ -558,37 +556,4 @@ LOTM 项目包含 `data/novel/` 目录（8 部，1400+ 章节 markdown）。
 
 - LOTM 有坐标系统（x, y 经纬度）
 - fate-sandbox 的 location 是结构化对象
-- 需要在 location state 中加入坐标字段
-
----
-
-## 12. 源代码引用
-
-LOTM 原项目 JavaScript 源代码已提取到 `original/` 目录：
-
-| 子目录                           | 内容                                                              |
-| -------------------------------- | ----------------------------------------------------------------- |
-| `original/battle-engine/`        | 战斗引擎（core/、flow/、logic/、models/、systems/）共约 45K 行 JS |
-| `original/app-core/`             | 游戏核心（GameManager、ChronicleCore、SnapshotCorrection 等）     |
-| `original/game-systems/`         | 游戏子系统（SequenceAbilities、IndustrySystem、TradingSystem 等） |
-| `original/data-storage/`         | 数据持久化（CloudSave、GameDatabase、SchemaValidation 等）        |
-| `original/ui-components/`        | UI 组件（BattleUI、FactionUI、WorldMap 等）                       |
-| `original/misc/`                 | 杂项工具（DynamicPropertyDetection、UtilityFunctions 等）         |
-| `original/_discard-performance/` | 弃用的性能优化代码                                                |
-
-**所有数值逻辑（伤害公式、攻防计算、技能消耗、条件参数评估、序列基准值等）
-以 `original/` 中的 JS 源代码为唯一权威参考。**
-
-`docs/combat-analysis.md`（1129 行）是对 battle-engine/ 的完整分析文档，
-包含公式推导、函数映射表、属性映射表。
-
-### 使用原则
-
-1. **公式完全还原** — 核心公式（如伤害 `D = floor(Ω × P × (A/D) × R × (1 + M))`）
-   直接在 JS 中确认后再实现，不自行推导。
-2. **变量名保留** — 代码中的变量名尽量保留原意以方便交叉验证。
-3. **架构不搬运** — 只提取数值公式和领域逻辑，不搬运行时框架（TurnManager、
-   CPUManager、BattleManager 等由 LLM 工具控制的部分不实现）。
-4. **数据格式自由** — 原 JS 的内联数据（power 映射表、消耗定义等）可以转换
-   为 config JSON 或 MD frontmatter，但数值本身必须与源码一致。
-5. **分歧裁决** — 任何公式/数值争议以 `original/` 代码为准。
+- 直接复用结构化对象，不要搞复杂的坐标系统，还得专门做一个move_to，不值得

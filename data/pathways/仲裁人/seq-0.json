@@ -7,19 +7,7 @@
   {
     "name": "审判权柄",
     "description": "违背秩序者皆可被审判。每次审判都有整个世界的意志和力量加持，可隔空也可近身发动。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    }
+    "type": "神之权柄"
   },
   {
     "name": "平衡权柄",
@@ -29,19 +17,7 @@
   {
     "name": "混乱权柄",
     "description": "不仅能够恢复、平息和泯灭混乱，也能通过秩序去刻意制造混乱。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    }
+    "type": "神之权柄"
   },
   {
     "name": "神国",

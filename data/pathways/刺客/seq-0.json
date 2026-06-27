@@ -7,34 +7,7 @@
   {
     "name": "混沌权柄",
     "description": "万物归于混沌、复返原初的核心权柄。于区域制造灾难性崩溃后形成混沌漩涡，将万物融化为原始的可能性，代表毁灭的终结。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentHumanity",
-      "amount": 16200
-    },
-    "effects": [
-      {
-        "name": "混沌侵蚀",
-        "type": "poison",
-        "stat": "当前活力",
-        "valueType": "fixed",
-        "power": {
-          "0": 11100,
-          "-2": 46250,
-          "-1": 27750,
-          "default": 11100
-        },
-        "duration": 6
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "原初权柄",
@@ -64,33 +37,6 @@
   {
     "name": "疾病权柄",
     "description": "自身即为疾病概念本身，可给任何抽象事物（如防御、逻辑）附加疾病。可侵蚀神灵。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "疾病侵蚀",
-        "type": "poison",
-        "stat": "当前活力",
-        "valueType": "fixed",
-        "power": {
-          "0": 11100,
-          "-2": 46250,
-          "-1": 27750,
-          "default": 11100
-        },
-        "duration": 7
-      }
-    ]
+    "type": "神之权柄"
   }
 ]

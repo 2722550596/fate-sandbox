@@ -2,47 +2,7 @@
   {
     "name": "神秘知识权柄",
     "description": "可化身为恐怖庞杂的信息洪流。能赋予数字真正的象征力量，首尾相接形成数字世界，可通过将1变为0将世界归于虚无。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "理智崩溃",
-        "type": "debuff",
-        "stat": "理智",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      },
-      {
-        "name": "灵性枯竭",
-        "type": "debuff",
-        "stat": "灵性",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "隐匿权柄",

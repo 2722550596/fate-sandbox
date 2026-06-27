@@ -2,79 +2,12 @@
   {
     "name": "诅咒权柄",
     "description": "完成所有类型诅咒且目标难以察觉；切断象征联系，极难被他人诅咒。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "all",
-    "power": {
-      "0": 22200,
-      "-2": 92500,
-      "-1": 55500,
-      "default": 22200
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "终极诅咒",
-        "type": "poison",
-        "stat": "当前活力",
-        "valueType": "fixed",
-        "power": {
-          "0": 11100,
-          "-2": 46250,
-          "-1": 27750,
-          "default": 11100
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "异类权柄",
     "description": "异类之王，掌控所有异类能力并可转化短暂异种。天然压制一切异类（含恶魔及失控者），能响应祈求并奴役中低序列异类。",
-    "type": "神之权柄",
-    "damageType": "mystical",
-    "targetType": "single",
-    "power": {
-      "0": 44400,
-      "-2": 185000,
-      "-1": 111000,
-      "default": 44400
-    },
-    "cost": {
-      "type": "currentSpirit",
-      "amount": 25800
-    },
-    "effects": [
-      {
-        "name": "异类压制-攻击",
-        "type": "debuff",
-        "stat": "attack",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      },
-      {
-        "name": "异类压制-防御",
-        "type": "debuff",
-        "stat": "defense",
-        "valueType": "percentage",
-        "power": {
-          "0": 25,
-          "-2": 30,
-          "-1": 30,
-          "default": 25
-        },
-        "duration": 5
-      }
-    ]
+    "type": "神之权柄"
   },
   {
     "name": "束缚权柄",

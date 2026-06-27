@@ -205,53 +205,7 @@ export const SEQUENCE_RANKS = [
 export const SEQUENCE_RANK_SCHEMA = stringEnumSchema(SEQUENCE_RANKS);
 export type SequenceRank = Static<typeof SEQUENCE_RANK_SCHEMA>;
 
-// ---------------------------------------------------------------------------
-// Status Effect — LOTM 状态效果
-// ---------------------------------------------------------------------------
 
-export const STATUS_EFFECT_TYPES = ["buff", "debuff", "risk", "flag"] as const;
-export const STATUS_EFFECT_TYPE_SCHEMA = stringEnumSchema(STATUS_EFFECT_TYPES);
-export type StatusEffectType = Static<typeof STATUS_EFFECT_TYPE_SCHEMA>;
-
-export const VALUE_TYPES = ["percentage", "fixed"] as const;
-export const VALUE_TYPE_SCHEMA = stringEnumSchema(VALUE_TYPES);
-export type ValueType = Static<typeof VALUE_TYPE_SCHEMA>;
-
-// ---------------------------------------------------------------------------
-// Damage Type — LOTM 伤害类型
-// ---------------------------------------------------------------------------
-
-export const DAMAGE_TYPES = ["physical", "mystical", "mental", "mixed"] as const;
-export const DAMAGE_TYPE_SCHEMA = stringEnumSchema(DAMAGE_TYPES);
-export type DamageType = Static<typeof DAMAGE_TYPE_SCHEMA>;
-
-// ---------------------------------------------------------------------------
-// Difficulty — LOTM 判定难度
-// ---------------------------------------------------------------------------
-
-export const DIFFICULTY_LEVELS = [
-  "trivial", // 轻而易举
-  "ordinary", // 寻常之事
-  "tricky", // 颇为棘手
-  "near-impossible", // 九死一生
-  "blasphemous", // 亵渎之举
-] as const;
-export const DIFFICULTY_LEVEL_SCHEMA = stringEnumSchema(DIFFICULTY_LEVELS);
-export type DifficultyLevel = Static<typeof DIFFICULTY_LEVEL_SCHEMA>;
-
-// ---------------------------------------------------------------------------
-// Judgment Result — LOTM 判定结果
-// ---------------------------------------------------------------------------
-
-export const JUDGMENT_OUTCOMES = [
-  "blessed", // 命运的眷顾
-  "perfect", // 完美掌控
-  "narrow-success", // 勉力成功
-  "failure", // 尝试失败
-  "loss-of-control", // 失控预兆
-] as const;
-export const JUDGMENT_OUTCOME_SCHEMA = stringEnumSchema(JUDGMENT_OUTCOMES);
-export type JudgmentOutcome = Static<typeof JUDGMENT_OUTCOME_SCHEMA>;
 
 // ---------------------------------------------------------------------------
 // Promotion System — LOTM 晋升体系
@@ -294,17 +248,4 @@ export const SCENE_THREAT_SEVERITIES = ["low", "medium", "high", "lethal"] as co
 export const SCENE_THREAT_SEVERITY_SCHEMA = stringEnumSchema(SCENE_THREAT_SEVERITIES);
 export type SceneThreatSeverity = Static<typeof SCENE_THREAT_SEVERITY_SCHEMA>;
 
-// ---------------------------------------------------------------------------
-// Six Attribute Keys — LOTM 六维属性
-// ---------------------------------------------------------------------------
 
-export const ATTRIBUTE_KEYS = [
-  "vitality", // 活力
-  "spirituality", // 灵性
-  "reason", // 理智
-  "humanity", // 人性
-  "agility", // 敏捷
-  "luck", // 运气
-] as const;
-export const ATTRIBUTE_KEY_SCHEMA = stringEnumSchema(ATTRIBUTE_KEYS);
-export type AttributeKey = Static<typeof ATTRIBUTE_KEY_SCHEMA>;
