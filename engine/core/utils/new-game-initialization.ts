@@ -168,7 +168,7 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
     },
     condition: { statusEffects: [] },
     equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { ordinaryItems: input.ordinaryItems ?? [], storedEquipment: [] },
+    inventory: { storedEquipment: [], consumables: [], misc: [] },
     abilities: (input.abilities ?? []).map((summary, index) => ({
       id: `ability-protagonist-${index + 1}`,
       label: summary,
@@ -209,7 +209,7 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
     },
     condition: { statusEffects: [] },
     equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { ordinaryItems: input.ordinaryItems ?? [], storedEquipment: [] },
+    inventory: { storedEquipment: [], consumables: [], misc: [] },
     abilities: (input.abilities ?? []).map((summary, index) => ({
       id: `ability-protagonist-${index + 1}`,
       label: summary,

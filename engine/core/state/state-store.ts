@@ -233,7 +233,7 @@ function createInitialProtagonist(): HumanActorState {
     },
     condition: { statusEffects: [] },
     equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { ordinaryItems: [], storedEquipment: [] },
+    inventory: { storedEquipment: [], consumables: [], misc: [] },
     abilities: [],
     relationshipToProtagonist: { stance: "self", summary: "玩家本人。" },
   };

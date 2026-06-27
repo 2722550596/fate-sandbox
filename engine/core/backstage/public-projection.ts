@@ -265,9 +265,10 @@ function formatTrackedItems(publicState: PublicGameState): string {
 
 function formatOrdinaryItems(publicState: PublicGameState): string {
   const lines = Object.values(publicState.actors)
-    .filter((actor) => actor.inventory.ordinaryItems.length > 0)
+    .filter((actor) => actor.inventory.misc.length > 0)
     .map(
-      (actor) => `- ${actor.presentation.renderName}：${actor.inventory.ordinaryItems.join("、")}`,
+      (actor) =>
+        `- ${actor.presentation.renderName}：${actor.inventory.misc.map((i) => i.name).join("、")}`,
     );
   return lines.length === 0 ? "- 无记录" : lines.join("\n");
 }

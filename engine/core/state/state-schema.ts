@@ -203,9 +203,33 @@ const EQUIPMENT_SLOTS_SCHEMA = Type.Object({
   sealedArtifact: nullable(EQUIPMENT_ITEM_DATA_SCHEMA),
 });
 
+const CONSUMABLE_ITEM_DATA_SCHEMA = Type.Object({
+  id: NON_EMPTY_STRING_SCHEMA,
+  name: NON_EMPTY_STRING_SCHEMA,
+  sequenceRank: SEQUENCE_RANK_SCHEMA,
+  type: NON_EMPTY_STRING_SCHEMA,
+  effect: stringEnumSchema(["杀伤", "恢复", "增益"]),
+  targetAttribute: Type.Optional(NON_EMPTY_STRING_SCHEMA),
+  damageBonus: Type.Optional(Type.Number()),
+  modifiers: Type.Optional(STATS_VALUES_SCHEMA),
+  sourceAttribute: Type.Optional(NON_EMPTY_STRING_SCHEMA),
+  sourceCost: Type.Optional(Type.Number()),
+  description: NON_EMPTY_STRING_SCHEMA,
+  quantity: NON_NEGATIVE_INTEGER_SCHEMA,
+});
+
+const MISC_ITEM_DATA_SCHEMA = Type.Object({
+  id: NON_EMPTY_STRING_SCHEMA,
+  name: NON_EMPTY_STRING_SCHEMA,
+  sequenceRank: SEQUENCE_RANK_SCHEMA,
+  description: NON_EMPTY_STRING_SCHEMA,
+  quantity: NON_NEGATIVE_INTEGER_SCHEMA,
+});
+
 const INVENTORY_STATE_SCHEMA = Type.Object({
-  ordinaryItems: NON_EMPTY_STRING_ARRAY_SCHEMA,
   storedEquipment: Type.Array(EQUIPMENT_ITEM_DATA_SCHEMA),
+  consumables: Type.Array(CONSUMABLE_ITEM_DATA_SCHEMA),
+  misc: Type.Array(MISC_ITEM_DATA_SCHEMA),
 });
 
 const ABILITY_STATE_SCHEMA = Type.Object({

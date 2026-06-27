@@ -501,14 +501,43 @@ export interface EquipmentSlots {
   sealedArtifact: EquipmentItemData | null;
 }
 
+// ─── 消耗品 ───────────────────────────────────────────
+
+export interface ConsumableItemData {
+  id: string;
+  name: string;
+  sequenceRank: SequenceRank;
+  type: string;
+  effect: "杀伤" | "恢复" | "增益";
+  targetAttribute?: string;
+  damageBonus?: number;
+  modifiers?: StatsValues;
+  sourceAttribute?: string;
+  sourceCost?: number;
+  description: string;
+  quantity: number;
+}
+
+// ─── 杂物 ────────────────────────────────────────────
+
+export interface MiscItemData {
+  id: string;
+  name: string;
+  sequenceRank: SequenceRank;
+  description: string;
+  quantity: number;
+}
+
 // ---------------------------------------------------------------------------
 // Inventory & Abilities
 // ---------------------------------------------------------------------------
 
 export interface InventoryState {
-  ordinaryItems: string[];
   storedEquipment: EquipmentItemData[];
+  consumables: ConsumableItemData[];
+  misc: MiscItemData[];
 }
+
 export interface AbilityState {
   id: string;
   label: string;
@@ -654,4 +683,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 4;
+export const CURRENT_STATE_SCHEMA_VERSION = 5;

@@ -204,7 +204,7 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
     },
     condition: { statusEffects: [] },
     equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { ordinaryItems: npc.ordinaryItems, storedEquipment: [] },
+    inventory: { storedEquipment: [], consumables: [], misc: [] },
     abilities: [],
     relationshipToProtagonist: npc.relationshipToProtagonist,
   };

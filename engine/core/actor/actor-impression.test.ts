@@ -25,7 +25,7 @@ function addTestNpc(draft: ReturnType<typeof createInitialState>, actorId: strin
     },
     condition: { statusEffects: [] },
     equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { ordinaryItems: [], storedEquipment: [] },
+    inventory: { storedEquipment: [], consumables: [], misc: [] },
     abilities: [],
     relationshipToProtagonist: { stance: "neutral", summary: "neutral" },
   };
