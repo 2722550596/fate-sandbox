@@ -211,7 +211,7 @@ const CONSUMABLE_ITEM_DATA_SCHEMA = Type.Object({
   effect: stringEnumSchema(["杀伤", "恢复", "增益"]),
   targetAttribute: Type.Optional(NON_EMPTY_STRING_SCHEMA),
   damageBonus: Type.Optional(Type.Number()),
-  modifiers: Type.Optional(STATS_VALUES_SCHEMA),
+  statChanges: Type.Optional(Type.Record(Type.String(), Type.Number())),
   sourceAttribute: Type.Optional(NON_EMPTY_STRING_SCHEMA),
   sourceCost: Type.Optional(Type.Number()),
   description: NON_EMPTY_STRING_SCHEMA,

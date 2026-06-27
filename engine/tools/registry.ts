@@ -12,6 +12,7 @@ import { attemptPromotionToolDefinition } from "./state/attempt-promotion.ts";
 import { commitTurnToolDefinition } from "./state/commit-turn.ts";
 import { configureCampaignToolDefinition } from "./state/configure-campaign.ts";
 import { createEquipmentToolDefinition } from "./state/create-equipment.ts";
+import { createItemToolDefinition } from "./state/create-item.ts";
 import { getStatusToolDefinition } from "./state/get-status.ts";
 import { harvestBackstageCandidateToolDefinition } from "./state/harvest-backstage-candidate.ts";
 import { initializeNewGameToolDefinition } from "./state/initialize-new-game.ts";
@@ -40,6 +41,7 @@ import { updateActorImpressionToolDefinition } from "./state/update-actor-impres
 import { updateEconomyToolDefinition } from "./state/update-economy.ts";
 import { updateHookToolDefinition } from "./state/update-hook.ts";
 import { upsertActorToolDefinition } from "./state/upsert-actor.ts";
+import { useConsumableToolDefinition } from "./state/use-consumable.ts";
 
 /** 全部 Domain Event Tool 契约清单；契约本体与实现同文件维护。 */
 const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
@@ -80,6 +82,8 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
   rollDiceToolDefinition,
   createEquipmentToolDefinition,
   manageEquipmentToolDefinition,
+  createItemToolDefinition,
+  useConsumableToolDefinition,
 ];
 
 export function registerAllTools(pi: ExtensionAPI): void {

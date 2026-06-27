@@ -511,7 +511,7 @@ export interface ConsumableItemData {
   effect: "杀伤" | "恢复" | "增益";
   targetAttribute?: string;
   damageBonus?: number;
-  modifiers?: StatsValues;
+  statChanges?: Record<string, number>;
   sourceAttribute?: string;
   sourceCost?: number;
   description: string;
