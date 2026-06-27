@@ -6,7 +6,7 @@ import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { getPathwayBaseline } from "./index.ts";
+import { getSequenceWeights } from "./index.ts";
 
 // ===========================================================================
 // 路径解析
@@ -57,7 +57,7 @@ export interface PathwayIndex {
   name: string;
   /** data/pathways/ 下的目录名 */
   directory: string;
-  /** 途径六维基础值（从途径矩阵来） */
+  /** 途径六维权重（从序列权重配置来） */
   baselineStats: [number, number, number, number, number, number] | null;
   /** 所有序列能力的文件路径 */
   abilityFiles: string[];
@@ -105,7 +105,7 @@ function buildPathwayIndex(): PathwayIndexMap {
     index[dirName] = {
       name: dirName,
       directory: dirName,
-      baselineStats: getPathwayBaseline(dirName) ?? null,
+      baselineStats: getSequenceWeights(dirName) ?? null,
       abilityFiles: files.map((f) => join(dirPath, f)),
       abilities,
     };

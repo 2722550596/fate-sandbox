@@ -44,7 +44,7 @@ function nullable<T extends TSchema>(schema: T) {
 }
 
 export const STATE_META_SCHEMA = Type.Object({
-  schemaVersion: Type.Literal(1),
+  schemaVersion: Type.Integer({ minimum: 1 }),
   createdAt: ISO_INSTANT_SCHEMA,
   updatedAt: ISO_INSTANT_SCHEMA,
   rngSeed: Type.Number(),
@@ -92,8 +92,23 @@ export const SCENE_STATE_SCHEMA = Type.Object({
 });
 
 // ---------------------------------------------------------------------------
-// Sequence State
+// Stats — 六维属性三层模型
 // ---------------------------------------------------------------------------
+
+const STATS_VALUES_SCHEMA = Type.Object({
+  vitality: Type.Number({ minimum: 0 }),
+  agility: Type.Number({ minimum: 0 }),
+  spirituality: Type.Number({ minimum: 0 }),
+  sanity: Type.Number({ minimum: 0 }),
+  humanity: Type.Number({ minimum: 0 }),
+  luck: Type.Number({ minimum: 0 }),
+});
+
+const CHARACTER_STATS_SCHEMA = Type.Object({
+  base: STATS_VALUES_SCHEMA,
+  max: STATS_VALUES_SCHEMA,
+  current: STATS_VALUES_SCHEMA,
+});
 
 const SEQUENCE_STATE_SCHEMA = Type.Object({
   currentSequence: NON_EMPTY_STRING_SCHEMA,
@@ -193,6 +208,7 @@ const ACTOR_BASE_PROPERTIES = {
   id: NON_EMPTY_STRING_SCHEMA,
   roles: Type.Array(ACTOR_ROLE_SCHEMA),
   sequence: nullable(SEQUENCE_STATE_SCHEMA),
+  stats: nullable(CHARACTER_STATS_SCHEMA),
   identity: IDENTITY_STATE_SCHEMA,
   presentation: PRESENTATION_STATE_SCHEMA,
   condition: CONDITION_STATE_SCHEMA,

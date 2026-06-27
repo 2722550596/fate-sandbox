@@ -14,6 +14,7 @@ function addTestNpc(draft: ReturnType<typeof createInitialState>, actorId: strin
     kind: "human",
     roles: [],
     sequence: null,
+    stats: null,
     identity: { publicIdentity: actorId, background: "", lockedFacts: [] },
     presentation: {
       internalName: actorId.charAt(0).toUpperCase() + actorId.slice(1),

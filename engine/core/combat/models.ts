@@ -3,6 +3,7 @@
 // ---------------------------------------------------------------------------
 
 import type { DamageType, SequenceRank } from "../state/state-enum-schemas.ts";
+import type { StatsValues } from "../state/state.ts";
 
 // ===========================================================================
 // 战斗单位快照
@@ -19,15 +20,8 @@ export interface CombatantSnapshot {
   tags: TagEntry[];
 }
 
-/** 六维属性（均为当前值） */
-export interface SixDimStats {
-  vitality: number;
-  agility: number;
-  spirituality: number;
-  sanity: number;
-  humanity: number;
-  luck: number;
-}
+/** 六维属性（对齐 state.ts 的 StatsValues，均为当前值） */
+export type SixDimStats = StatsValues;
 
 // ===========================================================================
 // 技能 / 能力定义

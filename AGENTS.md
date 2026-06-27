@@ -1,12 +1,12 @@
 # AGENTS.md
 
-面向在本项目工作的开发者与编码 agent。游玩说明见 `README.md`。
+面向在本项目工作的开发者与编码 agent。
 
 ---
 
 ## 项目当前形态
 
-`lotm-sandbox` 不是一张 prompt 卡；它是本地运行的互动叙事 runtime。
+`lotm-sandbox` 是在 `fate-sandbox` 的基建上经过 LOTM 的 IP 化处理后转变而来的。它不是一张 prompt 卡；它是本地运行的互动叙事 runtime。
 
 核心组成：
 
@@ -187,51 +187,6 @@ type SceneResult =
 - 未在剧情世界内公开时，public 序列状态必须是 `hidden` 或 `suspected`，display 填序列名或疑似称呼，如 `序列9`。
 - 真实途径/序列通过 `reveal_secret kind=configure-sequence-secrets` 写入 secret slot。
 - 修档时可用 `override_locked_fact kind=sequence-status status=hidden/suspected` 把误公开状态改回去。
-
-### 新手模式
-
-不了解 LOTM 的玩家可以玩，但必须从普通人/穿越者/低知识边界进入。
-
-- `/skill:start-game` 中，用户说“第一次玩”“不了解 LOTM”“随便来”时默认新手模式。
-- 新手模式不把术语知识当解谜前提；危险不能来自玩家不知道“序列/途径/魔药/源堡”等专有名词。
-- 专有名词首次影响行动时，只给一句与下一步选择相关的场内解释；禁止百科式灌输。
-- 不建议新人第一次直接进入复杂多阵营中心或非凡者开局，除非用户明确要求。
-
----
-
-## 子代理纪律
-
-项目子代理是后台导演组/审计器，不是陪聊 NPC。
-
-当前核心项目子代理：
-
-- **后台平行线（引擎直起异步 hermetic 导演）**：persona/契约住在 engine（`engine/core/backstage-director-persona.ts`）；`run_parallel_line` 用 `buildBackstageDirectorPrompt` 拼出 hermetic director prompt，并【直接 fork 一个 detached `pi -p` 后台导演】（`engine/core/backstage-spawn.ts`，不经主 agent loop、不阻塞），只输出结构化 offscreen 候选，不改 state、不面向玩家写正文。隔轮用返回的 run_id 调 `harvest_backstage_candidate`（引擎按 run_id 定位 director session、取回+验收，见 `engine/core/backstage-session-read.ts`）后落地。忘了 harvest 不会静默丢：`run_parallel_line` 起飞即记 pending-harvest（`engine/core/backstage-pending.ts`），commit 逐轮催账，且 `resolve_backstage_line` 在有未 harvest run 时拒绝清账（防 no-change 丢弃已产出候选）。同步 `parallel-line` 子代理已退役；不依赖任何子代理框架（引擎用 `node:child_process` 直接 fork `pi -p`，理由见 `docs/adr/0005`），持久/swarm/协调增长路径都是这条缝上的小增量。
-- `.pi/agents/timeline-showrunner.md`：世界线/题材审计，检查 drift、hook 滥用、NPC autonomy、world motion、beat closure（仍走同步子代理）。
-
-硬规则：
-
-- 主 GM 必须以 project scope 调用项目子代理；不要依赖 user-scope agent。
-- 子代理不得继承大块主项目上下文或技能目录：`inheritProjectContext: false`、`inheritSkills: false`。
-- 子代理必须显式配置 `tools` 和 `extensions`。不要 omitted `extensions`，否则可能加载普通扩展。
-- timeline 子代理只应加载 `extensions/subagents/timeline/index.ts`（提供 `lookup`）。`<timeline_state_context>` 由主 GM 进程在 subagent 工具调用发出前注入 task（`extensions/subagents/timeline/task-injection.ts`），不再读 state/state.json 侧通道。
-- 后台导演（parallel_line）输出必须是 bare JSON；不要 Markdown、解释、长 prose。回程由 `harvest_backstage_candidate` 过 engine 验收后才能落地。
-- 后台事件必须归属到 actor / faction / location / consequence，并给前台一个可行动痕迹；新闻、巡逻、门响、信件不能替代事件本体。
-
----
-
-## 发布与本地隐私纪律
-
-发布包不是 git 工作区原样打包。
-
-- 不要提交或发布 `.pi/agent/auth.json`、`sessions/`、`state/`、`.pi/npm/`、本地 session HTML。
-- 不要把 `agents/user/` 本地玩家角色印象打进发布包。
-- `docs/` 是开发文档，不进 release zip。
-- 发布脚本会删除 `agents/user/` 和 `*.test.ts`；不要移除这道防线。
-- `start.ps1` 必须保持 ASCII-safe / UTF-8 without BOM，避免 Windows PowerShell 编码误读。
-- README/release copy 描述项目为 experimental interactive narrative game；当前测试重点是 FSF 绫香线，但不要把具体玩家角色作为发布默认。
-- License 为 GPL-3.0-or-later；Fate / TYPE-MOON rights remain with their respective holders。
-
----
 
 ## 文件与命名
 

@@ -81,7 +81,7 @@ export interface GameState {
 }
 
 export interface StateMeta {
-  schemaVersion: 1;
+  schemaVersion: number;
   createdAt: string;
   updatedAt: string;
   rngSeed: number;
@@ -323,6 +323,7 @@ export interface ActorBase {
   kind: ActorKind;
   roles: ActorRole[];
   sequence: SequenceState | null;
+  stats: CharacterStats | null;
   identity: IdentityState;
   presentation: PresentationState;
   condition: ConditionState;
@@ -425,21 +426,27 @@ export interface SequenceState {
 }
 
 // ---------------------------------------------------------------------------
-// Six Attributes — LOTM 六维属性
+// Stats — 六维属性三层模型
+//
+// 每个 actor 持有一组 stats，三层含义：
+//   base    — 纯配置运算（序列基准 × 序列权重），只随序列晋升改变
+//   max     — base + 效果修正（buff/debuff），调用 recalculateMaxStats 更新
+//   current — 受伤害/治疗直接影响，被 max 钳制
 // ---------------------------------------------------------------------------
 
-export interface SixAttributesState {
-  vitality: AttributePair;
-  spirituality: AttributePair;
-  reason: AttributePair;
-  humanity: AttributePair;
-  agility: AttributePair;
-  luck: number;
+export interface CharacterStats {
+  base: StatsValues;
+  max: StatsValues;
+  current: StatsValues;
 }
 
-export interface AttributePair {
-  base: number;
-  current: number;
+export interface StatsValues {
+  vitality: number;
+  agility: number;
+  spirituality: number;
+  sanity: number;
+  humanity: number;
+  luck: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -616,4 +623,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 1;
+export const CURRENT_STATE_SCHEMA_VERSION = 2;

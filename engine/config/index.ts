@@ -27,23 +27,6 @@ function loadConfig<T>(filename: string): T {
 // 类型定义
 // ===========================================================================
 
-/** 能力体系映射：序列名称 → 战斗体系 */
-export interface AbilitySystemMapping {
-  [sequenceName: string]: string;
-}
-
-/** 能力体系配置中的单个体系 */
-export interface AbilitySystemEntry {
-  [stat: string]: number;
-}
-
-/** 能力体系配置 */
-export interface AbilitySystemConfig {
-  systems: Record<string, AbilitySystemEntry>;
-  aliases: Record<string, string>;
-  defaultSystem: string;
-}
-
 /** 神性：序列范围 → 神性倍率 */
 export interface DivinityEntry {
   min: number;
@@ -51,14 +34,14 @@ export interface DivinityEntry {
   val: number;
 }
 
-/** 途径矩阵：途径名 → 六维基础值数组 [活力, 敏捷, 灵性, 理智, 人性, 运气] */
-export type PathwayMatrix = Record<string, [number, number, number, number, number, number]>;
-
 /** 标签克制关系 */
 export type TagRelations = Record<string, Record<string, number>>;
 
 /** 序列基准：序列索引或名称 → 基础值 */
 export type SequenceBaseline = Record<string, number>;
+
+/** 序列权重：序列名 → 六维权重 [活力, 敏捷, 灵性, 理智, 人性, 运气] */
+export type SequenceWeights = Record<string, [number, number, number, number, number, number]>;
 
 // ===========================================================================
 // 配置导出（英文名）
@@ -76,23 +59,8 @@ export const tagDamageModifiers = loadConfig<TagRelations>("标签伤害修正.j
 /** 标签治疗修正：施疗方标签 → 受疗方标签 → 修正系数 */
 export const tagHealingModifiers = loadConfig<TagRelations>("标签治疗修正.json");
 
-/** 能力体系映射：序列名称 → 战斗体系 */
-export const abilitySystemMapping = loadConfig<AbilitySystemMapping>("能力体系映射.json");
-
-/** 能力体系配置：战斗体系 → 六维权重 */
-export const abilitySystemConfig = loadConfig<AbilitySystemConfig>("能力体系配置.json");
-
-/** 途径矩阵：途径名 → 六维基础值 */
-export const pathwayMatrix = loadConfig<PathwayMatrix>("途径矩阵.json");
-
-/** 天赋加成 */
-export const talentBonuses = loadConfig<Record<string, unknown>>("天赋加成.json");
-
-/** 标签映射 */
-export const tagMapping = loadConfig<Record<string, string[]>>("标签映射.json");
-
-/** 消耗品配置 */
-export const consumables = loadConfig<Record<string, unknown>>("消耗品配置.json");
+/** 序列权重：序列名 → 六维权重（已展开为每个序列名直接对应权重数组） */
+export const sequenceWeights = loadConfig<SequenceWeights>("序列权重.json");
 
 // ===========================================================================
 // 辅助函数
@@ -108,23 +76,14 @@ export function getDivinityValue(sequenceRankIndex: number): number {
   return 1.0;
 }
 
-/** 根据序列名称获取对应的能力体系 */
-export function getAbilitySystem(sequenceName: string): string {
-  return abilitySystemMapping[sequenceName] ?? abilitySystemConfig.defaultSystem;
-}
-
-/** 获取某个能力体系的六维权重 */
-export function getSystemWeights(systemName: string): AbilitySystemEntry {
-  return (
-    abilitySystemConfig.systems[systemName] ??
-    abilitySystemConfig.systems[abilitySystemConfig.defaultSystem] ??
-    {}
-  );
-}
-
-/** 根据途径名获取六维基础值 */
-export function getPathwayBaseline(
-  pathwayName: string,
+/**
+ * 获取某个序列的六维权重数组。
+ * 权重数组顺序：[活力, 敏捷, 灵性, 理智, 人性, 运气]
+ * 权重为 0~1 的小数，总和为 1。
+ * 找不到时返回 null。
+ */
+export function getSequenceWeights(
+  sequenceName: string,
 ): [number, number, number, number, number, number] | null {
-  return pathwayMatrix[pathwayName] ?? null;
+  return sequenceWeights[sequenceName] ?? null;
 }

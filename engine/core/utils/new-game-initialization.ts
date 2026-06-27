@@ -3,16 +3,20 @@ import type { MemoryClaim } from "../memory/memory.ts";
 import type {
   ActorId,
   ActorRole,
+  CharacterStats,
   OutfitState,
   PathwayId,
   PromotionSystem,
   PublicActorState,
   SequenceRank,
   State,
+  StatsValues,
 } from "../state/state.ts";
 
+import { sequenceBaseline, getSequenceWeights } from "../../config/index.ts";
 import { setScenePresence, upsertActor } from "../actor/actor.ts";
 import { configureCampaign } from "../campaign/campaign.ts";
+import { sequenceRankToIndex } from "../combat/sequence-utils.ts";
 import { recordMemory } from "../memory/memory.ts";
 import { createInitialState, PROTAGONIST_ACTOR_ID } from "../state/state-store.ts";
 
@@ -148,6 +152,7 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
     kind: "human",
     roles: input.roles ?? [],
     sequence: null,
+    stats: null,
     identity: {
       publicIdentity: input.publicIdentity,
       background: input.background,
@@ -172,6 +177,7 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
 }
 
 function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): PublicActorState {
+  const stats = computeBaseStats(input.currentSequence, input.rank);
   return {
     id: PROTAGONIST_ACTOR_ID,
     kind: "beyonder",
@@ -185,6 +191,7 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
       digestionProgress: input.digestionProgress ?? 0,
       lossOfControlProgress: input.lossOfControlProgress ?? 0,
     },
+    stats,
     identity: {
       publicIdentity: input.publicIdentity,
       background: input.background,
@@ -206,6 +213,35 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
     })),
     relationshipToProtagonist: { stance: "self", summary: "玩家本人。" },
   };
+}
+
+/**
+ * 根据序列名和序列等级计算六维基础值（base）。
+ * 公式：base[attr] = floor(序列基准[等级] × 序列权重[attr])
+ * base = max = current（新创建角色无效果影响）。
+ */
+function computeBaseStats(sequenceName: string, rank: SequenceRank): CharacterStats {
+  const rankIndex = sequenceRankToIndex(rank);
+  const totalPoints = sequenceBaseline[String(rankIndex)] ?? sequenceBaseline["普通"] ?? 200;
+  const weights = getSequenceWeights(sequenceName);
+
+  let vitality = 0,
+    agility = 0,
+    spirituality = 0,
+    sanity = 0,
+    humanity = 0,
+    luck = 0;
+  if (weights !== null) {
+    vitality = Math.floor(totalPoints * weights[0]);
+    agility = Math.floor(totalPoints * weights[1]);
+    spirituality = Math.floor(totalPoints * weights[2]);
+    sanity = Math.floor(totalPoints * weights[3]);
+    humanity = Math.floor(totalPoints * weights[4]);
+    luck = Math.floor(totalPoints * weights[5]);
+  }
+
+  const values: StatsValues = { vitality, agility, spirituality, sanity, humanity, luck };
+  return { base: values, max: values, current: values };
 }
 
 function assertNewGameInitialized(state: State, input: NewGameInitializationInput): void {

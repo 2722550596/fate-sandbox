@@ -13,6 +13,7 @@ void describe("actor LOTM", () => {
         kind: "human",
         roles: [],
         sequence: null,
+        stats: null,
         identity: { publicIdentity: "玩家", background: "普通人", lockedFacts: [] },
         presentation: {
           internalName: "你",
@@ -48,6 +49,7 @@ void describe("actor LOTM", () => {
           digestionProgress: 0,
           lossOfControlProgress: 0,
         },
+        stats: null,
         identity: { publicIdentity: "玩家", background: "非凡者", lockedFacts: [] },
         presentation: {
           internalName: "你",

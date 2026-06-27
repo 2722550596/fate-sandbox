@@ -180,6 +180,7 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
     id: assertNonEmptyString(npc.id, "npc.id"),
     roles: npc.publicRoles,
     sequence: null,
+    stats: null,
     identity: {
       publicIdentity: assertNonEmptyString(npc.publicIdentity, "npc.publicIdentity"),
       background: assertNonEmptyString(npc.publicIdentity, "npc.publicIdentity"),
