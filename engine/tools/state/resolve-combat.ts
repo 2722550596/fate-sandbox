@@ -1,11 +1,14 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import type { CombatActionInput } from "../../core/combat.ts";
+import type { CostType } from "../../core/combat/models.ts";
+import type { SequenceAbilityEntry } from "../../config/pathway.ts";
 import type { State } from "../../core/state/state.ts";
 
 import { executeCombatAction } from "../../core/combat.ts";
 import { sequenceRankToIndex } from "../../core/combat/sequence-utils.ts";
 import { getDivinityValue } from "../../config/index.ts";
+import { getPathwayAbilities } from "../../config/pathway.ts";
 import { recalculateMaxStats } from "../../core/state/stats-recalculator.ts";
 import { textResult } from "../runtime/tool-result.ts";
 import { runDomainEventTool } from "./domain-tool-runner.ts";
@@ -103,35 +106,105 @@ interface ParsedCombatInput {
   randomValue?: number;
 }
 
-function parseCombatInput(params: unknown, _draft: State): ParsedCombatInput {
+function parseCombatInput(params: unknown, draft: State): ParsedCombatInput {
   const raw = params as Record<string, unknown>;
   const attackerId = raw["attackerId"] as string | undefined;
   const defenderId = raw["defenderId"] as string | undefined;
-  const skill = raw["skill"] as Record<string, unknown> | undefined;
+  const skillName = raw["skillName"] as string | undefined;
 
   if (!attackerId || !defenderId) {
     throw new Error("resolve_combat 需要 attackerId 和 defenderId。");
   }
+  if (!skillName) {
+    throw new Error("resolve_combat 需要 skillName（技能名称）。");
+  }
+
+  // 从 state 读取攻击方 actor，用于查 pathway 技能配置
+  const attackerActor = draft.public.actors[attackerId];
+  if (!attackerActor) {
+    throw new Error(`actor 不存在: ${attackerId}`);
+  }
+
+  // 从 pathway 配置解析技能定义
+  const skill = resolveSkillFromPathway(attackerActor, skillName);
 
   return {
     attackerId,
     defenderId,
-    skill: {
-      name: typeof skill?.["name"] === "string" ? skill["name"] : "攻击",
-      power: (skill?.["power"] as number | Record<string, number> | undefined) ?? 1,
-      damageType: (skill?.["damageType"] as CombatActionInput["skill"]["damageType"]) ?? "physical",
-      targetType: (skill?.["targetType"] as CombatActionInput["skill"]["targetType"]) ?? "single",
-      cost: (skill?.["cost"] as CombatActionInput["skill"]["cost"]) ?? null,
-      isHeal: skill?.["isHeal"] === true,
-      healAmt: (skill?.["healAmt"] as number | Record<string, number> | undefined) ?? 0,
-      healType: typeof skill?.["healType"] === "string" ? skill["healType"] : "vitality",
-      healValueType: (skill?.["healValueType"] as "fixed" | "percentage") ?? "percentage",
-      customDamageCalculator: (skill?.["customDamageCalculator"] as string | null) ?? null,
-      effects: (skill?.["effects"] as CombatActionInput["skill"]["effects"]) ?? [],
-      conditionalParams: (skill?.["conditionalParams"] as CombatActionInput["skill"]["conditionalParams"]) ?? [],
-    },
+    skill,
     tagDamageRelations: raw["tagDamageRelations"] as Record<string, Record<string, number>> | undefined,
     randomValue: raw["randomValue"] as number | undefined,
+  };
+}
+
+/**
+ * 从 actor 的 pathway + sequence rank 查找技能定义。
+ * 只返回 type="非凡能力" 的技能。找不到时 fallback 到基础物理攻击。
+ */
+function resolveSkillFromPathway(
+  actor: import("../../core/state/state.ts").PublicActorState,
+  skillName: string,
+): CombatActionInput["skill"] {
+  const pathwayName = actor.sequence?.pathway;
+  const rank = actor.sequence?.rank;
+
+  if (pathwayName && rank) {
+    // rank 如 "seq-9"，直接当文件名后缀用
+    const abilities = getPathwayAbilities(pathwayName, rank);
+    if (abilities) {
+      const found = abilities.find(
+        (a) => a.name === skillName && a.type === "非凡能力",
+      );
+      if (found) {
+        return abilityEntryToSkill(found);
+      }
+    }
+  }
+
+  // fallback: 基础物理攻击
+  return {
+    name: skillName,
+    power: 1,
+    damageType: "physical",
+    targetType: "single",
+    cost: null,
+    isHeal: false,
+    healAmt: 0,
+    healType: "vitality",
+    healValueType: "percentage",
+    customDamageCalculator: null,
+    effects: [],
+    conditionalParams: [],
+  };
+}
+
+/** 将 pathway 配置中的能力条目转为战斗引擎的 SkillDef */
+function abilityEntryToSkill(entry: SequenceAbilityEntry): CombatActionInput["skill"] {
+  const power = entry["power"] as number | Record<string, number> | undefined;
+  const damageType = entry["damageType"] as string | undefined;
+  const targetType = entry["targetType"] as string | undefined;
+  const cost = entry["cost"] as Record<string, unknown> | undefined;
+  const isHeal = entry["isHeal"] === true;
+  const healAmt = entry["healAmt"] as number | Record<string, number> | undefined;
+  const healType = entry["healType"] as string | undefined;
+  const healValueType = entry["healValueType"] as string | undefined;
+  const customDamageCalculator = entry["customDamageCalculator"] as string | undefined;
+  const effects = entry["effects"] as Array<Record<string, unknown>> | undefined;
+  const conditionalParams = entry["conditionalParams"] as Array<Record<string, unknown>> | undefined;
+
+  return {
+    name: entry["name"] as string ?? "技能",
+    power: power ?? 1,
+    damageType: (damageType as CombatActionInput["skill"]["damageType"]) ?? "physical",
+    targetType: (targetType as CombatActionInput["skill"]["targetType"]) ?? "single",
+    cost: cost ? { type: cost["type"] as CostType, amount: cost["amount"] as number } : null,
+    isHeal,
+    healAmt: healAmt ?? 0,
+    healType: healType ?? "vitality",
+    healValueType: (healValueType as "fixed" | "percentage") ?? "fixed",
+    customDamageCalculator: customDamageCalculator ?? null,
+    effects: (effects ?? []) as unknown as CombatActionInput["skill"]["effects"],
+    conditionalParams: (conditionalParams ?? []) as unknown as CombatActionInput["skill"]["conditionalParams"],
   };
 }
 
@@ -191,27 +264,16 @@ function buildSnapshot(actor: PublicActorState, _actorId: string): CombatantSnap
 export const resolveCombatToolDefinition: FateToolDefinition = {
   name: "resolve_combat",
   description:
-    "执行一次 LOTM 战斗对抗结算。自动从 state 读取攻防双方的六维属性与状态效果，计算后写入伤害和效果到 state。\n\n" +
-    "使用边界：战斗轮次的对抗判定；提供 attackerId、defenderId 和技能定义。\n" +
-    "技能定义需包含 name、power（数值或序列映射表）、damageType（physical/mystical/mental/mixed）等。\n" +
+    "执行一次 LOTM 战斗对抗结算。自动从 state 读取攻防双方的六维属性与状态效果，\n" +
+    "从 pathway 配置自动获取技能定义（power / damageType / effects 等），\n" +
+    "计算后自动将伤害和效果写入 state。\n\n" +
+    "使用边界：战斗轮次的对抗判定；提供 attackerId、defenderId 和 skillName。\n" +
+    "skillName 必须与 data/pathways/<途径>/seq-<等级>.json 中的技能名称完全一致。\n" +
     "禁区：非战斗场景的判定走 roll_dice 或 perform_judgment。",
   parameters: Type.Object({
     attackerId: Type.String({ description: "攻击方 actorId" }),
     defenderId: Type.String({ description: "防御方 actorId" }),
-    skill: Type.Object({
-      name: Type.String({ description: "技能名称" }),
-      power: Type.Optional(Type.Any({ description: "固定数值或序列映射表 { '-2': 185000, '0': 44400 }" })),
-      damageType: Type.Optional(Type.String({ description: "伤害类型: physical/mystical/mental/mixed（默认 physical）" })),
-      targetType: Type.Optional(Type.String({ description: "目标类型: single/all（默认 single）" })),
-      cost: Type.Optional(Type.Any({ description: "消耗配置: { type: string, amount: number }" })),
-      isHeal: Type.Optional(Type.Boolean({ description: "是否为治疗技能" })),
-      healAmt: Type.Optional(Type.Any({ description: "治疗量" })),
-      healType: Type.Optional(Type.String({ description: "目标属性" })),
-      healValueType: Type.Optional(Type.String({ description: "fixed/percentage" })),
-      customDamageCalculator: Type.Optional(Type.String({ description: "fixedDamage/percentDamage/trueDamage" })),
-      effects: Type.Optional(Type.Array(Type.Any({ description: "技能自带效果" }))),
-      conditionalParams: Type.Optional(Type.Array(Type.Any({ description: "条件参数" }))),
-    }),
+    skillName: Type.String({ description: "技能名称（必须与 pathway 配置中的 name 完全一致）" }),
     tagDamageRelations: Type.Optional(Type.Any({ description: "标签克制关系映射（可选）" })),
     randomValue: Type.Optional(Type.Number({ description: "随机种子（可选，不传使用 Math.random）" })),
   }),
