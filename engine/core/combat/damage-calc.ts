@@ -84,6 +84,14 @@ export function calcDamage(
   const totalModifier = attackerMod + defenderMod + tagMod;
   damage = damage * (1 + totalModifier);
 
+  // 固定值伤害加成（杀伤消耗品等）
+  const flatBonus = calcDamageFlatBonus(
+    attacker.effects,
+    "damageDealtIncrease",
+    "damageDealtDecrease",
+  );
+  damage += flatBonus;
+
   const finalDamage = Math.max(0, Math.floor(damage));
 
   // 目标属性
@@ -157,6 +165,28 @@ function calcDamageModifier(
   }
 
   return modifier;
+}
+
+/**
+ * 计算固定值伤害修正（用于杀伤消耗品等）。
+ * 只处理 valueType === "fixed" 的效果。
+ */
+function calcDamageFlatBonus(
+  effects: EffectInstance[],
+  increaseStat: string,
+  decreaseStat: string,
+): number {
+  let bonus = 0;
+  for (const effect of effects) {
+    if (effect.valueType !== "fixed") continue;
+    if (effect.stat === increaseStat) {
+      bonus += effect.power;
+    }
+    if (effect.stat === decreaseStat) {
+      bonus -= effect.power;
+    }
+  }
+  return bonus;
 }
 
 // ===========================================================================

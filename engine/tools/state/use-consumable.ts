@@ -46,13 +46,13 @@ export function useConsumableTool(
         );
       }
 
-      // 2. 杀伤型：添加伤害加成作为临时状态效果
+      // 2. 杀伤型：添加固定值伤害加成状态效果（combat 系统通过 calcDamageFlatBonus 读取）
       if (item.effect === "杀伤" && item.damageBonus && item.damageBonus > 0) {
         actor.condition.statusEffects.push({
           id: `effect-consumable-${Date.now()}`,
           name: `${item.name}伤害加成`,
           type: "buff",
-          affectedAttribute: item.sourceAttribute ?? "vitality",
+          affectedAttribute: "damageDealtIncrease",
           valueType: "fixed",
           value: item.damageBonus,
           duration: 1,
