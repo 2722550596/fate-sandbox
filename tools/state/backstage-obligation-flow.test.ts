@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../engine/core/state-store.ts";
+import { getState, resetState } from "../../engine/core/state/state-store.ts";
 import { commitTurnTool } from "./commit-turn.ts";
 import { recordOffscreenEventTool } from "./record-offscreen-event.ts";
 import { resolveBackstageLineTool } from "./resolve-backstage-line.ts";

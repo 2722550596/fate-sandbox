@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { isRecord } from "../core/typebox-validation.ts";
+import { isRecord } from "../core/utils/typebox-validation.ts";
 
 export type PromptSlot = "pre-history" | "pre-response" | "final-contract";
 /** 双 pass 架构：结算器与渲染器各自持有独立的 preset 文件。 */

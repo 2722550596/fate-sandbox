@@ -2,9 +2,13 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { persistStateAfterCommit } from "../../engine/core/state-persistence.ts";
-import { cloneState, migrateState, replaceStateForDebug } from "../../engine/core/state-store.ts";
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { persistStateAfterCommit } from "../../engine/core/state/state-persistence.ts";
+import {
+  cloneState,
+  migrateState,
+  replaceStateForDebug,
+} from "../../engine/core/state/state-store.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 interface MigrateStateParams {

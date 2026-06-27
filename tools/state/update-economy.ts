@@ -1,11 +1,11 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { EconomyEvent } from "../../engine/core/economy.ts";
+import type { EconomyEvent } from "../../engine/core/economy/economy.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { updateEconomy } from "../../engine/core/economy.ts";
-import { parseEconomyEvent } from "../../engine/core/economy-schema.ts";
-import type { State } from "../../engine/core/state.ts";
+import { updateEconomy } from "../../engine/core/economy/economy.ts";
+import { parseEconomyEvent } from "../../engine/core/economy/economy-schema.ts";
+import type { State } from "../../engine/core/state/state.ts";
 
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 

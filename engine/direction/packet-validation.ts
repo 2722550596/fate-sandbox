@@ -1,4 +1,4 @@
-import type { ActorId, State } from "../core/state.ts";
+import type { ActorId, State } from "../core/state/state.ts";
 import type { RenderDirectionPacket } from "./packet-schema.ts";
 
 /**

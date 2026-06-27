@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 import { pruneAbandonedSubtree } from "./prune.ts";
 import {
   collectSubtreeIds,

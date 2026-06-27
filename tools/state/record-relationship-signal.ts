@@ -4,14 +4,14 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { recordRelationshipSignal } from "../../engine/core/relationship-signal.ts";
-import type { RelationshipSignal, State } from "../../engine/core/state.ts";
-import { stringEnumSchema } from "../../engine/core/state-enum-schemas.ts";
-import { RELATIONSHIP_SIGNAL_VISIBILITIES } from "../../engine/core/state-schema.ts";
+import { recordRelationshipSignal } from "../../engine/core/utils/relationship-signal.ts";
+import type { RelationshipSignal, State } from "../../engine/core/state/state.ts";
+import { stringEnumSchema } from "../../engine/core/state/state-enum-schemas.ts";
+import { RELATIONSHIP_SIGNAL_VISIBILITIES } from "../../engine/core/state/state-schema.ts";
 import {
   assertNonEmptyString,
   parseTypeBoxValue,
-} from "../../engine/core/typebox-validation.ts";
+} from "../../engine/core/utils/typebox-validation.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 

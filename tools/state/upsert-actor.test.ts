@@ -1,8 +1,8 @@
 import { describe, it } from "node:test";
 import { deepEqual, equal } from "node:assert/strict";
 
-import { upsertActor } from "../../engine/core/actor.ts";
-import { createInitialState } from "../../engine/core/state-store.ts";
+import { upsertActor } from "../../engine/core/actor/actor.ts";
+import { createInitialState } from "../../engine/core/state/state-store.ts";
 
 describe("upsertActor LOTM", () => {
   it("sets up a human protagonist", () => {

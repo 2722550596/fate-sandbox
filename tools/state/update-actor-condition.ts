@@ -1,6 +1,6 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import { updateActorCondition } from "../../engine/core/actor-condition.ts";
+import { updateActorCondition } from "../../engine/core/actor/actor-condition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";

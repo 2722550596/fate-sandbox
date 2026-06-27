@@ -12,7 +12,7 @@
 //   M = attackerMod + defenderMod + tagMod
 // ---------------------------------------------------------------------------
 
-import type { DamageType } from "../state-enum-schemas.ts";
+import type { DamageType } from "../state/state-enum-schemas.ts";
 import type {
   CombatantSnapshot,
   DamageCalcResult,

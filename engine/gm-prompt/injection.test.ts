@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import test from "node:test";
 
-import { resetState } from "../core/state-store.ts";
+import { resetState } from "../core/state/state-store.ts";
 import {
   buildRendererSystemPrompt,
   buildSystemPrompt,

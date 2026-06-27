@@ -11,15 +11,15 @@ import {
   retireFactionClock,
   scheduleEvent,
   upsertFactionClock,
-} from "../../engine/core/faction-clock.ts";
-import { FACTION_CLOCK_VISIBILITIES } from "../../engine/core/state-schema.ts";
-import { stringEnumSchema } from "../../engine/core/state-enum-schemas.ts";
-import type { State } from "../../engine/core/state.ts";
+} from "../../engine/core/utils/faction-clock.ts";
+import { FACTION_CLOCK_VISIBILITIES } from "../../engine/core/state/state-schema.ts";
+import { stringEnumSchema } from "../../engine/core/state/state-enum-schemas.ts";
+import type { State } from "../../engine/core/state/state.ts";
 import {
   assertNonEmptyString,
   isRecord,
   parseTypeBoxValue,
-} from "../../engine/core/typebox-validation.ts";
+} from "../../engine/core/utils/typebox-validation.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { exportState, resetState } from "../../engine/core/state-store.ts";
+import { exportState, resetState } from "../../engine/core/state/state-store.ts";
 import { configureCampaignTool } from "./configure-campaign.ts";
 
 void test("configureCampaignTool applies LOTM Tingen preset", () => {

@@ -1,4 +1,4 @@
-import { isRecord } from "../core/typebox-validation.ts";
+import { isRecord } from "../core/utils/typebox-validation.ts";
 
 /**
  * 结算器（Pass A）漏稿源头收口。

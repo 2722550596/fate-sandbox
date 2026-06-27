@@ -2,7 +2,7 @@
 // 战斗系统核心类型 — 数据模型
 // ---------------------------------------------------------------------------
 
-import type { DamageType, SequenceRank } from "../state-enum-schemas.ts";
+import type { DamageType, SequenceRank } from "../state/state-enum-schemas.ts";
 
 // ===========================================================================
 // 战斗单位快照

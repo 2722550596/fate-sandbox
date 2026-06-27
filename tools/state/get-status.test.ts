@@ -3,8 +3,8 @@ import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { resetState } from "../../engine/core/state-store.ts";
-import { sessionKey } from "../../engine/core/state-persistence.ts";
+import { resetState } from "../../engine/core/state/state-store.ts";
+import { sessionKey } from "../../engine/core/state/state-persistence.ts";
 import { commitTurnTool } from "./commit-turn.ts";
 import { getStatusTool } from "./get-status.ts";
 

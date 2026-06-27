@@ -1,8 +1,8 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import { buildGmBrief } from "../../engine/core/public-projection.ts";
-import { hydrateStateFromSessionManager } from "../../engine/core/session-hydration.ts";
-import { getState } from "../../engine/core/state-store.ts";
+import { buildGmBrief } from "../../engine/core/backstage/public-projection.ts";
+import { hydrateStateFromSessionManager } from "../../engine/core/utils/session-hydration.ts";
+import { getState } from "../../engine/core/state/state-store.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 const lastStatusRevisionBySession = new WeakMap<object, string>();

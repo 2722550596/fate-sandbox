@@ -7,7 +7,7 @@
 
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 
 /** 解析 /fuck 的参数：空串默认 1 步，其余必须是 >=1 的整数。 */
 export function parseRollbackSteps(args: string): number | undefined {

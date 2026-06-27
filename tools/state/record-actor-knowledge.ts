@@ -10,14 +10,14 @@ import {
   removeActorKnowledgeFact,
   upsertActorKnowledgeLens,
   type KnowledgeLensCategory,
-} from "../../engine/core/actor-agenda.ts";
-import type { ActorKnowledgeLens, State } from "../../engine/core/state.ts";
-import { stringEnumSchema } from "../../engine/core/state-enum-schemas.ts";
+} from "../../engine/core/actor/actor-agenda.ts";
+import type { ActorKnowledgeLens, State } from "../../engine/core/state/state.ts";
+import { stringEnumSchema } from "../../engine/core/state/state-enum-schemas.ts";
 import {
   assertNonEmptyString,
   isRecord,
   parseTypeBoxValue,
-} from "../../engine/core/typebox-validation.ts";
+} from "../../engine/core/utils/typebox-validation.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 

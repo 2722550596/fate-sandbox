@@ -2,7 +2,7 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { CURRENT_STATE_SCHEMA_VERSION } from "../../engine/core/state.ts";
+import { CURRENT_STATE_SCHEMA_VERSION } from "../../engine/core/state/state.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export function getStateSchemaTool(): ToolResult {

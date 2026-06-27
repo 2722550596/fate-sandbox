@@ -14,11 +14,11 @@ import {
   recallMemory,
   type RecallMemoryQuery,
   type RecallMemoryResult,
-} from "../../engine/core/memory-recall.ts";
-import { hydrateStateFromSessionManager } from "../../engine/core/session-hydration.ts";
-import { getState } from "../../engine/core/state-store.ts";
+} from "../../engine/core/memory/memory-recall.ts";
+import { hydrateStateFromSessionManager } from "../../engine/core/utils/session-hydration.ts";
+import { getState } from "../../engine/core/state/state-store.ts";
 import { textResult } from "../runtime/tool-result.ts";
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 
 export function recallMemoryTool(params: unknown, sessionManager: unknown): ToolResult {
   if (sessionManager !== undefined) {

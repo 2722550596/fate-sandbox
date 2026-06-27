@@ -1,15 +1,15 @@
-import type { ScenePresenceInput } from "../../engine/core/actor.ts";
-import type { MemoryEvent } from "../../engine/core/memory.ts";
-import type { TurnCommitEvent, TurnCommitInput } from "../../engine/core/turn-commit.ts";
+import type { ScenePresenceInput } from "../../engine/core/actor/actor.ts";
+import type { MemoryEvent } from "../../engine/core/memory/memory.ts";
+import type { TurnCommitEvent, TurnCommitInput } from "../../engine/core/state/turn-commit.ts";
 
-import { parseEconomyEvent } from "../../engine/core/economy-schema.ts";
-import { parseMemoryEvent } from "../../engine/core/memory-schema.ts";
-import { parseSceneEvent } from "../../engine/core/scene-schema.ts";
-import { parseSequenceInput } from "../../engine/core/actor-schema.ts";
-import { parseTurnTimePolicySchema } from "../../engine/core/turn-time-schema.ts";
+import { parseEconomyEvent } from "../../engine/core/economy/economy-schema.ts";
+import { parseMemoryEvent } from "../../engine/core/memory/memory-schema.ts";
+import { parseSceneEvent } from "../../engine/core/scene/scene-schema.ts";
+import { parseSequenceInput } from "../../engine/core/actor/actor-schema.ts";
+import { parseTurnTimePolicySchema } from "../../engine/core/state/turn-time-schema.ts";
 
 import { normalizeActorConditionEvent } from "./actor-condition-normalizer.ts";
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 
 const DEFAULT_SUMMARY = "本轮状态变化。";
 const TURN_EVENT_KINDS = [

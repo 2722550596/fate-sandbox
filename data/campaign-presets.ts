@@ -6,7 +6,7 @@ import type {
   SituationKind,
   TimelineId,
   TimeZoneId,
-} from "../engine/core/state.ts";
+} from "../engine/core/state/state.ts";
 
 /**
  * Per-protagonist-archetype first-frame anchors.

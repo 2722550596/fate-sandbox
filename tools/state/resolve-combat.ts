@@ -5,8 +5,8 @@ import type { CombatActionInput } from "../../engine/core/combat.ts";
 
 import { executeCombatAction } from "../../engine/core/combat.ts";
 import { textResult } from "../runtime/tool-result.ts";
-import { cloneState, commitState } from "../../engine/core/state-store.ts";
-import { persistStateAfterCommit } from "../../engine/core/state-persistence.ts";
+import { cloneState, commitState } from "../../engine/core/state/state-store.ts";
+import { persistStateAfterCommit } from "../../engine/core/state/state-persistence.ts";
 
 export function resolveCombatTool(params: unknown, sessionManager: unknown): ToolResult {
   const input = parseCombatInput(params);

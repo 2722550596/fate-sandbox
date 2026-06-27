@@ -3,8 +3,8 @@ import type { Static } from "typebox";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { stringEnumSchema } from "../core/state-enum-schemas.ts";
-import { isRecord, parseTypeBoxValue, trimStringsDeep } from "../core/typebox-validation.ts";
+import { stringEnumSchema } from "../core/state/state-enum-schemas.ts";
+import { isRecord, parseTypeBoxValue, trimStringsDeep } from "../core/utils/typebox-validation.ts";
 
 /**
  * Direction Packet：双 pass 架构（backlog #12）中结算器 → 渲染器的唯一通道。

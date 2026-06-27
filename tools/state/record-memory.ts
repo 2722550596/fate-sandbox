@@ -1,13 +1,13 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import type { MemoryEvent, MemoryEventResult } from "../../engine/core/memory.ts";
+import type { MemoryEvent, MemoryEventResult } from "../../engine/core/memory/memory.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { recordMemory } from "../../engine/core/memory.ts";
-import { parseMemoryEvent } from "../../engine/core/memory-schema.ts";
+import { recordMemory } from "../../engine/core/memory/memory.ts";
+import { parseMemoryEvent } from "../../engine/core/memory/memory-schema.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 
 export function recordMemoryTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

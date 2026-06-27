@@ -1,14 +1,14 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
-import type { SequenceInput } from "../../engine/core/actor-schema.ts";
+import type { SequenceInput } from "../../engine/core/actor/actor-schema.ts";
 
-import { cloneState, commitState } from "../../engine/core/state-store.ts";
-import { persistStateAfterCommit } from "../../engine/core/state-persistence.ts";
+import { cloneState, commitState } from "../../engine/core/state/state-store.ts";
+import { persistStateAfterCommit } from "../../engine/core/state/state-persistence.ts";
 import { textResult } from "../runtime/tool-result.ts";
-import { upsertActor } from "../../engine/core/actor.ts";
-import { performJudgment } from "../../engine/core/judgment.ts";
-import type { DifficultyLevel } from "../../engine/core/state-enum-schemas.ts";
+import { upsertActor } from "../../engine/core/actor/actor.ts";
+import { performJudgment } from "../../engine/core/utils/judgment.ts";
+import type { DifficultyLevel } from "../../engine/core/state/state-enum-schemas.ts";
 
 export function attemptPromotionTool(params: unknown, sessionManager: unknown): ToolResult {
   const { actorId, targetRank, targetName, pathway, divinity, digestionProgress, luck, agility } =

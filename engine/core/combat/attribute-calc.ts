@@ -4,7 +4,7 @@
 //       最终 = floor(max(0, base × (1 + percentage修正) + fixed修正))
 // ---------------------------------------------------------------------------
 
-import type { DamageType } from "../state-enum-schemas.ts";
+import type { DamageType } from "../state/state-enum-schemas.ts";
 import type { EffectInstance, SixDimStats } from "./models.ts";
 
 /**

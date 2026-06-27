@@ -2,8 +2,8 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { privateResolve } from "../../engine/core/secrets.ts";
-import { parsePrivateResolveEvent } from "../../engine/core/secrets-schema.ts";
+import { privateResolve } from "../../engine/core/secrets/secrets.ts";
+import { parsePrivateResolveEvent } from "../../engine/core/secrets/secrets-schema.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 

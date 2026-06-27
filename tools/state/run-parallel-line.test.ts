@@ -4,8 +4,8 @@ import test from "node:test";
 import {
   setBackstageDirectorSpawnerForTest,
   type BackstageDirectorHandle,
-} from "../../engine/core/backstage-spawn.ts";
-import { getState, resetState } from "../../engine/core/state-store.ts";
+} from "../../engine/core/backstage/backstage-spawn.ts";
+import { getState, resetState } from "../../engine/core/state/state-store.ts";
 
 import { runParallelLineTool } from "./run-parallel-line.ts";
 

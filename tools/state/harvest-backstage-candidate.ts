@@ -10,16 +10,16 @@
  * 或 resolve_backstage_line（no-change/blocked）。「不审查就落地」是禁区。
  */
 
-import type { ParallelLineOutput } from "../../engine/core/state.ts";
+import type { ParallelLineOutput } from "../../engine/core/state/state.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { clearPendingHarvestByRun } from "../../engine/core/backstage-pending.ts";
-import { readBackstageCandidateRaw } from "../../engine/core/backstage-session-read.ts";
-import { parseParallelLineOutput } from "../../engine/core/parallel-line-output-schema.ts";
-import { assertNonEmptyString, isRecord } from "../../engine/core/typebox-validation.ts";
+import { clearPendingHarvestByRun } from "../../engine/core/backstage/backstage-pending.ts";
+import { readBackstageCandidateRaw } from "../../engine/core/backstage/backstage-session-read.ts";
+import { parseParallelLineOutput } from "../../engine/core/backstage/parallel-line-output-schema.ts";
+import { assertNonEmptyString, isRecord } from "../../engine/core/utils/typebox-validation.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 

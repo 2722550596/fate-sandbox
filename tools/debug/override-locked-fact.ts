@@ -1,6 +1,6 @@
 import type { Static } from "typebox";
 
-import type { TypeBoxValidator } from "../../engine/core/typebox-validation.ts";
+import type { TypeBoxValidator } from "../../engine/core/utils/typebox-validation.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
@@ -10,10 +10,13 @@ import {
   PATHWAY_ID_SCHEMA,
   SEQUENCE_RANK_SCHEMA,
   stringEnumSchema,
-} from "../../engine/core/state-enum-schemas.ts";
-import { persistStateAfterCommit } from "../../engine/core/state-persistence.ts";
-import { cloneState, commitState } from "../../engine/core/state-store.ts";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../../engine/core/typebox-validation.ts";
+} from "../../engine/core/state/state-enum-schemas.ts";
+import { persistStateAfterCommit } from "../../engine/core/state/state-persistence.ts";
+import { cloneState, commitState } from "../../engine/core/state/state-store.ts";
+import {
+  parseTaggedTypeBoxUnion,
+  trimStringsDeep,
+} from "../../engine/core/utils/typebox-validation.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 const OVERRIDE_LOCKED_FACT_KINDS = ["sequence-rank", "pathway-secret", "sequence-secret"] as const;

@@ -2,7 +2,7 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
-import { assertNonEmptyString, isRecord } from "../../engine/core/typebox-validation.ts";
+import { assertNonEmptyString, isRecord } from "../../engine/core/utils/typebox-validation.ts";
 import { lookupWorldData } from "../../engine/world-data/lookup.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 

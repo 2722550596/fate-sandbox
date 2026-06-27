@@ -8,14 +8,14 @@ import {
   clearActorAgenda,
   markActorIndependentAction,
   upsertActorAgenda,
-} from "../../engine/core/actor-agenda.ts";
-import type { ActorAgendaState, State } from "../../engine/core/state.ts";
+} from "../../engine/core/actor/actor-agenda.ts";
+import type { ActorAgendaState, State } from "../../engine/core/state/state.ts";
 import {
   assertIsoDateString,
   assertNonEmptyString,
   isRecord,
   parseTypeBoxValue,
-} from "../../engine/core/typebox-validation.ts";
+} from "../../engine/core/utils/typebox-validation.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 

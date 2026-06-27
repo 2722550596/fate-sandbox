@@ -1,22 +1,22 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
-import type { PublicGameState } from "../../engine/core/state.ts";
+import type { PublicGameState } from "../../engine/core/state/state.ts";
 
 import { DynamicBorder, getMarkdownTheme } from "@earendil-works/pi-coding-agent";
 import { Container, Markdown, matchesKey, Text } from "@earendil-works/pi-tui";
 
 import {
+  buildInventoryMarkdown,
+  buildStatusMarkdown,
+} from "../../engine/core/backstage/public-projection.ts";
+import { getPublicState } from "../../engine/core/state/state-store.ts";
+import {
   buildHooksMarkdown,
   buildJournalMarkdown,
   buildRecapMarkdown,
   buildRelationsMarkdown,
-} from "../../engine/core/player-widgets.ts";
-import {
-  buildInventoryMarkdown,
-  buildStatusMarkdown,
-} from "../../engine/core/public-projection.ts";
-import { syncStateFromSessionManager } from "../../engine/core/session-hydration.ts";
-import { getPublicState } from "../../engine/core/state-store.ts";
+} from "../../engine/core/utils/player-widgets.ts";
+import { syncStateFromSessionManager } from "../../engine/core/utils/session-hydration.ts";
 
 export default function playerPanelExtension(pi: ExtensionAPI): void {
   pi.registerCommand("status", {

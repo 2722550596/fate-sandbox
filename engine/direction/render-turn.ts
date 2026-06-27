@@ -8,7 +8,7 @@ import {
   minimumProseUnits,
   proseLengthContextFromPacket,
 } from "../audit/lint-rules.ts";
-import { isRecord } from "../core/typebox-validation.ts";
+import { isRecord } from "../core/utils/typebox-validation.ts";
 import { parseDirectionPacket } from "./packet-schema.ts";
 
 /** 渲染产物落 session 的 customType；结算投影按它过滤，渲染史按它装配。 */

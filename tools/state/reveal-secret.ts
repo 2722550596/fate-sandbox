@@ -5,16 +5,16 @@ import type {
   ConfigureSequenceSecretsResult,
   RevealSecretResult,
   RevealSecretToolInput,
-} from "../../engine/core/secrets.ts";
+} from "../../engine/core/secrets/secrets.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import {
   configureActorSecrets,
   configureSequenceSecrets,
   revealSecret,
-} from "../../engine/core/secrets.ts";
-import type { State } from "../../engine/core/state.ts";
-import { parseRevealSecretToolInput } from "../../engine/core/secrets-schema.ts";
+} from "../../engine/core/secrets/secrets.ts";
+import type { State } from "../../engine/core/state/state.ts";
+import { parseRevealSecretToolInput } from "../../engine/core/secrets/secrets-schema.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 

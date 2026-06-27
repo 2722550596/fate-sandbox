@@ -1,4 +1,4 @@
-import type { TimelineId } from "../engine/core/state.ts";
+import type { TimelineId } from "../engine/core/state/state.ts";
 
 const SHORT_COOLDOWN_TURNS = 1;
 const DEFAULT_COOLDOWN_TURNS = 2;

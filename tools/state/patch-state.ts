@@ -1,7 +1,7 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
-import { patchState } from "../../engine/core/state-store.ts";
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { patchState } from "../../engine/core/state/state-store.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export function patchStateTool(params: unknown, _sessionManager: unknown): ToolResult {

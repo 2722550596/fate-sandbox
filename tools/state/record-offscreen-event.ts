@@ -5,13 +5,13 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 import {
   resetBackstagePressure,
   settleOldestBackstageObligation,
-} from "../../engine/core/backstage-obligation.ts";
-import { clearPendingHarvestByLine } from "../../engine/core/backstage-pending.ts";
-import { recordOffscreenEvent } from "../../engine/core/offscreen-event.ts";
-import { parseRecordOffscreenEventInput } from "../../engine/core/offscreen-event-schema.ts";
+} from "../../engine/core/backstage/backstage-obligation.ts";
+import { clearPendingHarvestByLine } from "../../engine/core/backstage/backstage-pending.ts";
+import { recordOffscreenEvent } from "../../engine/core/utils/offscreen-event.ts";
+import { parseRecordOffscreenEventInput } from "../../engine/core/utils/offscreen-event-schema.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 
 export function recordOffscreenEventTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

@@ -1,0 +1,171 @@
+import type { ActorId, MoneyPurse, State } from "../state/state.ts";
+
+import { createId } from "../utils/ids.ts";
+import { assertNonEmptyString, assertNonNegativeInteger } from "../utils/typebox-validation.ts";
+
+function assertPositiveInteger(value: unknown, fieldName: string): number {
+  const amount = assertNonNegativeInteger(value, fieldName);
+  if (amount === 0) {
+    throw new Error(`非法${fieldName}: 0。必须大于 0。`);
+  }
+  return amount;
+}
+
+import type { EconomyEvent } from "./economy-schema.ts";
+
+export type { EconomyEvent, MoneyGainSource } from "./economy-schema.ts";
+
+export interface EconomyEventResult {
+  message: string;
+}
+
+export function updateEconomy(draft: State, event: EconomyEvent): EconomyEventResult {
+  assertNonEmptyString(event.reason, "reason");
+  switch (event.kind) {
+    case "spend-money":
+      return changePurseAmount(
+        draft,
+        event.purseId,
+        event.ownerActorId,
+        -assertPositiveInteger(event.amount, "amount"),
+        "资金已支出。",
+        event.reason,
+      );
+    case "gain-money":
+      assertAuditableGain(event);
+      return changePurseAmount(
+        draft,
+        event.purseId,
+        event.ownerActorId,
+        assertPositiveInteger(event.amount, "amount"),
+        "资金已增加。",
+        event.reason,
+      );
+    case "add-purse":
+      return addPurse(draft, event);
+    case "rename-purse":
+      return renamePurse(draft, event);
+    case "add-debt":
+      return addDebt(draft, event);
+    default:
+      throw new Error("unreachable economy event kind");
+  }
+}
+
+function changePurseAmount(
+  draft: State,
+  purseId: string | undefined,
+  ownerActorId: ActorId | undefined,
+  delta: number,
+  message: string,
+  reason: string,
+): EconomyEventResult {
+  assertNonEmptyString(reason, "reason");
+  const purse = resolvePurse(draft.public.economy.accessibleFunds, purseId, ownerActorId);
+  const nextAmount = purse.amount + delta;
+  if (nextAmount < 0) {
+    throw new Error(`资金不足: ${purse.label} 只有 ${purse.amount} 円。`);
+  }
+  purse.amount = nextAmount;
+  return { message };
+}
+
+function assertAuditableGain(event: Extract<EconomyEvent, { kind: "gain-money" }>): void {
+  assertNonEmptyString(event.counterparty, "counterparty");
+  const amount = assertPositiveInteger(event.amount, "amount");
+  if (amount > 50000 && event.source === "found") {
+    throw new Error(
+      "大额资金增加不能标记为 found；必须提供可审计来源如 sale/withdrawal/gift/earned。不能用 gain-money 把现金设为目标数值。",
+    );
+  }
+  const reason = event.reason.toLowerCase();
+  const cheatingTerms = ["凭空", "作弊", "改成", "设为", "免费发财", "无代价", "999999"];
+  if (cheatingTerms.some((term) => reason.includes(term))) {
+    throw new Error("资金增加必须说明可审计来源；不能用 gain-money 把现金设为目标数值或凭空发财。");
+  }
+}
+
+function resolvePurse(
+  purses: MoneyPurse[],
+  purseId: string | undefined,
+  ownerActorId: ActorId | undefined,
+): MoneyPurse {
+  if (purseId !== undefined) {
+    const purse = purses.find((entry) => entry.id === purseId);
+    if (purse !== undefined) {
+      return purse;
+    }
+    throw new Error(`资金账户不存在: ${purseId}。当前可用: ${formatPurseIds(purses)}。`);
+  }
+
+  if (ownerActorId === undefined) {
+    throw new Error(`资金事件必须提供 purseId；若不确定，可提供 ownerActorId 自动选择账户。`);
+  }
+
+  const ownedPurses = purses.filter(
+    (entry) => entry.ownerActorId === ownerActorId && entry.access === "held",
+  );
+  if (ownedPurses.length === 1) {
+    const purse = ownedPurses[0];
+    if (purse === undefined) {
+      throw new Error("unreachable owned purse lookup");
+    }
+    return purse;
+  }
+  if (ownedPurses.length === 0) {
+    throw new Error(
+      `actor ${ownerActorId} 没有可自动选择的 held 资金账户。当前可用: ${formatPurseIds(purses)}。`,
+    );
+  }
+  throw new Error(
+    `actor ${ownerActorId} 有多个 held 资金账户，请指定 purseId。候选: ${formatPurseIds(ownedPurses)}。`,
+  );
+}
+
+function formatPurseIds(purses: MoneyPurse[]): string {
+  const ids = purses.map((purse) => purse.id);
+  return ids.length === 0 ? "无" : ids.join(", ");
+}
+
+function addPurse(
+  draft: State,
+  event: Extract<EconomyEvent, { kind: "add-purse" }>,
+): EconomyEventResult {
+  if (draft.public.actors[event.ownerActorId] === undefined) {
+    throw new Error(`owner actor 不存在: ${event.ownerActorId}`);
+  }
+  draft.public.economy.accessibleFunds.push({
+    id: createId(draft, "purse"),
+    ownerActorId: event.ownerActorId,
+    label: assertNonEmptyString(event.label, "label"),
+    amount: assertPositiveInteger(event.amount, "amount"),
+    access: event.access,
+  });
+  return { message: "资金账户已加入。" };
+}
+
+function renamePurse(
+  draft: State,
+  event: Extract<EconomyEvent, { kind: "rename-purse" }>,
+): EconomyEventResult {
+  const purse = resolvePurse(draft.public.economy.accessibleFunds, event.purseId, undefined);
+  purse.label = assertNonEmptyString(event.label, "label");
+  return { message: "资金账户名称已更新。" };
+}
+
+function addDebt(
+  draft: State,
+  event: Extract<EconomyEvent, { kind: "add-debt" }>,
+): EconomyEventResult {
+  if (draft.public.actors[event.debtorActorId] === undefined) {
+    throw new Error(`debtor actor 不存在: ${event.debtorActorId}`);
+  }
+  draft.public.economy.debts.push({
+    id: createId(draft, "debt"),
+    debtorActorId: event.debtorActorId,
+    creditor: assertNonEmptyString(event.creditor, "creditor"),
+    amount: assertPositiveInteger(event.amount, "amount"),
+    reason: assertNonEmptyString(event.reason, "reason"),
+  });
+  return { message: "债务已记录。" };
+}

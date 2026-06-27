@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
-import { isRecord } from "../core/typebox-validation.ts";
+import { isRecord } from "../core/utils/typebox-validation.ts";
 
 /**
  * Writer 化散文摘要缓存（backlog #13，MiMo checkpoint-writer 思路）。

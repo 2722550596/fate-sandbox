@@ -2,8 +2,8 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { setScenePresence } from "../../engine/core/actor.ts";
-import { parseScenePresenceInput } from "../../engine/core/actor-schema.ts";
+import { setScenePresence } from "../../engine/core/actor/actor.ts";
+import { parseScenePresenceInput } from "../../engine/core/actor/actor-schema.ts";
 
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 

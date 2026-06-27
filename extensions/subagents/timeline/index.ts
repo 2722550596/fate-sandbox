@@ -2,7 +2,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 import { Type } from "typebox";
 
-export { buildTimelineStateContextFromRaw as buildTimelineStateContext } from "../../../engine/core/state-file-projection.ts";
+export { buildTimelineStateContextFromRaw as buildTimelineStateContext } from "../../../engine/core/state/state-file-projection.ts";
 import { lookupTool } from "../../../tools/lookup/lookup.ts";
 
 /**

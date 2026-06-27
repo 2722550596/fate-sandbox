@@ -14,7 +14,7 @@ import type { SessionManager } from "@earendil-works/pi-coding-agent";
 
 import { existsSync, writeFileSync } from "node:fs";
 
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 import { collectSubtreeIds } from "./rollback.ts";
 
 /** 修剪需要的只读访问面（ctx.sessionManager 的只读视图可直接赋值）。 */

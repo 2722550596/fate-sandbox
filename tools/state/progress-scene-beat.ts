@@ -6,12 +6,12 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 import {
   assertNoOpenBackstageObligation,
   recordCanonicalTurnForBackstage,
-} from "../../engine/core/backstage-obligation.ts";
-import { formatPendingHarvestReminder } from "../../engine/core/backstage-pending.ts";
-import { collectBackstageDueNotices } from "../../engine/core/faction-clock.ts";
-import { assertNoOpenObligations } from "../../engine/core/obligations.ts";
-import { progressSceneBeat } from "../../engine/core/scene-beat-lifecycle.ts";
-import { parseSceneBeatProgressInput } from "../../engine/core/scene-beat-schema.ts";
+} from "../../engine/core/backstage/backstage-obligation.ts";
+import { formatPendingHarvestReminder } from "../../engine/core/backstage/backstage-pending.ts";
+import { collectBackstageDueNotices } from "../../engine/core/utils/faction-clock.ts";
+import { assertNoOpenObligations } from "../../engine/core/utils/obligations.ts";
+import { progressSceneBeat } from "../../engine/core/scene/scene-beat-lifecycle.ts";
+import { parseSceneBeatProgressInput } from "../../engine/core/scene/scene-beat-schema.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 

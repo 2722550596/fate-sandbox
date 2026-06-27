@@ -12,13 +12,13 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { buildBackstageDirectorPrompt } from "../../engine/core/backstage-director-prompt.ts";
-import { recordPendingHarvest } from "../../engine/core/backstage-pending.ts";
-import { spawnBackstageDirector } from "../../engine/core/backstage-spawn.ts";
-import { type AssembleParallelLineInput } from "../../engine/core/parallel-line-assembler.ts";
-import { hydrateStateFromSessionManager } from "../../engine/core/session-hydration.ts";
-import { getState } from "../../engine/core/state-store.ts";
-import { isRecord } from "../../engine/core/typebox-validation.ts";
+import { buildBackstageDirectorPrompt } from "../../engine/core/backstage/backstage-director-prompt.ts";
+import { recordPendingHarvest } from "../../engine/core/backstage/backstage-pending.ts";
+import { spawnBackstageDirector } from "../../engine/core/backstage/backstage-spawn.ts";
+import { type AssembleParallelLineInput } from "../../engine/core/backstage/parallel-line-assembler.ts";
+import { hydrateStateFromSessionManager } from "../../engine/core/utils/session-hydration.ts";
+import { getState } from "../../engine/core/state/state-store.ts";
+import { isRecord } from "../../engine/core/utils/typebox-validation.ts";
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 
 /** sanitize lineId into a stable run-id suffix for the director session. */

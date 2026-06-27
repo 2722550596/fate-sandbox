@@ -8,8 +8,8 @@
  * 子代理安全投影直接改写进 task 参数，零文件、零 env、secrets 过滤留在父侧。
  */
 
-import { buildTimelineStateContextFromRaw } from "../../../engine/core/state-file-projection.ts";
-import { isRecord } from "../../../engine/core/typebox-validation.ts";
+import { buildTimelineStateContextFromRaw } from "../../../engine/core/state/state-file-projection.ts";
+import { isRecord } from "../../../engine/core/utils/typebox-validation.ts";
 
 /**
  * 需要注入 <timeline_state_context> 的 project-scope 子代理名（不含 package 前缀）。

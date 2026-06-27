@@ -1,11 +1,11 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
-import type { LocationState } from "../../engine/core/state.ts";
-import type { BoundaryKind } from "../../engine/core/state-enum-schemas.ts";
+import type { LocationState } from "../../engine/core/state/state.ts";
+import type { BoundaryKind } from "../../engine/core/state/state-enum-schemas.ts";
 
-import { cloneState, commitState } from "../../engine/core/state-store.ts";
-import { persistStateAfterCommit } from "../../engine/core/state-persistence.ts";
+import { cloneState, commitState } from "../../engine/core/state/state-store.ts";
+import { persistStateAfterCommit } from "../../engine/core/state/state-persistence.ts";
 import { textResult } from "../runtime/tool-result.ts";
 
 export function moveToTool(params: unknown, sessionManager: unknown): ToolResult {

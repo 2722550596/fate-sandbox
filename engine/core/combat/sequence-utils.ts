@@ -2,7 +2,7 @@
 // 序列等级工具
 // ---------------------------------------------------------------------------
 
-import type { SequenceRank } from "../state-enum-schemas.ts";
+import type { SequenceRank } from "../state/state-enum-schemas.ts";
 import type { PowerMap } from "./models.ts";
 
 import { sequenceBaseline } from "../../config/index.ts";

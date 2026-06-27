@@ -7,7 +7,7 @@
  * 的参数机械提取一行摘要，零成本、零漂移、字节稳定。
  */
 
-import { isRecord } from "../core/typebox-validation.ts";
+import { isRecord } from "../core/utils/typebox-validation.ts";
 import { PROSE_CUSTOM_TYPE, SUBMIT_DIRECTION_PACKET_TOOL } from "./render-turn.ts";
 
 /** 摘要行总数上限（含上次摘要折叠进来的行）。 */

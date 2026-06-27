@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { sessionKey } from "../../engine/core/state-persistence.ts";
-import { resetState } from "../../engine/core/state-store.ts";
+import { sessionKey } from "../../engine/core/state/state-persistence.ts";
+import { resetState } from "../../engine/core/state/state-store.ts";
 import { migrateStateTool } from "./migrate-state.ts";
 
 void test("migrateStateTool apply=true persists state to session entries", () => {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { cloneState, resetState } from "../../engine/core/state-store.ts";
+import { cloneState, resetState } from "../../engine/core/state/state-store.ts";
 
 import { updateActorAgendaTool } from "./update-actor-agenda.ts";
 

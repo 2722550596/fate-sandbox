@@ -11,13 +11,13 @@ import {
   payHook,
   retireHook,
   surfaceHook,
-} from "../../engine/core/hooks.ts";
-import type { HookState, State } from "../../engine/core/state.ts";
+} from "../../engine/core/hooks/hooks.ts";
+import type { HookState, State } from "../../engine/core/state/state.ts";
 import {
   assertNonEmptyString,
   isRecord,
   parseTypeBoxValue,
-} from "../../engine/core/typebox-validation.ts";
+} from "../../engine/core/utils/typebox-validation.ts";
 
 import { runDomainEventTool } from "./domain-tool-runner.ts";
 

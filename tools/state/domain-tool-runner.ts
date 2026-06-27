@@ -1,6 +1,6 @@
-import { cloneState, commitState } from "../../engine/core/state-store.ts";
-import { persistStateAfterCommit } from "../../engine/core/state-persistence.ts";
-import type { State } from "../../engine/core/state.ts";
+import { cloneState, commitState } from "../../engine/core/state/state-store.ts";
+import { persistStateAfterCommit } from "../../engine/core/state/state-persistence.ts";
+import type { State } from "../../engine/core/state/state.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 export interface DomainToolRunInput<Result> {

@@ -14,10 +14,10 @@ import {
   NPC_OMISSION_REASON_CODES,
   parseDirectionPacket,
 } from "../../engine/direction/packet-schema.ts";
-import { stringEnumSchema as omissionReasonSchema } from "../../engine/core/state-enum-schemas.ts";
+import { stringEnumSchema as omissionReasonSchema } from "../../engine/core/state/state-enum-schemas.ts";
 import { SUBMIT_DIRECTION_PACKET_TOOL } from "../../engine/direction/render-turn.ts";
-import { stringEnumSchema } from "../../engine/core/state-enum-schemas.ts";
-import { getState } from "../../engine/core/state-store.ts";
+import { stringEnumSchema } from "../../engine/core/state/state-enum-schemas.ts";
+import { getState } from "../../engine/core/state/state-store.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 /**
