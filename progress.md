@@ -274,17 +274,6 @@ engine/core/
 | `data/campaign-presets.ts`           | ✅ **已 LOTM 化** | 5 个 LOTM 战役预设：`tingen_1349`、`backlund_1350`、`bayam_1351`、`condat_1349`、`custom_worldline`。包含 LOTM 风格 OpeningHooks（`beyonder` 等） |
 | `data/timeline-pressure-palettes.ts` | ✅ **已 LOTM 化** | 值夜人巡逻、机械之心调查、廷根地下冒险者公会、风暴教会码头检查、代罚者突袭等 LOTM 压力槽                                                          |
 
-### ❌ 仍未迁移的 Fate 数据
-
-| 文件                   | 现状                            |
-| ---------------------- | ------------------------------- |
-| `data/characters.json` | Fate 角色（远坂凛等）           |
-| `data/locations.json`  | Fate 地点（冬木市等）           |
-| `data/servants.json`   | Fate 从者数据                   |
-| `data/world.json`      | Fate 世界观设定（魔术、魔法等） |
-| `data/timelines.json`  | Fate 世界线                     |
-| `data/NOTICE.md`       | Fate 版本                       |
-
 ### ✅ 工具/引擎层数据依赖已同步
 
 `state-file-projection.ts`（timeline subagent context）现已读取 LOTM 字段：
@@ -292,18 +281,6 @@ engine/core/
 - `wounds` / `afflictions` / `servantModifiers` → `statusEffects` / `sequence`
 - `classifyPressureType` 正则关键词已更新为 LOTM 势力
 - `offscreen-pressure.ts` 兜底分类正则同步更新（值夜人、机械之心、非凡者、序列等）
-
-### ❌ 待新增的文件
-
-- `data/organizations.json` — 21 组织
-- `data/items.json` — 52 物品
-- `data/pathways.json` — 22 途径
-- `data/mechanics.json` — 610 行规则
-- `data/economy.json`
-- `data/narrative.json`
-- `data/system_rules.json`
-- `data/theater.json`
-- `data/dlc.json`
 
 ---
 
@@ -374,8 +351,6 @@ tests 342 | suites 6 | pass 341 | fail 0 | skipped 1 | duration_ms 6384ms
 | `.pi/agents/timeline-showrunner.md` | ❌ 未改                                     |
 | `AGENTS.md`                         | ❌ 未改                                     |
 | `README.md`                         | ❌ 未改                                     |
-| `context.md`                        | ❌ 未改                                     |
-| `CONTEXT.md`                        | ❌ 未改                                     |
 | `start.sh`                          | ❌ 未改                                     |
 | `start.ps1`                         | ❌ 未改                                     |
 
