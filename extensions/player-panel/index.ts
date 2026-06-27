@@ -20,20 +20,16 @@ import {
 
 export default function playerPanelExtension(pi: ExtensionAPI): void {
   pi.registerCommand("status", {
-    description: "Show player-visible Fate narrative status without adding chat context",
+    description: "Show player-visible LOTM narrative status without adding chat context",
     handler: async (_args, ctx) => {
-      await showPanel(ctx, "Fate Narrative Status", buildStatusMarkdown(readPublicState(ctx)));
+      await showPanel(ctx, "LOTM 叙事状态", buildStatusMarkdown(readPublicState(ctx)));
     },
   });
 
   pi.registerCommand("inventory", {
     description: "Show player-visible money and inventory without adding chat context",
     handler: async (_args, ctx) => {
-      await showPanel(
-        ctx,
-        "Fate Narrative Inventory",
-        buildInventoryMarkdown(readPublicState(ctx)),
-      );
+      await showPanel(ctx, "LOTM 物品与资金", buildInventoryMarkdown(readPublicState(ctx)));
     },
   });
 

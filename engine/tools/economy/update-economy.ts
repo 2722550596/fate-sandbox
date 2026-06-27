@@ -44,12 +44,18 @@ function formatPurseIds(draft: State): string {
 export const updateEconomyToolDefinition: FateToolDefinition = {
   name: "update_economy",
   description:
-    "更新 2004 年日本円经济状态；每笔资金指定 purse/account 与 reason，资金增加说明可审计来源。\n\n" +
-    "使用边界：消费、获得现金、增加/重命名资金账户、记录债务，或食宿/装备/服务/情报等交易。\n" +
+    "更新经济状态。每笔资金指定 purse/account 与 reason，资金增加说明可审计来源。\n\n" +
+    "【event kind 场景指南】\n" +
+    "- spend-money：日常消费、购买、付费\n" +
+    "- gain-money：获得收入、报酬、销售（必须说明 counterparty 与可审计 source）\n" +
+    "- add-purse：新增资金池——组织金库、客户预付款、委托人的保证金（新建时设定初始金额）\n" +
+    "- update-purse：修改已有钱包的 label 或 access 权限（不可改金额）\n" +
+    "- add-debt / resolve-debt：记录和清偿债务\n\n" +
     "禁区：把同行者资金说成玩家随身现金、资金不足时免费兜底，或用 gain-money 设目标数值/凭空发财。",
   parameters: Type.Object({
     kind: Type.String({
-      description: "允许: spend-money / gain-money / add-purse / rename-purse / add-debt",
+      description:
+        "允许: spend-money / gain-money / add-purse / update-purse / add-debt / resolve-debt",
     }),
     purseId: Type.Optional(
       Type.String({
@@ -66,6 +72,7 @@ export const updateEconomyToolDefinition: FateToolDefinition = {
       Type.String({ description: "债务人 actor id；必须已存在于 public actors" }),
     ),
     creditor: Type.Optional(Type.String()),
+    debtId: Type.Optional(Type.String({ description: "resolve-debt 必填：要结算的债务 id" })),
     source: Type.Optional(
       Type.String({
         description:
@@ -74,13 +81,16 @@ export const updateEconomyToolDefinition: FateToolDefinition = {
     ),
     counterparty: Type.Optional(Type.String({ description: "gain-money 必填：付款方/来源说明" })),
     label: Type.Optional(
-      Type.String({ description: "add-purse / rename-purse 必填：资金账户玩家可见名称" }),
+      Type.String({ description: "add-purse / update-purse 必填：资金账户玩家可见名称" }),
+    ),
+    access: Type.Optional(
+      Type.String({
+        description:
+          "add-purse / update-purse 必填：资金访问权限 held / shared / requires-permission",
+      }),
     ),
     amount: Type.Optional(
       Type.Unknown({ description: "金额；可填 number 或数字字符串，由领域工具校验。" }),
-    ),
-    access: Type.Optional(
-      Type.String({ description: "资金访问权限，允许: held / shared / requires-permission" }),
     ),
     reason: Type.String(),
   }),

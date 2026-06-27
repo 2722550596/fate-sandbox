@@ -43,10 +43,12 @@ export function updateEconomy(draft: State, event: EconomyEvent): EconomyEventRe
       );
     case "add-purse":
       return addPurse(draft, event);
-    case "rename-purse":
-      return renamePurse(draft, event);
+    case "update-purse":
+      return updatePurse(draft, event);
     case "add-debt":
       return addDebt(draft, event);
+    case "resolve-debt":
+      return resolveDebt(draft, event);
     default:
       throw new Error("unreachable economy event kind");
   }
@@ -144,13 +146,18 @@ function addPurse(
   return { message: "资金账户已加入。" };
 }
 
-function renamePurse(
+function updatePurse(
   draft: State,
-  event: Extract<EconomyEvent, { kind: "rename-purse" }>,
+  event: Extract<EconomyEvent, { kind: "update-purse" }>,
 ): EconomyEventResult {
   const purse = resolvePurse(draft.public.economy.accessibleFunds, event.purseId, undefined);
-  purse.label = assertNonEmptyString(event.label, "label");
-  return { message: "资金账户名称已更新。" };
+  if (event.label !== undefined) {
+    purse.label = assertNonEmptyString(event.label, "label");
+  }
+  if (event.access !== undefined) {
+    purse.access = event.access;
+  }
+  return { message: "资金账户已更新。" };
 }
 
 function addDebt(
@@ -168,4 +175,19 @@ function addDebt(
     reason: assertNonEmptyString(event.reason, "reason"),
   });
   return { message: "债务已记录。" };
+}
+
+function resolveDebt(
+  draft: State,
+  event: Extract<EconomyEvent, { kind: "resolve-debt" }>,
+): EconomyEventResult {
+  const index = draft.public.economy.debts.findIndex((debt) => debt.id === event.debtId);
+  if (index === -1) {
+    const available = draft.public.economy.debts
+      .map((d) => `${d.id}（${d.creditor} 方，${d.amount} 便士）`)
+      .join("；");
+    throw new Error(`债务不存在: ${event.debtId}。当前可用: ${available || "无"}。`);
+  }
+  draft.public.economy.debts.splice(index, 1);
+  return { message: `债务已结算：${event.debtId}。` };
 }

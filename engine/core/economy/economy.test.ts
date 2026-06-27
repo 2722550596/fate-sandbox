@@ -130,11 +130,11 @@ void test("updateEconomy rejects overspending", () => {
   );
 });
 
-void test("updateEconomy renames a purse without changing funds", () => {
+void test("updateEconomy updates a purse label and access", () => {
   const draft = createInitialState();
 
   updateEconomy(draft, {
-    kind: "rename-purse",
+    kind: "update-purse",
     purseId: "purse-protagonist-cash",
     label: "主角的钱包",
     reason: "修正资金账户显示名",
@@ -144,6 +144,23 @@ void test("updateEconomy renames a purse without changing funds", () => {
     (entry) => entry.id === "purse-protagonist-cash",
   );
   assert.equal(purse?.label, "主角的钱包");
+  assert.equal(purse?.amount, 24);
+});
+
+void test("updatePurse changes access from held to shared", () => {
+  const draft = createInitialState();
+
+  updateEconomy(draft, {
+    kind: "update-purse",
+    purseId: "purse-protagonist-cash",
+    access: "shared",
+    reason: "资金纳入团队共享",
+  });
+
+  const purse = draft.public.economy.accessibleFunds.find(
+    (entry) => entry.id === "purse-protagonist-cash",
+  );
+  assert.equal(purse?.access, "shared");
   assert.equal(purse?.amount, 24);
 });
 
@@ -159,5 +176,36 @@ void test("updateEconomy reports available purse ids for an unknown purse", () =
         reason: "测试错误信息",
       }),
     /purse-protagonist-cash/,
+  );
+});
+
+void test("resolveDebt removes a debt from the list", () => {
+  const draft = createInitialState();
+
+  updateEconomy(draft, {
+    kind: "add-debt",
+    debtorActorId: "protagonist",
+    creditor: "夏洛克·莫里亚蒂",
+    amount: 100,
+    reason: "情报费",
+  });
+  const debtId = draft.public.economy.debts[0]?.id;
+  assert.ok(debtId);
+
+  updateEconomy(draft, { kind: "resolve-debt", debtId, reason: "已付清" });
+  assert.equal(draft.public.economy.debts.length, 0);
+});
+
+void test("resolveDebt throws on missing debt", () => {
+  const draft = createInitialState();
+
+  assert.throws(
+    () =>
+      updateEconomy(draft, {
+        kind: "resolve-debt",
+        debtId: "debt-nonexistent",
+        reason: "找不到这笔债",
+      }),
+    /债务不存在/,
   );
 });

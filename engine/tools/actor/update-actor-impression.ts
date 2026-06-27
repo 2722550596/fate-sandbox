@@ -82,10 +82,12 @@ export const updateActorImpressionToolDefinition: FateToolDefinition = {
         "语癖/对话范例（必填）：2-3 句该角色口吻的具体示例台词 + 用词/断句/语气特征 + 典型闪避或调侪方式；" +
         "要具体到「只有这个角色会这么说」，禁止写抽象中性描述（如「说话直接/语气冷淡」）。从 canon 语感蒸馏，随情绪变化更新",
     }),
-    renderName: Type.Optional(Type.String({
-      description:
-        "可选：更新 actor 的正文固定用名。LOTM 身份切换时使用（如夏洛克→格尔曼→梅林）。",
-    })),
+    renderName: Type.Optional(
+      Type.String({
+        description:
+          "可选：更新 actor 的正文固定用名。LOTM 身份切换时使用（如夏洛克→格尔曼→梅林）。",
+      }),
+    ),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     updateActorImpressionTool(params, ctx.sessionManager),

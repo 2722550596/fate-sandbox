@@ -22,12 +22,12 @@ void test("updateEconomy reports available purse ids for an unknown purse", () =
   );
 });
 
-void test("updateEconomyTool renames a purse", () => {
+void test("updateEconomyTool updates a purse", () => {
   resetState();
 
   updateEconomyTool(
     {
-      kind: "rename-purse",
+      kind: "update-purse",
       purseId: "purse-protagonist-cash",
       label: "绫香的钱包",
       reason: "修正玩家可见资金账户名称",

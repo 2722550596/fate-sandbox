@@ -233,10 +233,15 @@ function formatFunds(publicState: PublicGameState): string {
     return "- 无可访问资金";
   }
   return publicState.economy.accessibleFunds
-    .map(
-      (purse) =>
-        `- ${purse.label}：${purse.amount.toLocaleString()} ${publicState.economy.currency}`,
-    )
+    .map((purse) => {
+      const owner =
+        purse.ownerActorId === publicState.protagonistActorId
+          ? "你"
+          : (publicState.actors[purse.ownerActorId]?.presentation.renderName ?? purse.ownerActorId);
+      const accessTag =
+        purse.access === "held" ? "随身持有" : purse.access === "shared" ? "共享" : "需许可";
+      return `- ${purse.label}（${owner} · ${accessTag}）：${purse.amount.toLocaleString()} ${publicState.economy.currency}`;
+    })
     .join("\n");
 }
 

@@ -151,7 +151,11 @@ void test("buildRendererMessages injects actor render names", () => {
     parseDirectionPacket(PACKET_ARGS, "packet"),
     undefined,
     [
-      { actorId: "manaka_sajyou_labyrinth", canonicalName: "Manaka Sajyou", renderName: "沙条爱歌" },
+      {
+        actorId: "manaka_sajyou_labyrinth",
+        canonicalName: "Manaka Sajyou",
+        renderName: "沙条爱歌",
+      },
       { actorId: "saber", canonicalName: "Saber", renderName: "Saber" },
     ],
   );
