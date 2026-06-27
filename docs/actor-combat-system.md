@@ -80,15 +80,15 @@ current: 直接受伤害/治疗/消耗影响，无其他间接副作用
 
 ### 配置文件一览
 
-| 文件 | 格式 | 作用 |
-|------|------|------|
-| `序列基准.json` | `Record<string, number>` | 序列等级 → 属性总值。如 `{"9": 300, "0": 1200000}` |
-| `序列权重.json` | `Record<string, number[6]>` | 序列名 → 六维权重数组 `[活力,敏捷,灵性,理智,人性,运气]`。总和为 1 |
-| `神性.json` | `Record<string, number>` | 序列索引 → 神性倍率 Ω。如 `{"9": 1.0, "0": 2}` |
-| `标签映射.json` | `Record<string, {tags: string[], duration: number}>` | 序列名 → 标签列表。如 `{"读心者": {tags:["精神"], duration: 99}}` |
-| `标签伤害修正.json` | `Record<string, Record<string, number>>` | 攻击方标签 → 防御方标签 → 伤害修正系数 |
-| `标签治疗修正.json` | `Record<string, Record<string, number>>` | 预留，装备系统使用 |
-| `data/pathways/<途径>/seq-<等级>.json` | `SequenceAbilityEntry[]` | 技能定义数组 |
+| 文件                                   | 格式                                                 | 作用                                                              |
+| -------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- |
+| `序列基准.json`                        | `Record<string, number>`                             | 序列等级 → 属性总值。如 `{"9": 300, "0": 1200000}`                |
+| `序列权重.json`                        | `Record<string, number[6]>`                          | 序列名 → 六维权重数组 `[活力,敏捷,灵性,理智,人性,运气]`。总和为 1 |
+| `神性.json`                            | `Record<string, number>`                             | 序列索引 → 神性倍率 Ω。如 `{"9": 1.0, "0": 2}`                    |
+| `标签映射.json`                        | `Record<string, {tags: string[], duration: number}>` | 序列名 → 标签列表。如 `{"读心者": {tags:["精神"], duration: 99}}` |
+| `标签伤害修正.json`                    | `Record<string, Record<string, number>>`             | 攻击方标签 → 防御方标签 → 伤害修正系数                            |
+| `标签治疗修正.json`                    | `Record<string, Record<string, number>>`             | 预留，装备系统使用                                                |
+| `data/pathways/<途径>/seq-<等级>.json` | `SequenceAbilityEntry[]`                             | 技能定义数组                                                      |
 
 ### base 计算流程
 
@@ -113,9 +113,9 @@ base.luck         = floor(300 × 0.05) = 15
 
 ```jsonc
 {
-  "attackerId": "protagonist",    // 从 state 自动读数据
-  "defenderId": "shadow-1",       // 从 state 自动读数据
-  "skillName": "出色格斗技巧"      // 从 pathway 配置自动查 power/damageType/cost/effects
+  "attackerId": "protagonist", // 从 state 自动读数据
+  "defenderId": "shadow-1", // 从 state 自动读数据
+  "skillName": "出色格斗技巧", // 从 pathway 配置自动查 power/damageType/cost/effects
 }
 ```
 
@@ -158,14 +158,14 @@ base.luck         = floor(300 × 0.05) = 15
 D = floor(Ω × P × (A/D) × R × (1 + M))
 ```
 
-| 符号 | 来源 | 说明 |
-|------|------|------|
-| Ω | `actor.sequence.divinity` 或 `神性.json` | 神性倍率 |
-| P | pathway 配置 `skill.power`（固定值或序列表） | 技能倍率 |
-| A | `computeAttack(stats, effects, damageType)` | 攻击力 |
-| D | `computeDefense(stats, effects, damageType)` | 防御力 |
-| R | `0.9 + Math.random() × 0.2` | ±10% 随机浮动 |
-| M | `damageModifier + tagModifier` | 总修正系数 |
+| 符号 | 来源                                         | 说明          |
+| ---- | -------------------------------------------- | ------------- |
+| Ω    | `actor.sequence.divinity` 或 `神性.json`     | 神性倍率      |
+| P    | pathway 配置 `skill.power`（固定值或序列表） | 技能倍率      |
+| A    | `computeAttack(stats, effects, damageType)`  | 攻击力        |
+| D    | `computeDefense(stats, effects, damageType)` | 防御力        |
+| R    | `0.9 + Math.random() × 0.2`                  | ±10% 随机浮动 |
+| M    | `damageModifier + tagModifier`               | 总修正系数    |
 
 #### 攻防计算
 
@@ -198,12 +198,12 @@ M_tag = ∑ tagDamageRelations[attackerTag][defenderTag]
 interface CombatActionResult {
   canAfford: boolean;
   costMessage: string;
-  damage: number;                  // 正值=伤害，负值=治疗
-  targetAttribute: "vitality" | "sanity";  // mental 伤害打 sanity，其余打 vitality
-  appliedEffects: EffectInstance[];         // 技能效果（已按同名替换规则处理）
-  costDeductions: CostDeduction[];          // 消耗扣减明细
-  formula: string;                          // 公式展示文本
-  details: string;                          // 完整日志
+  damage: number; // 正值=伤害，负值=治疗
+  targetAttribute: "vitality" | "sanity"; // mental 伤害打 sanity，其余打 vitality
+  appliedEffects: EffectInstance[]; // 技能效果（已按同名替换规则处理）
+  costDeductions: CostDeduction[]; // 消耗扣减明细
+  formula: string; // 公式展示文本
+  details: string; // 完整日志
 }
 ```
 

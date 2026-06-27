@@ -47,6 +47,30 @@ export interface SequenceTagDef {
 
 export type SequenceTagsMapping = Record<string, SequenceTagDef>;
 
+/** 装备类型配置 */
+export interface ItemTypeConfig {
+  p: [number, number];
+  n: [number, number];
+  pW: [number, number, number, number, number, number];
+}
+
+/** 特质定义 */
+export interface TraitDef {
+  M: number[];
+  A: number[];
+  n_bias: number[];
+  p_boost: number;
+  n_boost: number;
+}
+
+/** 消耗品类型配置 */
+export interface ConsumableTypeConfig {
+  powerRatio: number;
+  costRatio: number;
+  backlashMult: number;
+  defaultCost: string;
+}
+
 // ===========================================================================
 // 配置导出（英文名）
 // ===========================================================================
@@ -68,6 +92,15 @@ export const sequenceWeights = loadConfig<SequenceWeights>("序列权重.json");
 
 /** 序列标签映射：序列名 → 该序列的标签列表 */
 export const sequenceTagsMapping = loadConfig<SequenceTagsMapping>("标签映射.json");
+
+/** 装备类型参数：武器/衣物/饰品/封印物 */
+export const itemConfig = loadConfig<Record<string, ItemTypeConfig>>("物品参数.json");
+
+/** 特质图鉴 */
+export const traitDB = loadConfig<Record<string, TraitDef>>("特质图鉴.json");
+
+/** 消耗品配置 */
+export const consumableConfig = loadConfig<Record<string, ConsumableTypeConfig>>("消耗品配置.json");
 
 // ===========================================================================
 // 辅助函数
