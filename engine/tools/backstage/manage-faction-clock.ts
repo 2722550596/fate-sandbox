@@ -1,7 +1,9 @@
+import type { State } from "../../core/state/state.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
+
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
-import type { ToolResult } from "../runtime/tool-result.ts";
 
 import {
   advanceFactionClock,
@@ -11,17 +13,15 @@ import {
   retireFactionClock,
   scheduleEvent,
   upsertFactionClock,
-} from "../../core/utils/faction-clock.ts";
-import { FACTION_CLOCK_VISIBILITIES } from "../../core/state/state-schema.ts";
+} from "../../core/faction-clock.ts";
 import { stringEnumSchema } from "../../core/state/state-enum-schemas.ts";
-import type { State } from "../../core/state/state.ts";
+import { FACTION_CLOCK_VISIBILITIES } from "../../core/state/state-schema.ts";
 import {
   assertNonEmptyString,
   isRecord,
   parseTypeBoxValue,
 } from "../../core/utils/typebox-validation.ts";
-
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 const MANAGE_FACTION_CLOCK_KINDS = [
   "upsert-clock",
@@ -91,9 +91,7 @@ function executeManageFactionClock(draft: State, params: unknown): string {
       return `到期义务已展期：${event.id} → ${event.dueAt}。`;
     }
     default:
-      throw new Error(
-        `不支持的 kind: ${kind}。允许: ${MANAGE_FACTION_CLOCK_KINDS.join(" / ")}。`,
-      );
+      throw new Error(`不支持的 kind: ${kind}。允许: ${MANAGE_FACTION_CLOCK_KINDS.join(" / ")}。`);
   }
 }
 
@@ -169,7 +167,8 @@ export const manageFactionClockToolDefinition: FateToolDefinition = {
     "- 时钟填满后只归零不兑现变化",
   parameters: Type.Object({
     kind: Type.String({
-      description: "upsert-clock / advance-clock / reset-clock / retire-clock / schedule-event / resolve-due / extend-due",
+      description:
+        "upsert-clock / advance-clock / reset-clock / retire-clock / schedule-event / resolve-due / extend-due",
     }),
     clockId: Type.Optional(Type.String({ description: "advance/reset/retire 必填；upsert 可选" })),
     factionId: Type.Optional(Type.String({ description: "upsert-clock 必填：阵营标识" })),
@@ -178,7 +177,9 @@ export const manageFactionClockToolDefinition: FateToolDefinition = {
     visibility: Type.Optional(Type.String({ description: "upsert-clock 必填：hidden / leaked" })),
     ticks: Type.Optional(Type.Integer({ description: "advance-clock 必填：推进段数" })),
     reason: Type.Optional(Type.String({ description: "advance/retire/extend 必填：依据" })),
-    outcomeSummary: Type.Optional(Type.String({ description: "reset-clock/resolve-due 必填：兑现结果" })),
+    outcomeSummary: Type.Optional(
+      Type.String({ description: "reset-clock/resolve-due 必填：兑现结果" }),
+    ),
     dueAt: Type.Optional(Type.String({ description: "schedule-event 必填：游戏内 ISO 时刻" })),
     eventId: Type.Optional(Type.String({ description: "resolve-due/extend-due 必填" })),
     newDueAt: Type.Optional(Type.String({ description: "extend-due 必填：新到期时刻" })),

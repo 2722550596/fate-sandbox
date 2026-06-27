@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { cloneState, resetState } from "../../core/state/state-store.ts";
-
 import { recordActorKnowledgeTool } from "./record-actor-knowledge.ts";
 
 void test("recordActorKnowledgeTool adds and removes lens facts", () => {

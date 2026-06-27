@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { cloneState, resetState } from "../../core/state/state-store.ts";
-
 import { updateActorAgendaTool } from "./update-actor-agenda.ts";
 
 void test("updateActorAgendaTool upserts and marks independent action", () => {

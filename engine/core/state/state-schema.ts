@@ -343,6 +343,7 @@ export const TURN_OBLIGATION_KINDS = [
   "scene-objective",
   "scene-threat",
   "actor-condition",
+  "equipment",
   "sequence",
   "memory",
   "reveal-secret",

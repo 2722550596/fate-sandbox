@@ -15,10 +15,10 @@ import {
   type RecallMemoryQuery,
   type RecallMemoryResult,
 } from "../../core/memory/memory-recall.ts";
-import { hydrateStateFromSessionManager } from "../../core/utils/session-hydration.ts";
+import { hydrateStateFromSessionManager } from "../../core/state/session-hydration.ts";
 import { getState } from "../../core/state/state-store.ts";
-import { textResult } from "../runtime/tool-result.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { textResult } from "../runtime/tool-result.ts";
 
 export function recallMemoryTool(params: unknown, sessionManager: unknown): ToolResult {
   if (sessionManager !== undefined) {

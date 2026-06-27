@@ -50,10 +50,7 @@ void test("configureCampaignTool rejects unknown timeline with allowed values in
       ),
     (error: unknown) => {
       const message = String(error);
-      return (
-        message.includes("timeline") &&
-        message.includes("必须是允许值之一")
-      );
+      return message.includes("timeline") && message.includes("必须是允许值之一");
     },
   );
 });

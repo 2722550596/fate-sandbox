@@ -16,8 +16,8 @@ import type {
 import { getActorSecretSlots, setActorSecretSlots } from "../actor/secret-actor-state.ts";
 import { inferOffscreenPressureType } from "../backstage/offscreen-pressure.ts";
 import { recordMemory } from "../memory/memory.ts";
-import { settleOldestObligation } from "../utils/obligations.ts";
-import { recordOffscreenEvent } from "../utils/offscreen-event.ts";
+import { settleOldestObligation } from "../obligations.ts";
+import { recordOffscreenEvent } from "../offscreen-event.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 
 export type {

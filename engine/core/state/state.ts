@@ -116,6 +116,7 @@ export type TurnObligationKind =
   | "scene-objective"
   | "scene-threat"
   | "actor-condition"
+  | "equipment"
   | "sequence"
   | "memory"
   | "reveal-secret";

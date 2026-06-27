@@ -2,8 +2,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { getPathwaySequences, listPathways } from "./sequence-lookup.ts";
 import { parseFrontmatter } from "./frontmatter.ts";
+import { getPathwaySequences, listPathways } from "./sequence-lookup.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_ROOT = join(__dirname, "..", "..", "data");
@@ -231,11 +231,33 @@ function lookupPathway(query: string): LookupResult {
   const seqs = getPathwaySequences(normalized);
   if (seqs !== null) {
     const lines: string[] = [];
-    const SEQ_ORDER = ["seq-9","seq-8","seq-7","seq-6","seq-5","seq-4","seq-3","seq-2","seq-1","seq-0","old-one","pillar"];
-    const SEQ_LABEL: Record<string,string> = {
-      "seq-0":"序列 0","seq-1":"序列 1","seq-2":"序列 2","seq-3":"序列 3",
-      "seq-4":"序列 4","seq-5":"序列 5","seq-6":"序列 6","seq-7":"序列 7",
-      "seq-8":"序列 8","seq-9":"序列 9","pillar":"支柱","old-one":"旧日",
+    const SEQ_ORDER = [
+      "seq-9",
+      "seq-8",
+      "seq-7",
+      "seq-6",
+      "seq-5",
+      "seq-4",
+      "seq-3",
+      "seq-2",
+      "seq-1",
+      "seq-0",
+      "old-one",
+      "pillar",
+    ];
+    const SEQ_LABEL: Record<string, string> = {
+      "seq-0": "序列 0",
+      "seq-1": "序列 1",
+      "seq-2": "序列 2",
+      "seq-3": "序列 3",
+      "seq-4": "序列 4",
+      "seq-5": "序列 5",
+      "seq-6": "序列 6",
+      "seq-7": "序列 7",
+      "seq-8": "序列 8",
+      "seq-9": "序列 9",
+      pillar: "支柱",
+      "old-one": "旧日",
     };
     lines.push(`# ${normalized}`);
     lines.push("");
@@ -260,7 +282,6 @@ function lookupPathway(query: string): LookupResult {
 
   return { text: `未找到途径「${normalized}」。可用「途径/列表」查看全部。` };
 }
-
 
 function lookupAll(docs: MdDocument[], query: string, category?: LookupKind): MatchedEntry[] {
   let candidates = docs;

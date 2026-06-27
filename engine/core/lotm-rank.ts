@@ -15,22 +15,22 @@ import type { SequenceRank } from "./state/state-enum-schemas.ts";
 // ===========================================================================
 
 export type LOTMRankComparisonBand =
-  | "same-tier"       // 同级
-  | "edge"            // 半级差（装备补正）
-  | "advantage"       // 一级优势
-  | "overwhelming"    // 两级以上压制
-  | "off-scale";      // 规格外（理论上LOTM没有，保留兼容）
+  | "same-tier" // 同级
+  | "edge" // 半级差（装备补正）
+  | "advantage" // 一级优势
+  | "overwhelming" // 两级以上压制
+  | "off-scale"; // 规格外（理论上LOTM没有，保留兼容）
 
 export interface LOTMRankSide {
   rank: SequenceRank;
-  index: number;        // 数字索引：pillar=-2, ordinary=10
+  index: number; // 数字索引：pillar=-2, ordinary=10
   baselineValue: number; // 基准值 = 根据索引映射的值
 }
 
 export interface LOTMRankComparison {
   left: LOTMRankSide;
   right: LOTMRankSide;
-  baselineTierDelta: number;  // 左 - 右
+  baselineTierDelta: number; // 左 - 右
   band: LOTMRankComparisonBand;
   narrative: string;
 }
@@ -40,7 +40,7 @@ export interface LOTMRankComparison {
 // ===========================================================================
 
 const RANK_ORDER: Record<SequenceRank, number> = {
-  "pillar": -2,
+  pillar: -2,
   "old-one": -1,
   "seq-0": 0,
   "seq-1": 1,
@@ -52,17 +52,14 @@ const RANK_ORDER: Record<SequenceRank, number> = {
   "seq-7": 7,
   "seq-8": 8,
   "seq-9": 9,
-  "ordinary": 10,
+  ordinary: 10,
 };
 
 // ===========================================================================
 // 核心比较函数
 // ===========================================================================
 
-export function compareLOTMRanks(
-  left: SequenceRank,
-  right: SequenceRank,
-): LOTMRankComparison {
+export function compareLOTMRanks(left: SequenceRank, right: SequenceRank): LOTMRankComparison {
   const leftSide = lotmRankSide(left);
   const rightSide = lotmRankSide(right);
 
@@ -104,8 +101,8 @@ function comparisonBand(baselineTierDelta: number): LOTMRankComparisonBand {
 function comparisonNarrative(
   band: LOTMRankComparisonBand,
   baselineTierDelta: number,
-  left: LOTMRankSide,
-  right: LOTMRankSide,
+  _left: LOTMRankSide,
+  _right: LOTMRankSide,
 ): string {
   const direction = baselineTierDelta >= 0 ? "左侧" : "右侧";
   switch (band) {
@@ -119,6 +116,8 @@ function comparisonNarrative(
       return `双方序列同级；结果应由技能、环境、准备与代价决定。`;
     case "off-scale":
       return `规格外等级，不在常规序列标尺上。`;
+    default:
+      return `未知等级差区间：${String(band)}`;
   }
 }
 

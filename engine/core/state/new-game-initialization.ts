@@ -150,7 +150,6 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
     kind: "human",
     roles: input.roles ?? [],
     sequence: null,
-    stats: null,
     identity: {
       publicIdentity: input.publicIdentity,
       background: input.background,
@@ -164,8 +163,7 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
       demeanor: input.demeanor,
     },
     condition: { afflictions: [] },
-    equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { storedEquipment: [], consumables: [], misc: [] },
+    inventory: { items: [] },
     abilities: (input.abilities ?? []).map((summary, index) => ({
       id: `ability-protagonist-${index + 1}`,
       label: summary,
@@ -203,8 +201,7 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
       demeanor: input.demeanor,
     },
     condition: { afflictions: [] },
-    equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { storedEquipment: [], consumables: [], misc: [] },
+    inventory: { items: [] },
     abilities: (input.abilities ?? []).map((summary, index) => ({
       id: `ability-protagonist-${index + 1}`,
       label: summary,

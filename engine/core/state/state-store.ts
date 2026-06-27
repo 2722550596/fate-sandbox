@@ -218,7 +218,6 @@ function createInitialProtagonist(): HumanActorState {
     kind: "human",
     roles: [],
     sequence: null,
-    stats: null,
     identity: {
       publicIdentity: "身份未定的玩家角色",
       background: "开局尚未确认。由初始化或后续记忆事件锁定，不得在叙事中漂移。",
@@ -231,9 +230,8 @@ function createInitialProtagonist(): HumanActorState {
       outfit: { label: "日常服装", details: "开局尚未细化。" },
       demeanor: "由玩家行动定义。",
     },
-    condition: { statusEffects: [] },
-    equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { storedEquipment: [], consumables: [], misc: [] },
+    condition: { afflictions: [] },
+    inventory: { items: [] },
     abilities: [],
     relationshipToProtagonist: { stance: "self", summary: "玩家本人。" },
   };

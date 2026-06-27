@@ -390,14 +390,14 @@ LOTM 项目包含 `data/novel/` 目录（8 部，1400+ 章节 markdown）。
 
 ### 7.1 extensions/
 
-| 扩展                  | 操作                                                   |
-| --------------------- | ------------------------------------------------------ |
-| `player-panel/`       | **改写**：UI panel 适配 LOTM 字段（序列等） |
-| `player-choices/`     | 不变                                                   |
-| `rewind/`             | 不变                                                   |
-| `two-pass-render/`    | 不变                                                   |
-| `compaction-policy/`  | 微调：compaction 触发条件适配                          |
-| `subagents/timeline/` | **改写**：timeline 审计内容替换为 LOTM 世界线审计      |
+| 扩展                  | 操作                                              |
+| --------------------- | ------------------------------------------------- |
+| `player-panel/`       | **改写**：UI panel 适配 LOTM 字段（序列等）       |
+| `player-choices/`     | 不变                                              |
+| `rewind/`             | 不变                                              |
+| `two-pass-render/`    | 不变                                              |
+| `compaction-policy/`  | 微调：compaction 触发条件适配                     |
+| `subagents/timeline/` | **改写**：timeline 审计内容替换为 LOTM 世界线审计 |
 
 ### 7.2 .pi/agents/
 

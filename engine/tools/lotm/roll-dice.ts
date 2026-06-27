@@ -1,7 +1,9 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
+import { Type } from "typebox";
+
+import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { textResult } from "../runtime/tool-result.ts";
 
 export function rollDiceTool(params: unknown): ToolResult {
@@ -21,9 +23,10 @@ export function rollDiceTool(params: unknown): ToolResult {
 }
 
 function parseDiceParams(params: unknown): { diceType: number; count: number } {
-  const raw = params as Record<string, unknown>;
+  const raw = isRecord(params) ? params : {};
   const diceType = typeof raw.diceType === "number" ? raw.diceType : 100;
-  const count = typeof raw.count === "number" ? Math.max(1, Math.min(10, Math.floor(raw.count))) : 1;
+  const count =
+    typeof raw.count === "number" ? Math.max(1, Math.min(10, Math.floor(raw.count))) : 1;
   return { diceType, count };
 }
 

@@ -1,19 +1,15 @@
+import type { RelationshipSignal, State } from "../../core/state/state.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { recordRelationshipSignal } from "../../core/utils/relationship-signal.ts";
-import type { RelationshipSignal, State } from "../../core/state/state.ts";
+import { recordRelationshipSignal } from "../../core/relationship-signal.ts";
 import { stringEnumSchema } from "../../core/state/state-enum-schemas.ts";
 import { RELATIONSHIP_SIGNAL_VISIBILITIES } from "../../core/state/state-schema.ts";
-import {
-  assertNonEmptyString,
-  parseTypeBoxValue,
-} from "../../core/utils/typebox-validation.ts";
-
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { assertNonEmptyString, parseTypeBoxValue } from "../../core/utils/typebox-validation.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 interface RecordRelationshipSignalResult {
   signal: RelationshipSignal;
@@ -88,12 +84,15 @@ export const recordRelationshipSignalToolDefinition: FateToolDefinition = {
   parameters: Type.Object({
     actorId: Type.String({ description: "发出信号的 actor id；必须已存在于 public actors" }),
     targetActorId: Type.String({
-      description: "信号指向的 actor id；必须已存在于 public actors；通常是 protagonist，也可以是 NPC",
+      description:
+        "信号指向的 actor id；必须已存在于 public actors；通常是 protagonist，也可以是 NPC",
     }),
     signal: Type.String({ description: "行为证据：动作、称呼、距离、停顿、回避、照料或选择" }),
     interpretation: Type.String({ description: "当前解读：为什么这条行为改变关系读法" }),
     boundary: Type.String({ description: "边界：这条信号不能被过度解读成什么" }),
-    sourceEventId: Type.Optional(Type.Unknown({ description: "可选来源 event/fact/offscreen id；无来源填 null 或省略" })),
+    sourceEventId: Type.Optional(
+      Type.Unknown({ description: "可选来源 event/fact/offscreen id；无来源填 null 或省略" }),
+    ),
     visibility: Type.String({ description: "player-known / secret" }),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>

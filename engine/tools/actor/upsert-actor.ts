@@ -1,15 +1,14 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { PublicActorState } from "../../core/state/state.ts";
+import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { upsertActor } from "../../core/actor/actor.ts";
 import { parseActorRegistryInput } from "../../core/actor/actor-schema.ts";
+import { upsertActor } from "../../core/actor/actor.ts";
 import { ACTOR_KINDS } from "../../core/state/state-enum-schemas.ts";
-
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { resultDetails, runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 /**
  * upsert_actor 边界：结构校验交给 actor-schema；这里只保留领域归一化——
@@ -135,8 +134,7 @@ export const upsertActorToolDefinition: FateToolDefinition = {
     "- 把本局不需要追踪的角色全量写进 state",
   parameters: Type.Object({
     kind: Type.String({
-      description:
-        "setup-protagonist / ensure-public-npc / upsert-public-npc / upsert-sequence",
+      description: "setup-protagonist / ensure-public-npc / upsert-public-npc / upsert-sequence",
     }),
     actor: Type.Optional(publicActorSchema()),
     npc: Type.Optional(loosePublicNpcSchema()),
@@ -206,9 +204,7 @@ function looseSequenceSchema(): ReturnType<typeof Type.Object> {
     promotionSystem: Type.Optional(Type.String({ description: "potion / other" })),
     divinity: Type.Optional(Type.Number({ description: "神性值，默认 1" })),
     digestionProgress: Type.Optional(Type.Integer({ description: "0-100 消化进度，默认 0" })),
-    lossOfControlProgress: Type.Optional(
-      Type.Integer({ description: "0-100 失控进度，默认 0" }),
-    ),
+    lossOfControlProgress: Type.Optional(Type.Integer({ description: "0-100 失控进度，默认 0" })),
   });
 }
 

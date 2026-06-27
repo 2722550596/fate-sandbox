@@ -1,11 +1,11 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { retireActor } from "../../core/actor/actor.ts";
-import { parseRetireActorInput } from "../../core/actor/actor-schema.ts";
+import { Type } from "typebox";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { parseRetireActorInput } from "../../core/actor/actor-schema.ts";
+import { retireActor } from "../../core/actor/actor.ts";
+import { resultDetails, runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 export function retireActorTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({

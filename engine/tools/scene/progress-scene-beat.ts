@@ -1,19 +1,19 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
-import { timePolicySchema } from "./time-policy-tool-schema.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
+
+import { Type } from "typebox";
 
 import {
   assertNoOpenBackstageObligation,
   recordCanonicalTurnForBackstage,
 } from "../../core/backstage/backstage-obligation.ts";
 import { formatPendingHarvestReminder } from "../../core/backstage/backstage-pending.ts";
-import { collectBackstageDueNotices } from "../../core/utils/faction-clock.ts";
-import { assertNoOpenObligations } from "../../core/utils/obligations.ts";
+import { collectBackstageDueNotices } from "../../core/faction-clock.ts";
+import { assertNoOpenObligations } from "../../core/obligations.ts";
 import { progressSceneBeat } from "../../core/scene/scene-beat-lifecycle.ts";
 import { parseSceneBeatProgressInput } from "../../core/scene/scene-beat-schema.ts";
-
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
+import { timePolicySchema } from "./time-policy-tool-schema.ts";
 
 export function progressSceneBeatTool(params: unknown, sessionManager: unknown): ToolResult {
   const input = parseSceneBeatProgressInput(params, "progress_scene_beat 参数");

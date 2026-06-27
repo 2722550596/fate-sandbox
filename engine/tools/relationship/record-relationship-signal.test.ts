@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { cloneState, resetState } from "../../core/state/state-store.ts";
-
 import { recordRelationshipSignalTool } from "./record-relationship-signal.ts";
 
 void test("recordRelationshipSignalTool writes player-known and secret ledgers", () => {
@@ -15,7 +14,7 @@ void test("recordRelationshipSignalTool writes player-known and secret ledgers",
       signal: "she changes the subject before the apology",
       interpretation: "guarded concern",
       boundary: "not a confession",
-    coordinates: null,
+      coordinates: null,
       visibility: "player-known",
     },
     undefined,
@@ -52,7 +51,7 @@ void test("recordRelationshipSignalTool rejects invalid visibility and actors", 
           signal: "pause",
           interpretation: "concern",
           boundary: "not confession",
-        coordinates: null,
+          coordinates: null,
           visibility: "public",
         },
         undefined,
@@ -69,7 +68,7 @@ void test("recordRelationshipSignalTool rejects invalid visibility and actors", 
           signal: "pause",
           interpretation: "concern",
           boundary: "not confession",
-        coordinates: null,
+          coordinates: null,
           visibility: "player-known",
         },
         undefined,

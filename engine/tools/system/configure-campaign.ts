@@ -1,13 +1,13 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
 import type { CurrencyCode } from "../../core/state/state.ts";
+import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { configureCampaign } from "../../core/campaign/campaign.ts";
-import { parseConfigureCampaignInput } from "../../core/campaign/campaign-schema.ts";
+import { Type } from "typebox";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { parseConfigureCampaignInput } from "../../core/campaign/campaign-schema.ts";
+import { configureCampaign } from "../../core/campaign/campaign.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 
 /** Moon Cell 等时间线的货币别名归一化——这是领域归一化，不是校验。 */
 const CURRENCY_ALIASES: Readonly<Record<string, CurrencyCode>> = {

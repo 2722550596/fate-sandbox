@@ -6,7 +6,7 @@
  * 推进时间越过 dueAt 或时钟填满时，工具返回值直接催账——GM 不需要记得。
  */
 
-import type { FactionClock, ScheduledEvent, State } from "../state/state.ts";
+import type { FactionClock, ScheduledEvent, State } from "./state/state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 

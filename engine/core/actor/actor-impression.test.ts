@@ -14,7 +14,6 @@ function addTestNpc(draft: ReturnType<typeof createInitialState>, actorId: strin
     kind: "human",
     roles: [],
     sequence: null,
-    stats: null,
     identity: { publicIdentity: actorId, background: "", lockedFacts: [] },
     presentation: {
       internalName: actorId.charAt(0).toUpperCase() + actorId.slice(1),
@@ -23,9 +22,8 @@ function addTestNpc(draft: ReturnType<typeof createInitialState>, actorId: strin
       outfit: { label: "default", details: "" },
       demeanor: "neutral",
     },
-    condition: { statusEffects: [] },
-    equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { storedEquipment: [], consumables: [], misc: [] },
+    condition: { afflictions: [] },
+    inventory: { items: [] },
     abilities: [],
     relationshipToProtagonist: { stance: "neutral", summary: "neutral" },
   };

@@ -1,5 +1,10 @@
-import type { ActorId, PublicActorState, PublicGameState, State } from "../state/state.ts";
-import type { TagEntry } from "../state/state.ts";
+import type {
+  ActorId,
+  PublicActorState,
+  PublicGameState,
+  State,
+  TagEntry,
+} from "../state/state.ts";
 import type {
   ActorRegistryInput,
   PublicNpcInput,
@@ -159,7 +164,6 @@ function resolveSequenceTagsForActor(_sequenceName: string): TagEntry[] {
   return [];
 }
 
-
 function assertActorHasNoBlockingReferences(publicState: PublicGameState, actorId: ActorId): void {
   for (const [itemId, item] of Object.entries(publicState.trackedItems)) {
     if (item.ownerActorId === actorId || item.holderActorId === actorId) {
@@ -200,9 +204,8 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
       outfit: npc.outfit,
       demeanor: assertNonEmptyString(npc.demeanor, "npc.demeanor"),
     },
-    condition: { statusEffects: [] },
-    equipment: { weapon: null, clothing: null, accessory: null, sealedArtifact: null },
-    inventory: { storedEquipment: [], consumables: [], misc: [] },
+    condition: { afflictions: [] },
+    inventory: { items: [] },
     abilities: [],
     relationshipToProtagonist: npc.relationshipToProtagonist,
   };

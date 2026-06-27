@@ -5,11 +5,11 @@
  * 每个函数返回 Markdown 字符串，由 player-panel 扩展渲染。
  */
 
-import type { PublicGameState } from "../state/state.ts";
+import type { PublicGameState } from "../../engine/core/state/state.ts";
 
-import { actorDisplayName } from "../actor/actor-display.ts";
-import { formatHumanTime } from "../state/date-time.ts";
-import { recentPlayerKnownRelationshipSignals } from "./relationship-signal.ts";
+import { actorDisplayName } from "../../engine/core/actor/actor-display.ts";
+import { recentPlayerKnownRelationshipSignals } from "../../engine/core/relationship-signal.ts";
+import { formatHumanTime } from "../../engine/core/state/date-time.ts";
 
 // ─── /relations ──────────────────────────────────────────────────
 

@@ -20,8 +20,7 @@ import { clearPendingHarvestByRun } from "../../core/backstage/backstage-pending
 import { readBackstageCandidateRaw } from "../../core/backstage/backstage-session-read.ts";
 import { parseParallelLineOutput } from "../../core/backstage/parallel-line-output-schema.ts";
 import { assertNonEmptyString, isRecord } from "../../core/utils/typebox-validation.ts";
-
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 /** sessionDir 仅供测试注入临时夹具目录；生产走默认 BACKSTAGE_SESSION_DIR。 */
 export function harvestBackstageCandidateTool(
@@ -59,7 +58,9 @@ function buildGuidance(candidate: ParallelLineOutput): string {
     `- actorIds: ${candidate.actorIds.join(", ") || "(none)"}`,
     `- privateSummary: ${candidate.privateSummary}`,
     `- toneDriftRisk: ${candidate.toneDriftRisk}`,
-    candidate.riskFlags.length > 0 ? `- riskFlags: ${candidate.riskFlags.join("; ")}` : "- riskFlags: (none)",
+    candidate.riskFlags.length > 0
+      ? `- riskFlags: ${candidate.riskFlags.join("; ")}`
+      : "- riskFlags: (none)",
     "",
     "禁区：privateSummary / secretStateChanges 不得原样展示给玩家；publicLeakCandidates 才是玩家安全投影。",
     path,
@@ -81,7 +82,8 @@ export const harvestBackstageCandidateToolDefinition: FateToolDefinition = {
     "- 本工具不落地、不改 canonical state；落地用 record_offscreen_event / resolve_backstage_line",
   parameters: Type.Object({
     run_id: Type.String({
-      description: "run_parallel_line 返回的 run_id（如 bl-archer-floor1-scout）；engine 按它定位该 director 的持久 session 并取回裸候选",
+      description:
+        "run_parallel_line 返回的 run_id（如 bl-archer-floor1-scout）；engine 按它定位该 director 的持久 session 并取回裸候选",
     }),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>

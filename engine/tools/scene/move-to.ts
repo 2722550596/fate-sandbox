@@ -1,11 +1,14 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
-import type { ToolResult } from "../runtime/tool-result.ts";
 import type { LocationState } from "../../core/state/state.ts";
-import type { BoundaryKind } from "../../core/state/state-enum-schemas.ts";
+import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { cloneState, commitState } from "../../core/state/state-store.ts";
+import { Type } from "typebox";
+
+import { BOUNDARY_KINDS } from "../../core/state/state-enum-schemas.ts";
 import { persistStateAfterCommit } from "../../core/state/state-persistence.ts";
+import { cloneState, commitState } from "../../core/state/state-store.ts";
+import { assertOneOfString } from "../../core/utils/string-enum.ts";
+import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { textResult } from "../runtime/tool-result.ts";
 
 export function moveToTool(params: unknown, sessionManager: unknown): ToolResult {
@@ -16,7 +19,7 @@ export function moveToTool(params: unknown, sessionManager: unknown): ToolResult
     region,
     site,
     detail,
-    boundary: boundary as BoundaryKind,
+    boundary: assertOneOfString(boundary, BOUNDARY_KINDS, "boundary"),
     coordinates: coordinates ?? null,
   };
 
@@ -40,16 +43,18 @@ interface MoveParams {
 }
 
 function parseMoveParams(params: unknown): MoveParams {
-  const raw = params as Record<string, unknown>;
+  const raw = isRecord(params) ? params : {};
   const region = typeof raw.region === "string" && raw.region.length > 0 ? raw.region : "未知区域";
   const site = typeof raw.site === "string" && raw.site.length > 0 ? raw.site : "未知地点";
   const detail = typeof raw.detail === "string" ? raw.detail : "";
   const boundary = typeof raw.boundary === "string" ? raw.boundary : "normal";
   let coordinates: { x: number; y: number } | null = null;
   if (raw.coordinates !== undefined && raw.coordinates !== null) {
-    const coord = raw.coordinates as Record<string, unknown>;
-    const x = typeof coord.x === "number" ? coord.x : typeof coord.x === "string" ? Number(coord.x) : NaN;
-    const y = typeof coord.y === "number" ? coord.y : typeof coord.y === "string" ? Number(coord.y) : NaN;
+    const coord = isRecord(raw.coordinates) ? raw.coordinates : {};
+    const x =
+      typeof coord.x === "number" ? coord.x : typeof coord.x === "string" ? Number(coord.x) : NaN;
+    const y =
+      typeof coord.y === "number" ? coord.y : typeof coord.y === "string" ? Number(coord.y) : NaN;
     if (!isNaN(x) && !isNaN(y)) {
       coordinates = { x, y };
     }

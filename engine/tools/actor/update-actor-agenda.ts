@@ -1,3 +1,4 @@
+import type { ActorAgendaState, State } from "../../core/state/state.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
@@ -9,15 +10,13 @@ import {
   markActorIndependentAction,
   upsertActorAgenda,
 } from "../../core/actor/actor-agenda.ts";
-import type { ActorAgendaState, State } from "../../core/state/state.ts";
 import {
   assertIsoDateString,
   assertNonEmptyString,
   isRecord,
   parseTypeBoxValue,
 } from "../../core/utils/typebox-validation.ts";
-
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 const UPDATE_ACTOR_AGENDA_KINDS = ["upsert", "mark-independent-action", "clear"] as const;
 
@@ -67,9 +66,7 @@ function executeUpdateActorAgenda(draft: State, params: unknown): UpdateActorAge
       return { kind, agenda, reason: input.reason };
     }
     default:
-      throw new Error(
-        `不支持的 kind: ${kind}。允许: ${UPDATE_ACTOR_AGENDA_KINDS.join(" / ")}。`,
-      );
+      throw new Error(`不支持的 kind: ${kind}。允许: ${UPDATE_ACTOR_AGENDA_KINDS.join(" / ")}。`);
   }
 }
 
@@ -95,12 +92,15 @@ function formatResult(result: UpdateActorAgendaResult): string {
       return `NPC 自主行动已记账：${formatAgenda(result.agenda)}`;
     case "clear":
       return `NPC 主动性账本已移除：${result.agenda.actorId}（${result.reason}）`;
+    default:
+      return "未知主动性操作类型。";
   }
 }
 
 function formatAgenda(agenda: ActorAgendaState): string {
   const order = agenda.currentOrder === null ? "无当前指令" : agenda.currentOrder;
-  const acted = agenda.lastIndependentActionAt === null ? "尚无自主行动记录" : agenda.lastIndependentActionAt;
+  const acted =
+    agenda.lastIndependentActionAt === null ? "尚无自主行动记录" : agenda.lastIndependentActionAt;
   return `${agenda.actorId}｜goal=${agenda.goal}｜fear=${agenda.fear}｜order=${order}｜last=${acted}`;
 }
 

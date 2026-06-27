@@ -2,8 +2,8 @@ import type { PublicGameState } from "../state/state.ts";
 
 import { actorDisplayName } from "../actor/actor-display.ts";
 import { formatHookLedger } from "../hooks/hooks.ts";
+import { recentPlayerKnownRelationshipSignals } from "../relationship-signal.ts";
 import { formatHumanTime } from "../state/date-time.ts";
-import { recentPlayerKnownRelationshipSignals } from "../utils/relationship-signal.ts";
 
 export function buildGmBrief(publicState: PublicGameState): string {
   const protagonist = publicState.actors[publicState.protagonistActorId];
@@ -199,11 +199,8 @@ function formatGmBriefFunds(publicState: PublicGameState): string {
 function formatCondition(
   condition: NonNullable<PublicGameState["actors"][string]>["condition"],
 ): string {
-  const effects = condition.statusEffects.map(
-    (effect) =>
-      `${effect.type}:${effect.name}(${effect.affectedAttribute}${effect.value}${effect.valueType === "percentage" ? "%" : ""})`,
-  );
-  return effects.length === 0 ? "无显著状态效果" : effects.join("；");
+  const lines = condition.afflictions.map((effect) => `${effect.source}:${effect.text}`);
+  return lines.length === 0 ? "无显著状态效果" : lines.join("；");
 }
 
 function formatRecentEvents(publicState: PublicGameState): string {
@@ -265,10 +262,7 @@ function formatTrackedItems(publicState: PublicGameState): string {
 
 function formatOrdinaryItems(publicState: PublicGameState): string {
   const lines = Object.values(publicState.actors)
-    .filter((actor) => actor.inventory.misc.length > 0)
-    .map(
-      (actor) =>
-        `- ${actor.presentation.renderName}：${actor.inventory.misc.map((i) => i.name).join("、")}`,
-    );
+    .filter((actor) => actor.inventory.items.length > 0)
+    .map((actor) => `- ${actor.presentation.renderName}：${actor.inventory.items.join("、")}`);
   return lines.length === 0 ? "- 无记录" : lines.join("\n");
 }

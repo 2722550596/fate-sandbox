@@ -1,9 +1,10 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
-import { updateActorCondition } from "../../core/actor/actor-condition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { Type } from "typebox";
+
+import { updateActorCondition } from "../../core/actor/actor-condition.ts";
+import { resultDetails, runDomainEventTool } from "../system/domain-tool-runner.ts";
 import { normalizeActorConditionEvent } from "./actor-condition-normalizer.ts";
 
 export function updateActorConditionTool(params: unknown, sessionManager: unknown): ToolResult {
@@ -14,7 +15,6 @@ export function updateActorConditionTool(params: unknown, sessionManager: unknow
     message: (result) => result.message,
   });
 }
-
 
 export const updateActorConditionToolDefinition: FateToolDefinition = {
   name: "update_actor_condition",
@@ -41,11 +41,12 @@ export const updateActorConditionToolDefinition: FateToolDefinition = {
       Type.String({ description: "add-status-effect：buff / debuff / risk / flag" }),
     ),
     affectedAttribute: Type.Optional(
-      Type.String({ description: "add-status-effect：vitality / spirituality / reason / humanity / agility / luck" }),
+      Type.String({
+        description:
+          "add-status-effect：vitality / spirituality / reason / humanity / agility / luck",
+      }),
     ),
-    valueType: Type.Optional(
-      Type.String({ description: "add-status-effect：percentage / fixed" }),
-    ),
+    valueType: Type.Optional(Type.String({ description: "add-status-effect：percentage / fixed" })),
     value: Type.Optional(Type.Number({ description: "add-status-effect：效果数值" })),
     duration: Type.Optional(Type.Integer({ description: "add-status-effect：持续轮数" })),
     source: Type.Optional(Type.String({ description: "add-status-effect：效果来源" })),
@@ -73,7 +74,8 @@ export const updateActorConditionToolDefinition: FateToolDefinition = {
     label: Type.Optional(Type.String({ description: "add-tracked-item 必填：玩家可见标签" })),
     itemKind: Type.Optional(
       Type.String({
-        description: "mundane / weapon / sealed-artifact / mystical-item / document / key-item / consumable / other",
+        description:
+          "mundane / weapon / sealed-artifact / mystical-item / document / key-item / consumable / other",
       }),
     ),
     condition: Type.Optional(

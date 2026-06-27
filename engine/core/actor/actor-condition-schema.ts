@@ -6,12 +6,10 @@ import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
 import {
-  STATUS_EFFECT_TYPE_SCHEMA,
   stringEnumSchema,
   TRACKED_ITEM_CONDITION_SCHEMA,
   TRACKED_ITEM_KIND_SCHEMA,
   TRACKED_ITEM_VISIBILITY_SCHEMA,
-  VALUE_TYPE_SCHEMA,
 } from "../state/state-enum-schemas.ts";
 import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../utils/typebox-validation.ts";
 import { OUTFIT_STATE_SCHEMA } from "./actor-schema.ts";
@@ -25,8 +23,9 @@ import { OUTFIT_STATE_SCHEMA } from "./actor-schema.ts";
  * 留在 tools/state/actor-condition-normalizer.ts。
  */
 export const ACTOR_CONDITION_EVENT_KINDS = [
-  "add-status-effect",
-  "remove-status-effect",
+  "add-affliction",
+  "resolve-condition",
+  "update-wound",
   "change-outfit",
   "transfer-tracked-item",
   "update-tracked-item",
@@ -34,24 +33,40 @@ export const ACTOR_CONDITION_EVENT_KINDS = [
 ] as const;
 const ACTOR_CONDITION_EVENT_KIND_SCHEMA = stringEnumSchema(ACTOR_CONDITION_EVENT_KINDS);
 
-const ADD_STATUS_EFFECT_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("add-status-effect"),
+const AFFLICTION_SOURCE_SCHEMA = stringEnumSchema([
+  "combat",
+  "beyonder-ability",
+  "environment",
+  "item",
+  "other",
+]);
+
+const AFFLICTION_OUTCOME_SCHEMA = stringEnumSchema(["recovered", "stabilized"]);
+
+const ADD_AFFLICTION_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("add-affliction"),
   actorId: Type.String({ minLength: 1 }),
-  name: Type.String({ minLength: 1 }),
-  type: STATUS_EFFECT_TYPE_SCHEMA,
-  affectedAttribute: Type.String({ minLength: 1 }),
-  valueType: VALUE_TYPE_SCHEMA,
-  value: Type.Number(),
-  duration: Type.Integer({ minimum: 0 }),
-  source: Type.String({ minLength: 1 }),
+  source: AFFLICTION_SOURCE_SCHEMA,
+  text: Type.String({ minLength: 1 }),
+  expectedDuration: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),
   reason: Type.String({ minLength: 1 }),
 });
 
-const REMOVE_STATUS_EFFECT_EVENT_SCHEMA = Type.Object({
-  kind: Type.Literal("remove-status-effect"),
+const RESOLVE_CONDITION_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("resolve-condition"),
   actorId: Type.String({ minLength: 1 }),
   conditionId: Type.String({ minLength: 1 }),
-  outcome: stringEnumSchema(["recovered", "expired", "removed"]),
+  outcome: AFFLICTION_OUTCOME_SCHEMA,
+  reason: Type.String({ minLength: 1 }),
+});
+
+const UPDATE_WOUND_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("update-wound"),
+  actorId: Type.String({ minLength: 1 }),
+  conditionId: Type.String({ minLength: 1 }),
+  text: Type.Optional(Type.String({ minLength: 1 })),
+  source: Type.Optional(AFFLICTION_SOURCE_SCHEMA),
+  expectedDuration: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),
   reason: Type.String({ minLength: 1 }),
 });
 
@@ -92,16 +107,18 @@ const ADD_TRACKED_ITEM_EVENT_SCHEMA = Type.Object({
 });
 
 export type ActorConditionEvent =
-  | Static<typeof ADD_STATUS_EFFECT_EVENT_SCHEMA>
-  | Static<typeof REMOVE_STATUS_EFFECT_EVENT_SCHEMA>
+  | Static<typeof ADD_AFFLICTION_EVENT_SCHEMA>
+  | Static<typeof RESOLVE_CONDITION_EVENT_SCHEMA>
+  | Static<typeof UPDATE_WOUND_EVENT_SCHEMA>
   | Static<typeof CHANGE_OUTFIT_EVENT_SCHEMA>
   | Static<typeof TRANSFER_TRACKED_ITEM_EVENT_SCHEMA>
   | Static<typeof UPDATE_TRACKED_ITEM_EVENT_SCHEMA>
   | Static<typeof ADD_TRACKED_ITEM_EVENT_SCHEMA>;
 
 const ACTOR_CONDITION_EVENT_KIND_VALIDATOR = Compile(ACTOR_CONDITION_EVENT_KIND_SCHEMA);
-const ADD_STATUS_EFFECT_EVENT_VALIDATOR = Compile(ADD_STATUS_EFFECT_EVENT_SCHEMA);
-const REMOVE_STATUS_EFFECT_EVENT_VALIDATOR = Compile(REMOVE_STATUS_EFFECT_EVENT_SCHEMA);
+const ADD_AFFLICTION_EVENT_VALIDATOR = Compile(ADD_AFFLICTION_EVENT_SCHEMA);
+const RESOLVE_CONDITION_EVENT_VALIDATOR = Compile(RESOLVE_CONDITION_EVENT_SCHEMA);
+const UPDATE_WOUND_EVENT_VALIDATOR = Compile(UPDATE_WOUND_EVENT_SCHEMA);
 const CHANGE_OUTFIT_EVENT_VALIDATOR = Compile(CHANGE_OUTFIT_EVENT_SCHEMA);
 const TRANSFER_TRACKED_ITEM_EVENT_VALIDATOR = Compile(TRANSFER_TRACKED_ITEM_EVENT_SCHEMA);
 const UPDATE_TRACKED_ITEM_EVENT_VALIDATOR = Compile(UPDATE_TRACKED_ITEM_EVENT_SCHEMA);
@@ -109,8 +126,9 @@ const ADD_TRACKED_ITEM_EVENT_VALIDATOR = Compile(ADD_TRACKED_ITEM_EVENT_SCHEMA);
 
 // Compile 必须在独立常量上调用（satisfies 上下文会干扰泛型推导）。
 const ACTOR_CONDITION_EVENT_VARIANT_VALIDATORS = {
-  "add-status-effect": ADD_STATUS_EFFECT_EVENT_VALIDATOR,
-  "remove-status-effect": REMOVE_STATUS_EFFECT_EVENT_VALIDATOR,
+  "add-affliction": ADD_AFFLICTION_EVENT_VALIDATOR,
+  "resolve-condition": RESOLVE_CONDITION_EVENT_VALIDATOR,
+  "update-wound": UPDATE_WOUND_EVENT_VALIDATOR,
   "change-outfit": CHANGE_OUTFIT_EVENT_VALIDATOR,
   "transfer-tracked-item": TRANSFER_TRACKED_ITEM_EVENT_VALIDATOR,
   "update-tracked-item": UPDATE_TRACKED_ITEM_EVENT_VALIDATOR,

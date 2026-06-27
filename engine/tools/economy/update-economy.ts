@@ -1,13 +1,13 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
 import type { EconomyEvent } from "../../core/economy/economy.ts";
+import type { State } from "../../core/state/state.ts";
+import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { updateEconomy } from "../../core/economy/economy.ts";
-import { parseEconomyEvent } from "../../core/economy/economy-schema.ts";
-import type { State } from "../../core/state/state.ts";
+import { Type } from "typebox";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { parseEconomyEvent } from "../../core/economy/economy-schema.ts";
+import { updateEconomy } from "../../core/economy/economy.ts";
+import { resultDetails, runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 export function updateEconomyTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
@@ -46,7 +46,7 @@ export const updateEconomyToolDefinition: FateToolDefinition = {
   description:
     "更新 2004 年日本円经济状态；每笔资金指定 purse/account 与 reason，资金增加说明可审计来源。\n\n" +
     "使用边界：消费、获得现金、增加/重命名资金账户、记录债务，或食宿/装备/服务/情报等交易。\n" +
-    "禁区：把同行者资金说成玩家随身现金、资金不足时免费兜底，或用 gain-money 设目标数值/凭空发财。", 
+    "禁区：把同行者资金说成玩家随身现金、资金不足时免费兜底，或用 gain-money 设目标数值/凭空发财。",
   parameters: Type.Object({
     kind: Type.String({
       description: "允许: spend-money / gain-money / add-purse / rename-purse / add-debt",

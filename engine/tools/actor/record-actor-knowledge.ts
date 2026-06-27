@@ -1,3 +1,4 @@
+import type { ActorKnowledgeLens, State } from "../../core/state/state.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
@@ -11,15 +12,13 @@ import {
   upsertActorKnowledgeLens,
   type KnowledgeLensCategory,
 } from "../../core/actor/actor-agenda.ts";
-import type { ActorKnowledgeLens, State } from "../../core/state/state.ts";
 import { stringEnumSchema } from "../../core/state/state-enum-schemas.ts";
 import {
   assertNonEmptyString,
   isRecord,
   parseTypeBoxValue,
 } from "../../core/utils/typebox-validation.ts";
-
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 const RECORD_ACTOR_KNOWLEDGE_KINDS = ["upsert-lens", "add-fact", "remove-fact", "clear"] as const;
 const KNOWLEDGE_LENS_CATEGORIES = [
@@ -93,6 +92,8 @@ function formatResult(result: RecordActorKnowledgeResult): string {
       return `NPC 认知边界已移除：${result.lens.actorId}.${result.category} -= ${result.fact}`;
     case "clear":
       return `NPC 认知边界已清除：${result.lens.actorId}（${result.reason}）`;
+    default:
+      return "未知认知操作类型。";
   }
 }
 
@@ -155,7 +156,9 @@ export const recordActorKnowledgeToolDefinition: FateToolDefinition = {
     kind: Type.String({ description: "允许: upsert-lens / add-fact / remove-fact / clear" }),
     actorId: Type.String({ description: "目标 actor id；必须已存在于 public actors" }),
     category: Type.Optional(
-      Type.String({ description: "add/remove 必填：knows / suspects / falseBeliefs / forbiddenKnowledge" }),
+      Type.String({
+        description: "add/remove 必填：knows / suspects / falseBeliefs / forbiddenKnowledge",
+      }),
     ),
     fact: Type.Optional(Type.String({ description: "add/remove 必填：一条具体认知事实" })),
     knows: Type.Optional(Type.Array(Type.String({ description: "upsert-lens 必填" }))),

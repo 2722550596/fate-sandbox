@@ -1,10 +1,10 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { initializeNewGame } from "../../core/utils/new-game-initialization.ts";
-import { parseNewGameInitializationInput } from "../../core/utils/new-game-schema.ts";
+import { Type } from "typebox";
 
+import { initializeNewGame } from "../../core/state/new-game-initialization.ts";
+import { parseNewGameInitializationInput } from "../../core/state/new-game-schema.ts";
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function initializeNewGameTool(params: unknown, sessionManager: unknown): ToolResult {
@@ -33,8 +33,7 @@ export const initializeNewGameToolDefinition: FateToolDefinition = {
     kind: Type.String({ description: "human-protagonist / beyonder-protagonist" }),
     campaign: Type.Object({
       presetId: Type.String({
-        description:
-          "tingen_1349 / backlund_1350 / bayam_1351 / condat_1349 / custom_worldline",
+        description: "tingen_1349 / backlund_1350 / bayam_1351 / condat_1349 / custom_worldline",
       }),
       title: Type.Optional(Type.String()),
       premise: Type.Optional(Type.String()),
@@ -54,15 +53,21 @@ export const initializeNewGameToolDefinition: FateToolDefinition = {
     ),
     hiddenSequenceSecrets: Type.Optional(
       Type.Object({
-        pathway: Type.Optional(Type.String({
-          description: "途径 ID（如 seer / thief / spectator 等）",
-        })),
-        sequenceName: Type.Optional(Type.String({
-          description: "当前序列名（如 序列9-占卜家）",
-        })),
-        trueName: Type.Optional(Type.String({
-          description: "非凡者真名",
-        })),
+        pathway: Type.Optional(
+          Type.String({
+            description: "途径 ID（如 seer / thief / spectator 等）",
+          }),
+        ),
+        sequenceName: Type.Optional(
+          Type.String({
+            description: "当前序列名（如 序列9-占卜家）",
+          }),
+        ),
+        trueName: Type.Optional(
+          Type.String({
+            description: "非凡者真名",
+          }),
+        ),
         revealConditions: Type.Array(
           Type.String({
             description:

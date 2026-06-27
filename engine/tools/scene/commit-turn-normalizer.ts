@@ -2,14 +2,13 @@ import type { ScenePresenceInput } from "../../core/actor/actor.ts";
 import type { MemoryEvent } from "../../core/memory/memory.ts";
 import type { TurnCommitEvent, TurnCommitInput } from "../../core/state/turn-commit.ts";
 
+import { parseSequenceInput } from "../../core/actor/actor-schema.ts";
 import { parseEconomyEvent } from "../../core/economy/economy-schema.ts";
 import { parseMemoryEvent } from "../../core/memory/memory-schema.ts";
 import { parseSceneEvent } from "../../core/scene/scene-schema.ts";
-import { parseSequenceInput } from "../../core/actor/actor-schema.ts";
 import { parseTurnTimePolicySchema } from "../../core/state/turn-time-schema.ts";
-
-import { normalizeActorConditionEvent } from "./actor-condition-normalizer.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { normalizeActorConditionEvent } from "../actor/actor-condition-normalizer.ts";
 
 const DEFAULT_SUMMARY = "本轮状态变化。";
 const TURN_EVENT_KINDS = [
@@ -99,7 +98,10 @@ function normalizeKindText(value: unknown): string {
   return value.trim().toLowerCase().replace(/_/g, "-");
 }
 
-function extractDomainEvent(event: Record<string, unknown>, fieldName: string): Record<string, unknown> {
+function extractDomainEvent(
+  event: Record<string, unknown>,
+  fieldName: string,
+): Record<string, unknown> {
   if (isRecord(event["event"])) {
     return event["event"];
   }
@@ -115,10 +117,7 @@ function normalizeMemoryTurnEvent(event: Record<string, unknown>): MemoryEvent {
   return parseMemoryEvent(normalized, "commit_turn memory.event");
 }
 
-function normalizeSceneTurnEvent(
-  event: Record<string, unknown>,
-  summary: string,
-): TurnCommitEvent {
+function normalizeSceneTurnEvent(event: Record<string, unknown>, summary: string): TurnCommitEvent {
   const payload = normalizeSceneEventPayload(
     withReason(extractDomainEvent(event, "scene.event"), summary),
   );
@@ -156,11 +155,7 @@ function normalizeScenePresenceInput(
   };
 }
 
-function normalizeSummary(
-  value: unknown,
-  events: readonly unknown[],
-  timeReason: string,
-): string {
+function normalizeSummary(value: unknown, events: readonly unknown[], timeReason: string): string {
   const explicit = normalizeOptionalString(value);
   if (explicit !== null) {
     return explicit;
@@ -200,7 +195,10 @@ function findReason(event: unknown): string | null {
   return normalizeOptionalString(input["reason"]);
 }
 
-function withReason(event: Record<string, unknown>, summary: string): Record<string, unknown> & {
+function withReason(
+  event: Record<string, unknown>,
+  summary: string,
+): Record<string, unknown> & {
   reason: string;
 } {
   return { ...event, reason: normalizeReason(event["reason"], summary) };
@@ -218,7 +216,9 @@ function normalizeStringArray(
   if (value === undefined && fallback !== undefined) {
     return fallback;
   }
-  return assertArray(value, fieldName).map((entry) => assertNonEmptyString(entry, `${fieldName}[]`));
+  return assertArray(value, fieldName).map((entry) =>
+    assertNonEmptyString(entry, `${fieldName}[]`),
+  );
 }
 
 function assertNonEmptyString(value: unknown, fieldName: string): string {

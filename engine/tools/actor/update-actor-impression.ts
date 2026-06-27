@@ -14,10 +14,10 @@ import {
   upsertActorImpression,
   type UpsertActorImpressionInput,
 } from "../../core/actor/actor-impression.ts";
-import { hydrateStateFromSessionManager } from "../../core/utils/session-hydration.ts";
+import { hydrateStateFromSessionManager } from "../../core/state/session-hydration.ts";
 import { commitState, getState } from "../../core/state/state-store.ts";
-import { textResult } from "../runtime/tool-result.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { textResult } from "../runtime/tool-result.ts";
 
 export function updateActorImpressionTool(params: unknown, sessionManager: unknown): ToolResult {
   if (sessionManager !== undefined) {
@@ -28,10 +28,9 @@ export function updateActorImpressionTool(params: unknown, sessionManager: unkno
   const card = upsertActorImpression(state, input);
   commitState(state);
   const name = state.public.actors[card.actorId]?.presentation.renderName ?? card.actorId;
-  return textResult(
-    `${name} 印象卡已更新。卡片将在该 actor 在场时自动注入 pre-response。`,
-    { updatedImpression: card },
-  );
+  return textResult(`${name} 印象卡已更新。卡片将在该 actor 在场时自动注入 pre-response。`, {
+    updatedImpression: card,
+  });
 }
 
 function parseToolInput(params: unknown): UpsertActorImpressionInput {

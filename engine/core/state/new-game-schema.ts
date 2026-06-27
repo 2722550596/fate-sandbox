@@ -11,7 +11,7 @@ import {
   SEQUENCE_RANK_SCHEMA,
   stringEnumSchema,
 } from "../state/state-enum-schemas.ts";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "./typebox-validation.ts";
+import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../utils/typebox-validation.ts";
 
 /**
  * initialize_new_game 工具边界 schema。

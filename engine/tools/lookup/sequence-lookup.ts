@@ -11,13 +11,16 @@ import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { SEQUENCE_RANKS } from "../../core/state/state-enum-schemas.ts";
+import { assertOneOfString } from "../../core/utils/string-enum.ts";
+
 // ===========================================================================
 // 配置加载
 // ===========================================================================
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const CONFIG_PATH = join(__dirname, "..", "..", "..", "data", "config", "神之途径.json");
+const scriptUrl = fileURLToPath(import.meta.url);
+const scriptDir = dirname(scriptUrl);
+const CONFIG_PATH = join(scriptDir, "..", "..", "..", "data", "config", "神之途径.json");
 
 type PathwayIndex = Record<string, Record<string, string>>;
 
@@ -29,7 +32,10 @@ const sequenceIndex: Record<string, { pathway: string; rank: SequenceRank }> = {
 
 for (const [pathway, rankMap] of Object.entries(pathwayIndex)) {
   for (const [rank, seqName] of Object.entries(rankMap)) {
-    sequenceIndex[seqName] = { pathway, rank: rank as SequenceRank };
+    sequenceIndex[seqName] = {
+      pathway,
+      rank: assertOneOfString(rank, SEQUENCE_RANKS, "rank"),
+    };
   }
 }
 

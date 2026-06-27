@@ -1,7 +1,9 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+
 import { Type } from "typebox";
+
 import { buildGmBrief } from "../../core/backstage/public-projection.ts";
-import { hydrateStateFromSessionManager } from "../../core/utils/session-hydration.ts";
+import { hydrateStateFromSessionManager } from "../../core/state/session-hydration.ts";
 import { getState } from "../../core/state/state-store.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 

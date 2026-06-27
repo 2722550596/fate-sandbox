@@ -11,13 +11,16 @@
 // ---------------------------------------------------------------------------
 
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
+import { Type } from "typebox";
+
 import { upsertActor } from "../../core/actor/actor.ts";
-import type { SequenceInput } from "../../core/actor/actor-schema.ts";
-import { cloneState, commitState } from "../../core/state/state-store.ts";
+import { SEQUENCE_RANKS, PATHWAY_IDS } from "../../core/state/state-enum-schemas.ts";
 import { persistStateAfterCommit } from "../../core/state/state-persistence.ts";
+import { cloneState, commitState } from "../../core/state/state-store.ts";
+import { assertOneOfString } from "../../core/utils/string-enum.ts";
+import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { textResult } from "../runtime/tool-result.ts";
 
 export function attemptPromotionTool(params: unknown, sessionManager: unknown): ToolResult {
@@ -27,7 +30,9 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
 
   const actor = draft.public.actors[actorId];
   if (actor === undefined) {
-    return textResult(`actor 不存在: ${actorId}。先用 get_status 查看可用 actor。`, { error: "actor_not_found" });
+    return textResult(`actor 不存在: ${actorId}。先用 get_status 查看可用 actor。`, {
+      error: "actor_not_found",
+    });
   }
 
   // 唯一硬边界：消化进度必须 ≥80%
@@ -48,8 +53,8 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
     sequence: {
       actorId,
       currentSequence: targetName,
-      rank: targetRank as SequenceInput["rank"],
-      pathway: pathway as SequenceInput["pathway"],
+      rank: assertOneOfString(targetRank, SEQUENCE_RANKS, "targetRank"),
+      pathway: assertOneOfString(pathway, PATHWAY_IDS, "pathway"),
       promotionSystem: "potion",
       divinity: divinity ?? 0,
       digestionProgress: 0,
@@ -64,10 +69,12 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
     result: { actorId, targetRank, targetName, success: true },
   });
 
-  return textResult(
-    `【晋升成功】${actorId} 成功晋升至 ${targetName}！`,
-    { actorId, targetRank, targetName, success: true },
-  );
+  return textResult(`【晋升成功】${actorId} 成功晋升至 ${targetName}！`, {
+    actorId,
+    targetRank,
+    targetName,
+    success: true,
+  });
 }
 
 interface PromotionParams {
@@ -80,7 +87,7 @@ interface PromotionParams {
 }
 
 function parsePromotionParams(params: unknown): PromotionParams {
-  const raw = params as Record<string, unknown>;
+  const raw = isRecord(params) ? params : {};
   return {
     actorId: typeof raw.actorId === "string" && raw.actorId.length > 0 ? raw.actorId : "",
     targetRank: typeof raw.targetRank === "string" ? raw.targetRank : "seq-9",

@@ -3,21 +3,23 @@ import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 
 import { collectUnrevealedSecretStrings } from "../../audit/lint-rules.ts";
-import { scanDirectionPacket } from "../../direction/packet-firewall.ts";
 import {
-  buildPacketValidationContext,
-  validateRenderDirectionPacket,
-} from "../../direction/packet-validation.ts";
+  stringEnumSchema,
+  stringEnumSchema as omissionReasonSchema,
+} from "../../core/state/state-enum-schemas.ts";
+import { getState } from "../../core/state/state-store.ts";
+import { scanDirectionPacket } from "../../direction/packet-firewall.ts";
 import {
   type DirectionPacket,
   EVENT_WEIGHTS,
   NPC_OMISSION_REASON_CODES,
   parseDirectionPacket,
 } from "../../direction/packet-schema.ts";
-import { stringEnumSchema as omissionReasonSchema } from "../../core/state/state-enum-schemas.ts";
+import {
+  buildPacketValidationContext,
+  validateRenderDirectionPacket,
+} from "../../direction/packet-validation.ts";
 import { SUBMIT_DIRECTION_PACKET_TOOL } from "../../direction/render-turn.ts";
-import { stringEnumSchema } from "../../core/state/state-enum-schemas.ts";
-import { getState } from "../../core/state/state-store.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
 /**
@@ -60,7 +62,7 @@ export const submitDirectionPacketToolDefinition: FateToolDefinition = {
   description:
     "提交本轮 direction packet 并结束结算；每轮唯一收尾动作。\n\n" +
     "使用边界：全部领域工具结算完成后调用；meta/OOC 轮用 needsRender=false + directReply 直接作答。\n" +
-    "禁区：调用前后输出叙事正文、泄露未揭示真名/隐藏宝具名、替代领域工具落账，或把 UI 候选行动写进 suggestedActions 以外的位置。", 
+    "禁区：调用前后输出叙事正文、泄露未揭示真名/隐藏宝具名、替代领域工具落账，或把 UI 候选行动写进 suggestedActions 以外的位置。",
   parameters: Type.Object({
     needsRender: Type.Boolean({
       description: "true=叙事轮（渲染器产出正文）；false=meta/OOC 直答轮",
@@ -134,7 +136,8 @@ export const submitDirectionPacketToolDefinition: FateToolDefinition = {
     ),
     canonFacts: Type.Optional(
       Type.Array(Type.String(), {
-        description: "渲染所需原作事实预填；渲染器没有 lookup，缺位它就会编（叙事轮必填，可为空数组）",
+        description:
+          "渲染所需原作事实预填；渲染器没有 lookup，缺位它就会编（叙事轮必填，可为空数组）",
       }),
     ),
     directReply: Type.Optional(

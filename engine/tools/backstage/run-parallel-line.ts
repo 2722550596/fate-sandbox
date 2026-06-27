@@ -16,14 +16,17 @@ import { buildBackstageDirectorPrompt } from "../../core/backstage/backstage-dir
 import { recordPendingHarvest } from "../../core/backstage/backstage-pending.ts";
 import { spawnBackstageDirector } from "../../core/backstage/backstage-spawn.ts";
 import { type AssembleParallelLineInput } from "../../core/backstage/parallel-line-assembler.ts";
-import { hydrateStateFromSessionManager } from "../../core/utils/session-hydration.ts";
+import { hydrateStateFromSessionManager } from "../../core/state/session-hydration.ts";
 import { getState } from "../../core/state/state-store.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 /** sanitize lineId into a stable run-id suffix for the director session. */
 function backstageRunId(lineId: string): string {
-  const slug = lineId.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const slug = lineId
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
   return `bl-${slug || "line"}`;
 }
 
@@ -114,7 +117,9 @@ function optionalString(value: unknown): string | undefined {
 
 function optionalStringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  return value.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
+  return value.filter(
+    (entry): entry is string => typeof entry === "string" && entry.trim().length > 0,
+  );
 }
 
 function optionalBoolean(value: unknown): boolean | undefined {
@@ -140,19 +145,37 @@ export const runParallelLineToolDefinition: FateToolDefinition = {
       start: Type.String({ description: "ISO UTC 起始时刻" }),
       end: Type.String({ description: "ISO UTC 结束时刻" }),
     }),
-    currentArc: Type.Optional(Type.String({ description: "可选覆盖当前 arc；省略则从 storyWindow 推断" })),
-    currentBeat: Type.Optional(Type.String({ description: "可选覆盖当前 beat；省略则从 storyWindow 推断" })),
-    preferredPressureType: Type.Optional(Type.String({ description: "偏好压力类型；省略则由子代理自选" })),
+    currentArc: Type.Optional(
+      Type.String({ description: "可选覆盖当前 arc；省略则从 storyWindow 推断" }),
+    ),
+    currentBeat: Type.Optional(
+      Type.String({ description: "可选覆盖当前 beat；省略则从 storyWindow 推断" }),
+    ),
+    preferredPressureType: Type.Optional(
+      Type.String({ description: "偏好压力类型；省略则由子代理自选" }),
+    ),
     excludedActorIds: Type.Optional(Type.Array(Type.String(), { description: "硬排除 actor ids" })),
-    excludedPressureTypes: Type.Optional(Type.Array(Type.String(), { description: "硬排除压力类型" })),
+    excludedPressureTypes: Type.Optional(
+      Type.Array(Type.String(), { description: "硬排除压力类型" }),
+    ),
     majorBeatEnd: Type.Optional(Type.Boolean({ description: "本轮是否 beat 结束" })),
     arcTransition: Type.Optional(Type.Boolean({ description: "本轮是否 arc 转换" })),
-    additionalKnownFacts: Type.Optional(Type.Array(Type.String(), { description: "追加 knownFacts" })),
-    additionalPrivateFacts: Type.Optional(Type.Array(Type.String(), { description: "追加 privateFacts" })),
+    additionalKnownFacts: Type.Optional(
+      Type.Array(Type.String(), { description: "追加 knownFacts" }),
+    ),
+    additionalPrivateFacts: Type.Optional(
+      Type.Array(Type.String(), { description: "追加 privateFacts" }),
+    ),
     allowedScope: Type.Optional(Type.Array(Type.String(), { description: "允许范围" })),
-    forbiddenEscalations: Type.Optional(Type.Array(Type.String(), { description: "追加禁区（叠加 storyWindow）" })),
-    previousLineState: Type.Optional(Type.String({ description: "覆盖 engine 自动拼的上一次线状态" })),
-    playerSideSummary: Type.Optional(Type.String({ description: "覆盖 engine 自动拼的玩家侧摘要" })),
+    forbiddenEscalations: Type.Optional(
+      Type.Array(Type.String(), { description: "追加禁区（叠加 storyWindow）" }),
+    ),
+    previousLineState: Type.Optional(
+      Type.String({ description: "覆盖 engine 自动拼的上一次线状态" }),
+    ),
+    playerSideSummary: Type.Optional(
+      Type.String({ description: "覆盖 engine 自动拼的玩家侧摘要" }),
+    ),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     runParallelLineTool(params, ctx.sessionManager),

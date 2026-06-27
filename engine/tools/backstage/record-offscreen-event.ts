@@ -1,17 +1,17 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
+
+import { Type } from "typebox";
 
 import {
   resetBackstagePressure,
   settleOldestBackstageObligation,
 } from "../../core/backstage/backstage-obligation.ts";
 import { clearPendingHarvestByLine } from "../../core/backstage/backstage-pending.ts";
-import { recordOffscreenEvent } from "../../core/utils/offscreen-event.ts";
-import { parseRecordOffscreenEventInput } from "../../core/utils/offscreen-event-schema.ts";
-
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { parseRecordOffscreenEventInput } from "../../core/offscreen-event-schema.ts";
+import { recordOffscreenEvent } from "../../core/offscreen-event.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 export function recordOffscreenEventTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
@@ -69,7 +69,10 @@ export const recordOffscreenEventToolDefinition: FateToolDefinition = {
         "canonical 后台压力类型，取自 run_parallel_line 返回的 activePressurePalette 里某个 slot 的 pressureType（如 beyonder-activity / church-supervision）",
     }),
     pressureSlotId: Type.Optional(
-      Type.String({ description: "可选：对应 pressure palette slot 的 id（如 nighthawk-patrol / machinery-heart-investigation）" }),
+      Type.String({
+        description:
+          "可选：对应 pressure palette slot 的 id（如 nighthawk-patrol / machinery-heart-investigation）",
+      }),
     ),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>

@@ -1,13 +1,13 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
 import type { MemoryEvent, MemoryEventResult } from "../../core/memory/memory.ts";
+import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { recordMemory } from "../../core/memory/memory.ts";
-import { parseMemoryEvent } from "../../core/memory/memory-schema.ts";
+import { Type } from "typebox";
 
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { parseMemoryEvent } from "../../core/memory/memory-schema.ts";
+import { recordMemory } from "../../core/memory/memory.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 export function recordMemoryTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
@@ -29,6 +29,8 @@ function formatResult(params: MemoryEvent, result: MemoryEventResult): string {
       return `重大事件已记录：${result.eventId ?? "?"}\n- ${params.title}: ${params.summary}`;
     case "record-daily-summary":
       return `日常摘要已记录：${result.dailySummaryId ?? "?"}\n- ${params.summary}`;
+    default:
+      return "未知记忆事件类型。";
   }
 }
 

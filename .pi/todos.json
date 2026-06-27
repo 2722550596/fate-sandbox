@@ -1,5 +1,5 @@
 {
-  "nextId": 14,
+  "nextId": 16,
   "items": [
     {
       "id": 1,
@@ -42,6 +42,20 @@
       "content": "Fix remaining test files, all 4 checks pass (M7)",
       "done": false,
       "created": 1782500199
+    },
+    {
+      "id": 14,
+      "content": "修复所有文件移动后未更新的导入路径",
+      "done": true,
+      "created": 1782543892,
+      "tag": "导入路径修复"
+    },
+    {
+      "id": 15,
+      "content": "同步 ConditionState / InventoryState / ProtagonistActorState 等 schema 变更",
+      "done": true,
+      "created": 1782543892,
+      "tag": "Schema 同步"
     }
   ]
 }

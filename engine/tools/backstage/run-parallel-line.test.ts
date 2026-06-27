@@ -6,7 +6,6 @@ import {
   type BackstageDirectorHandle,
 } from "../../core/backstage/backstage-spawn.ts";
 import { getState, resetState } from "../../core/state/state-store.ts";
-
 import { runParallelLineTool } from "./run-parallel-line.ts";
 
 /** Capture the engine-direct spawn without launching a real `pi` process. */
@@ -14,7 +13,12 @@ function captureSpawn(): { calls: Array<{ prompt: string; runId: string }> } {
   const calls: Array<{ prompt: string; runId: string }> = [];
   setBackstageDirectorSpawnerForTest((prompt, runId): BackstageDirectorHandle => {
     calls.push({ prompt, runId });
-    return { runId, pid: 4242, model: "deepseek-v4-pro", sessionDir: ".pi/agent/backstage-sessions" };
+    return {
+      runId,
+      pid: 4242,
+      model: "deepseek-v4-pro",
+      sessionDir: ".pi/agent/backstage-sessions",
+    };
   });
   return { calls };
 }

@@ -12,11 +12,13 @@
 
 import type { State } from "../../core/state/state.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
-import { runDomainEventTool } from "./domain-tool-runner.ts";
-import type { ToolResult } from "../runtime/tool-result.ts";
-import { settleOldestObligation } from "../../core/utils/obligations.ts";
+
+import { settleOldestObligation } from "../../core/obligations.ts";
+import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 // ===========================================================================
 // 类型
@@ -33,7 +35,7 @@ export interface UpdateCorruptionResult {
   before: number;
   after: number;
   delta: number;
-  capped: boolean;       // 是否被 0-100 边界钳制
+  capped: boolean; // 是否被 0-100 边界钳制
   outOfControl: boolean; // 是否因此次变更达到 100
 }
 
@@ -51,10 +53,10 @@ export function updateCorruptionTool(params: unknown, sessionManager: unknown): 
 }
 
 function executeUpdateCorruption(draft: State, params: unknown): UpdateCorruptionResult {
-  const raw = params as Record<string, unknown>;
-  const actorId = String(raw["actorId"] ?? "");
+  const raw = isRecord(params) ? params : {};
+  const actorId = typeof raw["actorId"] === "string" ? raw["actorId"] : "";
   const delta = Number(raw["delta"]);
-  const reason = String(raw["reason"] ?? "");
+  const reason = typeof raw["reason"] === "string" ? raw["reason"] : "";
 
   if (!actorId) throw new Error("update_corruption: 缺少 actorId。");
   if (!Number.isFinite(delta) || delta === 0) {

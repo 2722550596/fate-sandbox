@@ -1,6 +1,6 @@
+import type { BackstageResolutionInput } from "../../core/backstage/backstage-obligation.ts";
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
-import type { BackstageResolutionInput } from "../../core/backstage/backstage-obligation.ts";
 
 import { Type } from "typebox";
 
@@ -8,8 +8,7 @@ import { settleOldestBackstageObligation } from "../../core/backstage/backstage-
 import { assertNoUnharvestedPending } from "../../core/backstage/backstage-pending.ts";
 import { assertOneOfString } from "../../core/utils/string-enum.ts";
 import { assertNonEmptyString, isRecord } from "../../core/utils/typebox-validation.ts";
-
-import { runDomainEventTool } from "./domain-tool-runner.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 const RESOLUTION_OUTCOMES = ["no-change", "blocked"] as const;
 const RESOLUTION_REASON_CODES = [
@@ -46,9 +45,14 @@ function parseInput(params: unknown): BackstageResolutionInput {
   const outcome = assertOneOfString(params["outcome"], RESOLUTION_OUTCOMES, "outcome", {
     style: "must-be",
   });
-  const reasonCode = assertOneOfString(params["reasonCode"], RESOLUTION_REASON_CODES, "reasonCode", {
-    style: "must-be",
-  });
+  const reasonCode = assertOneOfString(
+    params["reasonCode"],
+    RESOLUTION_REASON_CODES,
+    "reasonCode",
+    {
+      style: "must-be",
+    },
+  );
   const note = assertNonEmptyString(params["note"], "note");
   return { outcome, reasonCode, note };
 }

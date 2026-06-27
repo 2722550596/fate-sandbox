@@ -1,11 +1,11 @@
 import type { FateToolDefinition } from "../runtime/tool-definition.ts";
-import { Type } from "typebox";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
-import { setScenePresence } from "../../core/actor/actor.ts";
-import { parseScenePresenceInput } from "../../core/actor/actor-schema.ts";
+import { Type } from "typebox";
 
-import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
+import { parseScenePresenceInput } from "../../core/actor/actor-schema.ts";
+import { setScenePresence } from "../../core/actor/actor.ts";
+import { resultDetails, runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 export function setScenePresenceTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
