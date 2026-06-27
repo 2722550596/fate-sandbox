@@ -110,6 +110,12 @@ const CHARACTER_STATS_SCHEMA = Type.Object({
   current: STATS_VALUES_SCHEMA,
 });
 
+const TAG_ENTRY_SCHEMA = Type.Object({
+  name: NON_EMPTY_STRING_SCHEMA,
+  duration: Type.Integer({ minimum: 0 }),
+  stacks: Type.Integer({ minimum: 1 }),
+});
+
 const SEQUENCE_STATE_SCHEMA = Type.Object({
   currentSequence: NON_EMPTY_STRING_SCHEMA,
   rank: SEQUENCE_RANK_SCHEMA,
@@ -118,6 +124,7 @@ const SEQUENCE_STATE_SCHEMA = Type.Object({
   divinity: Type.Number({ minimum: 0 }),
   digestionProgress: Type.Integer({ minimum: 0, maximum: 100 }),
   lossOfControlProgress: Type.Integer({ minimum: 0, maximum: 100 }),
+  tags: Type.Array(TAG_ENTRY_SCHEMA),
 });
 
 // ---------------------------------------------------------------------------

@@ -8,6 +8,7 @@ import { assertInteger, formatUnknown, isRecord } from "../utils/typebox-validat
  *
  * 迁移历史：
  *   v1 → v2: 添加 actor.stats 字段（初始为 null）
+ *   v2 → v3: 给所有 actor.sequence 添加 tags: [] 字段
  */
 export function migrateRawGameState(raw: Record<string, unknown>): Record<string, unknown> {
   let current = structuredClone(raw);
@@ -27,6 +28,8 @@ function migrateOneSchemaVersion(
   switch (version) {
     case 1:
       return migrateV1ToV2(raw);
+    case 2:
+      return migrateV2ToV3(raw);
     default:
       throw new Error(
         `不支持的 state schemaVersion: ${version}。当前支持版本 ${CURRENT_STATE_SCHEMA_VERSION}。`,
@@ -52,7 +55,32 @@ function migrateV1ToV2(raw: Record<string, unknown>): Record<string, unknown> {
   }
 
   updated["public"] = { ...publicState, actors: updatedActors };
-  // meta.schemaVersion 由调用方在 migration 后统一更新
+  return updated;
+}
+
+/**
+ * v2 → v3: 给所有 actor.sequence 添加 tags: [] 字段。
+ */
+function migrateV2ToV3(raw: Record<string, unknown>): Record<string, unknown> {
+  const updated = { ...raw };
+  const publicState = assertRecordForMigration(updated["public"], "public");
+  const actors = assertRecordForMigration(publicState["actors"], "public.actors");
+
+  const updatedActors: Record<string, unknown> = {};
+  for (const [actorId, actor] of Object.entries(actors)) {
+    if (!isRecord(actor)) {
+      updatedActors[actorId] = actor;
+      continue;
+    }
+    const sequence = actor["sequence"];
+    if (isRecord(sequence) && sequence["tags"] === undefined) {
+      updatedActors[actorId] = { ...actor, sequence: { ...sequence, tags: [] } };
+    } else {
+      updatedActors[actorId] = actor;
+    }
+  }
+
+  updated["public"] = { ...publicState, actors: updatedActors };
   return updated;
 }
 

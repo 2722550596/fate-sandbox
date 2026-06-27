@@ -67,7 +67,14 @@ export function executeCombatAction(input: CombatActionInput): CombatActionResul
 
   // 计算消耗扣减明细
   const costDeductions: CostDeduction[] = [];
-  for (const attrKey of ["vitality", "agility", "spirituality", "sanity", "humanity", "luck"] as const) {
+  for (const attrKey of [
+    "vitality",
+    "agility",
+    "spirituality",
+    "sanity",
+    "humanity",
+    "luck",
+  ] as const) {
     const diff = attacker.stats[attrKey] - costDeduction.newStats[attrKey];
     if (diff > 0) {
       costDeductions.push({ attribute: attrKey, deductedAmount: diff });
@@ -76,7 +83,13 @@ export function executeCombatAction(input: CombatActionInput): CombatActionResul
 
   // 4. 判断是否治疗
   if (effectiveSkill.isHeal) {
-    return executeHeal(updatedAttacker, defender, effectiveSkill, costDeduction.message, costDeductions);
+    return executeHeal(
+      updatedAttacker,
+      defender,
+      effectiveSkill,
+      costDeduction.message,
+      costDeductions,
+    );
   }
 
   // 5. 计算伤害
@@ -89,7 +102,6 @@ export function executeCombatAction(input: CombatActionInput): CombatActionResul
     updatedAttacker,
   );
   const uniqueEffects = dedupeEffects(newDefenderEffects);
-
 
   const details = [damageResult.formula, costDeduction.message, ...effectLogs].join(" | ");
 

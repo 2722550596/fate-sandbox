@@ -43,6 +43,7 @@ describe("upsertActor LOTM", () => {
           divinity: 1,
           digestionProgress: 0,
           lossOfControlProgress: 0,
+          tags: [],
         },
         stats: null,
         identity: { publicIdentity: "玩家", background: "非凡者", lockedFacts: [] },

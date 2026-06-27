@@ -11,9 +11,10 @@ import type {
   SequenceRank,
   State,
   StatsValues,
+  TagEntry,
 } from "../state/state.ts";
 
-import { sequenceBaseline, getSequenceWeights } from "../../config/index.ts";
+import { sequenceBaseline, getSequenceWeights, sequenceTagsMapping } from "../../config/index.ts";
 import { setScenePresence, upsertActor } from "../actor/actor.ts";
 import { configureCampaign } from "../campaign/campaign.ts";
 import { sequenceRankToIndex } from "../combat/sequence-utils.ts";
@@ -190,6 +191,7 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
       divinity: input.divinity ?? 1,
       digestionProgress: input.digestionProgress ?? 0,
       lossOfControlProgress: input.lossOfControlProgress ?? 0,
+      tags: resolveSequenceTags(input.currentSequence),
     },
     stats,
     identity: {
@@ -242,6 +244,16 @@ function computeBaseStats(sequenceName: string, rank: SequenceRank): CharacterSt
 
   const values: StatsValues = { vitality, agility, spirituality, sanity, humanity, luck };
   return { base: values, max: values, current: values };
+}
+
+/**
+ * 从序列名解析标签列表。
+ * 从 sequenceTagsMapping 读取序列的标签配置，初始化 stacks=1。
+ */
+function resolveSequenceTags(sequenceName: string): TagEntry[] {
+  const def = sequenceTagsMapping[sequenceName];
+  if (!def) return [];
+  return def.tags.map((name) => ({ name, duration: def.duration, stacks: 1 }));
 }
 
 function assertNewGameInitialized(state: State, input: NewGameInitializationInput): void {

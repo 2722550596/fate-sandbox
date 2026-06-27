@@ -415,6 +415,12 @@ export interface StatusEffectState {
 // Sequence — LOTM 序列/途径状态
 // ---------------------------------------------------------------------------
 
+export interface TagEntry {
+  name: string;
+  duration: number;
+  stacks: number;
+}
+
 export interface SequenceState {
   currentSequence: string;
   rank: SequenceRank;
@@ -423,6 +429,7 @@ export interface SequenceState {
   divinity: number;
   digestionProgress: number;
   lossOfControlProgress: number;
+  tags: TagEntry[];
 }
 
 // ---------------------------------------------------------------------------
@@ -623,4 +630,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 2;
+export const CURRENT_STATE_SCHEMA_VERSION = 3;

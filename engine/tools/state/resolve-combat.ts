@@ -240,6 +240,8 @@ function buildSnapshot(actor: PublicActorState, _actorId: string): CombatantSnap
       priority: 0,
     }));
 
+  const tags = sequence?.tags ?? [];
+
   return {
     id: actor.id,
     name: actor.presentation.renderName,
@@ -254,7 +256,7 @@ function buildSnapshot(actor: PublicActorState, _actorId: string): CombatantSnap
     },
     divinity,
     effects,
-    tags: [],
+    tags,
   };
 }
 

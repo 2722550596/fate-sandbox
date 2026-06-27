@@ -43,6 +43,14 @@ export type SequenceBaseline = Record<string, number>;
 /** 序列权重：序列名 → 六维权重 [活力, 敏捷, 灵性, 理智, 人性, 运气] */
 export type SequenceWeights = Record<string, [number, number, number, number, number, number]>;
 
+/** 序列标签映射：序列名 → 标签定义 */
+export interface SequenceTagDef {
+  tags: string[];
+  duration: number;
+}
+
+export type SequenceTagsMapping = Record<string, SequenceTagDef>;
+
 // ===========================================================================
 // 配置导出（英文名）
 // ===========================================================================
@@ -61,6 +69,9 @@ export const tagHealingModifiers = loadConfig<TagRelations>("标签治疗修正.
 
 /** 序列权重：序列名 → 六维权重（已展开为每个序列名直接对应权重数组） */
 export const sequenceWeights = loadConfig<SequenceWeights>("序列权重.json");
+
+/** 序列标签映射：序列名 → 该序列的标签列表 */
+export const sequenceTagsMapping = loadConfig<SequenceTagsMapping>("标签映射.json");
 
 // ===========================================================================
 // 辅助函数

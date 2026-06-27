@@ -1,4 +1,5 @@
 import type { ActorId, PublicActorState, PublicGameState, State } from "../state/state.ts";
+import type { TagEntry } from "../state/state.ts";
 import type {
   ActorRegistryInput,
   PublicNpcInput,
@@ -7,6 +8,7 @@ import type {
   ScenePresenceInput,
 } from "./actor-schema.ts";
 
+import { sequenceTagsMapping } from "../../config/index.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 import { deleteSecretActorState } from "./secret-actor-state.ts";
 
@@ -113,6 +115,7 @@ function upsertSequence(
     divinity: seq.divinity,
     digestionProgress: seq.digestionProgress,
     lossOfControlProgress: seq.lossOfControlProgress,
+    tags: resolveSequenceTagsForActor(seq.currentSequence),
   };
 
   return {
@@ -151,6 +154,12 @@ export function removeActorEverywhere(draft: State, actorId: ActorId): void {
   draft.secrets.relationshipSignals = draft.secrets.relationshipSignals.filter(
     (signal) => signal.actorId !== actorId && signal.targetActorId !== actorId,
   );
+}
+
+function resolveSequenceTagsForActor(sequenceName: string): TagEntry[] {
+  const def = sequenceTagsMapping[sequenceName];
+  if (!def) return [];
+  return def.tags.map((name) => ({ name, duration: def.duration, stacks: 1 }));
 }
 
 function assertActorHasNoBlockingReferences(publicState: PublicGameState, actorId: ActorId): void {
