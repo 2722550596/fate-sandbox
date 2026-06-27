@@ -8,7 +8,7 @@ import { setScenePresenceToolDefinition } from "./actor/set-scene-presence.ts";
 import { updateActorAgendaToolDefinition } from "./actor/update-actor-agenda.ts";
 import { updateActorConditionToolDefinition } from "./actor/update-actor-condition.ts";
 import { updateActorImpressionToolDefinition } from "./actor/update-actor-impression.ts";
-import { updateTrackedItemToolDefinition } from "./inventory/update-tracked-item.ts";
+import { updateActorOutfitToolDefinition } from "./actor/update-actor-outfit.ts";
 import { upsertActorToolDefinition } from "./actor/upsert-actor.ts";
 import { harvestBackstageCandidateToolDefinition } from "./backstage/harvest-backstage-candidate.ts";
 import { manageFactionClockToolDefinition } from "./backstage/manage-faction-clock.ts";
@@ -19,6 +19,7 @@ import { getStateSchemaToolDefinition } from "./debug/get-state-schema.ts";
 import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact.ts";
 import { resetStateToolDefinition } from "./debug/reset-state.ts";
 import { updateEconomyToolDefinition } from "./economy/update-economy.ts";
+import { updateTrackedItemToolDefinition } from "./inventory/update-tracked-item.ts";
 import { addHiddenWorldFactToolDefinition } from "./knowledge/add-hidden-world-fact.ts";
 import { recallMemoryToolDefinition } from "./knowledge/recall-memory.ts";
 import { recordMemoryToolDefinition } from "./knowledge/record-memory.ts";
@@ -54,6 +55,7 @@ const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
   updateActorImpressionToolDefinition,
   updateActorConditionToolDefinition,
   updateTrackedItemToolDefinition,
+  updateActorOutfitToolDefinition,
   addHiddenWorldFactToolDefinition,
   setScenePresenceToolDefinition,
   upsertActorToolDefinition,

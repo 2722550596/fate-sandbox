@@ -1,5 +1,5 @@
 {
-  "nextId": 25,
+  "nextId": 35,
   "items": [
     {
       "id": 1,
@@ -113,6 +113,66 @@
       "content": "Run typecheck && lint && format:check && test",
       "done": true,
       "created": 1782592397
+    },
+    {
+      "id": 25,
+      "content": "Write lotm-rank.test.ts",
+      "done": false,
+      "created": 1782601923
+    },
+    {
+      "id": 26,
+      "content": "Remove change-outfit from actor-condition-schema.ts (kind list, schema, union, validator)",
+      "done": true,
+      "created": 1782602487
+    },
+    {
+      "id": 27,
+      "content": "Remove change-outfit handler from actor-condition.ts (import + switch case)",
+      "done": true,
+      "created": 1782602487
+    },
+    {
+      "id": 28,
+      "content": "Remove outfit alias rerouting from actor-condition-normalizer.ts",
+      "done": true,
+      "created": 1782602487
+    },
+    {
+      "id": 29,
+      "content": "Clean outfit params from update-actor-condition.ts tool definition",
+      "done": true,
+      "created": 1782602487
+    },
+    {
+      "id": 30,
+      "content": "Create new update-actor-outfit.ts tool in tools/actor/",
+      "done": true,
+      "created": 1782602487
+    },
+    {
+      "id": 31,
+      "content": "Register new tool in tools/registry.ts",
+      "done": true,
+      "created": 1782602487
+    },
+    {
+      "id": 32,
+      "content": "Add changeActorOutfit test to actor-impression.test.ts",
+      "done": true,
+      "created": 1782602487
+    },
+    {
+      "id": 33,
+      "content": "Update context.md documentation",
+      "done": true,
+      "created": 1782602487
+    },
+    {
+      "id": 34,
+      "content": "Final: typecheck + lint + format + test",
+      "done": true,
+      "created": 1782602487
     }
   ]
 }

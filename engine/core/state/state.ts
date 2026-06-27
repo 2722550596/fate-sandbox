@@ -476,6 +476,7 @@ export interface TrackedItemState {
   condition: TrackedItemCondition;
   visibility: TrackedItemVisibility;
   notes: string[];
+  sequenceRank?: SequenceRank;
 }
 
 // ---------------------------------------------------------------------------

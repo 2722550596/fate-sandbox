@@ -4,7 +4,6 @@ import type { ActorConditionEvent } from "./actor-condition-schema.ts";
 import { settleOldestObligation } from "../ledger/obligations.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
-import { changeActorOutfit } from "./actor-impression.ts";
 
 export type { ActorConditionEvent } from "./actor-condition-schema.ts";
 
@@ -32,8 +31,6 @@ function applyActorConditionEvent(
       return resolveCondition(draft, event);
     case "update-wound":
       return updateWound(draft, event);
-    case "change-outfit":
-      return changeActorOutfit(draft, event.actorId, event.outfit, event.reason);
     default:
       throw new Error("unreachable actor condition event kind");
   }

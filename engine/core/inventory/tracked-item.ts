@@ -1,4 +1,5 @@
 import type {
+  SequenceRank,
   TrackedItemCondition,
   TrackedItemKind,
   TrackedItemVisibility,
@@ -40,6 +41,7 @@ export function updateTrackedItem(
     holderActorId?: string | null | undefined;
     ownerActorId?: string | null | undefined;
     condition?: TrackedItemCondition | undefined;
+    sequenceRank?: SequenceRank | undefined;
     notes?: string[] | undefined;
     reason: string;
   },
@@ -67,6 +69,9 @@ export function updateTrackedItem(
   if (event.condition !== undefined) {
     item.condition = event.condition;
   }
+  if (event.sequenceRank !== undefined) {
+    item.sequenceRank = event.sequenceRank;
+  }
   if (event.notes !== undefined) {
     item.notes = event.notes;
   }
@@ -82,6 +87,7 @@ export function addTrackedItem(
     ownerActorId: string | null;
     condition: TrackedItemCondition;
     visibility: TrackedItemVisibility;
+    sequenceRank?: SequenceRank;
     notes: string[];
     reason: string;
   },
@@ -106,6 +112,7 @@ export function addTrackedItem(
     location: null,
     condition: event.condition,
     visibility: event.visibility,
+    sequenceRank: event.sequenceRank,
     notes: event.notes,
   };
   return { message: "重要物品已记录到追踪列表。" };

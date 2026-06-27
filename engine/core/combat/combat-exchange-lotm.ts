@@ -10,22 +10,22 @@
 // 但适配 LOTM 的序列等级/途径设定。
 // ---------------------------------------------------------------------------
 
-import type { FateToolDefinition } from "../tools/runtime/tool-definition.ts";
-import type { ToolResult } from "../tools/runtime/tool-result.ts";
+import type { FateToolDefinition } from "../../tools/runtime/tool-definition.ts";
+import type { ToolResult } from "../../tools/runtime/tool-result.ts";
+import type { SequenceRank } from "../state/state-enum-schemas.ts";
+import type { State } from "../state/state.ts";
 import type { LOTMRankComparison } from "./lotm-rank.ts";
-import type { SequenceRank } from "./state/state-enum-schemas.ts";
-import type { State } from "./state/state.ts";
 
 import { Type } from "typebox";
 
-import { noNumberNarrativeHint } from "../tools/runtime/narrative-hints.ts";
-import { runDomainEventTool } from "../tools/system/domain-tool-runner.ts";
+import { noNumberNarrativeHint } from "../../tools/runtime/narrative-hints.ts";
+import { runDomainEventTool } from "../../tools/system/domain-tool-runner.ts";
+import { recordObligation } from "../ledger/obligations.ts";
+import { SEQUENCE_RANKS } from "../state/state-enum-schemas.ts";
+import { seededRandomInt } from "../utils/seeded-rng.ts";
+import { assertOneOfString, assertOptionalOneOfString } from "../utils/string-enum.ts";
+import { isRecord } from "../utils/typebox-validation.ts";
 import { compareLOTMRanks } from "./lotm-rank.ts";
-import { recordObligation } from "./ledger/obligations.ts";
-import { SEQUENCE_RANKS } from "./state/state-enum-schemas.ts";
-import { seededRandomInt } from "./utils/seeded-rng.ts";
-import { assertOneOfString, assertOptionalOneOfString } from "./utils/string-enum.ts";
-import { isRecord } from "./utils/typebox-validation.ts";
 
 // ===========================================================================
 // 类型定义
@@ -73,16 +73,18 @@ export type LOTMSwing =
 export interface LOTMCombatExchangeInput {
   actorId: string;
   opponentId: string;
-  intent: string; // 当前动作意图，如"掩护队友撤退"
+  intent: string;
   tactic: LOTMTactic;
-  actorRank: SequenceRank; // 攻击方序列等级
-  opponentRank: SequenceRank; // 防御方序列等级
-  actorEquipmentRank?: SequenceRank; // 攻击方装备等级（可选）
-  opponentEquipmentRank?: SequenceRank; // 防御方装备等级（可选）
-  targetObjective?: string; // 当前场景目标
-  committedResources: string[]; // 已投入资源/手段
-  knownAdvantages: string[]; // 已知有利因素
-  knownDisadvantages: string[]; // 已知不利因素
+  actorRank: SequenceRank;
+  opponentRank: SequenceRank;
+  actorEquipmentRank?: SequenceRank;
+  opponentEquipmentRank?: SequenceRank;
+  actorEquipmentItemId?: string;
+  opponentEquipmentItemId?: string;
+  targetObjective?: string;
+  committedResources: string[];
+  knownAdvantages: string[];
+  knownDisadvantages: string[];
   riskTolerance: LOTMRiskTolerance;
   swing?: LOTMSwing;
 }
@@ -133,10 +135,10 @@ export function resolveLOTMCombatExchange(
   const stateLandings = buildLOTMStateLandings(input, outcome, combinedDelta);
 
   // 5. 构建后果引导、叙事约束、禁止写法
-  const consequenceGuidance = buildLOTMConsequenceGuidance(outcome, input.swing);
+  const consequenceGuidance = buildLOTMConsequenceGuidance(outcome, combinedDelta, input.swing);
   const narrativeConstraints = buildLOTMNarrativeConstraints(input, outcome, combinedDelta);
-  const forbiddenNarration = buildLOTMForbiddenNarration(outcome);
-  const nextActionWindow = buildLOTMNextActionWindow(input, outcome);
+  const forbiddenNarration = buildLOTMForbiddenNarration(outcome, combinedDelta);
+  const nextActionWindow = buildLOTMNextActionWindow(input, outcome, combinedDelta);
 
   return {
     actorId: input.actorId,
@@ -204,6 +206,35 @@ function buildLOTMStateLandings(
   outcome: LOTMOutcomeBand,
   combinedDelta: number,
 ): LOTMStateLanding[] {
+  // 秒杀级差距：低位方没有任何对抗余地，必须强制逃跑
+  if (Math.abs(combinedDelta) >= 4) {
+    const actorIsWeaker = combinedDelta < 0;
+    const weakerAction = actorIsWeaker ? `${input.tactic}——在本方视野内完全无效` : input.intent;
+    return [
+      {
+        kind: "scene-objective",
+        required: true,
+        reason: actorIsWeaker
+          ? `${weakerAction}；低位方没有任何对抗余地，必须立刻逃跑/撤退/回避，否则瞬间被秒杀。`
+          : `${input.intent}完成秒杀级压制；对方只能逃跑/撤退/回避，否则被彻底制服。`,
+      },
+      {
+        kind: "actor-condition",
+        required: false,
+        reason: actorIsWeaker
+          ? "若低位方选择硬扛不逃，应记录伤势、灵感消耗或失控值提升。"
+          : "高位方不需要付出代价；若低位方被直接击中，可记录其伤势。",
+      },
+      {
+        kind: "scene-threat",
+        required: false,
+        reason: actorIsWeaker
+          ? "若低位方成功逃跑，威胁转移到外部环境、追兵或暴露风险。"
+          : "若高位方选择追击，威胁保持不变；若就地处置目标，威胁消散。",
+      },
+    ];
+  }
+
   const landings: LOTMStateLanding[] = [
     {
       kind: "scene-objective",
@@ -281,9 +312,17 @@ function requiresCost(outcome: LOTMOutcomeBand, riskTolerance: LOTMRiskTolerance
 
 function buildLOTMConsequenceGuidance(
   outcome: LOTMOutcomeBand,
+  combinedDelta: number,
   swing: LOTMSwing | undefined,
 ): string[] {
   const guidance: string[] = [];
+
+  if (Math.abs(combinedDelta) >= 4) {
+    guidance.push("规格外差距：低位方没有任何对抗余地，必须逃跑/撤退/回避，否则瞬间被秒杀。");
+    guidance.push("高位方的战果应是驱逐、擒获或彻底压制，不需要付出实质性代价。");
+    return guidance;
+  }
+
   switch (outcome) {
     case "clean-advantage":
       guidance.push("给出明确战果：位置、火线、阵型、距离或目标进度至少改变一项。");
@@ -323,38 +362,49 @@ function buildLOTMNarrativeConstraints(
     "骰子或气氛不能覆盖序列等级压制、Locked Facts、身份/能力信息安全与已记录伤势。",
   ];
 
-  if (combinedDelta >= 2) {
+  if (Math.abs(combinedDelta) >= 4) {
     constraints.push(
-      "两级以上序列等级压制默认成立；低位方只能靠相性、环境、情报、牺牲资源或改换目标争取局部窗口。",
+      "规格外差距：低位方的任何直接对抗尝试都无意义，必须强制逃跑/撤退/回避，否则瞬间被秒杀。",
     );
-  }
+    constraints.push("高位方的胜利应是驱逐、擒获或完全压制，不需要付出实质性代价。");
+    constraints.push("如果低位方不能/不愿逃跑，高位方可以直接终结战斗或取得绝对控制权。");
+  } else {
+    if (combinedDelta >= 2) {
+      constraints.push(
+        "序列层级压制默认成立；低位方只能靠相性、环境、情报、牺牲资源或改换目标争取局部窗口。",
+      );
+    }
 
-  if (combinedDelta >= 1) {
-    constraints.push("一级序列等级优势明显；低位方需要更聪明的战术或意外因素来弥补差距。");
-  }
+    if (combinedDelta >= 1) {
+      constraints.push("序列等级优势明显；低位方需要更聪明的战术或意外因素来弥补差距。");
+    }
 
-  if (input.riskTolerance === "high" || input.riskTolerance === "desperate") {
-    constraints.push(
-      "高风险投入必须留下代价，但代价可落在灵感、失控值、暴露、位置或敌方下一手；不要每次都写伤势或停手。",
-    );
-  }
+    if (input.riskTolerance === "high" || input.riskTolerance === "desperate") {
+      constraints.push(
+        "高风险投入必须留下代价，但代价可落在灵感、失控值、暴露、位置或敌方下一手；不要每次都写伤势或停手。",
+      );
+    }
 
-  if (outcome === "overwhelmed") {
-    constraints.push(
-      "被压制方不得正面赢下交换；只能保住局部目标、被迫退让、付出代价或等待新资源介入。",
-    );
+    if (outcome === "overwhelmed") {
+      constraints.push(
+        "被压制方不得正面赢下交换；只能保住局部目标、被迫退让、付出代价或等待新资源介入。",
+      );
+    }
   }
 
   return constraints;
 }
 
-function buildLOTMForbiddenNarration(outcome: LOTMOutcomeBand): string[] {
+function buildLOTMForbiddenNarration(outcome: LOTMOutcomeBand, combinedDelta: number): string[] {
   const forbidden = [
     "禁止输出 HP、伤害数字、DC、score 或内部字段。",
     "禁止把未揭示的身份、能力、弱点或幕后判断直接写进玩家视角。",
     "禁止把无资源投入的高风险行动写成免费成功。",
   ];
-  if (outcome === "overwhelmed") {
+  if (Math.abs(combinedDelta) >= 4) {
+    forbidden.push("禁止低位方靠决心、气势、能力或任何手段正面对抗——只能逃跑/撤退/回避。");
+    forbidden.push("禁止把高位方的秒杀写成「险胜」或「惨胜」——差距是绝对的。");
+  } else if (outcome === "overwhelmed") {
     forbidden.push("禁止让被压制方靠决心、气势或一句台词正面反杀。");
   }
   return forbidden;
@@ -363,7 +413,12 @@ function buildLOTMForbiddenNarration(outcome: LOTMOutcomeBand): string[] {
 function buildLOTMNextActionWindow(
   input: LOTMCombatExchangeInput,
   outcome: LOTMOutcomeBand,
+  combinedDelta: number,
 ): string {
+  if (Math.abs(combinedDelta) >= 4) {
+    const weakerSide = combinedDelta > 0 ? "对方" : "本方";
+    return `规格外等级差：${weakerSide} 已没有任何对抗余地，必须立刻逃跑/撤退/回避，否则下一瞬即被秒杀。`;
+  }
   switch (outcome) {
     case "clean-advantage":
       return `「${input.intent}」取得局部主动；推进到追击、撤离、逼问、保护目标或扩大战果的选择点。`;
@@ -407,6 +462,8 @@ export const resolveLOTMCombatExchangeToolDefinition: FateToolDefinition = {
   description:
     "LOTM 战斗交换裁决。比较双方序列等级、装备等级和上下文因素，输出叙事约束和状态落点。\n\n" +
     "使用边界：一次明确的战斗交锋对抗。\n" +
+    "序列等级可自动从 actor 的 sequence.rank 兜底（不传则尝试自动解析）。\n" +
+    "装备等级可传 trackedItem id 自动解析物品的 sequenceRank。\n" +
     "禁区：一次结算完整战斗；输出 HP 或内部数值；把 outcome 当成自动状态变更。",
   parameters: Type.Object({
     actorId: Type.String({ description: "本方 actor id" }),
@@ -416,10 +473,26 @@ export const resolveLOTMCombatExchangeToolDefinition: FateToolDefinition = {
       description:
         "direct-attack / defense / escape / protect / probe / break-restraint / use-ability / support",
     }),
-    actorRank: Type.String({ description: "本方序列等级（如 seq-9, seq-5, seq-0, pillar）" }),
-    opponentRank: Type.String({ description: "对手序列等级" }),
-    actorEquipmentRank: Type.Optional(Type.String({ description: "本方装备等级（可选）" })),
-    opponentEquipmentRank: Type.Optional(Type.String({ description: "对手装备等级（可选）" })),
+    actorRank: Type.Optional(
+      Type.String({
+        description: "本方序列等级（不传则从 actor 自动解析；如 seq-9, seq-0, pillar）",
+      }),
+    ),
+    opponentRank: Type.Optional(
+      Type.String({ description: "对手序列等级（不传则从 actor 自动解析）" }),
+    ),
+    actorEquipmentRank: Type.Optional(
+      Type.String({ description: "本方装备等级（可选，与 itemId 二选一）" }),
+    ),
+    opponentEquipmentRank: Type.Optional(
+      Type.String({ description: "对手装备等级（可选，与 itemId 二选一）" }),
+    ),
+    actorEquipmentItemId: Type.Optional(
+      Type.String({ description: "本方装备的 trackedItem id（自动解析 rank，可选）" }),
+    ),
+    opponentEquipmentItemId: Type.Optional(
+      Type.String({ description: "对手装备的 trackedItem id（自动解析 rank，可选）" }),
+    ),
     targetObjective: Type.Optional(Type.String({ description: "当前场景目标" })),
     committedResources: Type.Optional(
       Type.Array(Type.String({ description: "已投入的资源/手段" })),
@@ -433,14 +506,85 @@ export const resolveLOTMCombatExchangeToolDefinition: FateToolDefinition = {
 };
 
 function resolveLOTMCombatExchangeTool(params: unknown, sessionManager: unknown): ToolResult {
-  const input = parseLOTMCombatExchangeInput(params);
+  const raw = isRecord(params) ? params : {};
+  const actorId = typeof raw["actorId"] === "string" ? raw["actorId"] : "";
+  const opponentId = typeof raw["opponentId"] === "string" ? raw["opponentId"] : "";
+  if (!actorId) throw new Error("resolve_combat_exchange: 缺少 actorId。");
+  if (!opponentId) throw new Error("resolve_combat_exchange: 缺少 opponentId。");
+
+  // 先解析基础字段（rank 延迟到拿到 draft 后再验证）
+  const rawActorRank = typeof raw["actorRank"] === "string" ? raw["actorRank"] : "";
+  const rawOpponentRank = typeof raw["opponentRank"] === "string" ? raw["opponentRank"] : "";
+  const rawActorEquipmentItemId =
+    typeof raw["actorEquipmentItemId"] === "string" ? raw["actorEquipmentItemId"] : undefined;
+  const rawOpponentEquipmentItemId =
+    typeof raw["opponentEquipmentItemId"] === "string" ? raw["opponentEquipmentItemId"] : undefined;
+
   return runDomainEventTool({
     sessionManager,
     execute: (draft) => {
-      const result = resolveLOTMCombatExchange(draft, {
-        ...input,
-        swing: input.swing ?? rollLOTMSwing(draft),
-      });
+      // 解析 actor 序列等级（显式 > actor.sequence.rank）
+      const actorRank = resolveActorRank(draft, actorId, rawActorRank);
+      const opponentRank = resolveActorRank(draft, opponentId, rawOpponentRank);
+
+      // 验证 rank 是有效的 SequenceRank
+      const validatedActorRank = assertOneOfString(actorRank, SEQUENCE_RANKS, "actorRank");
+      const validatedOpponentRank = assertOneOfString(opponentRank, SEQUENCE_RANKS, "opponentRank");
+
+      // 解析装备等级（itemId > 显式 rank > 无装备）
+      const actorEquipmentRank =
+        resolveTrackedItemRank(draft, rawActorEquipmentItemId) ??
+        assertOptionalOneOfString(raw["actorEquipmentRank"], SEQUENCE_RANKS, "actorEquipmentRank");
+      const opponentEquipmentRank =
+        resolveTrackedItemRank(draft, rawOpponentEquipmentItemId) ??
+        assertOptionalOneOfString(
+          raw["opponentEquipmentRank"],
+          SEQUENCE_RANKS,
+          "opponentEquipmentRank",
+        );
+
+      const input: LOTMCombatExchangeInput = {
+        actorId,
+        opponentId,
+        intent: typeof raw["intent"] === "string" ? raw["intent"] : "",
+        tactic: assertOneOfString(
+          raw["tactic"],
+          [
+            "direct-attack",
+            "defense",
+            "escape",
+            "protect",
+            "probe",
+            "break-restraint",
+            "use-ability",
+            "support",
+          ],
+          "tactic",
+        ),
+        actorRank: validatedActorRank,
+        opponentRank: validatedOpponentRank,
+        actorEquipmentRank,
+        opponentEquipmentRank,
+        targetObjective:
+          typeof raw["targetObjective"] === "string" ? raw["targetObjective"] : undefined,
+        committedResources: asStringArray(raw["committedResources"]),
+        knownAdvantages: asStringArray(raw["knownAdvantages"]),
+        knownDisadvantages: asStringArray(raw["knownDisadvantages"]),
+        riskTolerance: assertOneOfString(
+          raw["riskTolerance"],
+          ["low", "medium", "high", "desperate"],
+          "riskTolerance",
+        ),
+        swing: assertOptionalOneOfString(
+          raw["swing"],
+          ["bad-break", "pressure", "neutral", "opening", "turnabout"] as const,
+          "swing",
+        ),
+      };
+
+      input.swing ??= rollLOTMSwing(draft);
+      const result = resolveLOTMCombatExchange(draft, input);
+
       const recorded = result.stateLandings
         .filter((l) => l.required)
         .map((l) =>
@@ -459,67 +603,30 @@ function resolveLOTMCombatExchangeTool(params: unknown, sessionManager: unknown)
 }
 
 // ===========================================================================
-// 输入验证
+// 序列等级自动解析
 // ===========================================================================
 
-function parseLOTMCombatExchangeInput(params: unknown): LOTMCombatExchangeInput {
-  const raw = isRecord(params) ? params : {};
-  const actorId = typeof raw["actorId"] === "string" ? raw["actorId"] : "";
-  const opponentId = typeof raw["opponentId"] === "string" ? raw["opponentId"] : "";
-  if (!actorId) throw new Error("resolve_combat_exchange: 缺少 actorId。");
-  if (!opponentId) throw new Error("resolve_combat_exchange: 缺少 opponentId。");
+/** 解析 actor 序列等级：显式 > state.sequence.rank */
+function resolveActorRank(draft: State, actorId: string, explicitRank: string): string {
+  if (explicitRank) return explicitRank;
+  const actor = draft.public.actors[actorId];
+  if (actor?.sequence?.rank) return actor.sequence.rank;
+  throw new Error(
+    `resolve_combat_exchange: 无法解析 ${actorId} 的序列等级——未传 actorRank 且 actor 没有 sequence.rank。`,
+  );
+}
 
-  const actorRank = typeof raw["actorRank"] === "string" ? raw["actorRank"] : "";
-  const opponentRank = typeof raw["opponentRank"] === "string" ? raw["opponentRank"] : "";
-  if (!actorRank) throw new Error("resolve_combat_exchange: 缺少 actorRank。");
-  if (!opponentRank) throw new Error("resolve_combat_exchange: 缺少 opponentRank。");
-
-  return {
-    actorId,
-    opponentId,
-    intent: typeof raw["intent"] === "string" ? raw["intent"] : "",
-    tactic: assertOneOfString(
-      raw["tactic"],
-      [
-        "direct-attack",
-        "defense",
-        "escape",
-        "protect",
-        "probe",
-        "break-restraint",
-        "use-ability",
-        "support",
-      ],
-      "tactic",
-    ),
-    actorRank: assertOneOfString(actorRank, SEQUENCE_RANKS, "actorRank"),
-    opponentRank: assertOneOfString(opponentRank, SEQUENCE_RANKS, "opponentRank"),
-    actorEquipmentRank: assertOptionalOneOfString(
-      raw["actorEquipmentRank"],
-      SEQUENCE_RANKS,
-      "actorEquipmentRank",
-    ),
-    opponentEquipmentRank: assertOptionalOneOfString(
-      raw["opponentEquipmentRank"],
-      SEQUENCE_RANKS,
-      "opponentEquipmentRank",
-    ),
-    targetObjective:
-      typeof raw["targetObjective"] === "string" ? raw["targetObjective"] : undefined,
-    committedResources: asStringArray(raw["committedResources"]),
-    knownAdvantages: asStringArray(raw["knownAdvantages"]),
-    knownDisadvantages: asStringArray(raw["knownDisadvantages"]),
-    riskTolerance: assertOneOfString(
-      raw["riskTolerance"],
-      ["low", "medium", "high", "desperate"],
-      "riskTolerance",
-    ),
-    swing: assertOptionalOneOfString(
-      raw["swing"],
-      ["bad-break", "pressure", "neutral", "opening", "turnabout"] as const,
-      "swing",
-    ),
-  };
+/** 解析 trackedItem 的序列等级：从 state 中查物品的 sequenceRank */
+function resolveTrackedItemRank(
+  draft: State,
+  itemId: string | undefined,
+): SequenceRank | undefined {
+  if (!itemId) return undefined;
+  const item = draft.public.trackedItems[itemId];
+  if (item === undefined) {
+    throw new Error(`resolve_combat_exchange: trackedItem ${itemId} 不存在。`);
+  }
+  return item.sequenceRank;
 }
 
 function asStringArray(value: unknown): string[] {

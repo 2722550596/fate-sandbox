@@ -5,9 +5,9 @@ import type {
   State,
 } from "../state/state.ts";
 
-import { allActorSecretSlots } from "./secret-actor-state.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString, isRecord } from "../utils/typebox-validation.ts";
+import { allActorSecretSlots } from "./secret-actor-state.ts";
 
 export interface RecordRelationshipSignalInput {
   actorId: ActorId;

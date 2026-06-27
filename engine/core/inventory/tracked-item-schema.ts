@@ -6,6 +6,7 @@ import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
 import {
+  SEQUENCE_RANK_SCHEMA,
   TRACKED_ITEM_CONDITION_SCHEMA,
   TRACKED_ITEM_KIND_SCHEMA,
   TRACKED_ITEM_VISIBILITY_SCHEMA,
@@ -33,6 +34,7 @@ const UPDATE_TRACKED_ITEM_EVENT_SCHEMA = Type.Object({
   condition: Type.Optional(TRACKED_ITEM_CONDITION_SCHEMA),
   holderActorId: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),
   ownerActorId: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),
+  sequenceRank: Type.Optional(SEQUENCE_RANK_SCHEMA),
   notes: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
   reason: Type.String({ minLength: 1 }),
 });
@@ -45,6 +47,7 @@ const ADD_TRACKED_ITEM_EVENT_SCHEMA = Type.Object({
   ownerActorId: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
   condition: TRACKED_ITEM_CONDITION_SCHEMA,
   visibility: TRACKED_ITEM_VISIBILITY_SCHEMA,
+  sequenceRank: Type.Optional(SEQUENCE_RANK_SCHEMA),
   notes: Type.Array(Type.String({ minLength: 1 })),
   reason: Type.String({ minLength: 1 }),
 });

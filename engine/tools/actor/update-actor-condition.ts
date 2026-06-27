@@ -19,17 +19,16 @@ export function updateActorConditionTool(params: unknown, sessionManager: unknow
 export const updateActorConditionToolDefinition: FateToolDefinition = {
   name: "update_actor_condition",
   description:
-    "更新 actor 的非凡者状态效果或外观装备。\n\n" +
+    "更新 actor 的非凡者状态效果（affliction）。\n\n" +
     "【使用边界】\n" +
     "- 添加/移除状态效果（buff/debuff/risk/flag），对应 add-status-effect / remove-status-effect\n" +
-    "- 外观/服装变化用 change-outfit\n\n" +
+    "- 更改外观/服装请使用 update_actor_outfit 工具\n\n" +
     "禁区：\n" +
     "- 改写锁定身份事实、序列秘密或基础参数\n" +
     "- 用通用 HP 百分比代替离散状态效果",
   parameters: Type.Object({
     kind: Type.String({
-      description:
-        "add-status-effect / remove-status-effect / change-outfit / update-outfit(alias) / change-clothes(alias)",
+      description: "add-status-effect / remove-status-effect",
     }),
     actorId: Type.Optional(
       Type.String({ description: "目标 actor id；必须已存在于 public actors" }),
@@ -54,12 +53,6 @@ export const updateActorConditionToolDefinition: FateToolDefinition = {
     outcome: Type.Optional(
       Type.String({
         description: "remove-status-effect：recovered / expired / removed",
-      }),
-    ),
-    outfit: Type.Optional(
-      Type.Object({
-        label: Type.String({ description: "外观/服装标签" }),
-        details: Type.String({ description: "可见细节" }),
       }),
     ),
     reason: Type.Optional(Type.String()),

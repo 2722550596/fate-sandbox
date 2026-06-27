@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { createInitialState } from "../state/initial-state.ts";
 import {
+  changeActorOutfit,
   formatPresenceImpressionCards,
   presentActorImpressions,
   upsertActorImpression,
@@ -137,4 +138,41 @@ void test("formatPresenceImpressionCards returns null when no NPC present", () =
   const draft = createInitialState();
   draft.public.scene.presentActorIds = ["protagonist"];
   assert.equal(formatPresenceImpressionCards(draft), null);
+});
+
+void test("changeActorOutfit updates actor outfit", () => {
+  const draft = createInitialState();
+  addTestNpc(draft, "sabre");
+
+  const result = changeActorOutfit(
+    draft,
+    "sabre",
+    {
+      label: "战斗装束",
+      details: "蓝色礼装，铠甲覆于裙摆之上",
+    },
+    "进入战斗状态",
+  );
+
+  assert.equal(result.message, "外观装备已更新。");
+  const actor = draft.public.actors["sabre"];
+  assert.equal(actor?.presentation.outfit.label, "战斗装束");
+  assert.equal(actor?.presentation.outfit.details, "蓝色礼装，铠甲覆于裙摆之上");
+});
+
+void test("changeActorOutfit rejects missing actor", () => {
+  const draft = createInitialState();
+  assert.throws(
+    () =>
+      changeActorOutfit(
+        draft,
+        "nonexistent",
+        {
+          label: "test",
+          details: "test",
+        },
+        "test",
+      ),
+    /actor 不存在/,
+  );
 });

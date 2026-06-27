@@ -6,39 +6,27 @@ import { isRecord } from "../../core/utils/typebox-validation.ts";
 /**
  * update_actor_condition / commit_turn 子事件的领域归一化层。
  * 结构校验交给 actor-condition-schema；这里只保留真正的领域逻辑：
- * outfit 别名重路由、误用 update-wound 换装的抢救、fallback reason 注入、
- * nullable 字段缺省归一，以及两条指向性更强的领域报错。
+ * fallback reason 注入、nullable 字段缺省归一，以及两条指向性更强的领域报错。
+ *
+ * 更换外观/服装请使用 update_actor_outfit 工具，不要通过 actor-condition 事件。
  */
 export function normalizeActorConditionEvent(
   params: unknown,
   fallbackReason?: string,
 ): ActorConditionEvent {
   const input = assertRecord(params, "actor-condition 参数");
-  const rerouted = rerouteOutfitAliases(input);
-  guardUpdateWoundConditionId(rerouted);
-  guardResolveOutcome(rerouted);
+  guardUpdateWoundConditionId(input);
+  guardResolveOutcome(input);
   return parseActorConditionEvent(
-    withNullableDefaults(withFallbackReason(rerouted, fallbackReason)),
+    withNullableDefaults(withFallbackReason(input, fallbackReason)),
     "actor-condition 参数",
   );
-}
-
-/** update-outfit / change-clothes 别名，以及“误用 update-wound 换装”的抢救。 */
-function rerouteOutfitAliases(input: Record<string, unknown>): Record<string, unknown> {
-  const kind = input["kind"];
-  if (kind === "update-outfit" || kind === "change-clothes") {
-    return { ...input, kind: "change-outfit" };
-  }
-  if (kind === "update-wound" && isRecord(input["outfit"]) && isBlank(input["conditionId"])) {
-    return { ...input, kind: "change-outfit" };
-  }
-  return input;
 }
 
 function guardUpdateWoundConditionId(input: Record<string, unknown>): void {
   if (input["kind"] === "update-wound" && isBlank(input["conditionId"])) {
     throw new Error(
-      "update-wound 必须提供已有 wound 的 conditionId；更换服装/外观请使用 kind=change-outfit。",
+      "update-wound 必须提供已有 wound 的 conditionId；更换服装/外观请使用 update_actor_outfit 工具。",
     );
   }
 }

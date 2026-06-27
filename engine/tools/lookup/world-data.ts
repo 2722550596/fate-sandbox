@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { lookupAbilities, parseAbilityQuery } from "./ability-lookup.ts";
 import { parseFrontmatter } from "./frontmatter.ts";
 import { getPathwaySequences, listPathways } from "./sequence-lookup.ts";
 
@@ -66,8 +67,13 @@ let cachedDocIndex: MdDocument[] | null = null;
 // ---------------------------------------------------------------------------
 // 公共 API
 // ---------------------------------------------------------------------------
-
 export function lookupWorldData(request: LookupRequest): LookupResult {
+  // 序列名/途径-序列 → 走能力查询
+  const abilityQuery = parseAbilityQuery(request.query);
+  if (abilityQuery !== null) {
+    return lookupAbilities(request.query);
+  }
+
   // 途径走 pathway 索引（易读格式化输出），不走 MD 文件扫描
   if (request.category === "途径") {
     return lookupPathway(request.query);

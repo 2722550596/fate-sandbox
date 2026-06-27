@@ -14,14 +14,14 @@
 
 ### 结论
 
-**这个引用同时承载了 affliction（add-affliction / resolve-condition / update-wound）和 tracked-item（add-tracked-item / update-tracked-item / transfer-tracked-item）以及 outfit（change-outfit）。** 它是一个已经混合了两种不同领域的概念实体。
+**这个引用同时承载了 affliction（add-affliction / resolve-condition / update-wound）和 tracked-item（add-tracked-item / update-tracked-item / transfer-tracked-item）。outfit（change-outfit）已拆分至 impression 领域。** 它是一个已经混合了两种不同领域的概念实体。
 
 ### 证据
 
 `ActorConditionEvent` discriminated union 的 7 个 variant：
 
 - **affliction 相关**：`add-affliction`, `resolve-condition`, `update-wound`（作用于 `actor.condition.afflictions[]`）
-- **outfit 相关**：`change-outfit`（作用于 `actor.presentation.outfit`）
+- ~~**outfit 相关**：`change-outfit`（作用于 `actor.presentation.outfit`）~~ → 已拆分至 `update_actor_outfit` 工具（impression 领域）
 - **tracked-item 相关**：`add-tracked-item`, `update-tracked-item`, `transfer-tracked-item`（作用于 `state.public.trackedItems[]`）
 
 三者共享同一个 turn event kind `"actor-condition"`，同一个 normalizer `normalizeActorConditionEvent`，同一个 switch dispatch 入口 `updateActorCondition`。
