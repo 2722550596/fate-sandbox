@@ -1,0 +1,787 @@
+{
+  "mainRegions": [
+    {
+      "id": "intis_republic",
+      "name": "因蒂斯共和国",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 38.93,
+            "y": 8.88
+          },
+          {
+            "x": 48.82,
+            "y": 10.99
+          },
+          {
+            "x": 49.97,
+            "y": 13.04
+          },
+          {
+            "x": 48.99,
+            "y": 14.19
+          },
+          {
+            "x": 47.85,
+            "y": 13.22
+          },
+          {
+            "x": 44.59,
+            "y": 16.39
+          },
+          {
+            "x": 39.73,
+            "y": 13.04
+          },
+          {
+            "x": 38.76,
+            "y": 10.87
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-primary), 0.3)",
+        "stroke": "var(--color-primary)"
+      }
+    },
+    {
+      "id": "ruin_kingdom",
+      "name": "鲁恩王国",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 52.81,
+            "y": 11.58
+          },
+          {
+            "x": 52.54,
+            "y": 13.43
+          },
+          {
+            "x": 49.8,
+            "y": 13.26
+          },
+          {
+            "x": 50.59,
+            "y": 17.95
+          },
+          {
+            "x": 53.96,
+            "y": 17.85
+          },
+          {
+            "x": 58.63,
+            "y": 13.08
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-info), 0.3)",
+        "stroke": "var(--color-info)"
+      }
+    },
+    {
+      "id": "fussac_empire",
+      "name": "弗萨克帝国",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 38.68,
+            "y": 8.67
+          },
+          {
+            "x": 61.2,
+            "y": 13.18
+          },
+          {
+            "x": 63.68,
+            "y": 11.23
+          },
+          {
+            "x": 55.89,
+            "y": 5.04
+          },
+          {
+            "x": 43.45,
+            "y": 4.07
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-info), 0.3)",
+        "stroke": "var(--color-info)"
+      }
+    },
+    {
+      "id": "fenebot_kingdom",
+      "name": "费内波特王国",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 48.04,
+            "y": 16.45
+          },
+          {
+            "x": 44.5,
+            "y": 18.2
+          },
+          {
+            "x": 49.09,
+            "y": 20.5
+          },
+          {
+            "x": 50.24,
+            "y": 17.32
+          },
+          {
+            "x": 49.19,
+            "y": 14.4
+          },
+          {
+            "x": 47.77,
+            "y": 13.61
+          },
+          {
+            "x": 46.35,
+            "y": 14.85
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-magic), 0.3)",
+        "stroke": "var(--color-magic)"
+      }
+    },
+    {
+      "id": "狂暴海",
+      "name": "狂暴海",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 43.53,
+            "y": 18.99
+          },
+          {
+            "x": 47.42,
+            "y": 25.72
+          },
+          {
+            "x": 53.69,
+            "y": 24.57
+          },
+          {
+            "x": 60.31,
+            "y": 24.13
+          },
+          {
+            "x": 57.84,
+            "y": 17.32
+          },
+          {
+            "x": 54.39,
+            "y": 18.12
+          },
+          {
+            "x": 50.42,
+            "y": 18.2
+          },
+          {
+            "x": 49.72,
+            "y": 20.59
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-info), 0.2)",
+        "stroke": "var(--color-info)"
+      }
+    },
+    {
+      "id": "苏尼亚海",
+      "name": "苏尼亚海",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 69.95,
+            "y": 8.76
+          },
+          {
+            "x": 61.55,
+            "y": 14.06
+          },
+          {
+            "x": 59.08,
+            "y": 13.43
+          },
+          {
+            "x": 57.22,
+            "y": 15.73
+          },
+          {
+            "x": 59.88,
+            "y": 21.39
+          },
+          {
+            "x": 67.91,
+            "y": 28.19
+          },
+          {
+            "x": 68.0,
+            "y": 35.53
+          },
+          {
+            "x": 72.77,
+            "y": 35.17
+          },
+          {
+            "x": 71.53,
+            "y": 12.99
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-info), 0.2)",
+        "stroke": "var(--color-info)"
+      }
+    },
+    {
+      "id": "西拜朗",
+      "name": "西拜朗",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 53.0,
+            "y": 25.1
+          },
+          {
+            "x": 52.89,
+            "y": 31.99
+          },
+          {
+            "x": 56.43,
+            "y": 36.67
+          },
+          {
+            "x": 58.54,
+            "y": 29.08
+          },
+          {
+            "x": 57.31,
+            "y": 26.07
+          },
+          {
+            "x": 55.81,
+            "y": 24.74
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-success), 0.3)",
+        "stroke": "var(--color-success)"
+      }
+    },
+    {
+      "id": "东拜朗",
+      "name": "东拜朗",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 57.04,
+            "y": 24.67
+          },
+          {
+            "x": 58.73,
+            "y": 29.0
+          },
+          {
+            "x": 56.34,
+            "y": 37.82
+          },
+          {
+            "x": 59.61,
+            "y": 37.57
+          },
+          {
+            "x": 67.3,
+            "y": 28.01
+          },
+          {
+            "x": 61.2,
+            "y": 24.48
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-success), 0.3)",
+        "stroke": "var(--color-success)"
+      }
+    },
+    {
+      "id": "伦堡",
+      "name": "伦堡",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 46.27,
+            "y": 14.93
+          },
+          {
+            "x": 45.74,
+            "y": 17.32
+          },
+          {
+            "x": 47.85,
+            "y": 16.53
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-warning), 0.3)",
+        "stroke": "var(--color-warning)"
+      }
+    },
+    {
+      "id": "迷雾海",
+      "name": "迷雾海",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 24.09,
+            "y": 11.31
+          },
+          {
+            "x": 12.16,
+            "y": 24.13
+          },
+          {
+            "x": 25.42,
+            "y": 36.95
+          },
+          {
+            "x": 48.3,
+            "y": 37.12
+          },
+          {
+            "x": 41.5,
+            "y": 15.65
+          },
+          {
+            "x": 36.73,
+            "y": 11.4
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-info), 0.2)",
+        "stroke": "var(--color-info)"
+      }
+    },
+    {
+      "id": "极地海",
+      "name": "极地海",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 1.84,
+            "y": 38.09
+          },
+          {
+            "x": 1.74,
+            "y": 44.91
+          },
+          {
+            "x": 98.82,
+            "y": 45.26
+          },
+          {
+            "x": 98.57,
+            "y": 37.92
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-info), 0.2)",
+        "stroke": "var(--color-info)"
+      }
+    },
+    {
+      "id": "北海",
+      "name": "北海",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 25.77,
+            "y": 3.45
+          },
+          {
+            "x": 24.89,
+            "y": 10.34
+          },
+          {
+            "x": 37.7,
+            "y": 10.78
+          },
+          {
+            "x": 40.7,
+            "y": 3.72
+          },
+          {
+            "x": 56.78,
+            "y": 4.69
+          },
+          {
+            "x": 60.9,
+            "y": 8.04
+          },
+          {
+            "x": 78.24,
+            "y": 7.96
+          },
+          {
+            "x": 80.28,
+            "y": 3.27
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-info), 0.2)",
+        "stroke": "var(--color-info)"
+      }
+    },
+    {
+      "id": "神弃之地",
+      "name": "神弃之地",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 72.24,
+            "y": 8.4
+          },
+          {
+            "x": 73.74,
+            "y": 23.6
+          },
+          {
+            "x": 86.38,
+            "y": 37.74
+          },
+          {
+            "x": 98.74,
+            "y": 6.54
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-danger), 0.3)",
+        "stroke": "var(--color-danger)"
+      }
+    },
+    {
+      "id": "西大陆",
+      "name": "西大陆",
+      "type": "polygon",
+      "points": {
+        "outer": [
+          {
+            "x": 1.74,
+            "y": 5.48
+          },
+          {
+            "x": 2.09,
+            "y": 26.43
+          },
+          {
+            "x": 25.24,
+            "y": 6.54
+          }
+        ],
+        "holes": []
+      },
+      "style": {
+        "fill": "rgba(var(--rgb-danger), 0.3)",
+        "stroke": "var(--color-danger)"
+      }
+    }
+  ],
+  "landmarks": [
+    {
+      "name": "廷根",
+      "type": "point",
+      "marker": {
+        "top": "26.34%",
+        "left": "55.36%"
+      },
+      "mainRegionName": "鲁恩王国",
+      "id": "landmark_tingen",
+      "description": "鲁恩王国的重要城市，因非凡者事件闻名，是主角早期活动的核心场所。"
+    },
+    {
+      "name": "贝克兰德",
+      "type": "point",
+      "marker": {
+        "top": "29.18%",
+        "left": "56.00%"
+      },
+      "mainRegionName": "鲁恩王国",
+      "id": "landmark_bekland",
+      "description": "鲁恩王国的首都，商业与非凡者活动的中心，拥有复杂的社会阶层与势力格局。"
+    },
+    {
+      "name": "凛冬郡",
+      "type": "point",
+      "marker": {
+        "top": "24.13%",
+        "left": "55.12%"
+      },
+      "mainRegionName": "鲁恩王国",
+      "id": "landmark_winter_county",
+      "description": "鲁恩王国北部边境核心区域，与弗萨克帝国隔安曼达山脉相望；常年冰雪覆盖，是黑夜女神教会总部“宁静教堂”所在地，负责保管高危险封印物、处置异端，也是鲁恩抵御弗萨克的重要地理屏障。"
+    },
+    {
+      "name": "康斯顿",
+      "type": "point",
+      "marker": {
+        "top": "26.13%",
+        "left": "52.46%"
+      },
+      "mainRegionName": "鲁恩王国",
+      "id": "landmark_conston",
+      "description": "又名风城，是鲁恩王国第二大城市，煤钢产业极度发达。作为间海郡首府，其发达的工业基础和沿海区位，也让它成为北大陆工业城市的典型代表。"
+    },
+    {
+      "name": "特里尔",
+      "type": "point",
+      "marker": {
+        "top": "27.29%",
+        "left": "45.20%"
+      },
+      "mainRegionName": "因蒂斯共和国",
+      "id": "landmark_trier",
+      "description": "因蒂斯共和国的首都，政治与文化中心，建筑风格宏伟，非凡者组织活动隐秘。"
+    },
+    {
+      "name": "科尔杜村",
+      "type": "point",
+      "marker": {
+        "top": "29.32%",
+        "left": "45.99%"
+      },
+      "mainRegionName": "因蒂斯共和国",
+      "id": "landmark_kordu_village",
+      "description": "因蒂斯共和国莱斯顿省南部达列日地区的大型村落，临近伦堡、费内波特王国北部，盛产葡萄酒。本堂神甫纪尧姆·贝内因不满永恒烈阳教会带领村民投向'宿命之环'，引发多起跨境人口失踪事件。"
+    },
+    {
+      "name": "白银城",
+      "type": "point",
+      "marker": {
+        "top": "29.53%",
+        "left": "79.39%"
+      },
+      "mainRegionName": "神弃之地",
+      "id": "landmark_silver_city",
+      "description": "神弃之地的幸存者城邦，信仰古老神祇，拥有独特的非凡传承。"
+    },
+    {
+      "name": "月城",
+      "type": "point",
+      "marker": {
+        "top": "25.74%",
+        "left": "93.18%"
+      },
+      "mainRegionName": "神弃之地",
+      "id": "landmark_moon_city",
+      "description": "神弃之地的另一大城邦，以月亮信仰和神秘学研究闻名，与白银城既有合作也有竞争。"
+    },
+    {
+      "name": "费内波特城",
+      "type": "point",
+      "marker": {
+        "top": "32.71%",
+        "left": "48.65%"
+      },
+      "mainRegionName": "费内波特王国",
+      "id": "landmark_fenebot_city",
+      "description": "费内波特王国的核心，间海沿岸的贸易与政治枢纽，与北大陆强国长期博弈的南方据点。"
+    },
+    {
+      "name": "桑塔港",
+      "type": "point",
+      "marker": {
+        "top": "28.42%",
+        "left": "48.53%"
+      },
+      "mainRegionName": "费内波特王国",
+      "id": "landmark_santa_harbor",
+      "description": "费内波特王国北部间海沿岸的核心港口，是举办祈海仪式的关键场地，兼具贸易流通与隐秘势力活动的双重属性。"
+    },
+    {
+      "name": "圣密隆",
+      "type": "point",
+      "marker": {
+        "top": "19.79%",
+        "left": "51.22%"
+      },
+      "mainRegionName": "弗萨克帝国",
+      "id": "landmark_sanmilong",
+      "description": "弗萨克帝国首都，间海北岸的军事行政中心，战神信仰与红祭司、巨人超凡体系的核心地。"
+    },
+    {
+      "name": "艾萨拉",
+      "type": "point",
+      "marker": {
+        "top": "31.32%",
+        "left": "46.89%"
+      },
+      "mainRegionName": "伦堡",
+      "id": "landmark_aisala",
+      "description": "伦堡首都，知识与智慧之神教会总部，北大陆南部的知识传播枢纽，居民以知识崇拜和考试文化为特色。"
+    },
+    {
+      "name": "班西岛",
+      "type": "point",
+      "marker": {
+        "top": "35.29%",
+        "left": "56.69%"
+      },
+      "mainRegionName": "狂暴海",
+      "id": "landmark_bansi_island",
+      "description": "苏尼亚海的危险港口，邪神活动与教会大战的爆发地，格尔曼・斯帕罗海上冒险的早期声名节点。"
+    },
+    {
+      "name": "拜亚姆",
+      "type": "point",
+      "marker": {
+        "top": "38.89%",
+        "left": "60.14%"
+      },
+      "mainRegionName": "苏尼亚海",
+      "id": "landmark_baiyam",
+      "description": "罗思德群岛首府 “慷慨之城”，中苏尼亚海的殖民商业中心，香料贸易与多方势力（海盗、殖民政府、教会）交汇的混乱据点。"
+    },
+    {
+      "name": "苏尼亚岛",
+      "type": "point",
+      "marker": {
+        "top": "22.55%",
+        "left": "60.14%"
+      },
+      "mainRegionName": "苏尼亚海",
+      "id": "landmark_sunyi_island",
+      "description": "苏尼亚海的地理标识载体，海上贸易与风暴频发的典型海域区域，是该海域诸多殖民岛屿与航线的地理代称。"
+    },
+    {
+      "name": "拿斯",
+      "type": "point",
+      "marker": {
+        "top": "30.82%",
+        "left": "63.76%"
+      },
+      "mainRegionName": "苏尼亚海",
+      "id": "landmark_nasi",
+      "description": "加尔加斯群岛首府 “白色之城”，弗萨克在苏尼亚海东部的殖民前哨，白色岩石建筑与海盗、冒险家混杂的混乱港口。"
+    },
+    {
+      "name": "帕苏岛",
+      "type": "point",
+      "marker": {
+        "top": "30.89%",
+        "left": "59.43%"
+      },
+      "mainRegionName": "苏尼亚海",
+      "id": "landmark_pasu_island",
+      "description": "风暴之渊所在地，苏尼亚海东部的神权中心，风暴之主教会总部，常年雷霆风暴笼罩的神圣超凡领域。"
+    },
+    {
+      "name": "古拉因城",
+      "type": "point",
+      "marker": {
+        "top": "48.29%",
+        "left": "60.31%"
+      },
+      "mainRegionName": "东拜朗",
+      "id": "landmark_gulayin_city",
+      "description": "东拜朗首府，鲁恩在南大陆的殖民统治中心，拜朗本土文化与鲁恩殖民体系交融的政治与行政据点。"
+    },
+    {
+      "name": "库克瓦城",
+      "type": "point",
+      "marker": {
+        "top": "50.87%",
+        "left": "55.54%"
+      },
+      "mainRegionName": "西拜朗",
+      "id": "landmark_kukewa_city",
+      "description": "西拜朗最大城市，南大陆多方势力（殖民、军阀、原始信仰）争夺的混乱枢纽，拜朗帝国崩溃后权力真空的典型地带。"
+    },
+    {
+      "name": "派洛斯港",
+      "type": "point",
+      "marker": {
+        "top": "52.18%",
+        "left": "53.45%"
+      },
+      "mainRegionName": "西拜朗马塔尼邦",
+      "id": "landmark_pyros_port",
+      "description": "西拜朗马塔尼邦的核心沿海港口，卢米安从狂暴海抵达南大陆的首站；由奎拉里尔将军统治，原为因蒂斯殖民地、现受费内波特势力影响，是马塔尼邦的贸易与交通枢纽，卢米安以“大冒险家路易·贝里”身份公开行动的起点，可乘棺材车前往蒂扎莫镇。"
+    },
+    {
+      "name": "蒂扎莫镇",
+      "type": "point",
+      "marker": {
+        "top": "52.92%",
+        "left": "53.86%"
+      },
+      "mainRegionName": "西拜朗",
+      "id": "landmark_tizamo_town",
+      "description": "西拜朗马塔尼邦核心城镇，梦节举办地；镇内有圣西恩大教堂、特瓦纳科家族故居等关键场所，镇外原始森林深处藏有黑色古墓（法布提神孽封印地），是卢米安追查“西索”、参与梦节事件的核心场地。"
+    },
+    {
+      "name": "高地王国",
+      "type": "point",
+      "marker": {
+        "top": "57.58%",
+        "left": "56.96%"
+      },
+      "mainRegionName": "西拜朗",
+      "id": "landmark_highland_kingdom",
+      "description": "南大陆星星高原的独立政治体，玫瑰学派的重要活动地，受鲁恩、因蒂斯双重控制的傀儡政权，“被缚之神” 信仰衍生的势力中心。"
+    },
+    {
+      "name": "拉夏岛",
+      "type": "point",
+      "marker": {
+        "top": "51.03%",
+        "left": "38.85%"
+      },
+      "mainRegionName": "迷雾海",
+      "id": "landmark_laxia",
+      "description": "迷雾海深处的隐秘岛屿，\"神秘女王\" 贝尔纳黛・古斯塔夫的驻地，翡翠城所在地，也是要素黎明组织的总部基地。"
+    }
+  ]
+}

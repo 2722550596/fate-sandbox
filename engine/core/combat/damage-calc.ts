@@ -22,8 +22,9 @@ import type {
   TagHealingRelations,
 } from "./models.ts";
 
+import { getDivinityValue } from "../../config/index.ts";
 import { computeAttack, computeDefense } from "./attribute-calc.ts";
-import { resolvePowerMap } from "./sequence-utils.ts";
+import { resolvePowerMap, sequenceRankToIndex } from "./sequence-utils.ts";
 
 /**
  * 主伤害计算入口。
@@ -53,7 +54,8 @@ export function calcDamage(
 
   // 核心公式
   const atkDefRatio = def <= 0 ? atk : atk / def; // 防御=0时特判
-  const divinity = attacker.divinity || 1;
+  const divinity =
+    attacker.divinity || getDivinityValue(sequenceRankToIndex(attacker.sequenceRank));
   const skillPower = resolvePowerMap(
     typeof skill.power === "object" ? skill.power : undefined,
     attacker.sequenceRank,

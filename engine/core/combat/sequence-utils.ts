@@ -5,6 +5,8 @@
 import type { SequenceRank } from "../state-enum-schemas.ts";
 import type { PowerMap } from "./models.ts";
 
+import { sequenceBaseline } from "../../config/index.ts";
+
 /**
  * 将 SequenceRank 字符串转为数字索引，用于查 power 映射表。
  *
@@ -78,20 +80,7 @@ export function resolvePowerMap(
  * 获取序列基准总值（用于非技能场景的基础对抗判定）。
  */
 export function getSequenceBaseValue(rank: SequenceRank): number {
-  const bases: Record<SequenceRank, number> = {
-    ordinary: 200,
-    "seq-9": 300,
-    "seq-8": 450,
-    "seq-7": 1000,
-    "seq-6": 2500,
-    "seq-5": 6000,
-    "seq-4": 15000,
-    "seq-3": 40000,
-    "seq-2": 120000,
-    "seq-1": 300000,
-    "seq-0": 1200000,
-    "old-one": 3000000,
-    pillar: 5000000,
-  };
-  return bases[rank];
+  const key = rank.replace("seq-", "");
+  const value = sequenceBaseline[key] ?? sequenceBaseline[rank] ?? sequenceBaseline["普通"];
+  return value ?? 300;
 }

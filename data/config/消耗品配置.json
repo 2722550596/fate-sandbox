@@ -1,0 +1,38 @@
+{
+  "符咒": {
+    "powerRatio": 0.25,
+    "costRatio": 0.05,
+    "backlashMult": 1.5,
+    "defaultCost": "灵性"
+  },
+  "药品": {
+    "powerRatio": 0.12,
+    "costRatio": 0.02,
+    "backlashMult": 0.5,
+    "defaultCost": "理智"
+  },
+  "子弹": {
+    "powerRatio": 0.15,
+    "costRatio": 0.01,
+    "backlashMult": 1.0,
+    "defaultCost": "活力"
+  },
+  "卷轴": {
+    "powerRatio": 0.3,
+    "costRatio": 0.08,
+    "backlashMult": 1.2,
+    "defaultCost": "灵性"
+  },
+  "神性": {
+    "powerRatio": 0.55,
+    "costRatio": 0.1,
+    "backlashMult": 3.0,
+    "defaultCost": "人性"
+  },
+  "其他": {
+    "powerRatio": 0.0,
+    "costRatio": 0.0,
+    "backlashMult": 1.0,
+    "defaultCost": "灵性"
+  }
+}

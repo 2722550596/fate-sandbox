@@ -17,6 +17,7 @@ import type {
   SkillDef,
 } from "./models.ts";
 
+import { tagDamageModifiers, tagHealingModifiers } from "../../config/index.ts";
 import { evaluateConditionalParams } from "./condition-eval.ts";
 import { canAffordCost, deductCost } from "./cost-manager.ts";
 import { calcDamage, calcTagHealingModifier } from "./damage-calc.ts";
@@ -30,7 +31,7 @@ import { resolvePowerMap } from "./sequence-utils.ts";
  * @returns 攻击结果
  */
 export function executeCombatAction(input: CombatActionInput): CombatActionResult {
-  const { attacker, defender, skill, tagDamageRelations } = input;
+  const { attacker, defender, skill, tagDamageRelations = tagDamageModifiers } = input;
 
   // 1. 检查消耗
   const costCheck = canAffordCost(attacker, skill);
@@ -64,13 +65,7 @@ export function executeCombatAction(input: CombatActionInput): CombatActionResul
 
   // 4. 判断是否治疗
   if (effectiveSkill.isHeal) {
-    return executeHeal(
-      updatedAttacker,
-      defender,
-      effectiveSkill,
-      tagDamageRelations,
-      costDeduction.message,
-    );
+    return executeHeal(updatedAttacker, defender, effectiveSkill, costDeduction.message);
   }
 
   // 5. 计算伤害
@@ -82,7 +77,6 @@ export function executeCombatAction(input: CombatActionInput): CombatActionResul
     effectiveSkill,
     updatedAttacker,
   );
-
   const uniqueEffects = dedupeEffects(newDefenderEffects);
 
   const details = [damageResult.formula, costDeduction.message, ...effectLogs].join(" | ");
@@ -106,7 +100,6 @@ function executeHeal(
   attacker: CombatantSnapshot,
   defender: CombatantSnapshot,
   skill: SkillDef,
-  tagDamageRelations: Record<string, Record<string, number>> | undefined,
   costMessage: string,
 ): CombatActionResult {
   const healAmt = resolvePowerMap(
@@ -125,7 +118,7 @@ function executeHeal(
     rawHeal = Math.floor(maxValue * healAmt);
   }
 
-  const tagMod = calcTagHealingModifier(attacker, defender, tagDamageRelations);
+  const tagMod = calcTagHealingModifier(attacker, defender, tagHealingModifiers);
   rawHeal = Math.max(0, Math.floor(rawHeal * (1 + tagMod)));
 
   const actualHeal = Math.min(rawHeal, maxValue - currentValue);

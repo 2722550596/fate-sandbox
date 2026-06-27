@@ -1,0 +1,36 @@
+{
+  "multipliers": {
+    "首领": 3.0,
+    "头目": 2.0,
+    "精英": 1.4,
+    "普通": 1.0
+  },
+  "rankRules": [
+    {
+      "minRank": -2,
+      "maxRank": 2,
+      "minM": 3.0,
+      "maxM": 3.0,
+      "defaultName": "首领"
+    },
+    {
+      "minRank": 3,
+      "maxRank": 4,
+      "minM": 2.0,
+      "maxM": 3.0,
+      "defaultName": "头目"
+    },
+    {
+      "minRank": 5,
+      "maxRank": 7,
+      "minM": 1.4,
+      "maxM": 2.0,
+      "defaultName": "精英"
+    }
+  ],
+  "defaultRule": {
+    "minM": 1.0,
+    "maxM": 1.4,
+    "defaultName": "普通"
+  }
+}

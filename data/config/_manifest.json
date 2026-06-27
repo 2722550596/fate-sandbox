@@ -1,0 +1,128 @@
+[
+  {
+    "uid": "4",
+    "comment": "【配置】事件词库",
+    "file": "事件词库.json",
+    "success": true
+  },
+  {
+    "uid": "16",
+    "comment": "【配置】序列基准",
+    "file": "序列基准.json",
+    "success": true
+  },
+  {
+    "uid": "17",
+    "comment": "【配置】物品参数",
+    "file": "物品参数.json",
+    "success": true
+  },
+  {
+    "uid": "18",
+    "comment": "【配置】字体配置",
+    "file": "字体配置.json",
+    "success": true
+  },
+  {
+    "uid": "19",
+    "comment": "【配置】途径矩阵",
+    "file": "途径矩阵.json",
+    "success": true
+  },
+  {
+    "uid": "20",
+    "comment": "【配置】特质图鉴",
+    "file": "特质图鉴.json",
+    "success": true
+  },
+  {
+    "uid": "21",
+    "comment": "【配置】消耗品配置",
+    "file": "消耗品配置.json",
+    "success": true
+  },
+  {
+    "uid": "22",
+    "comment": "【配置】标签映射",
+    "file": "标签映射.json",
+    "success": true
+  },
+  {
+    "uid": "23",
+    "comment": "【配置】NPC模板",
+    "file": "NPC模板.json",
+    "success": true
+  },
+  {
+    "uid": "24",
+    "comment": "【配置】神性",
+    "file": "神性.json",
+    "success": true
+  },
+  {
+    "uid": "25",
+    "comment": "【配置】天赋加成",
+    "file": "天赋加成.json",
+    "success": true
+  },
+  {
+    "uid": "26",
+    "comment": "【配置】能力体系配置",
+    "file": "能力体系配置.json",
+    "success": true
+  },
+  {
+    "uid": "27",
+    "comment": "【配置】能力体系映射",
+    "file": "能力体系映射.json",
+    "success": true
+  },
+  {
+    "uid": "28",
+    "comment": "【配置】等待语录",
+    "file": "等待语录.json",
+    "success": true
+  },
+  {
+    "uid": "29",
+    "comment": "【配置】背景图库",
+    "file": "背景图库.json",
+    "success": true
+  },
+  {
+    "uid": "30",
+    "comment": "【配置】标签伤害修正",
+    "file": "标签伤害修正.json",
+    "success": true
+  },
+  {
+    "uid": "31",
+    "comment": "【配置】标签治疗修正",
+    "file": "标签治疗修正.json",
+    "success": true
+  },
+  {
+    "uid": "34",
+    "comment": "【配置】地图数据",
+    "file": "地图数据.json",
+    "success": true
+  },
+  {
+    "uid": "38",
+    "comment": "【配置】产业配置",
+    "file": "产业配置.json",
+    "success": true
+  },
+  {
+    "uid": "39",
+    "comment": "【配置】势力配置",
+    "file": "势力配置.json",
+    "success": true
+  },
+  {
+    "uid": "40",
+    "comment": "【配置】投资回报率",
+    "file": "投资回报率.json",
+    "success": true
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "scaleThresholds": {
+    "medium": 5000,
+    "large": 50000
+  },
+  "productionConversion": {
+    "1级": 1,
+    "2级": 5,
+    "3级": 10,
+    "4级": 50,
+    "5级": 100
+  },
+  "typeMapping": {
+    "第一产业": "农产品",
+    "第二产业": "工业品",
+    "第三产业": "服务",
+    "独立领地": "农产品"
+  },
+  "formulas": {
+    "techPositiveCoeff": 2e-6,
+    "techNegativeCoeff": 1.25e-5,
+    "scalePenaltyBase": 10000,
+    "scalePenaltyCoeff": 0.1,
+    "marketFactorBase": 0.5,
+    "marketFactorOffset": 10,
+    "marketFactorDivisor": 90,
+    "costMultiplierBase": 2,
+    "costMultiplierDivisor": 100
+  }
+}
