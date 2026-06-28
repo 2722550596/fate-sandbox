@@ -569,7 +569,7 @@ const STATE_VALIDATOR: TypeBoxValidator<State> = COMPILED_STATE_VALIDATOR;
 
 export function parseStateSchema(value: unknown): State {
   const prepared = applyDeserializationDefaults(trimStringsDeep(value));
-  const state = parseTypeBoxValue<State>(prepared, "state", STATE_VALIDATOR);
+  const state = parseTypeBoxValue<State>(prepared, "状态", STATE_VALIDATOR);
   normalizeStateDatesInPlace(state);
   assertStateInvariants(state);
   return state;

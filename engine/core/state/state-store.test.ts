@@ -74,7 +74,7 @@ void test("replaceStateForDebug rejects invalid state", () => {
 
   assert.throws(
     () => replaceStateForDebug({ invalid: true } as never),
-    /非法 state/,
+    /非法.?状态/,
   );
 });
 
@@ -97,7 +97,7 @@ void test("commitState rejects invalid state", () => {
 
   assert.throws(
     () => commitState({ invalid: true } as never),
-    /非法 state/,
+    /非法.?状态/,
   );
 });
 
@@ -128,6 +128,6 @@ void test("hydrateState rejects invalid data", () => {
 
   assert.throws(
     () => hydrateState({ invalid: true }),
-    /非法 state/,
+    /非法.?状态/,
   );
 });
