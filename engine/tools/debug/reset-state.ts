@@ -17,8 +17,7 @@ export function resetStateTool(params: unknown, sessionManager: unknown): ToolRe
 
 export const resetStateToolDefinition: DomainToolDefinition = {
   name: "reset_state",
-  description:
-    "【调试工具】重置为新 Fate schema 初始状态；不做旧 schema migration。必须写明 reason。",
+  description: "【调试工具】重置为初始状态；不做旧 schema migration。必须写明 reason。",
   parameters: Type.Object({ reason: Type.String() }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     resetStateTool(params, ctx.sessionManager),

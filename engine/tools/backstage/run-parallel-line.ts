@@ -140,7 +140,9 @@ export const runParallelLineToolDefinition: DomainToolDefinition = {
     "- 把 privateFacts / privateSummary 原样写进玩家可见正文\n" +
     "- 不过 harvest_backstage_candidate 验收就落地",
   parameters: Type.Object({
-    lineId: Type.String({ description: "后台线标识，如 caster-ryudou、lancer-church" }),
+    lineId: Type.String({
+      description: "后台线标识，如 tingen-nightwatch-patrol、backlund-machinery-investigation",
+    }),
     timeWindow: Type.Object({
       start: Type.String({ description: "ISO UTC 起始时刻" }),
       end: Type.String({ description: "ISO UTC 结束时刻" }),

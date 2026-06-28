@@ -150,7 +150,7 @@ export const recordActorKnowledgeToolDefinition: DomainToolDefinition = {
     "- NPC 离开本局跟踪：clear + reason\n\n" +
     "禁区：\n" +
     "- 用它公开秘密：它只写 secret state\n" +
-    "- 把玩家现实知识/GM lookup/未揭示真名/隐藏宝具塞进 knows（除非剧情已成立）\n" +
+    "- 把玩家现实知识/GM lookup/未揭示序列途径/隐藏身份塞进 knows（除非剧情已成立）\n" +
     "- 让 NPC 说出 forbiddenKnowledge；需揭示先走 reveal_secret 或前台证据",
   parameters: Type.Object({
     kind: Type.String({ description: "允许: upsert-lens / add-fact / remove-fact / clear" }),

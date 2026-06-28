@@ -66,12 +66,12 @@ export const recordOffscreenEventToolDefinition: DomainToolDefinition = {
     createdFrom: Type.String({ description: "允许: parallel-line-subagent / gm / debug" }),
     pressureType: Type.String({
       description:
-        "canonical 后台压力类型，取自 run_parallel_line 返回的 activePressurePalette 里某个 slot 的 pressureType（如 beyonder-activity / church-supervision）",
+        "canonical 后台压力类型，取自 run_parallel_line 返回的 activePressurePalette 里某个 slot 的 pressureType（如 beyonder-autonomy / church-supervision）",
     }),
     pressureSlotId: Type.Optional(
       Type.String({
         description:
-          "可选：对应 pressure palette slot 的 id（如 nighthawk-patrol / machinery-heart-investigation）",
+          "可选：对应 pressure palette slot 的 id（如 tingen-nightwatcher-patrol / tingen-machinery-heart-investigation）",
       }),
     ),
   }),

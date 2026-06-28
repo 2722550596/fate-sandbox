@@ -62,7 +62,7 @@ export const submitDirectionPacketToolDefinition: DomainToolDefinition = {
   description:
     "提交本轮 direction packet 并结束结算；每轮唯一收尾动作。\n\n" +
     "使用边界：全部领域工具结算完成后调用；meta/OOC 轮用 needsRender=false + directReply 直接作答。\n" +
-    "禁区：调用前后输出叙事正文、泄露未揭示真名/隐藏宝具名、替代领域工具落账，或把 UI 候选行动写进 suggestedActions 以外的位置。",
+    "禁区：调用前后输出叙事正文、泄露未揭示序列途径/隐藏身份、替代领域工具落账，或把 UI 候选行动写进 suggestedActions 以外的位置。",
   parameters: Type.Object({
     needsRender: Type.Boolean({
       description: "true=叙事轮（渲染器产出正文）；false=meta/OOC 直答轮",

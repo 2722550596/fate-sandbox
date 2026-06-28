@@ -49,7 +49,7 @@ export const recordMemoryToolDefinition: DomainToolDefinition = {
   description:
     "写入玩家已知的长期事实、重大事件或日常摘要。每条 public memory 必须给 claims（事实类型+确定性+证据）；普通事实用 kind=mundane。\n\n" +
     "【使用边界】\n" +
-    "- 身世/契约/生死/真名/宝具/令咒/阵营/永久缺损等重大变化：record-major-event + claims\n" +
+    "- 身世/契约/生死/晋升序列/污染失控/阵营/永久缺损等重大变化：record-major-event + claims\n" +
     "- 单次采购/调查/战斗结论等需长期保留的事件：也用 record-major-event\n" +
     "- 仅半天以上跳过、日终/章节摘要：record-daily-summary\n\n" +
     "禁区：\n" +

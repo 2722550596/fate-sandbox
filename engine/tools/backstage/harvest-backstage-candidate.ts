@@ -83,7 +83,7 @@ export const harvestBackstageCandidateToolDefinition: DomainToolDefinition = {
   parameters: Type.Object({
     run_id: Type.String({
       description:
-        "run_parallel_line 返回的 run_id（如 bl-archer-floor1-scout）；engine 按它定位该 director 的持久 session 并取回裸候选",
+        "run_parallel_line 返回的 run_id（如 bl-tingen-nightwatch-001）；engine 按它定位该 director 的持久 session 并取回裸候选",
     }),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>

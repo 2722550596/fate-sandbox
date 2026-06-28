@@ -78,7 +78,7 @@ export const recordRelationshipSignalToolDefinition: DomainToolDefinition = {
     "- 公开表现用 player-known，隐藏动机/误解用 secret\n\n" +
     "禁区：\n" +
     "- 记闲聊、一次性礼貌、无后续意义的情绪形容\n" +
-    "- 把未揭示真名/隐藏宝具/幕后动机写进 player-known（需隐藏用 secret）\n" +
+    "- 把未揭示序列途径/隐藏身份/幕后动机写进 player-known（需隐藏用 secret）\n" +
     "- 用抽象判词代替行为证据\n" +
     "- 把 boundary 写成未来剧情指令",
   parameters: Type.Object({

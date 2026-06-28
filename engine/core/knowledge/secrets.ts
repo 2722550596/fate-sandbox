@@ -19,7 +19,6 @@ import { settleOldestObligation } from "../ledger/obligations.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 import { recordMemory } from "./memory.ts";
-import { recordOffscreenEvent } from "./offscreen-event.ts";
 
 export type {
   AddHiddenWorldFactInput,
@@ -411,20 +410,7 @@ function hiddenReaction(
   const slots = getActorSecretSlots(draft.secrets, event.actorId);
   const hasRelevantSecret =
     slots !== undefined && secretText(slots).includes(event.stimulus.toLowerCase());
-  if (hasRelevantSecret) {
-    recordOffscreenEvent(draft, {
-      lineId: "private-resolve",
-      actorIds: [event.actorId],
-      timeRange: { start: draft.public.clock.currentAt, end: draft.public.clock.currentAt },
-      visibility: "secret",
-      summary: `隐藏反应触发：${event.publicContext}`,
-      consequences: [],
-      futureHooks: [],
-      createdFrom: "gm",
-      pressureType: "private-resolve",
-      pressureSlotId: null,
-    });
-  }
+
   return {
     outcome: hasRelevantSecret ? "subtle-reaction" : "no-special-effect",
     narrativeConstraints: hasRelevantSecret
