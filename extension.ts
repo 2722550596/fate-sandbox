@@ -16,11 +16,11 @@ import { PROSE_CUSTOM_TYPE } from "./engine/direction/render-turn.ts";
 import { stripLeakedSettlementProse } from "./engine/direction/settlement-prose-firewall.ts";
 import { buildSystemPrompt, injectGmPromptMessages } from "./engine/gm-prompt/injection.ts";
 import { registerAllTools } from "./engine/tools/registry.ts";
+import debugPromptCapture from "./extensions/debug-prompt-capture/index.ts";
 import {
   buildTimelineStateContextBlock,
   injectTimelineContextIntoSubagentInput,
 } from "./extensions/subagents/task-injection.ts";
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default function extension(pi: ExtensionAPI): void {
@@ -86,6 +86,11 @@ export default function extension(pi: ExtensionAPI): void {
     }
   });
 
+  // Debug: prompt capture (only when DEBUG_PROMPT=true)
+  if (process.env["DEBUG_PROMPT"] === "true") {
+    debugPromptCapture(pi);
+    console.log("[extension] debug prompt capture enabled");
+  }
   registerAllTools(pi);
 }
 

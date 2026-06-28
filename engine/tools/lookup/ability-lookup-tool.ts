@@ -2,9 +2,9 @@ import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
+import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { textResult } from "../runtime/tool-result.ts";
 import { parseAbilityQuery, lookupAbility } from "./ability-lookup.ts";
-
 export const lookupAbilityToolDefinition: DomainToolDefinition = {
   name: "lookup_ability",
   description:
@@ -19,9 +19,7 @@ export const lookupAbilityToolDefinition: DomainToolDefinition = {
     only: Type.Optional(Type.Boolean({ description: "true 时只查指定等级，不累积显示低序列能力" })),
   }),
   execute: async (_toolCallId, params) => {
-    // oxlint-disable-next-line no-unsafe-type-assertion
-    const raw =
-      typeof params === "object" && params !== null ? (params as Record<string, unknown>) : {};
+    const raw = isRecord(params) ? params : {};
     const query = typeof raw["query"] === "string" ? raw["query"] : "";
     const only = raw["only"] === true;
     const parsed = parseAbilityQuery(query, only);

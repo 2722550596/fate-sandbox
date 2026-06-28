@@ -6,6 +6,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Type } from "typebox";
 
+import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { textResult } from "../runtime/tool-result.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -16,9 +17,7 @@ function ensureDebugDir(): void {
 }
 
 export function debugSignalTool(params: unknown): ToolResult {
-  // oxlint-disable-next-line no-unsafe-type-assertion
-  const raw =
-    typeof params === "object" && params !== null ? (params as Record<string, unknown>) : {};
+  const raw = isRecord(params) ? params : {};
 
   const signal = {
     timestamp: new Date().toISOString(),
