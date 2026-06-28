@@ -44,6 +44,7 @@ export interface AssembleParallelLineInput {
 }
 
 const RECENT_OFFSCREEN_LIMIT = 6;
+const RECENT_SECRET_LIMIT = 6;
 const MAX_KNOWN_FACTS = 12;
 const MAX_PRIVATE_FACTS = 8;
 
@@ -98,6 +99,15 @@ function buildRecentOffscreenEvents(state: State): ParallelLineRecentEvent[] {
   }));
 }
 
+function buildRecentSecretEvents(state: State): string[] {
+  return state.secrets.secretEventLog.slice(-RECENT_SECRET_LIMIT).map((event) => {
+    const actors = event.relatedActorIds
+      .map((id) => state.public.actors[id]?.presentation.renderName ?? id)
+      .join("、");
+    return `[${event.time}] ${event.summary}（涉及：${actors}）`;
+  });
+}
+
 function buildPressurePalette(
   timeline: State["public"]["scenario"]["timeline"],
   recentEvents: readonly ParallelLineRecentEvent[],
@@ -131,6 +141,11 @@ function buildKnownFacts(state: State, input: AssembleParallelLineInput): string
   }
   if (input.additionalKnownFacts !== undefined) {
     facts.push(...input.additionalKnownFacts);
+  }
+  // 注入最近隐藏事件摘要
+  const recentSecrets = buildRecentSecretEvents(state);
+  if (recentSecrets.length > 0) {
+    facts.push("【最近隐藏事件】", ...recentSecrets);
   }
   return facts.slice(-MAX_KNOWN_FACTS);
 }

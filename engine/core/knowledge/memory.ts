@@ -48,7 +48,7 @@ function recordPinnedFact(
   draft: State,
   event: Extract<MemoryEvent, { kind: "pin-fact" }>,
 ): MemoryEventResult {
-  validateClaims(draft, event.claims);
+  validateClaims(draft, event.claims, event.kind);
   const id = createId(draft, "fact");
   draft.public.memory.pinnedFacts.push({
     id,
@@ -68,7 +68,7 @@ function recordMajorEvent(
   draft: State,
   event: Extract<MemoryEvent, { kind: "record-major-event" }>,
 ): MemoryEventResult {
-  validateClaims(draft, event.claims);
+  validateClaims(draft, event.claims, event.kind);
   const id = createId(draft, "event");
   draft.public.memory.eventLog.push({
     id,
@@ -87,10 +87,19 @@ function normalizeConsequences(consequences: readonly string[] | undefined): str
   return consequences.map((consequence) => assertNonEmptyString(consequence, "consequences[]"));
 }
 
-function validateClaims(draft: State, claims: readonly MemoryClaim[] | undefined): void {
+function validateClaims(
+  draft: State,
+  claims: readonly MemoryClaim[] | undefined,
+  eventKind: string,
+): void {
+  // pin-fact 和 daily-summary 允许不传 claims
+  if (eventKind !== "record-major-event" && (claims === undefined || claims.length === 0)) {
+    return;
+  }
+  // record-major-event 必须带 claims
   if (claims === undefined || claims.length === 0) {
     throw new Error(
-      "record_memory 必须提供 claims；用结构化 claim 表达 public memory 的事实类型、确定性和证据。普通事实用 kind=mundane。",
+      "record-major-event 必须提供 claims；用结构化 claim 表达 public memory 的事实类型、确定性和证据。普通事实用 kind=mundane。",
     );
   }
   const secretSlots = allActorSecretSlots(draft.secrets);

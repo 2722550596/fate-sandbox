@@ -28,6 +28,7 @@ export interface TimelineStateContext {
   actors: TimelineActorContext[];
   relationshipSignals: TimelineRelationshipSignalContext[];
   recentOffscreenEvents: TimelineOffscreenEventContext[];
+  recentSecretEvents: TimelineSecretEventContext[];
   pressurePalette: TimelinePressureSlotContext[];
 }
 
@@ -83,7 +84,14 @@ export interface TimelinePressureSlotContext extends TimelinePressureSlot {
   coolingDown: boolean;
 }
 
+export interface TimelineSecretEventContext {
+  time: string;
+  summary: string;
+  actorIds: string[];
+}
+
 const RECENT_OFFSCREEN_LIMIT = 6;
+const RECENT_SECRET_LIMIT = 6;
 const RECENT_RELATIONSHIP_SIGNAL_LIMIT = 8;
 
 export function buildTimelineStateContextFromRaw(raw: unknown): TimelineStateContext {
@@ -95,6 +103,7 @@ export function buildTimelineStateContextFromRaw(raw: unknown): TimelineStateCon
   const scene = requireRecord(publicState["scene"], "public.scene");
   const actors = requireRecord(publicState["actors"], "public.actors");
   const offscreenEventLog = optionalArray(secrets["offscreenEventLog"]);
+  const secretEventLog = optionalArray(secrets["secretEventLog"]);
   const relationshipSignals = recentRelationshipSignals(
     optionalArray(publicState["relationshipSignals"]),
     optionalArray(secrets["relationshipSignals"]),
@@ -109,6 +118,10 @@ export function buildTimelineStateContextFromRaw(raw: unknown): TimelineStateCon
   const recentOffscreenEvents = offscreenEventLog
     .slice(-RECENT_OFFSCREEN_LIMIT)
     .map((event, index) => offscreenEventContext(event, index));
+
+  const recentSecretEvents = secretEventLog
+    .slice(-RECENT_SECRET_LIMIT)
+    .map((event, index) => secretEventContext(event, index));
 
   return {
     currentAt,
@@ -134,6 +147,7 @@ export function buildTimelineStateContextFromRaw(raw: unknown): TimelineStateCon
     ),
     relationshipSignals,
     recentOffscreenEvents,
+    recentSecretEvents,
     pressurePalette: buildPressurePaletteContext(timeline, recentOffscreenEvents),
   };
 }
@@ -249,6 +263,15 @@ function offscreenEventContext(value: unknown, index: number): TimelineOffscreen
     summary,
     consequences: stringArray(event["consequences"], `offscreenEventLog[${index}].consequences`),
     futureHooks: stringArray(event["futureHooks"], `offscreenEventLog[${index}].futureHooks`),
+  };
+}
+
+function secretEventContext(value: unknown, index: number): TimelineSecretEventContext {
+  const event = requireRecord(value, `secretEventLog[${index}]`);
+  return {
+    time: requireString(event["time"], `secretEventLog[${index}].time`),
+    summary: requireString(event["summary"], `secretEventLog[${index}].summary`),
+    actorIds: stringArray(event["relatedActorIds"], `secretEventLog[${index}].relatedActorIds`),
   };
 }
 

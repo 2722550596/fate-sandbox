@@ -53,6 +53,15 @@ export interface RevealSecretResult {
   playerSafeMessage: string;
 }
 
+function recordSecretEvent(draft: State, summary: string, relatedActorIds: string[]): void {
+  draft.secrets.secretEventLog.push({
+    id: createId(draft, "secret-event"),
+    time: draft.public.clock.currentAt,
+    summary,
+    relatedActorIds,
+  });
+}
+
 export function configureSequenceSecrets(
   draft: State,
   input: ConfigureSequenceSecretsInput,
@@ -93,6 +102,7 @@ export function configureSequenceSecrets(
     }
   }
   setActorSecretSlots(draft.secrets, input.actorId, existing);
+  recordSecretEvent(draft, `${input.actorId} 的非凡者秘密已配置`, [input.actorId]);
 
   return { message: `序列 secrets 已配置：${input.actorId}。` };
 }
@@ -130,6 +140,7 @@ export function configureActorSecrets(
     input.unrevealedAffiliations ?? [],
   );
   setActorSecretSlots(draft.secrets, input.actorId, existing);
+  recordSecretEvent(draft, `${input.actorId} 的隐藏动机/归属已配置`, [input.actorId]);
 
   return { message: `actor secrets 已配置：${input.actorId}。` };
 }
@@ -192,6 +203,10 @@ export function revealSecret(draft: State, event: RevealSecretEvent): RevealSecr
         },
       ],
     });
+    const actorLabel = draft.public.actors[event.actorId]?.presentation.renderName ?? event.actorId;
+    recordSecretEvent(draft, `${actorLabel} 的隐藏秘密已被揭示：${result.playerSafeMessage}`, [
+      event.actorId,
+    ]);
   }
 
   return result;
@@ -405,6 +420,11 @@ function hiddenReaction(
   const hasRelevantSecret =
     slots !== undefined && secretText(slots).includes(event.stimulus.toLowerCase());
 
+  if (hasRelevantSecret) {
+    const actorLabel = draft.public.actors[event.actorId]?.presentation.renderName ?? event.actorId;
+    recordSecretEvent(draft, `${actorLabel} 对刺激产生隐藏反应`, [event.actorId]);
+  }
+
   return {
     outcome: hasRelevantSecret ? "subtle-reaction" : "no-special-effect",
     narrativeConstraints: hasRelevantSecret
@@ -427,6 +447,17 @@ function secretCompatibility(
   const bothHaveSecrets =
     getActorSecretSlots(draft.secrets, event.actorId) !== undefined &&
     getActorSecretSlots(draft.secrets, event.targetActorId) !== undefined;
+
+  if (bothHaveSecrets) {
+    const actorLabel = draft.public.actors[event.actorId]?.presentation.renderName ?? event.actorId;
+    const targetLabel =
+      draft.public.actors[event.targetActorId]?.presentation.renderName ?? event.targetActorId;
+    recordSecretEvent(draft, `${actorLabel} 与 ${targetLabel} 之间存在隐藏相性`, [
+      event.actorId,
+      event.targetActorId,
+    ]);
+  }
+
   return {
     outcome: bothHaveSecrets ? "strong-reaction" : "no-special-effect",
     narrativeConstraints: bothHaveSecrets
