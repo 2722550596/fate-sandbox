@@ -101,6 +101,12 @@ function load(): EconomyPriceTable {
 // Lookup helpers
 // ===========================================================================
 
+/** 捆绑类别组：一个关键词触发多个相关类别同时显示 */
+const CATEGORY_GROUPS: Record<string, string[]> = {
+  potion: ["potion-formula", "main-material", "auxiliary-material"],
+  魔药: ["potion-formula", "main-material", "auxiliary-material"],
+  配方: ["potion-formula", "main-material", "auxiliary-material"],
+};
 /** 按 id 精确匹配，再按 name 模糊匹配。返回匹配列表和匹配原因。 */
 function matchCategories(
   cats: PriceCategory[],
@@ -181,24 +187,42 @@ export interface EconomyQuery {
 export interface EconomyLookupResult {
   text: string;
 }
-
-const VALID_SEQUENCES = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-
 export function lookupEconomyPrice(query: EconomyQuery): EconomyLookupResult {
   const data = load();
+
   const { meta, categories } = data;
   const currency = meta.currency;
 
   // --- Validate sequence ---
   const seq = query.sequence;
-  if (seq !== undefined && !VALID_SEQUENCES.has(seq)) {
-    return { text: `不支持的序列等级：${seq}。仅支持 1～9。` };
-  }
   const seqKey = seq !== undefined ? String(seq) : undefined;
 
   // --- Mode 1: category + optional sequence ---
   if (query.category !== undefined) {
     const category = query.category;
+
+    // Check for category groups first
+    const groupKeys = CATEGORY_GROUPS[category];
+    if (groupKeys !== undefined) {
+      const groupedMatches: Array<{ cat: PriceCategory; reason: string }> = [];
+      for (const key of groupKeys) {
+        const cat = categories.find((c) => c.id === key);
+        if (cat) groupedMatches.push({ cat, reason: `魔药相关（${cat.name}）` });
+      }
+      if (groupedMatches.length > 0) {
+        const lines: string[] = [];
+        lines.push(`📋 ${meta.note}`);
+        lines.push(`💡 ${meta.recoveryNote}`);
+        lines.push("");
+        lines.push(`🔍 魔药相关价格一览（${category}）：`);
+        for (const { cat } of groupedMatches) {
+          lines.push(`━━━ ${cat.name}━━━`);
+          lines.push(...renderCategory(cat, seqKey, currency));
+          lines.push("");
+        }
+        return { text: lines.join("\n").trimEnd() };
+      }
+    }
     const matches = matchCategories(categories, category);
     if (matches.length === 0) {
       // Suggest available categories
@@ -291,7 +315,9 @@ export function lookupEconomyPrice(query: EconomyQuery): EconomyLookupResult {
   lines.push("");
   lines.push("查询方式：");
   lines.push('  lookup_economy({ category: "potion-formula" })        → 按 id 查魔药配方价格');
-  lines.push('  lookup_economy({ category: "魔药" })                  → 模糊查含"魔药"的类别');
+  lines.push(
+    '  lookup_economy({ category: "potion" })                → 一键看魔药配方+主材料+辅助材料',
+  );
   lines.push("  lookup_economy({ sequence: 7 })                      → 跨类别查序列7的所有价格");
   lines.push('  lookup_economy({ category: "characteristic", sequence: 5 }) → 精确筛选');
   lines.push('  lookup_economy({ query: "封印物" })                  → 关键词自由搜索');

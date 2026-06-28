@@ -46,7 +46,7 @@ export const initializeNewGameToolDefinition: DomainToolDefinition = {
     }),
     protagonist: Type.Unknown({
       description:
-        "human: canonicalName/renderName/publicIdentity/background/apparentAge/outfit/demeanor；beyonder additionally pathway/sequence/trueNameDisplay。renderName 是正文固定用名，中文名优先。",
+        "human: canonicalName/renderName/publicIdentity/background/apparentAge/outfit/demeanor/roles/abilities/ordinaryItems；beyonder additionally pathway/sequence/rank/promotionSystem。renderName 是正文固定用名，中文名优先。",
     }),
     presence: Type.Optional(
       Type.Object({
@@ -54,30 +54,16 @@ export const initializeNewGameToolDefinition: DomainToolDefinition = {
         allyActorIds: Type.Optional(Type.Array(Type.String())),
       }),
     ),
-    hiddenSequenceSecrets: Type.Optional(
-      Type.Object({
-        pathway: Type.Optional(
-          Type.String({
-            description: "途径 ID（如 seer / marauder / spectator 等）",
+    knownFacts: Type.Optional(
+      Type.Array(
+        Type.Object({
+          scope: Type.String({
+            description: "protagonist / npc / faction / world",
           }),
-        ),
-        sequenceName: Type.Optional(
-          Type.String({
-            description: "当前序列名（如 序列9-占卜家）",
-          }),
-        ),
-        trueName: Type.Optional(
-          Type.String({
-            description: "非凡者真名",
-          }),
-        ),
-        revealConditions: Type.Array(
-          Type.String({
-            description:
-              "可被后续 reveal_secret 的 claim/trigger/evidence 字面命中的短线索词。例：愚者 / 源堡 / 灰雾之上",
-          }),
-        ),
-      }),
+          subject: Type.Optional(Type.String()),
+          text: Type.String(),
+        }),
+      ),
     ),
     reason: Type.String(),
   }),

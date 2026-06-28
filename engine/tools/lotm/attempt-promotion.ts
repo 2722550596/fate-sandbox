@@ -25,7 +25,11 @@ import {
   type LOTMPromotionInput,
 } from "../../core/promotion/promotion-exchange-lotm.ts";
 import { PATHWAY_DISPLAY_NAMES, RANK_DISPLAY_NAMES } from "../../core/state/pathway-names.ts";
-import { SEQUENCE_RANKS } from "../../core/state/state-enum-schemas.ts";
+import {
+  type PathwayId,
+  SEQUENCE_RANKS,
+  type SequenceRank,
+} from "../../core/state/state-enum-schemas.ts";
 import { createId } from "../../core/utils/ids.ts";
 import { assertOneOfString } from "../../core/utils/string-enum.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
@@ -48,14 +52,43 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
 
       const actor = draft.public.actors[actorId];
       if (!actor) throw new Error(`attempt_promotion: actor 不存在: ${actorId}。`);
-      if (!actor.sequence) throw new Error(`attempt_promotion: actor ${actorId} 不是非凡者。`);
 
-      const actingCueCount = actor.sequence.actingCues.length;
+      // Determine current rank: 普通人类没有 sequence
+      // 首次晋升（普通人→序列9）需要提供 pathway
+      const isFirstPromotion = !actor.sequence;
+      let currentRank: SequenceRank;
+      let pathway: PathwayId;
+
+      if (isFirstPromotion) {
+        if (actor.kind !== "human") {
+          throw new Error(`attempt_promotion: actor ${actorId} 没有序列也不是人类。`);
+        }
+        const targetRank = assertOneOfString(raw["targetRank"], SEQUENCE_RANKS, "targetRank");
+        if (targetRank !== "seq-9") {
+          throw new Error(`attempt_promotion: 普通人只能晋升序列9，目标为 ${targetRank} 无效。`);
+        }
+        currentRank = "ordinary";
+        const rawPathway = typeof raw["pathway"] === "string" ? raw["pathway"] : "";
+        if (!rawPathway) {
+          throw new Error("attempt_promotion: 普通人晋升序列9必须提供 pathway。");
+        }
+        if (!(rawPathway in PATHWAY_DISPLAY_NAMES)) {
+          throw new Error(`attempt_promotion: 无效途径 ${rawPathway}。`);
+        }
+        // oxlint-disable-next-line no-unsafe-type-assertion — validated by `in` check above
+        pathway = rawPathway as PathwayId;
+      } else {
+        // 安全：已有 sequence 时 isFirstPromotion 为 false
+        currentRank = actor.sequence!.rank;
+        pathway = actor.sequence!.pathway;
+      }
+
+      const actingCueCount = isFirstPromotion ? 0 : actor.sequence!.actingCues.length;
       const targetRank = assertOneOfString(raw["targetRank"], SEQUENCE_RANKS, "targetRank");
 
       const input: LOTMPromotionInput = {
         actorId,
-        currentRank: actor.sequence.rank,
+        currentRank,
         targetRank,
         actingCueCount,
         ritualIntegrity: assertOneOfString(
@@ -83,12 +116,27 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
 
       let abilityCount = 0;
       if (successOutcomes.has(result.outcome)) {
-        // 1. 序列等级更新 + 扮演记录重置
-        actor.sequence.rank = targetRank;
-        actor.sequence.actingCues = [];
+        if (isFirstPromotion) {
+          // 首次晋升：创建 sequence（HumanActorState → BeyonderActorState）
+          (actor as { kind: string }).kind = "beyonder";
+          const pathwayName = PATHWAY_DISPLAY_NAMES[pathway] ?? pathway;
+          const rankLabel = RANK_DISPLAY_NAMES[targetRank] ?? targetRank;
+          actor.sequence = {
+            currentSequence: `${pathwayName}·${rankLabel}`,
+            rank: targetRank,
+            pathway,
+            promotionSystem: "potion",
+            tags: [],
+            actingCues: [],
+          };
+        } else {
+          // 已有序列：更新等级 + 重置扮演
+          actor.sequence!.rank = targetRank;
+          actor.sequence!.actingCues = [];
+        }
 
-        // 2. 序列名更新
-        const pathwayName = PATHWAY_DISPLAY_NAMES[actor.sequence.pathway] ?? actor.sequence.pathway;
+        // 2. 能力填充
+        const pathwayName = PATHWAY_DISPLAY_NAMES[pathway] ?? pathway;
         const rankLabel = RANK_DISPLAY_NAMES[targetRank] ?? targetRank;
         const abilities = lookupStructuredAbilities(pathwayName, rankLabel);
         actor.abilities = abilities.map((a) => ({
@@ -242,6 +290,12 @@ export const attemptPromotionToolDefinition: DomainToolDefinition = {
     "禁区：用此工具代管非序列状态变更，或跳过叙事直接晋升。",
   parameters: Type.Object({
     actorId: Type.String({ minLength: 1, description: "晋升目标 actor id" }),
+    pathway: Type.Optional(
+      Type.String({
+        description:
+          "晋升途径（如 seer/apprentice/marauder）；首次晋升（普通人→序列9）必填，已有序列时从 actor.sequence 继承",
+      }),
+    ),
     targetRank: Type.String({
       description:
         "目标序列等级（seq-9 / seq-8 / seq-7 / seq-6 / seq-5 / seq-4 / seq-3 / seq-2 / seq-1 / seq-0 / old-one / pillar）",

@@ -12,12 +12,9 @@ import { updateActorConditionToolDefinition } from "./actor/update-actor-conditi
 import { updateActorImpressionToolDefinition } from "./actor/update-actor-impression.ts";
 import { updateActorOutfitToolDefinition } from "./actor/update-actor-outfit.ts";
 import { upsertActorToolDefinition } from "./actor/upsert-actor.ts";
-import { harvestBackstageCandidateToolDefinition } from "./backstage/harvest-backstage-candidate.ts";
-import { manageFactionClockToolDefinition } from "./backstage/manage-faction-clock.ts";
 import { recordOffscreenEventToolDefinition } from "./backstage/record-offscreen-event.ts";
-import { resolveBackstageLineToolDefinition } from "./backstage/resolve-backstage-line.ts";
-import { runParallelLineToolDefinition } from "./backstage/run-parallel-line.ts";
 import { clearBackstageLockToolDefinition } from "./debug/clear-backstage-lock.ts";
+import { debugSignalToolDefinition } from "./debug/debug-signal.ts";
 import { getStateSchemaToolDefinition } from "./debug/get-state-schema.ts";
 import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact.ts";
 import { patchStateToolDefinition } from "./debug/patch-state.ts";
@@ -28,6 +25,7 @@ import { addHiddenWorldFactToolDefinition } from "./knowledge/add-hidden-world-f
 import { recallMemoryToolDefinition } from "./knowledge/recall-memory.ts";
 import { recordMemoryToolDefinition } from "./knowledge/record-memory.ts";
 import { revealSecretToolDefinition } from "./knowledge/reveal-secret.ts";
+import { lookupAbilityToolDefinition } from "./lookup/ability-lookup-tool.ts";
 import { lookupEconomyToolDefinition } from "./lookup/economy-lookup.ts";
 import { lookupToolDefinition } from "./lookup/lookup-rag.ts";
 import { lookupNovelToolDefinition } from "./lookup/novel-lookup.ts";
@@ -38,7 +36,7 @@ import { commitTurnToolDefinition } from "./scene/commit-turn.ts";
 import { privateResolveToolDefinition } from "./scene/private-resolve.ts";
 import { progressSceneBeatToolDefinition } from "./scene/progress-scene-beat.ts";
 import { submitDirectionPacketToolDefinition } from "./scene/submit-direction-packet.ts";
-import { getStatusToolDefinition } from "./system/get-status.ts";
+import { getStatusRawToolDefinition, getStatusToolDefinition } from "./system/get-status.ts";
 import { initializeNewGameToolDefinition } from "./system/initialize-new-game.ts";
 import { updateHookToolDefinition } from "./system/update-hook.ts";
 
@@ -48,9 +46,9 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   commitTurnToolDefinition,
   progressSceneBeatToolDefinition,
   getStatusToolDefinition,
+  getStatusRawToolDefinition,
   recordMemoryToolDefinition,
   recordOffscreenEventToolDefinition,
-  manageFactionClockToolDefinition,
   retireActorToolDefinition,
   updateActorAgendaToolDefinition,
   recordActorKnowledgeToolDefinition,
@@ -66,9 +64,6 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   recordActingFeedbackToolDefinition,
   updateEconomyToolDefinition,
   revealSecretToolDefinition,
-  runParallelLineToolDefinition,
-  harvestBackstageCandidateToolDefinition,
-  resolveBackstageLineToolDefinition,
   privateResolveToolDefinition,
   submitDirectionPacketToolDefinition,
   updateHookToolDefinition,
@@ -79,6 +74,8 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   overrideLockedFactToolDefinition,
   clearBackstageLockToolDefinition,
 
+  debugSignalToolDefinition,
+  lookupAbilityToolDefinition,
   resetStateToolDefinition,
   getStateSchemaToolDefinition,
   attemptPromotionToolDefinition,

@@ -1,5 +1,5 @@
 {
-  "nextId": 60,
+  "nextId": 74,
   "items": [
     {
       "id": 1,
@@ -323,6 +323,90 @@
       "content": "Phase 9: 四项检查 + 验证",
       "done": true,
       "created": 1782648034
+    },
+    {
+      "id": 60,
+      "content": "A1: fix update_actor_condition description to match schema (add-affliction/resolve-condition/update-wound)",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 61,
+      "content": "A2: register lookup_ability tool in registry.ts",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 62,
+      "content": "A3: add get_status_raw sibling tool",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 63,
+      "content": "A4: unregister backstage tools from registry",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 64,
+      "content": "A5: fix attempt_promotion for 普通人→序列9",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 65,
+      "content": "B6: add forbiddenContent to packet schema constraints",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 66,
+      "content": "B7: add-debt cap (current amount × 1000)",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 67,
+      "content": "B8: debt visibility + resolve-by-id in update_economy",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 68,
+      "content": "B9: economy currency conversion with type field",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 69,
+      "content": "B10: debug signal tool (record JSONL to .debug/)",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 70,
+      "content": "B11: optimize lookup_economy for 魔药配方+材料",
+      "done": true,
+      "created": 1782687373
+    },
+    {
+      "id": 71,
+      "content": "C12+ redesign reveal_secret semantics and schema",
+      "done": false,
+      "created": 1782687373
+    },
+    {
+      "id": 72,
+      "content": "C13: debug hooks for passA/passB prompts",
+      "done": false,
+      "created": 1782687373
+    },
+    {
+      "id": 73,
+      "content": "C14: renderer intercomEvent support",
+      "done": false,
+      "created": 1782687373
     }
   ]
 }

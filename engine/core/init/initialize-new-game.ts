@@ -146,6 +146,13 @@ const NEW_GAME_PRESENCE_INPUT_SCHEMA = Type.Object({
   allyActorIds: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
 });
 
+const MEMORY_SCOPE_SCHEMA_FOR_INIT = stringEnumSchema(["protagonist", "npc", "faction", "world"]);
+
+const NEW_GAME_KNOWN_FACT_SCHEMA = Type.Object({
+  scope: MEMORY_SCOPE_SCHEMA_FOR_INIT,
+  subject: Type.Optional(Type.String({ minLength: 1 })),
+  text: Type.String({ minLength: 1 }),
+});
 const HUMAN_PROTAGONIST_OPENING_SCHEMA = Type.Object({
   canonicalName: Type.String({ minLength: 1 }),
   renderName: Type.Optional(Type.String({ minLength: 1 })),
@@ -154,6 +161,7 @@ const HUMAN_PROTAGONIST_OPENING_SCHEMA = Type.Object({
   apparentAge: Type.String({ minLength: 1 }),
   outfit: OUTFIT_STATE_SCHEMA,
   demeanor: Type.String({ minLength: 1 }),
+  roles: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
   abilities: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
   ordinaryItems: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
 });
@@ -170,8 +178,8 @@ const BEYONDER_PROTAGONIST_OPENING_SCHEMA = Type.Object({
   rank: SEQUENCE_RANK_SCHEMA,
   pathway: PATHWAY_ID_SCHEMA,
   promotionSystem: Type.Optional(PROMOTION_SYSTEM_SCHEMA),
+  roles: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
   abilities: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
-  ordinaryItems: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
 });
 
 export const NEW_GAME_KINDS = ["human-protagonist", "beyonder-protagonist"] as const;
@@ -183,6 +191,7 @@ const HUMAN_NEW_GAME_INPUT_SCHEMA = Type.Object({
   protagonist: HUMAN_PROTAGONIST_OPENING_SCHEMA,
   presence: Type.Optional(NEW_GAME_PRESENCE_INPUT_SCHEMA),
   reason: Type.String({ minLength: 1 }),
+  knownFacts: Type.Optional(Type.Array(NEW_GAME_KNOWN_FACT_SCHEMA)),
 });
 
 const BEYONDER_NEW_GAME_INPUT_SCHEMA = Type.Object({
@@ -191,6 +200,7 @@ const BEYONDER_NEW_GAME_INPUT_SCHEMA = Type.Object({
   protagonist: BEYONDER_PROTAGONIST_OPENING_SCHEMA,
   presence: Type.Optional(NEW_GAME_PRESENCE_INPUT_SCHEMA),
   reason: Type.String({ minLength: 1 }),
+  knownFacts: Type.Optional(Type.Array(NEW_GAME_KNOWN_FACT_SCHEMA)),
 });
 
 const NEW_GAME_KIND_VALIDATOR = Compile(NEW_GAME_KIND_SCHEMA);
@@ -346,7 +356,7 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
       demeanor: input.demeanor,
     },
     condition: { afflictions: [] },
-    inventory: { items: [] },
+    inventory: { items: input.ordinaryItems ?? [] },
     abilities: (input.abilities ?? []).map((summary, index) => ({
       id: `ability-protagonist-${index + 1}`,
       label: summary,
@@ -391,7 +401,6 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
     relationshipToProtagonist: { stance: "self", summary: "玩家本人。" },
   };
 }
-
 function assertNewGameInitialized(state: State, input: NewGameInitializationInput): void {
   const protagonist = state.public.actors[PROTAGONIST_ACTOR_ID];
   if (protagonist === undefined) {

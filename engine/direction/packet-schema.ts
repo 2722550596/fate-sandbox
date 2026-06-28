@@ -110,6 +110,14 @@ export const RENDER_DIRECTION_PACKET_SCHEMA = Type.Object({
   suggestedActions: Type.Optional(
     Type.Array(SUGGESTED_ACTION_SCHEMA, { minItems: 1, maxItems: 4 }),
   ),
+  /** 渲染约束：渲染器不得写入或暗示的内容 */
+  constraints: Type.Optional(
+    Type.Object({
+      forbiddenContent: Type.Array(Type.String({ minLength: 1 }), {
+        description: "禁止写入的原文或意象列表；渲染器不得直接或暗示性地写入这些内容",
+      }),
+    }),
+  ),
 });
 export type RenderDirectionPacket = Static<typeof RENDER_DIRECTION_PACKET_SCHEMA>;
 

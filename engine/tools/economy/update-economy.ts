@@ -51,6 +51,7 @@ export const updateEconomyToolDefinition: DomainToolDefinition = {
     "- add-purse：新增资金池——组织金库、客户预付款、委托人的保证金（新建时设定初始金额）\n" +
     "- update-purse：修改已有钱包的 label 或 access 权限（不可改金额）\n" +
     "- add-debt / resolve-debt：记录和清偿债务\n\n" +
+    "currencyType: 货币类型（loen-鲁恩金镑/fesac-弗萨克金霍恩/intis-因蒂斯费尔金/feynapotter-费内波特金里索），默认 loen。金额会按官方汇率自动换算后入账。\n\n" +
     "禁区：把同行者资金说成玩家随身现金、资金不足时免费兜底，或用 gain-money 设目标数值/凭空发财。",
   parameters: Type.Object({
     kind: Type.String({
@@ -91,6 +92,12 @@ export const updateEconomyToolDefinition: DomainToolDefinition = {
     ),
     amount: Type.Optional(
       Type.Unknown({ description: "金额；可填 number 或数字字符串，由领域工具校验。" }),
+    ),
+    currencyType: Type.Optional(
+      Type.String({
+        description:
+          "货币类型（loen-鲁恩金镑/fesac-弗萨克金霍恩/intis-因蒂斯费尔金/feynapotter-费内波特金里索），默认 loen",
+      }),
     ),
     reason: Type.String(),
   }),

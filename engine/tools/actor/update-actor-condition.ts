@@ -28,7 +28,7 @@ export const updateActorConditionToolDefinition: DomainToolDefinition = {
     "- 用通用 HP 百分比代替离散状态效果",
   parameters: Type.Object({
     kind: Type.String({
-      description: "add-status-effect / remove-status-effect",
+      description: "add-affliction / resolve-condition / update-wound",
     }),
     actorId: Type.Optional(
       Type.String({ description: "目标 actor id；必须已存在于 public actors" }),

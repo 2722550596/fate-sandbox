@@ -24,6 +24,10 @@ export const MONEY_GAIN_SOURCES = [
 export const MONEY_GAIN_SOURCE_SCHEMA = stringEnumSchema(MONEY_GAIN_SOURCES);
 export type MoneyGainSource = Static<typeof MONEY_GAIN_SOURCE_SCHEMA>;
 
+export const CURRENCY_TYPES = ["loen", "fesac", "intis", "feynapotter"] as const;
+export const CURRENCY_TYPE_SCHEMA = stringEnumSchema(CURRENCY_TYPES);
+export type CurrencyType = Static<typeof CURRENCY_TYPE_SCHEMA>;
+
 export const ECONOMY_EVENT_KINDS = [
   "spend-money",
   "gain-money",
@@ -41,6 +45,7 @@ export const SPEND_MONEY_EVENT_SCHEMA = Type.Object({
   purseId: Type.Optional(Type.String({ minLength: 1 })),
   callerActorId: Type.Optional(Type.String({ minLength: 1 })),
   amount: NON_NEGATIVE_AMOUNT_SCHEMA,
+  currencyType: Type.Optional(CURRENCY_TYPE_SCHEMA),
   reason: Type.String({ minLength: 1 }),
 });
 
@@ -49,6 +54,7 @@ export const GAIN_MONEY_EVENT_SCHEMA = Type.Object({
   purseId: Type.Optional(Type.String({ minLength: 1 })),
   callerActorId: Type.Optional(Type.String({ minLength: 1 })),
   amount: NON_NEGATIVE_AMOUNT_SCHEMA,
+  currencyType: Type.Optional(CURRENCY_TYPE_SCHEMA),
   source: MONEY_GAIN_SOURCE_SCHEMA,
   counterparty: Type.String({ minLength: 1 }),
   reason: Type.String({ minLength: 1 }),
@@ -59,6 +65,7 @@ export const ADD_PURSE_EVENT_SCHEMA = Type.Object({
   ownerActorId: Type.String({ minLength: 1 }),
   label: Type.String({ minLength: 1 }),
   amount: NON_NEGATIVE_AMOUNT_SCHEMA,
+  currencyType: Type.Optional(CURRENCY_TYPE_SCHEMA),
   access: PURSE_ACCESS_SCHEMA,
   reason: Type.String({ minLength: 1 }),
 });
