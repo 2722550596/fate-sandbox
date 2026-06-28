@@ -245,51 +245,13 @@ function offscreenEventContext(value: unknown, index: number): TimelineOffscreen
       end: requireString(timeRange["end"], `offscreenEventLog[${index}].timeRange.end`),
     },
     visibility: requireString(event["visibility"], `offscreenEventLog[${index}].visibility`),
-    pressureType: classifyPressureType(actorIds, summary),
+    pressureType: requireString(event["pressureType"], `offscreenEventLog[${index}].pressureType`),
     summary,
     consequences: stringArray(event["consequences"], `offscreenEventLog[${index}].consequences`),
     futureHooks: stringArray(event["futureHooks"], `offscreenEventLog[${index}].futureHooks`),
   };
 }
 
-function classifyPressureType(actorIds: readonly string[], summary: string): string {
-  const haystack = `${actorIds.join(" ")} ${summary}`.toLowerCase();
-  if (
-    /police|government|监测|封锁|巡逻|警方|警察|媒体|政府|值夜人|机械之心|代罚者/.test(haystack)
-  ) {
-    return "authority-surveillance";
-  }
-  if (/church|教会|代行者|监督者|风暴教会|永恒烈阳|蒸汽与机械/.test(haystack)) {
-    return "church-supervision";
-  }
-  if (/nighthawks|值夜人|廷根|机械之心|代罚者|非凡者|序列|魔药/.test(haystack)) {
-    return "beyonder-activity";
-  }
-  if (
-    /workshop|bounded field|leyline|familiar|caster|工房|结界|灵脉|使魔|术式|非凡者|序列|魔药/.test(
-      haystack,
-    )
-  ) {
-    return "magecraft-infrastructure";
-  }
-  if (
-    /servant|saber|archer|lancer|rider|caster|assassin|berserker|从者|英灵|宝具|真名/.test(haystack)
-  ) {
-    return "beyonder-activity";
-  }
-  if (/civilian|school|hospital|news|rumor|市民|学校|医院|新闻|传闻|社交|交通/.test(haystack)) {
-    return "civilian-society";
-  }
-  if (
-    /dream|disease|curse|origin|dead apostle|vampire|梦|疾病|诅咒|起源|死徒|吸血鬼/.test(haystack)
-  ) {
-    return "occult-contagion";
-  }
-  if (/land|forest|temple|desert|crater|土地|森林|寺|沙漠|陨坑|地脉/.test(haystack)) {
-    return "territory-environment";
-  }
-  return "other";
-}
 
 function formatStateFileLocation(location: Record<string, unknown>): string {
   return ["region", "site", "detail"]
