@@ -1,11 +1,11 @@
 import type { PublicActorState, State } from "../state/state.ts";
-import type { ActorConditionEvent } from "./actor-condition-schema.ts";
+import type { ActorConditionEvent } from "./actor-schema.ts";
 
 import { settleOldestObligation } from "../ledger/obligations.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 
-export type { ActorConditionEvent } from "./actor-condition-schema.ts";
+export type { ActorConditionEvent } from "./actor-schema.ts";
 
 export interface ActorConditionEventResult {
   message: string;

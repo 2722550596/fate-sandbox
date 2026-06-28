@@ -166,3 +166,121 @@ export function parseActorRegistryInput(value: unknown, fieldName: string): Acto
     ACTOR_REGISTRY_VARIANT_VALIDATORS,
   );
 }
+
+// ===========================================================================
+// Acting — 扮演消化事件
+// ===========================================================================
+
+export const ACTING_EVENT_KINDS = ["advance-acting"] as const;
+const ACTING_EVENT_KIND_SCHEMA = stringEnumSchema(ACTING_EVENT_KINDS);
+
+const NON_EMPTY_STRING = Type.String({ minLength: 1 });
+
+/** 单条扮演行为记录：key=行为维度标识, label=显示名 */
+const CUE_ENTRY_SCHEMA = Type.Object({
+  key: NON_EMPTY_STRING,
+  label: NON_EMPTY_STRING,
+});
+
+export const ADVANCE_ACTING_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("advance-acting"),
+  actorId: NON_EMPTY_STRING,
+  cues: Type.Array(CUE_ENTRY_SCHEMA, { minItems: 1 }),
+  reason: NON_EMPTY_STRING,
+});
+
+export type AdvanceActingInput = Static<typeof ADVANCE_ACTING_EVENT_SCHEMA>;
+
+export type ActingEvent = AdvanceActingInput;
+
+const ACTING_EVENT_KIND_VALIDATOR = Compile(ACTING_EVENT_KIND_SCHEMA);
+const ADVANCE_ACTING_EVENT_VALIDATOR = Compile(ADVANCE_ACTING_EVENT_SCHEMA);
+
+const ACTING_EVENT_VARIANT_VALIDATORS = {
+  "advance-acting": ADVANCE_ACTING_EVENT_VALIDATOR,
+} satisfies Record<ActingEvent["kind"], TypeBoxValidator<ActingEvent>>;
+
+export function parseActingEvent(value: unknown, fieldName: string): ActingEvent {
+  return parseTaggedTypeBoxUnion<ActingEvent["kind"], ActingEvent>(
+    trimStringsDeep(value),
+    fieldName,
+    "kind",
+    ACTING_EVENT_KIND_VALIDATOR,
+    ACTING_EVENT_VARIANT_VALIDATORS,
+  );
+}
+
+// ===========================================================================
+// Actor Condition — 状态效果事件
+// ===========================================================================
+
+export const ACTOR_CONDITION_EVENT_KINDS = [
+  "add-affliction",
+  "resolve-condition",
+  "update-wound",
+] as const;
+const ACTOR_CONDITION_EVENT_KIND_SCHEMA = stringEnumSchema(ACTOR_CONDITION_EVENT_KINDS);
+
+const AFFLICTION_SOURCE_SCHEMA = stringEnumSchema([
+  "combat",
+  "beyonder-ability",
+  "environment",
+  "item",
+  "other",
+]);
+
+const AFFLICTION_OUTCOME_SCHEMA = stringEnumSchema(["recovered", "stabilized"]);
+
+export const ADD_AFFLICTION_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("add-affliction"),
+  actorId: Type.String({ minLength: 1 }),
+  source: AFFLICTION_SOURCE_SCHEMA,
+  text: Type.String({ minLength: 1 }),
+  expectedDuration: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),
+  reason: Type.String({ minLength: 1 }),
+});
+
+export const RESOLVE_CONDITION_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("resolve-condition"),
+  actorId: Type.String({ minLength: 1 }),
+  conditionId: Type.String({ minLength: 1 }),
+  outcome: AFFLICTION_OUTCOME_SCHEMA,
+  reason: Type.String({ minLength: 1 }),
+});
+
+export const UPDATE_WOUND_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("update-wound"),
+  actorId: Type.String({ minLength: 1 }),
+  conditionId: Type.String({ minLength: 1 }),
+  text: Type.Optional(Type.String({ minLength: 1 })),
+  source: Type.Optional(AFFLICTION_SOURCE_SCHEMA),
+  expectedDuration: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),
+  reason: Type.String({ minLength: 1 }),
+});
+
+export type ActorConditionEvent =
+  | Static<typeof ADD_AFFLICTION_EVENT_SCHEMA>
+  | Static<typeof RESOLVE_CONDITION_EVENT_SCHEMA>
+  | Static<typeof UPDATE_WOUND_EVENT_SCHEMA>;
+
+const ACTOR_CONDITION_EVENT_KIND_VALIDATOR = Compile(ACTOR_CONDITION_EVENT_KIND_SCHEMA);
+const ADD_AFFLICTION_EVENT_VALIDATOR = Compile(ADD_AFFLICTION_EVENT_SCHEMA);
+const RESOLVE_CONDITION_EVENT_VALIDATOR = Compile(RESOLVE_CONDITION_EVENT_SCHEMA);
+const UPDATE_WOUND_EVENT_VALIDATOR = Compile(UPDATE_WOUND_EVENT_SCHEMA);
+
+// Compile 必须在独立常量上调用（satisfies 上下文会干扰泛型推导）。
+const ACTOR_CONDITION_EVENT_VARIANT_VALIDATORS = {
+  "add-affliction": ADD_AFFLICTION_EVENT_VALIDATOR,
+  "resolve-condition": RESOLVE_CONDITION_EVENT_VALIDATOR,
+  "update-wound": UPDATE_WOUND_EVENT_VALIDATOR,
+} satisfies Record<ActorConditionEvent["kind"], TypeBoxValidator<ActorConditionEvent>>;
+
+export function parseActorConditionEvent(value: unknown, fieldName: string): ActorConditionEvent {
+  return parseTaggedTypeBoxUnion<ActorConditionEvent["kind"], ActorConditionEvent>(
+    trimStringsDeep(value),
+    fieldName,
+    "kind",
+    ACTOR_CONDITION_EVENT_KIND_VALIDATOR,
+    ACTOR_CONDITION_EVENT_VARIANT_VALIDATORS,
+  );
+}

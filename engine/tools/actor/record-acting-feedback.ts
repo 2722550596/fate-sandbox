@@ -3,8 +3,8 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { parseActingEvent } from "../../core/actor/acting-schema.ts";
 import { recordActing } from "../../core/actor/acting.ts";
+import { parseActingEvent } from "../../core/actor/actor-schema.ts";
 import { resultDetails, runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 export function recordActingFeedbackTool(params: unknown, sessionManager: unknown): ToolResult {

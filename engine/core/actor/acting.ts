@@ -1,7 +1,7 @@
 import type { State } from "../state/state.ts";
-import type { ActingEvent } from "./acting-schema.ts";
+import type { ActingEvent } from "./actor-schema.ts";
 
-export type { ActingEvent } from "./acting-schema.ts";
+export type { ActingEvent } from "./actor-schema.ts";
 
 export interface ActingResult {
   message: string;

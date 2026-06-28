@@ -1,6 +1,6 @@
 import type { ActorConditionEvent } from "../../core/actor/actor-condition.ts";
 
-import { parseActorConditionEvent } from "../../core/actor/actor-condition-schema.ts";
+import { parseActorConditionEvent } from "../../core/actor/actor-schema.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
 
 /**
