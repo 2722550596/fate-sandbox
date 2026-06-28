@@ -15,6 +15,7 @@ import { manageFactionClockToolDefinition } from "./backstage/manage-faction-clo
 import { recordOffscreenEventToolDefinition } from "./backstage/record-offscreen-event.ts";
 import { resolveBackstageLineToolDefinition } from "./backstage/resolve-backstage-line.ts";
 import { runParallelLineToolDefinition } from "./backstage/run-parallel-line.ts";
+import { clearBackstageLockToolDefinition } from "./debug/clear-backstage-lock.ts";
 import { getStateSchemaToolDefinition } from "./debug/get-state-schema.ts";
 import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact.ts";
 import { resetStateToolDefinition } from "./debug/reset-state.ts";
@@ -70,6 +71,7 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   lookupToolDefinition,
   patchStateToolDefinition,
   overrideLockedFactToolDefinition,
+  clearBackstageLockToolDefinition,
 
   resetStateToolDefinition,
   getStateSchemaToolDefinition,
