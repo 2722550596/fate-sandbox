@@ -15,8 +15,8 @@ void test("manage_faction_clock full lifecycle through the tool surface", () => 
   const created = manageFactionClockTool(
     {
       kind: "upsert-clock",
-      factionId: "matou",
-      label: "圣杯容器准备",
+      factionId: "steam-church",
+      label: "蒸汽教会调查进度",
       size: 4,
       visibility: "hidden",
     },
@@ -32,7 +32,7 @@ void test("manage_faction_clock full lifecycle through the tool surface", () => 
   assert.match(advanced.content[0]?.text ?? "", /已填满/);
 
   const reset = manageFactionClockTool(
-    { kind: "reset-clock", clockId, outcomeSummary: "影开始夜间捕食，街区出现昏迷者。" },
+    { kind: "reset-clock", clockId, outcomeSummary: "教会开始暗中调查，街区出现昏迷者。" },
     sm,
   );
   assert.match(reset.content[0]?.text ?? "", /已归零/);

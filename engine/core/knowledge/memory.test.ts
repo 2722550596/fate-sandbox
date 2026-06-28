@@ -43,9 +43,9 @@ void test("recordMemory requires structured claims", () => {
     () =>
       recordMemory(draft, {
         kind: "record-major-event",
-        title: "柳洞寺确认情报",
-        summary: "凛确认 Caster 正在柳洞寺。",
-        consequences: ["Caster 位置已确认。"],
+        title: "廷根市教堂确认情报",
+        summary: "值夜者确认非凡者在廷根市教堂。",
+        consequences: ["非凡者位置已确认。"],
         claims: [],
       }),
     /必须提供 claims/,
@@ -54,9 +54,9 @@ void test("recordMemory requires structured claims", () => {
   assert.throws(() => {
     const invalidEvent = {
       kind: "record-major-event",
-      title: "柳洞寺确认情报",
-      summary: "凛确认 Caster 正在柳洞寺。",
-      consequences: ["Caster 位置已确认。"],
+      title: "廷根市教堂确认情报",
+      summary: "值夜者确认非凡者在廷根市教堂。",
+      consequences: ["非凡者位置已确认。"],
     };
     // @ts-expect-error runtime boundary regression: tool input may omit claims even though TypeScript callers cannot.
     recordMemory(draft, invalidEvent);
@@ -68,12 +68,12 @@ void test("recordMemory accepts missing major event consequences as empty", () =
 
   const result = recordMemory(draft, {
     kind: "record-major-event",
-    title: "新都采购急救物资",
-    summary: "卫宫士郎与远坂凛在新都商业街采购急救物资并返回卫宫宅。",
+    title: "廷根市采购非凡物资",
+    summary: "值夜者小队在廷根市商业街采购非凡物资并返回教堂驻地。",
     claims: [
       {
         kind: "mundane",
-        statement: "卫宫士郎在新都商业街购买了急救物资。",
+        statement: "值夜者小队在廷根市商业街购买了非凡物资。",
         certainty: "observed",
       },
     ],
@@ -90,13 +90,13 @@ void test("recordMemory rejects non-mundane confirmed claims without evidence", 
     () =>
       recordMemory(draft, {
         kind: "record-major-event",
-        title: "柳洞寺确认情报",
-        summary: "凛确认 Caster 正在柳洞寺。",
-        consequences: ["Caster 位置已确认。"],
+        title: "廷根市教堂确认情报",
+        summary: "值夜者确认非凡者在廷根市教堂。",
+        consequences: ["非凡者位置已确认。"],
         claims: [
           {
             kind: "location",
-            statement: "凛确认 Caster 正在柳洞寺。",
+            statement: "值夜者确认非凡者在廷根市教堂。",
             certainty: "confirmed",
           },
         ],
@@ -110,13 +110,13 @@ void test("recordMemory accepts explicitly worded hypotheses", () => {
 
   const result = recordMemory(draft, {
     kind: "record-major-event",
-    title: "关于柳洞寺的未证实猜测",
-    summary: "士郎猜测 Caster 可能与柳洞寺有关，但没有证据确认。",
+    title: "关于廷根市教堂的未证实猜测",
+    summary: "线人猜测非凡者可能与廷根市教堂有关，但没有证据确认。",
     consequences: ["该猜测未证实，不能作为行动事实。"],
     claims: [
       {
         kind: "location",
-        statement: "士郎猜测 Caster 可能与柳洞寺有关。",
+        statement: "线人猜测非凡者可能与廷根市教堂有关。",
         certainty: "hypothesis",
       },
     ],
@@ -134,13 +134,13 @@ void test("recordMemory rejects hypothesis worded as confirmed fact", () => {
       recordMemory(draft, {
         kind: "pin-fact",
         scope: "world",
-        subject: "柳洞寺",
-        text: "凛确认 Caster 正在柳洞寺。",
+        subject: "廷根市教堂",
+        text: "值夜者确认非凡者在廷根市教堂。",
         sourceEventId: null,
         claims: [
           {
             kind: "location",
-            statement: "凛确认 Caster 正在柳洞寺。",
+            statement: "值夜者确认非凡者在廷根市教堂。",
             certainty: "hypothesis",
           },
         ],
@@ -158,7 +158,7 @@ void test("recordMemory rejects daily summaries for single events", () => {
         kind: "record-daily-summary",
         startDate: "2004-01-30T00:00:00.000Z",
         endDate: "2004-01-30T23:59:00.000Z",
-        summary: "在新都商业街购入两件雨衣，花费2400円。",
+        summary: "在廷根市商业街购入两件防污斗篷，花费2400便士。",
       }),
     /单次采购\/调查\/战斗结论请用 record-major-event/,
   );
@@ -171,7 +171,7 @@ void test("recordMemory accepts actual daily summaries", () => {
     kind: "record-daily-summary",
     startDate: "2004-01-30T00:00:00.000Z",
     endDate: "2004-01-30T23:59:00.000Z",
-    summary: "今日下午在新都完成采购并返回卫宫宅休整。",
+    summary: "今日下午在廷根市完成采购并返回教堂驻地休整。",
   });
 
   assert.equal(draft.public.memory.dailySummaries[0]?.id, result.dailySummaryId);

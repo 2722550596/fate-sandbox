@@ -10,11 +10,11 @@ void test("progressSceneBeatTool begins a beat from the GM-facing adapter", () =
   const result = progressSceneBeatTool(
     {
       kind: "begin",
-      title: "柳洞寺外围侦察",
-      objectives: ["观察结界", "安全撤回"],
-      purpose: "进入柳洞寺外围侦察 beat。",
+      title: "廷根市值夜者教堂外围侦察",
+      objectives: ["观察教堂", "记录可疑活动"],
+      purpose: "进入廷根市值夜者教堂外围侦察 beat。",
       time: { kind: "elapsed", elapsedMinutes: 1, reason: "进入侦察态势。" },
-      threats: [{ summary: "山门附近有从者级别气息", severity: "medium" }],
+      threats: [{ summary: "教堂附近有序列途径气息", severity: "medium" }],
       presence: { presentActorIds: ["protagonist"] },
       situation: "investigation",
     },
@@ -23,12 +23,12 @@ void test("progressSceneBeatTool begins a beat from the GM-facing adapter", () =
 
   const state = getState();
   assert.match(result.content[0]?.text ?? "", /Scene Beat 已开始/);
-  assert.equal(state.public.scene.storyWindow?.title, "柳洞寺外围侦察");
+  assert.equal(state.public.scene.storyWindow?.title, "廷根市值夜者教堂外围侦察");
   assert.deepEqual(
     state.public.scene.objectives.map((objective) => objective.summary),
-    ["观察结界", "安全撤回"],
+    ["观察教堂", "记录可疑活动"],
   );
-  assert.equal(state.public.scene.threats[0]?.summary, "山门附近有从者级别气息");
+  assert.equal(state.public.scene.threats[0]?.summary, "教堂附近有序列途径气息");
 });
 
 void test("progressSceneBeatTool completes current beat and opens next beat", () => {
@@ -36,15 +36,15 @@ void test("progressSceneBeatTool completes current beat and opens next beat", ()
   progressSceneBeatTool(
     {
       kind: "begin",
-      title: "真名与宝具揭示收口",
-      objectives: ["真名揭示成立", "宝具揭示成立"],
-      purpose: "开启揭示收口 beat",
+      title: "占卜家途径线索收口",
+      objectives: ["身份猜想成立", "途径线索成立"],
+      purpose: "开启占卜线索收口 beat",
       time: { kind: "elapsed", elapsedMinutes: 1, reason: "开启 beat。" },
       beatId: "reveal-wrapup",
       actionPolicy: {
         allowedActions: ["整理线索"],
-        forbiddenEscalations: ["不得继续追击"],
-        completionCriteria: ["真名揭示成立", "宝具揭示成立"],
+        forbiddenEscalations: ["不得暴露身份"],
+        completionCriteria: ["身份猜想成立", "途径线索成立"],
       },
       presence: { presentActorIds: ["protagonist"] },
     },
@@ -54,22 +54,22 @@ void test("progressSceneBeatTool completes current beat and opens next beat", ()
   const result = progressSceneBeatTool(
     {
       kind: "complete",
-      outcome: "真名与宝具揭示成立，现场进入短暂停顿。",
+      outcome: "占卜线索收口成立，双方进入短暂对峙。",
       time: { kind: "elapsed", elapsedMinutes: 1, reason: "收口当前 beat。" },
       memory: {
-        title: "真名与宝具揭示成立",
-        summary: "玩家通过现场线索确认揭示成立，双方暂时停手观察。",
+        title: "占卜线索收口成立",
+        summary: "玩家通过现场线索确认占卜家途径，双方暂时停手观察。",
         claims: [
           {
             kind: "mundane",
-            statement: "真名与宝具揭示这一幕已经在现场发生。",
+            statement: "占卜家线索收口已经在现场完成。",
             certainty: "observed",
           },
         ],
       },
       nextBeat: {
-        title: "揭示后的短暂停顿",
-        objectives: ["观察对方反应", "决定是否撤离"],
+        title: "收口后的对峙",
+        objectives: ["观察值夜者动向", "决定是否撤离"],
         presence: { presentActorIds: ["protagonist"], allyActorIds: [] },
         situation: "social",
       },
@@ -79,8 +79,8 @@ void test("progressSceneBeatTool completes current beat and opens next beat", ()
 
   const state = getState();
   assert.match(result.content[0]?.text ?? "", /Scene Beat 已切换/);
-  assert.equal(state.public.scene.storyWindow?.title, "揭示后的短暂停顿");
-  assert.equal(state.public.memory.eventLog[0]?.title, "真名与宝具揭示成立");
+  assert.equal(state.public.scene.storyWindow?.title, "收口后的对峙");
+  assert.equal(state.public.memory.eventLog[0]?.title, "占卜线索收口成立");
   assert.equal(state.public.scene.situation, "social");
 });
 
@@ -93,18 +93,18 @@ void test("progressSceneBeatTool rejects non-positive travel elapsedMinutes", ()
         {
           kind: "begin",
           title: "非法移动 beat",
-          objectives: ["确认魔力痕迹"],
-          purpose: "移动到新都商业街并开始调查。",
+          objectives: ["确认非凡痕迹"],
+          purpose: "移动到廷根市佐特兰街并开始调查。",
           time: {
             kind: "travel",
             location: {
-              region: "冬木市",
-              site: "新都",
-              detail: "商业街",
+              region: "鲁恩王国",
+              site: "廷根市",
+              detail: "佐特兰街",
               boundary: "normal",
             },
             elapsedMinutes: 0,
-            reason: "移动到新都商业街。",
+            reason: "移动到廷根市佐特兰街。",
           },
         },
         createNoopSessionManager(),
