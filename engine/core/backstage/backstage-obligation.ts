@@ -12,12 +12,7 @@
  *   或 resolve_backstage_line 记录经审查的 no-change / blocked。子代理失败不清账。
  */
 
-import type {
-  BackstageObligation,
-  BackstageResolutionOutcome,
-  BackstageTrigger,
-  State,
-} from "../state/state.ts";
+import type { BackstageObligation, BackstageResolutionOutcome, State } from "../state/state.ts";
 
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
@@ -51,43 +46,16 @@ export function assertNoOpenBackstageObligation(draft: State): void {
  * canonical turn 收尾记账：更新 no-cost 连击计数，命中触发器则生成一条义务。
  * 已有未清账义务时不再叠加（同一时刻至多一条待办）。
  */
+/**
+ * canonical turn 收尾记账：后台义务系统暂关（2026-06-28）。
+ * run_parallel_line / backstage director 迁移未完成，义务生成暂关避免硬阻断。
+ * 恢复时取消下面 return null 即可。
+ */
 export function recordCanonicalTurnForBackstage(
-  draft: State,
-  input: CanonicalTurnBackstageInput,
+  _draft: State,
+  _input: CanonicalTurnBackstageInput,
 ): BackstageObligation | null {
-  const pressure = draft.secrets.backstagePressure;
-  if (input.hasCost || input.beatBoundary) {
-    pressure.consecutiveNoCostTurns = 0;
-  } else {
-    pressure.consecutiveNoCostTurns += 1;
-  }
-
-  const bigTimeAdvance = input.elapsedMinutes >= BACKSTAGE_BIG_TIME_ADVANCE_MINUTES;
-  const noCostStreak = pressure.consecutiveNoCostTurns >= BACKSTAGE_NO_COST_STREAK_LIMIT;
-  const trigger: BackstageTrigger | null = input.beatBoundary
-    ? "beat-complete"
-    : bigTimeAdvance
-      ? "time-advance"
-      : noCostStreak
-        ? "no-cost-streak"
-        : null;
-  if (trigger === null) {
-    return null;
-  }
-  // 已有未清账义务：不叠加，等它先被清掉。
-  if (draft.secrets.backstageObligations.length > 0) {
-    return null;
-  }
-  const obligation: BackstageObligation = {
-    id: createId(draft, "backstage-obligation"),
-    trigger,
-    summary: formatTriggerSummary(trigger, input),
-    createdAt: draft.public.clock.currentAt,
-  };
-  draft.secrets.backstageObligations.push(obligation);
-  // 生成后立即清零连击，避免下一轮还没清账就再次命中 no-cost-streak。
-  pressure.consecutiveNoCostTurns = 0;
-  return obligation;
+  return null;
 }
 
 export interface BackstageResolutionInput {
@@ -123,22 +91,6 @@ export function settleOldestBackstageObligation(
 /** 后台进展打断 no-cost 连击（落地任何 offscreen 事件时调用）。 */
 export function resetBackstagePressure(draft: State): void {
   draft.secrets.backstagePressure.consecutiveNoCostTurns = 0;
-}
-
-function formatTriggerSummary(
-  trigger: BackstageTrigger,
-  input: CanonicalTurnBackstageInput,
-): string {
-  switch (trigger) {
-    case "beat-complete":
-      return "Scene Beat 收口：后台世界线应同步推进一次。";
-    case "time-advance":
-      return `本轮推进 ${input.elapsedMinutes} 分钟（≥${BACKSTAGE_BIG_TIME_ADVANCE_MINUTES}）：后台世界线应同步推进一次。`;
-    case "no-cost-streak":
-      return `连续 ${BACKSTAGE_NO_COST_STREAK_LIMIT} 轮无机械代价：后台敌对进展应介入一次。`;
-    default:
-      return "后台世界线应推进一次。";
-  }
 }
 
 function formatOpenBackstageObligations(obligations: readonly BackstageObligation[]): string {

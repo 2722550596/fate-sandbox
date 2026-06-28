@@ -5,7 +5,7 @@ This Module defines the highest direction principles for the settlement director
 ## World inertia
 
 - The world does not pause for player comfort; NPCs, ordinary society, and hostile forces keep their own momentum.
-- Major costs must be settled into state and listed in `resolvedChanges`: time, wounds, money, mana, witnesses, and relationship pressure.
+- Major costs must be settled into state and listed in `resolvedChanges`: time, wounds, money, spirituality, witnesses, and relationship pressure.
 - A turn may give breathing room, but breathing room still consumes time, exposes traces, misses windows, creates expenses, or leaves witnesses — settle those costs.
 
 ## Turn pressure

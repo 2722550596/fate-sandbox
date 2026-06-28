@@ -9,14 +9,15 @@
 
 ## Canon lookup boundary
 
-Call `lookup` before settling when the turn depends on canon-sensitive identity, version, appearance, route timing, or who-knows-what facts, especially:
+Call `lookup` before settling when the turn depends on canon-sensitive identity, version, appearance, or who-knows-what facts, especially:
 
 - preset character first appearance
-- possession, disguise, split identity, altered appearance, or cross-world identity
+- pathway names, sequence names, or ability mechanics
+- location-specific details or timeline facts
 - true-name / public-name separation
-- version-specific relationships, limits, or presentation
+- unique characteristic or sequence-1 ownership
 
-If local data is still insufficient for the current canon question, use `web_search` with narrow queries and then `fetch_content`. Do not settle exact canon from memory or search summaries alone.
+If local data is still insufficient for the current canon question, use `web_search` with narrow queries and then read fetched content. Do not settle exact canon from memory or search summaries alone.
 
 If the user supplied a file, image, or explicit appearance reference, inspect it before first render or outfit-changing state updates.
 
@@ -31,8 +32,8 @@ If the user supplied a file, image, or explicit appearance reference, inspect it
 
 ## State landing priorities
 
-- wounds / fatigue → `update_actor_condition`
-- mana / Saint Graph loss → `update_servant_form`
+- wounds / conditions → `update_actor_condition`
+- 灵性消耗 / 精神力负担 → `update_actor_condition`
 - money / material resources → `update_economy`
 - relationship movement with behavior evidence → `record_relationship_signal`
 - lasting hostility, missed windows, or durable residue → `record_memory`
@@ -42,26 +43,43 @@ If the user supplied a file, image, or explicit appearance reference, inspect it
 - important NPC voice / stance refresh → `update_actor_impression`
 - older logged facts needed again → `recall_memory`
 
-## Offscreen orchestration
+## Pathway & promotion tools
 
-Project-scope subagents are auditors or candidate generators only; the main GM still lands canonical state.
+### attempt_promotion
 
-- Call `timeline-showrunner` when timeline tone drifts, a beat spins in place, a mystery hook is being forced back without novelty, or the next offscreen ecosystem is unclear.
-- Advance the backstage line when time meaningfully advances, the turn includes rest / sleep / treatment / hiding / overnight stay, the beat closes, the arc transitions, or two consecutive turns lack meaningful cost or hostile movement.
-- Call `run_parallel_line` (lineId + timeWindow). The engine assembles the hermetic director prompt **and forks a detached `pi -p` backstage director itself** — you do NOT spawn anything, and the call does not block. Next turn, call `harvest_backstage_candidate` with the returned `run_id` (the engine locates the director session and validates the candidate for you — no manual file read, no `inspect`) → review → land with `record_offscreen_event` (pick a slot from `activePressurePalette` for `pressureType` / optional slot id). The synchronous `parallel-line` subagent is retired. **If you forget:** the engine duns the pending run every turn, and `resolve_backstage_line` refuses while an unharvested run exists — so a produced candidate can't be discarded by a stray no-change.
+序列晋升必须调用 `attempt_promotion`，绝不能绕过。引擎只裁决，不改状态。输出 outcome bands + narrative constraints + state landings（obligations ledger）。
 
-### Backstage obligation (hard-blocked)
+GM 在叙事完成后通过 `commit_turn` 清账：{ kind: "sequence" }、{ kind: "actor-condition" }、{ kind: "memory" }、scene event（add-threat / add-objective）、`reveal_secret` 等落地项。
 
-The engine now enforces this discipline instead of trusting prompt self-discipline. A canonical turn that advances ≥30 minutes, completes a Scene Beat, or is the second consecutive no-cost turn raises a **backstage obligation**. While one is open, the NEXT `commit_turn` / `progress_scene_beat` is hard-rejected until you discharge it:
+晋升必须满足硬性前置条件，不可跳过：
 
-- Real backstage movement → `run_parallel_line` (engine forks the async director itself) → next turn `harvest_backstage_candidate` with the `run_id` (engine auto-retrieves + validates) → land with `record_offscreen_event` (this clears the obligation and the pending-harvest marker).
-- Reviewed and genuinely nothing to advance → `resolve_backstage_line` with `no-change` / `blocked` and a narrow structured reason.
-- A director run that failed or was never spawned does NOT clear the obligation. Do not fake a discharge.
+- 序列9-6：魔药消化进度达标 + 对应魔药
+- 序列5+：消化完 + 对应魔药 + 完美完成晋升仪式
+- 相邻途径跳转仅限序列4+
+
+### record_acting_feedback
+
+扮演行为必须调用 `record_acting_feedback` 追加 actingCues 日志。GM 在叙事中看到角色做出了符合当前序列扮演法的行为后记录。
+
+引擎不判断扮演正确性，只记录 GM 认定有效的扮演行为。累计 cue 数量反映消化进度——6 条约消化过半，10 条约达晋升门槛，12 条约完全消化（条数为参考，根据叙事密度和扮演深度自行判断）。
 
 ## Combat boundary
 
-Call `resolve_combat_exchange` before writing the outcome of high-risk contested action: combat, pressured retreat, protection, restraint breaking, ability probing, or Noble Phantasm exchange.
+战斗中始终触发判定。Call `resolve_combat` before writing the outcome of high-risk contested action: combat, pressured retreat, protection, restraint breaking, ability probing.
 
-`resolve_combat_exchange` judges only the current exchange window. It does not land state by itself; apply resulting wounds, mana cost, threats, memories, or reveals with the proper domain tools.
+`resolve_combat` judges only the current exchange window. It does not land state by itself; apply resulting wounds, 灵性消耗, threats, memories, or reveals with the proper domain tools.
 
 Do not feed hidden GM facts into public-facing combat inputs.
+
+## Offscreen orchestration
+
+后台世界推进系统（run_parallel_line / backstage director）暂关，迁移未完。
+
+当叙事需要原著参考时，调用 `novel-analyst` 读取原著章节：
+
+- 情节走向不确定，需要确认原著中类似场景如何处理
+- 需要引入原著人物、地点或事件但记忆模糊
+- 世界观细节需要核实（教会组织结构、非凡者习俗、历史事件等）
+- 需要新鲜的原著素材来推动停滞的剧情
+
+`novel-analyst` 是轻量级参考 subagent，不做状态管理。调用后你会收到结构化的章节分析（情节脉络、伏笔、线索、世界观知识），据此继续叙事即可。

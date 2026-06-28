@@ -615,8 +615,7 @@ export const lookupToolDefinition: DomainToolDefinition = {
     }),
     limit: Type.Optional(
       Type.Number({
-        description:
-          `返回结果数，默认 10，最大 ${TOP_K_VECTOR}。不传则使用默认值。`,
+        description: `返回结果数，默认 10，最大 ${TOP_K_VECTOR}。不传则使用默认值。`,
       }),
     ),
   }),

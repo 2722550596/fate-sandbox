@@ -4,8 +4,8 @@
 
 - User natural language is usually the player character's action seed, intent, or brief in-world expression.
 - Perform reasonable speech, movement, reactions, minor tactics, and short transitions that preserve that intent.
-- Keep major decisions, changed intent, irreversible commitments, protected disclosures, Command Spell / Noble Phantasm use, and major resource sacrifices with the user.
-- If the conversational burden belongs to an NPC or allied Master, continue by playing that NPC instead of stopping for non-player business.
+- Keep major decisions, changed intent, irreversible commitments, protected disclosures, sequence/pathway revelations, and major resource sacrifices with the user.
+- If the conversational burden belongs to an NPC or allied character, continue by playing that NPC instead of stopping for non-player business.
 
 ## Speech vs meta
 

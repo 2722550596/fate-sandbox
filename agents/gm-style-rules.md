@@ -11,7 +11,7 @@ Single source of truth for the renderer's prose style: viewpoint discipline, pos
 ## Player-output language
 
 - Render in native Chinese, not translated English.
-- Use accepted Chinese Type-Moon terms when `canonFacts` supplies them. If no mapping is supplied, prefer natural Chinese phrasing over transliterated system jargon.
+- Use supplied `canonFacts` terms when available. If no mapping is supplied, prefer natural Chinese phrasing over transliterated system jargon.
 - Keep internal labels, field names, and audit terms out of the prose.
 
 ## Scene recipe
@@ -79,44 +79,44 @@ Keep briefing under stress broken by handling, damage, and triage. A survivor do
 - Compress long time skips with 2 to 4 shots: the starting condition, repeated wear during the middle, and the abnormality or new situation at the end.
 - Do not deliver all information at once. Let the player assemble the situation from traces, gaps, oddities, and other characters' reactions.
 
-## Fate flavor
+## LOTM flavor
 
-- Render Mystery first as reality going wrong: shadow angles fail, sound thins, skin cools, light lags half a beat, air seems scraped away.
-- Render Servant pressure through space and missing movement: distance stops mattering, footsteps make no sound, the weapon has not moved but the body already knows it is late.
-- Render magecraft traces as physical anomalies first, then offer limited judgment. Do not announce backstage truth.
-- Strong people do not need to shout. Danger can come from politeness, quiet, and absence of spare motion.
-- Let mythic violence collide with ordinary surfaces: school corridors, convenience-store bags, coat cuffs, train noise, receipts, wet shoes, cheap lights. The mundane object should remain physically specific while the supernatural pressure distorts how bodies use it.
-- In combat or pursuit, write weight, speed, muscle refusal, breath loss, footing, and the body's late recognition before naming technique or rank. Magical force should feel like pressure on nerves, balance, skin, joints, air, or light.
-- Hide ideological conflict and loyalty under plain or cold lines. Characters in crisis often say practical things because direct feeling would cost too much time, pride, or safety.
+- Render supernatural intrusion as physical wrongness first: a gaslight flickering without wind, fog that carries a metallic taste, footsteps that lag behind the walker, a room where the wallpaper pattern suddenly looks wrong under candlelight.
+- Render sequence-gap pressure through sensory distortion: air thickens, sounds thin out, a spiritual chill crawls up the spine, the body registers danger before the mind names it. Never name it "威压" or "位格压制".
+- Render beyonder ability traces as physical anomalies first, then offer limited judgment from the character's viewpoint. Do not announce backstage truth.
+- Strong beyonders do not need to shout. Danger comes from stillness, politeness, a line spoken too softly, or the absence of expected reaction.
+- Let supernatural violence collide with Victorian surfaces: carriage wheels halting too suddenly, gas lamps, fogged windows, coal smoke, cheap tallow candles, a bowler hat knocked into a puddle. The mundane object stays physically specific while the beyonder pressure distorts how bodies relate to it.
+- In combat or pursuit, write weight, speed, muscle refusal, breath loss, footing, and the body's late recognition before naming ability or rank. Supernatural force should feel like pressure on nerves, balance, skin, joints, air, or light.
+- Hide ideological conflict and faction loyalty under plain or cold lines. Characters in crisis often say practical things because direct feeling would cost too much time, pride, or safety.
 
 ## Ordinary-life texture
 
-- Use routine detail as a load-bearing surface. School schedules, cleaning time, club activity, empty classrooms, train platforms, vending machines, convenience-store bags, bent receipts, wet shoe soles, and cheap fluorescent lights should change what characters can do.
-- Winter scenes may carry coats, breath, numb fingers, cold stair rails, early darkness, kettles, convenience-store heat, or train doors closing. Let the season press on bodies and timing before naming atmosphere.
-- Food and drink are social moves. Tea, canned coffee, miso soup, curry, boxed lunches, convenience-store fried food, or a shared bottle can carry care, refusal, apology, debt, or delay.
-- Time of day should alter social permission: school lunch, after-school cleaning, club hours, last train, late convenience stores, and holiday crowds give different excuses, absences, and pressure.
+- Use routine detail as a load-bearing surface. Gas lamp maintenance, coal deliveries, newspaper headlines, carriage fares, fogged windowpanes, the rattle of tram wheels on cobblestone, and the smell of cheap tallow should change what characters can do.
+- Winter scenes may carry greatcoats, visible breath, numbed fingers in thin gloves, early darkness, coal smoke hanging low, kettles whistling in the next room, or carriage doors slamming shut. Let the season press on bodies and timing before naming atmosphere.
+- Food and drink are social moves. A cup of tea with too little sugar, day-old bread, a bowl of chowder at a public house, cheap beer, or a shared flask can carry care, refusal, apology, debt, or delay.
+- Time of day should alter social permission: morning fog means fewer witnesses; the last tram makes hesitation expensive; church bells mark what hour has been lost; gas lamps going out at dawn signal that the night's business must conclude.
 
 Usable ordinary anchors:
 
-- School: cleaning time leaves corridors half-empty; club hours explain who is still present; a classroom after dismissal makes private speech possible but fragile.
-- Transit: the last train makes hesitation expensive; platform noise can swallow a line; a closing door can decide who is left outside.
-- Convenience stores: warmth, plastic bags, receipts, canned coffee, and fried food can make night danger feel closer by contrast.
-- Food at home: curry, miso soup, tea, or boxed lunches can carry apology, routine, refusal, or care more cleanly than direct confession.
+- Street: cobblestones wet with fog drip, a lamplighter's ladder left against a post, newspaper boys shouting headlines that are half a day old, a carriage wheel stuck in a rut.
+- Public house: the warmth and noise press against the cold outside; a pint set down too hard can end a negotiation; the landlord counting coins behind the bar is the only clock.
+- Lodgings: a rented room with a squeaking floorboard, a gas lamp that needs its mantel replaced, a window that won't quite shut, the landlady's footsteps on the stairs.
+- Food at table: tea gone cold, bread with a hard crust, a bowl of soup that someone pushes across the table instead of apologizing.
 
-## Type-Moon prose spine
+## LOTM prose spine
 
-- Treat supernatural or mythic scale as intrusion into ordinary daily life. The page should be able to hold a mythic contract and a cheap fluorescent light in the same breath.
-- Keep the human body fragile against non-human force: pain, balance, cold, breath, blood, hearing, and delayed muscle response should carry the fear before lore terms appear.
-- Magecraft should enter as physical damage to normal perception: pressure behind the eyes, scraped skin temperature, a missing footstep, a corridor that returns sound wrong, a hand that moves too late.
+- Treat beyonder power as intrusion into ordinary Victorian daily life. The page should hold a demigod's mythic form and a coal-smoke-stained curtain in the same breath.
+- Keep the human body fragile against non-human force: pain, balance, cold, breath, blood, hearing, and delayed muscle response should carry the fear before sequence ranks or pathway terms appear.
+- Beyonder abilities should enter as physical damage to normal perception: pressure behind the eyes, scraped skin temperature, a missing footstep, a corridor that returns sound wrong, a hand that moves too late.
 - Battle prose needs hard contact: gravity, acceleration, footing, torn fabric, cramped distance, a weapon's weight, and the instant when the body understands before the mind catches up.
-- Ideals, loyalty, and betrayal should hide under practical or cold lines. Let characters talk about passage, proof, timing, debt, or procedure while the larger conflict sits underneath.
+- Faction loyalty, betrayal, and survival instinct should hide under practical or cold lines. Let characters talk about passage, proof, timing, debt, or procedure while the larger conflict sits underneath.
 
 Concrete pressure patterns:
 
-- A fluorescent light keeps humming after the sound around it has gone thin.
-- A cheap umbrella, sleeve, receipt, or school bag reacts before a Servant visibly moves.
-- A clean hallway stays ordinary, which makes blood, bounded fields, or missing footsteps worse.
-- A convenience-store bag taps someone's knee while a supernatural countdown closes in.
+- A gas lamp keeps hissing after the sound around it has gone thin.
+- A coat sleeve, receipt, or carriage ticket reacts before a beyonder visibly moves.
+- A clean street stays ordinary, which makes blood, ritual traces, or missing footsteps worse.
+- A tea cup taps its saucer while a supernatural countdown closes in.
 - A polite line lands colder than a threat because nobody has enough spare movement to dramatize it.
 
 ## Figurative restraint
@@ -147,7 +147,7 @@ For social, investigative, and standoff turns, do not let one speaker deliver a 
 3. A body/object beat changes distance, formation, leverage, or timing.
 4. The next line either trades usable information, sets a condition, or exposes a new cost.
 
-If an NPC asks for proof, permission, identity, or terms from another NPC or allied Master, write that answer and the immediate reaction unless the answer itself requires the player character's major decision.
+If an NPC asks for proof, permission, identity, or terms from another NPC or allied character, write that answer and the immediate reaction unless the answer itself requires the player character's major decision.
 
 ## Bad-to-good rewrite
 

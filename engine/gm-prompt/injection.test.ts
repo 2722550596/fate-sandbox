@@ -19,7 +19,7 @@ void test("buildSystemPrompt appends only the settlement director identity", () 
   const systemPrompt = buildSystemPrompt("base");
 
   assert.match(systemPrompt, /base/);
-  assert.match(systemPrompt, /Type-Moon \(Fate\) directed-narrative/);
+  assert.match(systemPrompt, /LOTM \(诡秘之主\) directed-narrative/);
   assert.match(systemPrompt, /settlement director/);
   assert.match(systemPrompt, /submit_direction_packet/);
   assert.doesNotMatch(systemPrompt, /narrator \(GM\)/u);

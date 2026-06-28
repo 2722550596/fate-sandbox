@@ -2,6 +2,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 import type { DomainToolDefinition } from "./runtime/tool-definition.ts";
 
+import { resolveLOTMCombatExchangeToolDefinition } from "../core/combat/combat-exchange-lotm.ts";
 import { recordActingFeedbackToolDefinition } from "./actor/record-acting-feedback.ts";
 import { recordActorKnowledgeToolDefinition } from "./actor/record-actor-knowledge.ts";
 import { retireActorToolDefinition } from "./actor/retire-actor.ts";
@@ -81,6 +82,7 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   resetStateToolDefinition,
   getStateSchemaToolDefinition,
   attemptPromotionToolDefinition,
+  resolveLOTMCombatExchangeToolDefinition,
 ];
 
 export function registerAllTools(pi: ExtensionAPI): void {

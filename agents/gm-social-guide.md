@@ -13,20 +13,21 @@ This Module is the persistent reading filter for important NPC interactions. It 
 - Silence is not automatically refusal. It can be thought, wording, waiting for the other person to finish, or preserving face. It becomes refusal when paired with retreating courtesy, repeated excuses, changed address, or topic transfer.
 - Relationship movement must leave behavior evidence. When a moment changes trust, distance, debt, suspicion, protection, or boundary, settle it with `record_relationship_signal` before relying on it later.
 
-## Type-Moon dialogue
+## LOTM dialogue
 
-- Magi withhold information and rarely explain their trump cards. If they can probe, they do not reveal; if they can stay ambiguous, they do not define.
-- Holy Church politeness can be oppressive. The calmer the tone, the more likely it is observing a reaction.
-- Student everyday life may be light, but abnormalities should create breaks: a sentence stops, laughter dies, footsteps lag half a beat.
-- Strong characters do not need long threats to create pressure. Short lines, silence, and absence of extra movement work better.
+- Beyonders withhold information and rarely explain their trump cards. If they can probe, they do not reveal; if they can stay ambiguous, they do not define.
+- Church politeness can be oppressive — the calmer the tone, the more likely it is observing a reaction. 正神教会人员（值夜者、代罚者、机械之心）的官方措辞本身就是施压工具。
+- Ordinary daily life may be light, but abnormalities should create breaks: a sentence stops, laughter dies, footsteps lag half a beat.
+- Strong beyonders do not need long threats to create pressure. Short lines, silence, and absence of extra movement work better. High-sequence characters feel dangerous precisely because they waste no motion.
 - Competent characters ask for the smallest proof that changes their next action, not for biographies. Identity checks, conditions for passage, and temporary trust should be transactional and specific.
 - Characters under pressure still protect face. They may choose the practical wording, avoid gratitude, or turn fear into scheduling, positioning, payment, duty, or a complaint about inconvenience.
 
-## Japanese social texture
+## Victorian social texture
 
-- Public conflict is expensive. Even hostile characters may use restraint, formal address, indirect refusal, or a condition framed as procedure.
-- Emotional excess is socially suspect unless the character canonically behaves that way. Keep distance proportionate: affection, suspicion, debt, and anger should show through changed address, changed spacing, or object handling before direct confession.
-- “It cannot be helped” is not surrender; it is a way to keep moving after shock. Let characters resume practical motion while the cost remains visible in smaller habits.
+- Public conflict is expensive. Even hostile characters may use restraint, formal address, indirect refusal, or a condition framed as procedure. Victorian society punishes public scenes more harshly than private sins.
+- Class distance is real and visible. A gentleman does not address a laborer the same way he addresses an equal. A housemaid's courtesy is armor. The form of address — 先生, 女士, 阁下, or the deliberate omission of title — carries as much weight as the words that follow.
+- Emotional excess is socially suspect. Keep distance proportionate: affection, suspicion, debt, and anger should show through changed address, changed spacing, or object handling before direct confession.
+- "It cannot be helped" is not surrender; it is a way to keep moving after shock. Let characters resume practical motion while the cost remains visible in smaller habits.
 - Courtesy can punish. A return to surname, a cleaner honorific, or a more complete sentence can be colder than an insult.
 
 ## NPC behavior driver

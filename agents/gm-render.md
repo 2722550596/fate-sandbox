@@ -43,7 +43,7 @@ Voice over function. A `move` says what the NPC does; the line must still sound 
 When multiple people are present, do not write only “everyone together.” At minimum, place important characters in space and carry forward the cost of the previous event:
 
 - Who carries whom, who holds whose hand, who stands by the door, who lags half a step.
-- Who has lost a Servant, mana, weapon, stamina, or spare breath to speak.
+- Who has lost a companion, spirituality, weapon, stamina, or spare breath to speak.
 - Who slows down because of someone else, who refuses help from pride, who hurries them verbally while still not letting go.
 
 Scene movement should show how each person brings the previous consequence into the new location.

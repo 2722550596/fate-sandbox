@@ -35,7 +35,8 @@ export const initializeNewGameToolDefinition: DomainToolDefinition = {
     kind: Type.String({ description: "human-protagonist / beyonder-protagonist" }),
     scenario: Type.Object({
       presetId: Type.String({
-        description: "tingen_1349 / backlund_1350 / bayam_1351 / condat_1349 / custom_worldline",
+        description:
+          "tingen_1349_klein / tingen_1349_default / backlund_1350 / bayam_1351 / condat_1349 / custom_worldline",
       }),
       title: Type.Optional(Type.String()),
       premise: Type.Optional(Type.String()),

@@ -1,5 +1,5 @@
 {
-  "nextId": 51,
+  "nextId": 60,
   "items": [
     {
       "id": 1,
@@ -269,6 +269,60 @@
       "content": "Typecheck + lint + format",
       "done": true,
       "created": 1782642836
+    },
+    {
+      "id": 51,
+      "content": "Phase 1: gm-rules.md — 全部重写为 LOTM 硬规则",
+      "done": true,
+      "created": 1782648034
+    },
+    {
+      "id": 52,
+      "content": "Phase 2: gm-context.md — 全部重写为 LOTM 世界设定",
+      "done": true,
+      "created": 1782648034
+    },
+    {
+      "id": 53,
+      "content": "Phase 3: gm-tool-policy.md — 替换 Fate 工具为 LOTM 工具路由",
+      "done": true,
+      "created": 1782648034
+    },
+    {
+      "id": 54,
+      "content": "Phase 4: gm-story-driver.md — 新增 LOTM 叙事驱动层",
+      "done": true,
+      "created": 1782648034
+    },
+    {
+      "id": 55,
+      "content": "Phase 5: gm-style-rules.md — 替换 Fate flavor 为 LOTM 风味",
+      "done": true,
+      "created": 1782648034
+    },
+    {
+      "id": 56,
+      "content": "Phase 6: gm-style-blacklist.md — 追加 LOTM 特有禁词",
+      "done": true,
+      "created": 1782648034
+    },
+    {
+      "id": 57,
+      "content": "Phase 7: 边角收尾 (system-settlement, gm-social-guide, gm-settlement-principles)",
+      "done": true,
+      "created": 1782648034
+    },
+    {
+      "id": 58,
+      "content": "Phase 8: 注册 resolve_combat 工具到 registry",
+      "done": true,
+      "created": 1782648034
+    },
+    {
+      "id": 59,
+      "content": "Phase 9: 四项检查 + 验证",
+      "done": true,
+      "created": 1782648034
     }
   ]
 }

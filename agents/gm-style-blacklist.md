@@ -30,3 +30,23 @@ The lint rules also reject colloquial negate-then-correct narration and negative
 ## Repetition guard
 
 Within the same scene, do not lean on the same image cluster for three consecutive turns: cold light, cuffs, breath, darkness, fingers, shadows, and similar motifs. When an image recurs, it must have changed: closer, broken, carried by another character, or seen from the other side.
+
+## LOTM hard bans (mechanically linted; violations force a rewrite)
+
+- 非凡威压 / 半神威压 / 序列压制 / 位格压制 / 生命层次压制 — use sensory distortion instead
+- 神迹 / 神力震撼 / 神威如狱 / 如见神明 — use physical wrongness instead
+- 气质特别 / 眼神不一般 / 身上的气息不寻常 — use surface description only
+- 跪拜 / 臣服 / 膜拜 / 敬畏（作为对高序列的反应时） — use flight instinct instead
+- 不敢反抗 / 灵魂战栗 / 发自心底的恐惧（同层次时） — 同层次内禁止
+- 绝对恐惧 / 污染（描述同层次位格差异时） — use 似乎更强 / 资深者 / 序列在自己之上
+- 就是现在（战斗节点） — replace with contact, distance loss, footing failure, or body noticing too late
+- 他动了 / 她动了 — replace with concrete movement or impact
+
+## Beyond-worldview contamination bans
+
+These terms belong to other settings; using them in LOTM prose breaks immersion:
+
+- 魔力 / 魔法 / 法师 / 魔力波动 — LOTM: 灵性 / 非凡能力 / 非凡者 / 灵性波动
+- 结界 — LOTM: 灵性之墙 或具体仪式名称
+- 圣光 / 神圣 — LOTM: 具体途径能力描述
+- 剑圣 / 武神 — use setting-appropriate terms
