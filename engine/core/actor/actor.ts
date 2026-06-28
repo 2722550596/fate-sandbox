@@ -31,16 +31,23 @@ export function setScenePresence(draft: State, input: ScenePresenceInput): Scene
   assertNonEmptyString(input.reason, "reason");
   assertKnownActors(draft.public.actors, input.presentActorIds, "presentActorIds");
   assertKnownActors(draft.public.actors, input.allyActorIds, "allyActorIds");
+  for (const allyId of input.allyActorIds) {
+    if (!input.presentActorIds.includes(allyId)) {
+      throw new Error(
+        `allyActorIds 必须都是 presentActorIds 的子集：${allyId} 不在 presentActorIds 中。`,
+      );
+    }
+  }
   draft.public.scene.presentActorIds = uniqueActorIds(input.presentActorIds);
   draft.public.allyActorIds = uniqueActorIds(input.allyActorIds);
   return { message: "场景在场 actor 已更新。" };
 }
 
-export type { ScenePresenceInput } from "./actor-schema.ts";
-
 export interface ScenePresenceResult {
   message: string;
 }
+
+export type { ScenePresenceInput } from "./actor-schema.ts";
 
 export type { RetireActorInput } from "./actor-schema.ts";
 

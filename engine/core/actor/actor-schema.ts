@@ -113,7 +113,6 @@ export const SEQUENCE_INPUT_SCHEMA = Type.Object({
   divinity: Type.Number({ minimum: 0 }),
   digestionProgress: Type.Integer({ minimum: 0, maximum: 100 }),
   lossOfControlProgress: Type.Integer({ minimum: 0, maximum: 100 }),
-  reason: Type.String({ minLength: 1 }),
 });
 export type SequenceInput = Static<typeof SEQUENCE_INPUT_SCHEMA>;
 

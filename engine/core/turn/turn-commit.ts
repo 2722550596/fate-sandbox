@@ -60,7 +60,7 @@ export function commitTurn(draft: State, input: TurnCommitInput): TurnCommitResu
   const summary = assertNonEmptyString(input.summary, "summary");
   const startedAt = draft.public.clock.currentAt;
   const timeResult = applyTurnTime(draft, input.time);
-  const results = input.events.map((event) => applyTurnEvent(draft, event));
+  const results = input.events.map((event) => applyTurnEvent(draft, event, summary));
   assertNoOpenObligations(draft);
   const timeResults = [{ kind: "scene" as const, result: timeResult }];
   const finalResults = [...timeResults, ...results];
@@ -80,7 +80,11 @@ export function commitTurn(draft: State, input: TurnCommitInput): TurnCommitResu
   };
 }
 
-function applyTurnEvent(draft: State, event: TurnCommitEvent): TurnCommitEventResult {
+function applyTurnEvent(
+  draft: State,
+  event: TurnCommitEvent,
+  _summary: string,
+): TurnCommitEventResult {
   switch (event.kind) {
     case "scene":
       return { kind: event.kind, result: updateScene(draft, event.event) };
@@ -91,7 +95,7 @@ function applyTurnEvent(draft: State, event: TurnCommitEvent): TurnCommitEventRe
     case "tracked-item":
       return { kind: event.kind, result: applyTrackedItemEvent(draft, event.event) };
     case "sequence":
-      return { kind: event.kind, result: applySequenceEvent(draft, event.event) };
+      return { kind: event.kind, result: applySequenceEvent(draft, event.event, _summary) };
     case "economy":
       return { kind: event.kind, result: updateEconomy(draft, event.event) };
     case "memory":
@@ -101,11 +105,15 @@ function applyTurnEvent(draft: State, event: TurnCommitEvent): TurnCommitEventRe
   }
 }
 
-function applySequenceEvent(draft: State, event: SequenceEvent): SequenceEventResult {
+function applySequenceEvent(
+  draft: State,
+  event: SequenceEvent,
+  reason: string,
+): SequenceEventResult {
   const result = upsertActor(draft, {
     kind: "upsert-sequence",
     sequence: event,
-    reason: event.reason,
+    reason,
   });
   settleOldestObligation(draft, ["sequence"]);
   return { message: result.message };

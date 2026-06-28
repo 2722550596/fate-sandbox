@@ -59,7 +59,6 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
       divinity: divinity ?? 0,
       digestionProgress: 0,
       lossOfControlProgress: 0,
-      reason: `晋升至 ${targetName}`,
     },
     reason: `晋升至 ${targetName}`,
   });

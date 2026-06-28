@@ -415,7 +415,7 @@ refactor: extract lookup index builder to shared utility
 ### 提交前必须通过四项检查
 
 ```bash
-pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
+pnpm format && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 ```
 
 一条不过 = 不能 commit。不允许 `--no-verify`。
@@ -454,7 +454,7 @@ pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 - **改 lookup/data** → 保留 canonical fact skeleton，避免复制 wiki prose；不要引入非 LOTM 材料污染目标世界。
 - **改 subagent** → project-scope、explicit `tools`、explicit `extensions`、bare JSON 输出约束必须保留。
 - **改 release 包** → 跑打包检查，确认不含 `sessions/`、`state/`、`.pi/agent/`、`agents/user/`、`docs/`、`*.test.ts`。
-- **任何改动** → `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test` 全过。
+- **任何改动** → `pnpm format && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test` 全过。
 
 ---
 
