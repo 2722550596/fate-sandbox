@@ -65,9 +65,7 @@ export interface SceneBeatTransitionResult {
 export function beginSceneBeat(draft: State, input: SceneBeatInput): SceneBeatResult {
   assertNonEmptyString(input.reason, "reason");
   assertBeatObjectives(input.objectives);
-  const objectiveIds: SceneObjectiveId[] = [];
-  const threatIds: SceneThreatId[] = [];
-  beginSceneBeatOnDraft(draft, input, objectiveIds, threatIds);
+  const { objectiveIds, threatIds } = beginSceneBeatOnDraft(draft, input);
   return {
     message: `Scene Beat 已开始：${input.storyWindow.title}；目标 ${objectiveIds.length} 个。`,
     objectiveIds,
@@ -78,9 +76,7 @@ export function beginSceneBeat(draft: State, input: SceneBeatInput): SceneBeatRe
 function beginSceneBeatOnDraft(
   draft: State,
   input: SceneBeatInput,
-  objectiveIds: SceneObjectiveId[],
-  threatIds: SceneThreatId[],
-): void {
+): { objectiveIds: SceneObjectiveId[]; threatIds: SceneObjectiveId[] } {
   if (draft.public.scene.storyWindow !== null) {
     throw new Error(formatActiveBeatExistsError(draft.public.scene.storyWindow));
   }
@@ -96,6 +92,8 @@ function beginSceneBeatOnDraft(
     assertActorsExist(draft.public.actors, input.allyActorIds, "allyActorIds");
     draft.public.allyActorIds = uniqueActorIds(input.allyActorIds);
   }
+  const objectiveIds: SceneObjectiveId[] = [];
+  const threatIds: SceneObjectiveId[] = [];
   // 逐个写入 draft：createId 扫描 draft 避让，批量 map 会产生重复 ID。
   draft.public.scene.objectives = [];
   for (const summary of input.objectives) {
@@ -117,6 +115,7 @@ function beginSceneBeatOnDraft(
       severity: threat.severity,
     });
   }
+  return { objectiveIds, threatIds };
 }
 
 export function transitionSceneBeat(
