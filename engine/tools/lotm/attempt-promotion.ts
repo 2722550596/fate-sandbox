@@ -24,9 +24,12 @@ import {
   resolveLOTMPromotion,
   type LOTMPromotionInput,
 } from "../../core/promotion/promotion-exchange-lotm.ts";
+import { PATHWAY_DISPLAY_NAMES, RANK_DISPLAY_NAMES } from "../../core/state/pathway-names.ts";
 import { SEQUENCE_RANKS } from "../../core/state/state-enum-schemas.ts";
+import { createId } from "../../core/utils/ids.ts";
 import { assertOneOfString } from "../../core/utils/string-enum.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { lookupStructuredAbilities } from "../lookup/ability-lookup.ts";
 import { noNumberNarrativeHint } from "../runtime/narrative-hints.ts";
 import { runDomainEventTool } from "../system/domain-tool-runner.ts";
 
@@ -76,10 +79,29 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
 
       const result = resolveLOTMPromotion(draft, input);
       const landings = result.stateLandings;
+      const successOutcomes = new Set(["triumph", "success-with-cost", "scarred-success"]);
 
-      // 记录必须落地的义务
+      let abilityCount = 0;
+      if (successOutcomes.has(result.outcome)) {
+        // 1. 序列等级更新 + 扮演记录重置
+        actor.sequence.rank = targetRank;
+        actor.sequence.actingCues = [];
+
+        // 2. 序列名更新
+        const pathwayName = PATHWAY_DISPLAY_NAMES[actor.sequence.pathway] ?? actor.sequence.pathway;
+        const rankLabel = RANK_DISPLAY_NAMES[targetRank] ?? targetRank;
+        const abilities = lookupStructuredAbilities(pathwayName, rankLabel);
+        actor.abilities = abilities.map((a) => ({
+          id: createId(draft, "ability"),
+          label: a.name,
+          summary: a.description,
+        }));
+        abilityCount = abilities.length;
+      }
+
+      // 记录必须落地的义务（过滤掉已自动处理的 actor-sequence）
       const recorded = landings
-        .filter((l) => l.required)
+        .filter((l) => l.required && l.kind !== "actor-sequence")
         .map((l) =>
           recordObligation(draft, {
             source: "promotion",
@@ -88,11 +110,16 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
           }),
         );
 
-      return { result, recordedObligations: recorded.length };
+      return {
+        result,
+        recordedObligations: recorded.length,
+        abilityCount,
+        didAutoWrite: successOutcomes.has(result.outcome),
+      };
     },
     details: ({ result }) => ({ result }),
-    message: ({ result, recordedObligations }) =>
-      formatPromotionResult(result, recordedObligations),
+    message: ({ result, recordedObligations, abilityCount, didAutoWrite }) =>
+      formatPromotionResult(result, recordedObligations, abilityCount, didAutoWrite),
   });
 }
 
@@ -127,12 +154,25 @@ function landingKindToObligationKind(
 export function formatPromotionResult(
   result: import("../../core/promotion/promotion-exchange-lotm.ts").LOTMPromotionResult,
   recordedObligations: number,
+  abilityCount: number,
+  didAutoWrite: boolean,
 ): string {
   const lines: string[] = [
     `晋升裁决：${result.outcome}`,
     `目标等级：${result.targetRank}`,
     `扮演准备：${result.actingReadiness}（${result.actingCueCount} 条）`,
     `综合偏移：${result.totalModifier > 0 ? "+" : ""}${result.totalModifier}`,
+  ];
+
+  if (didAutoWrite) {
+    lines.push(
+      "",
+      `✅ 序列已自动更新：${result.targetRank}`,
+      `✅ 已自动填充 ${abilityCount} 项新能力`,
+    );
+  }
+
+  lines.push(
     "",
     "状态落点：",
     ...result.stateLandings.map(formatLanding),
@@ -147,7 +187,7 @@ export function formatPromotionResult(
     ...uniqueLines(result.forbiddenNarration).map((l) => `- ${l}`),
     "",
     `下一行动窗口：${result.nextActionWindow}`,
-  ];
+  );
 
   if (recordedObligations > 0) {
     lines.push(

@@ -26,7 +26,7 @@ import { seededRandomInt } from "../utils/seeded-rng.ts";
 export type LOTMPromotionOutcomeBand =
   | "triumph" // 完美晋升，无代价——一切顺利
   | "success-with-cost" // 成功，但有代价（消耗品/伤势）
-  | "scarred-success" // 成功，但有永久性代价（失去某样东西/精神烙印）
+  | "scarred-success" // 成功，但有永久性代价（失去某样东西/失控）
   | "stabilized" // 没晋升也没失控——消耗了材料，维持现状
   | "loss-of-control" // 晋升失败，角色陷入失控边缘
   | "catastrophe"; // 完全失控/死亡，需要外界干预

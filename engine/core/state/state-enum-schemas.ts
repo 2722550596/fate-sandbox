@@ -152,32 +152,45 @@ export const ACTOR_STANCE_SCHEMA = stringEnumSchema(ACTOR_STANCES);
 export type ActorStance = Static<typeof ACTOR_STANCE_SCHEMA>;
 
 // ---------------------------------------------------------------------------
-// Pathway — LOTM 22 条标准途径
+// Pathway — LOTM 32 条途径（22 标准 + 10 外神/非标准）
+// 中文名对照见 pathway-names.ts
 // ---------------------------------------------------------------------------
 
 export const PATHWAY_IDS = [
+  // —— 22 条标准途径 ——
   "seer", // 占卜家
   "apprentice", // 学徒
-  "thief", // 偷盗者
-  "mystery-prayer", // 秘祈人
+  "marauder", // 偷盗者
   "spectator", // 观众
-  "sailor", // 水手
   "bard", // 歌颂者
+  "sailor", // 水手
   "reader", // 阅读者
-  "warrior", // 战士
+  "secrets-suppliant", // 秘祈人
   "sleepless", // 不眠者
-  "grave-keeper", // 收尸人
+  "corpse-collector", // 收尸人
+  "warrior", // 战士
+  "mystery-pryer", // 窥秘人
+  "savant", // 通识者
   "hunter", // 猎人
   "assassin", // 刺客
-  "savant", // 通识者
-  "secret-pryer", // 窥秘人
-  "monster", // 怪物
   "apothecary", // 药师
-  "cultivator", // 耕种者
-  "ruffian", // 恶棍
-  "arbiter", // 仲裁人
+  "planter", // 耕种者
   "lawyer", // 律师
-  "broker", // 掮客
+  "arbiter", // 仲裁人
+  "prisoner", // 囚犯
+  "criminal", // 罪犯
+  "monster", // 怪物
+  // —— 10 条外神/非标准途径 ——
+  "dancer", // 舞蹈家（宿命）
+  "villain", // 恶棍（堕落母神）
+  "patient", // 病患（衰败君王）
+  "scrooge", // 吝啬鬼（欲望母树）
+  "broker", // 掮客（不定之雾）
+  "astronomy-aficionado", // 天文爱好者（超星主宰）
+  "tramp", // 流浪汉（原初饥饿）
+  "dreamless", // 失梦人（命运女神）
+  "babbler", // 入门者（不熄的唠叨者）
+  "prayermonger", // 萨满（高维外神衍生）
   "custom",
 ] as const;
 export const PATHWAY_ID_SCHEMA = stringEnumSchema(PATHWAY_IDS);

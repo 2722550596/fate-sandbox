@@ -57,7 +57,7 @@ export const initializeNewGameToolDefinition: DomainToolDefinition = {
       Type.Object({
         pathway: Type.Optional(
           Type.String({
-            description: "途径 ID（如 seer / thief / spectator 等）",
+            description: "途径 ID（如 seer / marauder / spectator 等）",
           }),
         ),
         sequenceName: Type.Optional(

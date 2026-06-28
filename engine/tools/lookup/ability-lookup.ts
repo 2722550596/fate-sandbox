@@ -301,4 +301,15 @@ export function listAbilitySequenceNames(): string[] {
   return Object.keys(seqNameIndex).toSorted();
 }
 
+/** 按 pathway 显示名 + rank 标签查询该序列的能力条目（结构化数据，供 promotion 工具直接消费） */
+export function lookupStructuredAbilities(
+  pathwayDisplayName: string,
+  rankLabel: string,
+): Array<{ name: string; description: string; type: string }> {
+  const { pathwayIndex } = buildIndexes();
+  const rankMap = pathwayIndex[pathwayDisplayName];
+  if (rankMap === undefined) return [];
+  return rankMap[rankLabel] ?? [];
+}
+
 export type { ParsedQuery as AbilityParsedQuery };

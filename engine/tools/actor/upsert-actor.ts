@@ -190,7 +190,7 @@ function looseSequenceSchema(): ReturnType<typeof Type.Object> {
     }),
     pathway: Type.String({
       description:
-        "seer / apprentice / thief / mystery-prayer / spectator / sailor / bard / reader / warrior / sleepless / grave-keeper / hunter / assassin / savant / secret-pryer / monster / apothecary / cultivator / ruffian / arbiter / lawyer / broker",
+        "seer / apprentice / marauder / spectator / bard / sailor / reader / secrets-suppliant / sleepless / corpse-collector / warrior / mystery-pryer / savant / hunter / assassin / apothecary / planter / lawyer / arbiter / prisoner / criminal / monster / dancer / villain / patient / scrooge / broker / astronomy-aficionado / tramp / dreamless / babbler / prayermonger",
     }),
     promotionSystem: Type.Optional(Type.String({ description: "potion / other" })),
   });
