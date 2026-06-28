@@ -49,7 +49,7 @@ export const STATE_META_SCHEMA = Type.Object({
   rngCounter: Type.Integer({ minimum: 0 }),
 });
 
-export const CAMPAIGN_STATE_SCHEMA = Type.Object({
+export const SCENARIO_STATE_SCHEMA = Type.Object({
   title: NON_EMPTY_STRING_SCHEMA,
   timeline: TIMELINE_ID_SCHEMA,
   openingMode: OPENING_MODE_SCHEMA,
@@ -401,7 +401,7 @@ const ACTOR_IMPRESSION_SCHEMA = Type.Object({
 // ---------------------------------------------------------------------------
 
 export const PUBLIC_GAME_STATE_SCHEMA = Type.Object({
-  campaign: CAMPAIGN_STATE_SCHEMA,
+  scenario: SCENARIO_STATE_SCHEMA,
   clock: CLOCK_STATE_SCHEMA,
   scene: SCENE_STATE_SCHEMA,
   actors: Type.Record(Type.String(), PUBLIC_ACTOR_STATE_SCHEMA),

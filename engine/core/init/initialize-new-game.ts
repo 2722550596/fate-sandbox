@@ -1,33 +1,45 @@
-import type { ConfigureCampaignInput } from "../campaign/campaign.ts";
 import type { MemoryClaim } from "../knowledge/memory.ts";
-import type { TypeBoxValidator } from "../utils/typebox-validation.ts";
 import type {
   ActorId,
   ActorRole,
+  CurrencyCode,
+  LocationState,
+  OpeningMode,
   OutfitState,
   PathwayId,
   PromotionSystem,
   PublicActorState,
+  RuleSetId,
   SequenceRank,
+  SituationKind,
   State,
   TagEntry,
+  TimelineId,
+  TimeZoneId,
 } from "../state/state.ts";
+import type { TypeBoxValidator } from "../utils/typebox-validation.ts";
 
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
+import { getCampaignPreset } from "../../../data/campaign-presets.ts";
 import { OUTFIT_STATE_SCHEMA } from "../actor/actor-schema.ts";
 import { setScenePresence, upsertActor } from "../actor/actor.ts";
-import { configureCampaign } from "../campaign/campaign.ts";
 import { recordMemory } from "../knowledge/memory.ts";
-import { createInitialState, PROTAGONIST_ACTOR_ID } from "./initial-state.ts";
+import { normalizeIsoInstant } from "../state/date-time.ts";
 import {
   PATHWAY_ID_SCHEMA,
   PROMOTION_SYSTEM_SCHEMA,
   SEQUENCE_RANK_SCHEMA,
   stringEnumSchema,
 } from "../state/state-enum-schemas.ts";
-import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../utils/typebox-validation.ts";
+import { createId } from "../utils/ids.ts";
+import {
+  assertNonEmptyString,
+  parseTaggedTypeBoxUnion,
+  trimStringsDeep,
+} from "../utils/typebox-validation.ts";
+import { createInitialState, PROTAGONIST_ACTOR_ID } from "./initial-state.ts";
 
 // ---------------------------------------------------------------------------
 // TS 类型
@@ -35,13 +47,27 @@ import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../utils/typebox-valid
 
 export type NewGameInitializationInput = HumanNewGameInput | BeyonderNewGameInput;
 
-export interface NewGameCampaignInput extends Omit<ConfigureCampaignInput, "reason"> {
+export interface NewGameScenarioInput {
+  presetId: string;
+  title?: string;
+  timeline?: TimelineId;
+  openingMode?: OpeningMode;
+  premise?: string;
+  activeRuleSetIds?: RuleSetId[];
+  timezone?: TimeZoneId;
+  startedAt?: string;
+  currentAt?: string;
+  location?: LocationState;
+  situation?: SituationKind;
+  currency?: CurrencyCode;
+  startingFunds?: number;
+  purseLabel?: string;
   reason?: string;
 }
 
 export interface HumanNewGameInput {
   kind: "human-protagonist";
-  campaign: NewGameCampaignInput;
+  scenario: NewGameScenarioInput;
   protagonist: HumanProtagonistOpeningInput;
   presence?: NewGamePresenceInput;
   knownFacts?: NewGameKnownFactInput[];
@@ -50,7 +76,7 @@ export interface HumanNewGameInput {
 
 export interface BeyonderNewGameInput {
   kind: "beyonder-protagonist";
-  campaign: NewGameCampaignInput;
+  scenario: NewGameScenarioInput;
   protagonist: BeyonderProtagonistOpeningInput;
   presence?: NewGamePresenceInput;
   knownFacts?: NewGameKnownFactInput[];
@@ -111,7 +137,7 @@ export interface NewGameInitializationResult {
 // initialize_new_game 工具边界 schema
 // ---------------------------------------------------------------------------
 
-const NEW_GAME_CAMPAIGN_INPUT_SCHEMA = Type.Object({
+const NEW_GAME_SCENARIO_INPUT_SCHEMA = Type.Object({
   presetId: Type.String({ minLength: 1 }),
   title: Type.Optional(Type.String({ minLength: 1 })),
   premise: Type.Optional(Type.String({ minLength: 1 })),
@@ -161,7 +187,7 @@ const NEW_GAME_KIND_SCHEMA = stringEnumSchema(NEW_GAME_KINDS);
 
 const HUMAN_NEW_GAME_INPUT_SCHEMA = Type.Object({
   kind: Type.Literal("human-protagonist"),
-  campaign: NEW_GAME_CAMPAIGN_INPUT_SCHEMA,
+  scenario: NEW_GAME_SCENARIO_INPUT_SCHEMA,
   protagonist: HUMAN_PROTAGONIST_OPENING_SCHEMA,
   presence: Type.Optional(NEW_GAME_PRESENCE_INPUT_SCHEMA),
   reason: Type.String({ minLength: 1 }),
@@ -169,7 +195,7 @@ const HUMAN_NEW_GAME_INPUT_SCHEMA = Type.Object({
 
 const BEYONDER_NEW_GAME_INPUT_SCHEMA = Type.Object({
   kind: Type.Literal("beyonder-protagonist"),
-  campaign: NEW_GAME_CAMPAIGN_INPUT_SCHEMA,
+  scenario: NEW_GAME_SCENARIO_INPUT_SCHEMA,
   protagonist: BEYONDER_PROTAGONIST_OPENING_SCHEMA,
   presence: Type.Optional(NEW_GAME_PRESENCE_INPUT_SCHEMA),
   reason: Type.String({ minLength: 1 }),
@@ -199,10 +225,63 @@ export function parseNewGameInitializationInput(
     NEW_GAME_VARIANT_VALIDATORS,
   );
 }
+function applyScenario(draft: State, input: NewGameScenarioInput): void {
+  const reason = assertNonEmptyString(input.reason ?? "", "reason");
+  const preset = getCampaignPreset(input.presetId);
+  const title: string = input.title ?? preset.title;
+  const timeline: TimelineId = input.timeline ?? preset.timeline;
+  const openingMode: OpeningMode = input.openingMode ?? preset.openingMode;
+  const premise: string = input.premise ?? preset.premise;
+  const activeRuleSetIds: RuleSetId[] = input.activeRuleSetIds ?? preset.activeRuleSetIds;
+  const timezone: TimeZoneId = input.timezone ?? preset.timezone;
+  const startedAt = normalizeIsoInstant(input.startedAt ?? preset.startedAt, "startedAt");
+  const currentAt = normalizeIsoInstant(
+    input.currentAt ?? input.startedAt ?? preset.currentAt,
+    "currentAt",
+  );
+  const location: LocationState = input.location ?? preset.location;
+  const situation: SituationKind = input.situation ?? preset.situation;
+  const currency: CurrencyCode = input.currency ?? preset.economy.currency;
+  const startingFunds: number = input.startingFunds ?? preset.economy.startingFunds;
+  const purseLabel: string = input.purseLabel ?? preset.economy.purseLabel;
 
-// ---------------------------------------------------------------------------
-// 初始化引擎
-// ---------------------------------------------------------------------------
+  draft.public.scenario = { title, timeline, openingMode, premise, activeRuleSetIds };
+  draft.public.clock.startedAt = startedAt;
+  draft.public.clock.currentAt = currentAt;
+  draft.public.clock.timezone = timezone;
+  draft.public.clock.lastLongRestAt = null;
+  draft.public.scene.location = location;
+  draft.public.scene.situation = situation;
+  draft.public.scene.lastResolvedAt = currentAt;
+  draft.public.economy.currency = currency;
+  draft.public.economy.accessibleFunds = [
+    {
+      id: "purse-protagonist-cash",
+      ownerActorId: draft.public.protagonistActorId,
+      label: purseLabel,
+      amount: startingFunds,
+      access: "held",
+    },
+  ];
+  draft.public.memory.pinnedFacts = [
+    ...draft.public.memory.pinnedFacts.filter((fact) => fact.id !== "fact-campaign-configured"),
+    {
+      id: "fact-campaign-configured",
+      scope: "world",
+      subject: "scenario",
+      text: `Scenario 已配置：${timeline}；timeline=${timezone}。${reason}`,
+      since: currentAt,
+      sourceEventId: null,
+    },
+  ];
+  draft.public.memory.eventLog.push({
+    id: createId(draft, "event"),
+    time: currentAt,
+    title: "Scenario 配置",
+    summary: reason,
+    consequences: [`当前时间线: ${timeline}`, `本地时区: ${timezone}`],
+  });
+}
 
 export function initializeNewGame(
   draft: State,
@@ -212,8 +291,8 @@ export function initializeNewGame(
   Object.assign(draft, createInitialState());
   steps.push("reset-state");
 
-  configureCampaign(draft, { ...input.campaign, reason: input.campaign.reason ?? input.reason });
-  steps.push("configure-campaign");
+  applyScenario(draft, { ...input.scenario, reason: input.scenario.reason ?? input.reason });
+  steps.push("configure-scenario");
 
   if (input.kind === "human-protagonist") {
     upsertActor(draft, {
@@ -331,8 +410,8 @@ function assertNewGameInitialized(state: State, input: NewGameInitializationInpu
   if (state.public.protagonistActorId !== PROTAGONIST_ACTOR_ID) {
     throw new Error("新游戏初始化失败：protagonistActorId 必须是 protagonist。");
   }
-  if (state.public.campaign.title.trim().length === 0) {
-    throw new Error("新游戏初始化失败：campaign 未配置。");
+  if (state.public.scenario.title.trim().length === 0) {
+    throw new Error("新游戏初始化失败：scenario 未配置。");
   }
   if (input.kind === "beyonder-protagonist") {
     if (protagonist.sequence === null) {

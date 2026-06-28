@@ -1,5 +1,5 @@
 {
-  "nextId": 35,
+  "nextId": 47,
   "items": [
     {
       "id": 1,
@@ -173,6 +173,78 @@
       "content": "Final: typecheck + lint + format + test",
       "done": true,
       "created": 1782602487
+    },
+    {
+      "id": 35,
+      "content": "创建 engine/core/init/ 目录，合并 {campaign/campaign.ts + state/new-game-initialization.ts}",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 36,
+      "content": "创建 engine/core/init/initial-state.ts（从 state/ 移入）",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 37,
+      "content": "改名 state 字段 public.campaign → public.scenario（state.ts + state-schema.ts + initial-state.ts）",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 38,
+      "content": "更新 state-file-projection.ts 的 campaign 引用",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 39,
+      "content": "更新 parallel-line-assembler.ts",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 40,
+      "content": "更新 get-state-schema.ts 字符串",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 41,
+      "content": "更新 initialize-new-game.ts tool 描述 + 参数",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 42,
+      "content": "更新 recall-memory.ts 工具描述",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 43,
+      "content": "更新 memory.test.ts 测试名",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 44,
+      "content": "删 engine/core/campaign/ 目录 + state/new-game-initialization.ts",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 45,
+      "content": "bump CURRENT_STATE_SCHEMA_VERSION 5→6",
+      "done": true,
+      "created": 1782611190
+    },
+    {
+      "id": 46,
+      "content": "pnpm format & typecheck & lint & test",
+      "done": true,
+      "created": 1782611190
     }
   ]
 }

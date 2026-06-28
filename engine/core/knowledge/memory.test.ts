@@ -4,7 +4,7 @@ import test from "node:test";
 import { createInitialState } from "../state/initial-state.ts";
 import { recordMemory } from "./memory.ts";
 
-void test("recordMemory stores pinned facts in public campaign memory", () => {
+void test("recordMemory stores pinned facts in public scenario memory", () => {
   const draft = createInitialState();
 
   const result = recordMemory(draft, {

@@ -13,7 +13,7 @@ export interface TimelineStateContext {
   displayTime: string;
   currentLocalTime: string;
   timeRangeRule: string;
-  campaign: {
+  scenario: {
     title: string;
     timeline: string;
     premise: string;
@@ -90,7 +90,7 @@ export function buildTimelineStateContextFromRaw(raw: unknown): TimelineStateCon
   const state = selectStateRecord(raw);
   const publicState = requireRecord(state["public"], "state.public");
   const secrets = requireRecord(state["secrets"], "state.secrets");
-  const campaign = requireRecord(publicState["campaign"], "public.campaign");
+  const scenario = requireRecord(publicState["scenario"], "public.scenario");
   const clock = requireRecord(publicState["clock"], "public.clock");
   const scene = requireRecord(publicState["scene"], "public.scene");
   const actors = requireRecord(publicState["actors"], "public.actors");
@@ -105,7 +105,7 @@ export function buildTimelineStateContextFromRaw(raw: unknown): TimelineStateCon
   const currentAt = requireString(clock["currentAt"], "clock.currentAt");
   const timezone = requireTimezone(clock["timezone"], "clock.timezone");
   const displayTime = formatHumanTime(currentAt, timezone).display;
-  const timeline = requireTimelineId(campaign["timeline"], "campaign.timeline");
+  const timeline = requireTimelineId(scenario["timeline"], "scenario.timeline");
   const recentOffscreenEvents = offscreenEventLog
     .slice(-RECENT_OFFSCREEN_LIMIT)
     .map((event, index) => offscreenEventContext(event, index));
@@ -117,10 +117,10 @@ export function buildTimelineStateContextFromRaw(raw: unknown): TimelineStateCon
     displayTime,
     currentLocalTime: displayTime,
     timeRangeRule: `所有 timeWindow/timeRange.start/end 必须使用 ISO UTC；当前 UTC ${currentAt} = ${timezone} 本地 ${displayTime}；不得把本地时钟直接加 Z 输出；timeRange.end <= currentAt。`,
-    campaign: {
-      title: requireString(campaign["title"], "campaign.title"),
+    scenario: {
+      title: requireString(scenario["title"], "scenario.title"),
       timeline,
-      premise: requireString(campaign["premise"], "campaign.premise"),
+      premise: requireString(scenario["premise"], "scenario.premise"),
     },
     scene: {
       location: formatStateFileLocation(requireRecord(scene["location"], "scene.location")),

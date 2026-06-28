@@ -85,7 +85,7 @@ export interface StateMeta {
 }
 
 export interface PublicGameState {
-  campaign: CampaignState;
+  scenario: ScenarioState;
   clock: ClockState;
   scene: SceneState;
   actors: Record<ActorId, PublicActorState>;
@@ -229,7 +229,7 @@ export interface ScheduledEvent {
 // Campaign
 // ---------------------------------------------------------------------------
 
-export interface CampaignState {
+export interface ScenarioState {
   title: string;
   timeline: TimelineId;
   openingMode: OpeningMode;
@@ -602,4 +602,4 @@ export interface StateExport extends Omit<GameState, "public"> {
 
 export type State = GameState;
 
-export const CURRENT_STATE_SCHEMA_VERSION = 5;
+export const CURRENT_STATE_SCHEMA_VERSION = 6;

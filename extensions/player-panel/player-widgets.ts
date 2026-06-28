@@ -220,9 +220,9 @@ export function buildRecapMarkdown(publicState: PublicGameState): string {
 
   sections.push(`**当前时间**：${time.display}`, "");
 
-  // Campaign premise
-  sections.push(`**战役**：${publicState.campaign.title}`, "");
-  sections.push(publicState.campaign.premise, "");
+  // Scenario premise
+  sections.push(`**战役**：${publicState.scenario.title}`, "");
+  sections.push(publicState.scenario.premise, "");
 
   // Protagonist
   const protagonist = publicState.actors[publicState.protagonistActorId];

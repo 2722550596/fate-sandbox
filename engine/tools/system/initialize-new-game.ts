@@ -6,7 +6,7 @@ import { Type } from "typebox";
 import {
   initializeNewGame,
   parseNewGameInitializationInput,
-} from "../../core/state/new-game-initialization.ts";
+} from "../../core/init/initialize-new-game.ts";
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 
 export function initializeNewGameTool(params: unknown, sessionManager: unknown): ToolResult {
@@ -22,7 +22,7 @@ export function initializeNewGameTool(params: unknown, sessionManager: unknown):
 export const initializeNewGameToolDefinition: DomainToolDefinition = {
   name: "initialize_new_game",
   description:
-    "初始化新游戏 Game State 的单入口 recipe：重置 state、配置 campaign、写 protagonist、设在场 actor、必要时配 protagonist 序列隐藏秘密。\n\n" +
+    "初始化新游戏 Game State 的单入口 recipe：重置 state、配置 scenario、写 protagonist、设在场 actor、必要时配 protagonist 序列隐藏秘密。\n\n" +
     "【使用边界】\n" +
     "- /skill:start-game 已定好时间线/立场/开场身份，进正式剧情前一次性建立可运行 state\n" +
     "- protagonist 是非凡者且序列秘密需 hidden-canonical secret slot\n\n" +
@@ -33,7 +33,7 @@ export const initializeNewGameToolDefinition: DomainToolDefinition = {
     "- 用它替代后续领域事件工具",
   parameters: Type.Object({
     kind: Type.String({ description: "human-protagonist / beyonder-protagonist" }),
-    campaign: Type.Object({
+    scenario: Type.Object({
       presetId: Type.String({
         description: "tingen_1349 / backlund_1350 / bayam_1351 / condat_1349 / custom_worldline",
       }),

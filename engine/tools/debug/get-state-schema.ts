@@ -10,7 +10,7 @@ export function getStateSchemaTool(): ToolResult {
     version: CURRENT_STATE_SCHEMA_VERSION,
     root: "GameState { meta, public, secrets }",
     publicAggregates: [
-      "campaign",
+      "scenario",
       "clock",
       "scene",
       "actors",

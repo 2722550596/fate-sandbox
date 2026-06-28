@@ -52,7 +52,7 @@ export function assembleParallelLineInput(
   input: AssembleParallelLineInput,
 ): ParallelLineInput {
   const lineId = assertNonEmptyString(input.lineId, "lineId");
-  const timeline = state.public.campaign.timeline;
+  const timeline = state.public.scenario.timeline;
 
   const recentOffscreenEvents = buildRecentOffscreenEvents(state);
   const activePressurePalette = buildPressurePalette(timeline, recentOffscreenEvents);
@@ -99,7 +99,7 @@ function buildRecentOffscreenEvents(state: State): ParallelLineRecentEvent[] {
 }
 
 function buildPressurePalette(
-  timeline: State["public"]["campaign"]["timeline"],
+  timeline: State["public"]["scenario"]["timeline"],
   recentEvents: readonly ParallelLineRecentEvent[],
 ): ParallelLinePressureSlotHint[] {
   const recentPressureTypes = recentEvents.map((event) => event.pressureType);

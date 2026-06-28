@@ -122,7 +122,7 @@ function formatQueryDescription(query: RecallMemoryQuery): string {
 export const recallMemoryToolDefinition: DomainToolDefinition = {
   name: "recall_memory",
   description:
-    "检索 campaign memory（pinnedFacts + eventLog + dailySummaries）。按关键词/actor/地点/scope 过滤，返回匹配条目。不改状态。\n\n" +
+    "检索 scenario memory（pinnedFacts + eventLog + dailySummaries）。按关键词/actor/地点/scope 过滤，返回匹配条目。不改状态。\n\n" +
     "【使用边界】\n" +
     "- 需回忆旧事实但 GM brief 只有最近 3 条 eventLog\n" +
     "- 玩家提到过去事件/人/地，需确认记忆一致性\n" +
