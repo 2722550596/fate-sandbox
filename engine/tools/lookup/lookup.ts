@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
@@ -12,7 +12,7 @@ export function lookupTool(params: unknown): ToolResult {
   return textResult(result.text);
 }
 
-export const lookupToolDefinition: FateToolDefinition = {
+export const lookupToolDefinition: DomainToolDefinition = {
   name: "lookup",
   description:
     "查询诡秘之主世界权威设定：角色、地点、组织、物品、途径、设定；默认跨全库搜索，支持少量空格/逗号分隔关键词。\n\n" +

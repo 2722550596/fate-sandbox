@@ -1,5 +1,5 @@
 import type { BackstageResolutionInput } from "../../core/backstage/backstage-obligation.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -57,7 +57,7 @@ function parseInput(params: unknown): BackstageResolutionInput {
   return { outcome, reasonCode, note };
 }
 
-export const resolveBackstageLineToolDefinition: FateToolDefinition = {
+export const resolveBackstageLineToolDefinition: DomainToolDefinition = {
   name: "resolve_backstage_line",
   description:
     "清掉一条未清账的后台世界推进义务——仅用于经审查确认本轮后台无可落地推进的情形。\n\n" +

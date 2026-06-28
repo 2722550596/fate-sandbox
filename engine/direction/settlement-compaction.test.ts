@@ -103,5 +103,5 @@ void test("buildSettlementCompactionSummary omits prose marker when no prose mes
 });
 
 function proseMessage(text: string): Record<string, unknown> {
-  return { role: "custom", customType: "fsn-prose", content: text };
+  return { role: "custom", customType: "rendered-prose", content: text };
 }

@@ -11,7 +11,7 @@
 // ---------------------------------------------------------------------------
 
 import type { State } from "../../core/state/state.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -118,7 +118,7 @@ function formatCorruptionResult(result: UpdateCorruptionResult): string {
 // 工具注册
 // ===========================================================================
 
-export const updateCorruptionToolDefinition: FateToolDefinition = {
+export const updateCorruptionToolDefinition: DomainToolDefinition = {
   name: "update_corruption",
   description:
     "更新指定 actor 的失控值（lossOfControlProgress，范围 0~100）。\n\n" +

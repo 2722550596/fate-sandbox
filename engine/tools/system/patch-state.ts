@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
@@ -13,7 +13,7 @@ export function patchStateTool(params: unknown, _sessionManager: unknown): ToolR
   return textResult("patch_state 已禁用：常规玩法必须使用领域 update 工具。");
 }
 
-export const patchStateToolDefinition: FateToolDefinition = {
+export const patchStateToolDefinition: DomainToolDefinition = {
   name: "patch_state",
   description: "【调试工具】裸 JSON Patch 已禁用；常规玩法必须使用领域 update 工具。",
   parameters: Type.Object({

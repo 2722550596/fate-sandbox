@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -34,7 +34,7 @@ function rollDie(sides: number): number {
   return Math.floor(Math.random() * sides) + 1;
 }
 
-export const rollDiceToolDefinition: FateToolDefinition = {
+export const rollDiceToolDefinition: DomainToolDefinition = {
   name: "roll_dice",
   description:
     "掷一次骰子（默认 d100），返回骰面结果。\n\n" +

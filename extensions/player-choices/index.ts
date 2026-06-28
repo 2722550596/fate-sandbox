@@ -10,7 +10,7 @@ import type { SuggestedAction } from "../../engine/direction/packet-schema.ts";
 
 import { PROSE_CUSTOM_TYPE } from "../../engine/direction/render-turn.ts";
 
-const CHOICE_WIDGET_KEY = "fsn-player-choices";
+const CHOICE_WIDGET_KEY = "player-choices";
 
 export type ChoiceCommand = { kind: "show" } | { index: number; kind: "submit" };
 

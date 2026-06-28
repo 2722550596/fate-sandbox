@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -43,7 +43,7 @@ function assertNotPlayerKnown(params: unknown): void {
   }
 }
 
-export const recordOffscreenEventToolDefinition: FateToolDefinition = {
+export const recordOffscreenEventToolDefinition: DomainToolDefinition = {
   name: "record_offscreen_event",
   description:
     "写入玩家不可见或仅预示的幕后事件；用于平行线 subagent 候选落地。\n\n" +

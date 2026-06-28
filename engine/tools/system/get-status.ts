@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
@@ -53,7 +53,7 @@ function isObject(value: unknown): value is object {
   return typeof value === "object" && value !== null;
 }
 
-export const getStatusToolDefinition: FateToolDefinition = {
+export const getStatusToolDefinition: DomainToolDefinition = {
   name: "get_status",
   description:
     "查看玩家可见状态摘要；返回 GM brief 风格读模型，不展示完整 JSON。\n\n" +

@@ -11,7 +11,7 @@
  */
 
 import type { ParallelLineOutput } from "../../core/state/state.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -67,7 +67,7 @@ function buildGuidance(candidate: ParallelLineOutput): string {
   ].join("\n");
 }
 
-export const harvestBackstageCandidateToolDefinition: FateToolDefinition = {
+export const harvestBackstageCandidateToolDefinition: DomainToolDefinition = {
   name: "harvest_backstage_candidate",
   description:
     "按 run_id 从 director 的持久 session 取回裸候选并过 engine 验收，返回结构合法的 ParallelLineOutput 供审查后落地。\n\n" +

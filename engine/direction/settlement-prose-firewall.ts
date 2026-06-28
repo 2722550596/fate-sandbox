@@ -10,7 +10,7 @@ import { isRecord } from "../core/utils/typebox-validation.ts";
  * 历史，被后续结算轮次反复回喂，让结算器把「没渲染过的自说自话」当成既定事实，
  * 与 canonical prose 分叉，还白白撑大上下文。
  *
- * `extension.ts` 的 context 过滤只认 `fsn-prose` custom message（渲染器产物），
+ * `extension.ts` 的 context 过滤只认 `rendered-prose` custom message（渲染器产物），
  * 认不出结算器自己的裸文本。本函数在 `message_end` 钩子里补上这道闸：把「含
  * ≥1 toolCall 的 assistant 消息」中的 `text` 部件剥掉，保留 thinking 与 toolCall
  * 部件，从源头杜绝漏稿入史。

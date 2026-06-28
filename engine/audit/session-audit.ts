@@ -28,7 +28,7 @@ interface RawEntry {
   message?: Record<string, unknown>;
   customType?: string;
   data?: unknown;
-  /** custom_message entry 的正文（双 pass 渲染轮的 fsn-prose 走这里） */
+  /** custom_message entry 的正文（双 pass 渲染轮的 rendered-prose 走这里） */
   content?: unknown;
 }
 
@@ -108,15 +108,15 @@ export interface AuditTurn {
   index: number;
   userText: string;
   toolCalls: AuditToolCall[];
-  /** 本轮全部可见文本拼接（assistant text + fsn-prose 渲染正文） */
+  /** 本轮全部可见文本拼接（assistant text + rendered-prose 渲染正文） */
   fullText: string;
   /**
    * 本轮最终玩家可见正文。
-   * 双 pass session：fsn-prose custom message（优先）；
+   * 双 pass session：rendered-prose custom message（优先）；
    * 单 pass 老 session：最后一个含 text 的 assistant 消息。
    */
   finalProse: string;
-  /** 本轮结束时最新 fsn-state 快照中的未揭示秘密字符串 */
+  /** 本轮结束时最新 domain-state 快照中的未揭示秘密字符串 */
   unrevealedSecrets: string[];
 }
 
@@ -161,14 +161,14 @@ export function groupTurns(path: readonly RawEntry[]): AuditTurn[] {
   const pendingResults = new Map<string, AuditToolCall>();
 
   for (const entry of path) {
-    if (entry.type === "custom" && entry.customType === "fsn-state" && isRecord(entry.data)) {
+    if (entry.type === "custom" && entry.customType === "domain-state" && isRecord(entry.data)) {
       const state = entry.data["state"];
       if (isRecord(state)) latestSecrets = collectUnrevealedSecretStrings(state["secrets"]);
       if (current !== undefined) current.unrevealedSecrets = latestSecrets;
       continue;
     }
-    // 双 pass 渲染轮的最终正文：fsn-prose custom message 覆盖 assistant text
-    if (entry.type === "custom_message" && entry.customType === "fsn-prose") {
+    // 双 pass 渲染轮的最终正文：rendered-prose custom message 覆盖 assistant text
+    if (entry.type === "custom_message" && entry.customType === "rendered-prose") {
       if (current !== undefined) {
         const prose = blockText(entry.content);
         if (prose.trim().length > 0) {
@@ -532,13 +532,13 @@ function readLedgerArray(secrets: unknown, key: string): Record<string, unknown>
 }
 
 /**
- * active path 上最后一个 fsn-state 快照的 `secrets`（最新引擎账本所在）。
+ * active path 上最后一个 domain-state 快照的 `secrets`（最新引擎账本所在）。
  * 老 schema（无 backstage 字段）返回的对象里读不到，measure 会安全降级为空账本。
  */
 export function extractLatestSecrets(path: readonly RawEntry[]): unknown {
   let secrets: unknown;
   for (const entry of path) {
-    if (entry.type === "custom" && entry.customType === "fsn-state" && isRecord(entry.data)) {
+    if (entry.type === "custom" && entry.customType === "domain-state" && isRecord(entry.data)) {
       const state = entry.data["state"];
       if (isRecord(state)) secrets = state["secrets"];
     }

@@ -5,7 +5,7 @@
  * pinnedFacts + eventLog + dailySummaries。不上向量、不改状态。
  */
 
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -119,7 +119,7 @@ function formatQueryDescription(query: RecallMemoryQuery): string {
   return parts.length > 0 ? parts.join(", ") : "全量";
 }
 
-export const recallMemoryToolDefinition: FateToolDefinition = {
+export const recallMemoryToolDefinition: DomainToolDefinition = {
   name: "recall_memory",
   description:
     "检索 campaign memory（pinnedFacts + eventLog + dailySummaries）。按关键词/actor/地点/scope 过滤，返回匹配条目。不改状态。\n\n" +

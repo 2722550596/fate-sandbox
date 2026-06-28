@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -20,7 +20,7 @@ export function addHiddenWorldFactTool(params: unknown, sessionManager: unknown)
   });
 }
 
-export const addHiddenWorldFactToolDefinition: FateToolDefinition = {
+export const addHiddenWorldFactToolDefinition: DomainToolDefinition = {
   name: "add_hidden_world_fact",
   description:
     "记录一条世界/战役级隐藏事实。这些事实不属于特定 actor，而是世界观层面的秘密（如源质本质、末日预言等）。\n\n" +

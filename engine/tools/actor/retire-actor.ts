@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -16,7 +16,7 @@ export function retireActorTool(params: unknown, sessionManager: unknown): ToolR
   });
 }
 
-export const retireActorToolDefinition: FateToolDefinition = {
+export const retireActorToolDefinition: DomainToolDefinition = {
   name: "retire_actor",
   description:
     "将已退场/死亡/离开可见叙事或不再需持续追踪的 public actor 从 registry 移除。\n\n" +

@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -49,7 +49,7 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
   });
 }
 
-export const progressSceneBeatToolDefinition: FateToolDefinition = {
+export const progressSceneBeatToolDefinition: DomainToolDefinition = {
   name: "progress_scene_beat",
   description:
     "推进 Scene Beat lifecycle：用 begin 开启有界行动窗口，用 complete 收口当前 beat。\n\n" +

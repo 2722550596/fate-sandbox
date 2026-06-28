@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -19,7 +19,7 @@ export function initializeNewGameTool(params: unknown, sessionManager: unknown):
   });
 }
 
-export const initializeNewGameToolDefinition: FateToolDefinition = {
+export const initializeNewGameToolDefinition: DomainToolDefinition = {
   name: "initialize_new_game",
   description:
     "初始化新游戏 Game State 的单入口 recipe：重置 state、配置 campaign、写 protagonist、设在场 actor、必要时配 protagonist 序列隐藏秘密。\n\n" +

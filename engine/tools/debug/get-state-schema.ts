@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
@@ -37,7 +37,7 @@ export function getStateSchemaTool(): ToolResult {
   return textResult(JSON.stringify(schema, null, 2));
 }
 
-export const getStateSchemaToolDefinition: FateToolDefinition = {
+export const getStateSchemaToolDefinition: DomainToolDefinition = {
   name: "get_state_schema",
   description: "【调试工具】查看当前状态 schema 版本与聚合根。",
   parameters: Type.Object({}),

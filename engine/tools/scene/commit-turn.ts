@@ -1,5 +1,5 @@
 import type { TurnCommitEvent } from "../../core/turn/turn-commit.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -46,7 +46,7 @@ export function commitTurnTool(params: unknown, sessionManager: unknown): ToolRe
   });
 }
 
-export const commitTurnToolDefinition: FateToolDefinition = {
+export const commitTurnToolDefinition: DomainToolDefinition = {
   name: "commit_turn",
   description:
     "每轮叙事结束时一次性提交本轮领域事件。用于一轮内聚合多个状态变化。\n\n" +

@@ -50,7 +50,7 @@ void test("extractLastAssistantText throws when no assistant candidate exists ye
 });
 
 function freshDir(): string {
-  return mkdtempSync(join(tmpdir(), "fsn-session-read-"));
+  return mkdtempSync(join(tmpdir(), "tmp-session-read-"));
 }
 
 void test("readBackstageCandidateRaw locates a run's session by run_id", () => {
@@ -82,7 +82,7 @@ void test("readBackstageCandidateRaw throws for an unknown run_id", () => {
 
 void test("readBackstageCandidateRaw throws when the session dir is absent", () => {
   assert.throws(
-    () => readBackstageCandidateRaw("bl-x", join(tmpdir(), "fsn-nonexistent-dir-xyz")),
+    () => readBackstageCandidateRaw("bl-x", join(tmpdir(), "tmp-nonexistent-dir-xyz")),
     /session 目录不存在/,
   );
 });

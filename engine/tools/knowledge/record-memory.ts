@@ -1,5 +1,5 @@
 import type { MemoryEvent, MemoryEventResult } from "../../core/knowledge/memory.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -44,7 +44,7 @@ function normalizeSourceEventId(params: unknown): unknown {
   return { ...params, sourceEventId };
 }
 
-export const recordMemoryToolDefinition: FateToolDefinition = {
+export const recordMemoryToolDefinition: DomainToolDefinition = {
   name: "record_memory",
   description:
     "写入玩家已知的长期事实、重大事件或日常摘要。每条 public memory 必须给 claims（事实类型+确定性+证据）；普通事实用 kind=mundane。\n\n" +

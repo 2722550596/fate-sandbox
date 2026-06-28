@@ -1,5 +1,5 @@
 import type { PublicActorState } from "../../core/state/state.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -120,7 +120,7 @@ function assertActorKind(value: unknown, fieldName: string): void {
   }
 }
 
-export const upsertActorToolDefinition: FateToolDefinition = {
+export const upsertActorToolDefinition: DomainToolDefinition = {
   name: "upsert_actor",
   description:
     "将 protagonist、公开 NPC 或序列信息写入 public actor registry。\n\n" +

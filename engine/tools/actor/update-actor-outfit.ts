@@ -5,7 +5,7 @@
  * 不属于 condition（affliction/wound）系统。
  */
 
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -60,7 +60,7 @@ function requireString(value: unknown, field: string): string {
   return value.trim();
 }
 
-export const updateActorOutfitToolDefinition: FateToolDefinition = {
+export const updateActorOutfitToolDefinition: DomainToolDefinition = {
   name: "update_actor_outfit",
   description:
     "更换 actor 的外观/服装（outfit）。\n\n" +

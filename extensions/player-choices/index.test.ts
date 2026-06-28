@@ -15,7 +15,7 @@ function proseEntry(
     id,
     parentId,
     timestamp: new Date().toISOString(),
-    customType: "fsn-prose",
+    customType: "rendered-prose",
     content: "正文",
     display: true,
     details,

@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
@@ -15,7 +15,7 @@ export function resetStateTool(params: unknown, sessionManager: unknown): ToolRe
   return textResult(`状态已重置：${reason}`, details);
 }
 
-export const resetStateToolDefinition: FateToolDefinition = {
+export const resetStateToolDefinition: DomainToolDefinition = {
   name: "reset_state",
   description:
     "【调试工具】重置为新 Fate schema 初始状态；不做旧 schema migration。必须写明 reason。",

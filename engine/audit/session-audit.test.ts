@@ -39,7 +39,7 @@ function buildJsonl(specs: readonly ChainSpec[]): string {
       lines.push(
         JSON.stringify({
           type: "custom",
-          customType: "fsn-state",
+          customType: "domain-state",
           id,
           parentId: parent,
           data: { v: 1, turn: i, state: { meta: {}, public: {}, secrets: spec.secrets ?? {} } },
@@ -49,7 +49,7 @@ function buildJsonl(specs: readonly ChainSpec[]): string {
       lines.push(
         JSON.stringify({
           type: "custom_message",
-          customType: "fsn-prose",
+          customType: "rendered-prose",
           id,
           parentId: parent,
           content: spec.text ?? "",
@@ -117,7 +117,7 @@ function plainTurn(
   ];
 }
 
-/** 一个双 pass 轮：user → assistant(submit packet) → result → fsn-prose 渲染正文 */
+/** 一个双 pass 轮：user → assistant(submit packet) → result → rendered-prose 渲染正文 */
 function twoPassTurn(callId: string, prose: string): ChainSpec[] {
   return [
     { kind: "user", text: "玩家行动" },
@@ -264,7 +264,7 @@ void test("add-threat scene event counts as cost", () => {
   assert.equal(pressure.noCostTurns, 0);
 });
 
-void test("groupTurns takes fsn-prose custom message as final prose in two-pass sessions", () => {
+void test("groupTurns takes rendered-prose custom message as final prose in two-pass sessions", () => {
   const turns = groupTurns(
     reconstructActivePath(
       parseSessionJsonl(
@@ -482,7 +482,7 @@ void test("measureBackstageLedger defaults to an empty ledger on legacy secrets"
   assert.equal(report.nonLandedRatio, 0);
 });
 
-void test("extractLatestSecrets returns the last fsn-state snapshot's secrets", () => {
+void test("extractLatestSecrets returns the last domain-state snapshot's secrets", () => {
   const jsonl = buildJsonl([
     { kind: "user", text: "一" },
     { kind: "state", secrets: { backstageObligations: [{ id: "old" }] } },

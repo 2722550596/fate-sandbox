@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -17,7 +17,7 @@ export function setScenePresenceTool(params: unknown, sessionManager: unknown): 
   });
 }
 
-export const setScenePresenceToolDefinition: FateToolDefinition = {
+export const setScenePresenceToolDefinition: DomainToolDefinition = {
   name: "set_scene_presence",
   description:
     "更新当前场景在场 actor 与同行者；materialization 与 physical presence 分离，避免 upsert_actor 兼做入/离场。\n\n" +

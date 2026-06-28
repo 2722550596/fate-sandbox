@@ -10,7 +10,7 @@
 //   - 引擎只确保 "消化不够就不能晋升" 这个硬边界
 // ---------------------------------------------------------------------------
 
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -97,7 +97,7 @@ function parsePromotionParams(params: unknown): PromotionParams {
   };
 }
 
-export const attemptPromotionToolDefinition: FateToolDefinition = {
+export const attemptPromotionToolDefinition: DomainToolDefinition = {
   name: "attempt_promotion",
   description:
     "序列晋升。引擎只检查消化进度（需 ≥80%），不计算骰子判定或失控值。\n\n" +

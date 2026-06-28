@@ -7,7 +7,7 @@
  * 验收 → 审查 → record_offscreen_event / resolve_backstage_line 落地清账。
  */
 
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -127,7 +127,7 @@ function optionalBoolean(value: unknown): boolean | undefined {
   return undefined;
 }
 
-export const runParallelLineToolDefinition: FateToolDefinition = {
+export const runParallelLineToolDefinition: DomainToolDefinition = {
   name: "run_parallel_line",
   description:
     "engine 装配 hermetic director prompt 并【直接异步 fork 后台导演】（detached pi -p，不经主循环、不阻塞）。GM 只给 lineId + timeWindow + 可选偏好，一次调用即起异步后台线。\n\n" +

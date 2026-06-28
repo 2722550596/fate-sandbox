@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -16,7 +16,7 @@ export function updateTrackedItemTool(params: unknown, sessionManager: unknown):
   });
 }
 
-export const updateTrackedItemToolDefinition: FateToolDefinition = {
+export const updateTrackedItemToolDefinition: DomainToolDefinition = {
   name: "update_tracked_item",
   description:
     "追踪关键物品的持有者、状态或新增物品到 trackedItems。\n\n" +

@@ -1,4 +1,4 @@
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -16,7 +16,7 @@ export function updateActorConditionTool(params: unknown, sessionManager: unknow
   });
 }
 
-export const updateActorConditionToolDefinition: FateToolDefinition = {
+export const updateActorConditionToolDefinition: DomainToolDefinition = {
   name: "update_actor_condition",
   description:
     "更新 actor 的非凡者状态效果（affliction）。\n\n" +

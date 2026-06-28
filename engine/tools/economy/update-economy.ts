@@ -1,6 +1,6 @@
 import type { EconomyEvent } from "../../core/economy/economy.ts";
 import type { State } from "../../core/state/state.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -41,7 +41,7 @@ function formatPurseIds(draft: State): string {
   return purseIds.length === 0 ? "无" : purseIds.join(", ");
 }
 
-export const updateEconomyToolDefinition: FateToolDefinition = {
+export const updateEconomyToolDefinition: DomainToolDefinition = {
   name: "update_economy",
   description:
     "更新经济状态。每笔资金指定 purse/account 与 reason，资金增加说明可审计来源。\n\n" +

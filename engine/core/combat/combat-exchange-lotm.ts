@@ -10,7 +10,7 @@
 // 但适配 LOTM 的序列等级/途径设定。
 // ---------------------------------------------------------------------------
 
-import type { FateToolDefinition } from "../../tools/runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../../tools/runtime/tool-definition.ts";
 import type { ToolResult } from "../../tools/runtime/tool-result.ts";
 import type { SequenceRank } from "../state/state-enum-schemas.ts";
 import type { State } from "../state/state.ts";
@@ -457,7 +457,7 @@ function formatLOTMRankCheck(
 // 工具注册
 // ===========================================================================
 
-export const resolveLOTMCombatExchangeToolDefinition: FateToolDefinition = {
+export const resolveLOTMCombatExchangeToolDefinition: DomainToolDefinition = {
   name: "resolve_combat_exchange",
   description:
     "LOTM 战斗交换裁决。比较双方序列等级、装备等级和上下文因素，输出叙事约束和状态落点。\n\n" +

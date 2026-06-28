@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-import type { FateToolDefinition } from "./runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "./runtime/tool-definition.ts";
 
 import { recordActorKnowledgeToolDefinition } from "./actor/record-actor-knowledge.ts";
 import { retireActorToolDefinition } from "./actor/retire-actor.ts";
@@ -39,7 +39,7 @@ import { patchStateToolDefinition } from "./system/patch-state.ts";
 import { updateHookToolDefinition } from "./system/update-hook.ts";
 
 /** 全部 Domain Event Tool 契约清单；契约本体与实现同文件维护。 */
-const TOOL_DEFINITIONS: readonly FateToolDefinition[] = [
+const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   initializeNewGameToolDefinition,
   commitTurnToolDefinition,
   progressSceneBeatToolDefinition,

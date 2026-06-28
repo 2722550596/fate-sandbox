@@ -5,7 +5,7 @@ import type {
   RevealSecretToolInput,
 } from "../../core/knowledge/secrets.ts";
 import type { State } from "../../core/state/state.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -56,7 +56,7 @@ function secretMessage(output: RevealSecretToolResult): string {
   return output.result.playerSafeMessage;
 }
 
-export const revealSecretToolDefinition: FateToolDefinition = {
+export const revealSecretToolDefinition: DomainToolDefinition = {
   name: "reveal_secret",
   description:
     "配置或揭示 hidden-canonical secret。配置模式只写 secrets；揭示模式只在玩家可见证据成立时更新 public。\n\n" +

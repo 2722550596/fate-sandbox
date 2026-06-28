@@ -1,5 +1,5 @@
 import type { ActorAgendaState, State } from "../../core/state/state.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -129,7 +129,7 @@ const UPSERT_VALIDATOR = Compile(UPSERT_SCHEMA);
 const MARK_VALIDATOR = Compile(MARK_SCHEMA);
 const CLEAR_VALIDATOR = Compile(CLEAR_SCHEMA);
 
-export const updateActorAgendaToolDefinition: FateToolDefinition = {
+export const updateActorAgendaToolDefinition: DomainToolDefinition = {
   name: "update_actor_agenda",
   description:
     "记录/更新 NPC/势力代理人的主动性账本（secret state）：目标/恐惧/当前指令/最近自主行动时间。防止 NPC 退化成等待物。\n\n" +

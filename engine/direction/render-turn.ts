@@ -12,7 +12,7 @@ import { isRecord } from "../core/utils/typebox-validation.ts";
 import { parseDirectionPacket } from "./packet-schema.ts";
 
 /** 渲染产物落 session 的 customType；结算投影按它过滤，渲染史按它装配。 */
-export const PROSE_CUSTOM_TYPE = "fsn-prose";
+export const PROSE_CUSTOM_TYPE = "rendered-prose";
 export const SUBMIT_DIRECTION_PACKET_TOOL = "submit_direction_packet";
 
 /**

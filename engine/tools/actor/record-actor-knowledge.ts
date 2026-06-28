@@ -1,5 +1,5 @@
 import type { ActorKnowledgeLens, State } from "../../core/state/state.ts";
-import type { FateToolDefinition } from "../runtime/tool-definition.ts";
+import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
@@ -139,7 +139,7 @@ const ADD_FACT_VALIDATOR = Compile(ADD_FACT_SCHEMA);
 const REMOVE_FACT_VALIDATOR = Compile(REMOVE_FACT_SCHEMA);
 const CLEAR_VALIDATOR = Compile(CLEAR_SCHEMA);
 
-export const recordActorKnowledgeToolDefinition: FateToolDefinition = {
+export const recordActorKnowledgeToolDefinition: DomainToolDefinition = {
   name: "record_actor_knowledge",
   description:
     "记录 NPC 认知边界（secret state）：知道/怀疑/误信/绝不应凭空知道的事。防止 NPC 说出 GM 视角事实、隐藏真名、幕后真相。\n\n" +

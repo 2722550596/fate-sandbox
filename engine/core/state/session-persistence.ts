@@ -7,7 +7,7 @@ import { CURRENT_STATE_SCHEMA_VERSION } from "./state.ts";
 import { hydrateState, resetState } from "./state-store.ts";
 import { isRecord } from "../utils/typebox-validation.ts";
 
-const SESSION_KEY = "fsn-state";
+const SESSION_KEY = "domain-state";
 
 export function sessionKey(): string {
   return SESSION_KEY;
