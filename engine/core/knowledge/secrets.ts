@@ -198,9 +198,7 @@ function tryRevealWorldFact(fact: HiddenWorldFact, event: RevealSecretEvent): bo
   const evidence = revealEvidenceText(event);
   const normalizedNeedle = needle.toLowerCase();
   const normalizedEvidence = evidence.toLowerCase();
-  const textMatch =
-    fact.text.toLowerCase().includes(normalizedNeedle) ||
-    fact.revealConditions.some((c) => normalizedNeedle.includes(c.toLowerCase()));
+  const textMatch = fact.text.toLowerCase().includes(normalizedNeedle);
   const evidenceMatch = fact.revealConditions.some((c) =>
     normalizedEvidence.includes(c.toLowerCase()),
   );
@@ -229,21 +227,20 @@ function applyRevealSecret(
     throw new Error(`actor 不存在: ${event.actorId}`);
   }
   const slots = getActorSecretSlots(draft.secrets, event.actorId);
-  if (slots === undefined) {
-    return { outcome: "insufficient-evidence", playerSafeMessage: "没有足够证据确认。" };
-  }
-  const pathwaySecret = slots.pathwaySecret;
-  if (pathwaySecret !== undefined && canRevealStringSlot(event, pathwaySecret)) {
-    pathwaySecret.revealState = "revealed";
-    return { outcome: "revealed", playerSafeMessage: "途径秘密已经揭示。" };
-  }
-  const sequenceSecret = slots.sequenceSecret;
-  if (sequenceSecret !== undefined && canRevealStringSlot(event, sequenceSecret)) {
-    sequenceSecret.revealState = "revealed";
-    return { outcome: "revealed", playerSafeMessage: "序列秘密已经揭示。" };
-  }
-  if (markForeshadowed(slots, evidence)) {
-    return { outcome: "foreshadowed", playerSafeMessage: "线索成立，但尚不足以完全揭示。" };
+  if (slots !== undefined) {
+    const pathwaySecret = slots.pathwaySecret;
+    if (pathwaySecret !== undefined && canRevealStringSlot(event, pathwaySecret)) {
+      pathwaySecret.revealState = "revealed";
+      return { outcome: "revealed", playerSafeMessage: "途径秘密已经揭示。" };
+    }
+    const sequenceSecret = slots.sequenceSecret;
+    if (sequenceSecret !== undefined && canRevealStringSlot(event, sequenceSecret)) {
+      sequenceSecret.revealState = "revealed";
+      return { outcome: "revealed", playerSafeMessage: "序列秘密已经揭示。" };
+    }
+    if (markForeshadowed(slots, evidence)) {
+      return { outcome: "foreshadowed", playerSafeMessage: "线索成立，但尚不足以完全揭示。" };
+    }
   }
   // 扫描隐藏世界事实
   const protagonistId = draft.public.protagonistActorId;
@@ -353,14 +350,10 @@ function revealEvidenceText(event: RevealSecretEvent): string {
 }
 
 function slotMatches<T>(slot: SecretSlot<T>, text: string): boolean {
-  const normalized = text.toLowerCase();
-  const serialized = JSON.stringify(slot.value).toLowerCase();
-  return (
-    serialized.includes(normalized) ||
-    slot.revealConditions.some((condition) => normalized.includes(condition.toLowerCase()))
-  );
+  const needle = text.toLowerCase();
+  const serialized = String(slot.value).toLowerCase();
+  return needle.includes(serialized);
 }
-
 function evidenceMatches<T>(slot: SecretSlot<T>, evidence: string): boolean {
   const normalized = evidence.toLowerCase();
   return slot.revealConditions.some((condition) => normalized.includes(condition.toLowerCase()));
