@@ -39,7 +39,7 @@ const NON_NEGATIVE_AMOUNT_SCHEMA = Type.Integer({ minimum: 0 });
 export const SPEND_MONEY_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("spend-money"),
   purseId: Type.Optional(Type.String({ minLength: 1 })),
-  ownerActorId: Type.Optional(Type.String({ minLength: 1 })),
+  callerActorId: Type.Optional(Type.String({ minLength: 1 })),
   amount: NON_NEGATIVE_AMOUNT_SCHEMA,
   reason: Type.String({ minLength: 1 }),
 });
@@ -47,7 +47,7 @@ export const SPEND_MONEY_EVENT_SCHEMA = Type.Object({
 export const GAIN_MONEY_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("gain-money"),
   purseId: Type.Optional(Type.String({ minLength: 1 })),
-  ownerActorId: Type.Optional(Type.String({ minLength: 1 })),
+  callerActorId: Type.Optional(Type.String({ minLength: 1 })),
   amount: NON_NEGATIVE_AMOUNT_SCHEMA,
   source: MONEY_GAIN_SOURCE_SCHEMA,
   counterparty: Type.String({ minLength: 1 }),

@@ -26,7 +26,7 @@ export function updateEconomy(draft: State, event: EconomyEvent): EconomyEventRe
       return changePurseAmount(
         draft,
         event.purseId,
-        event.ownerActorId,
+        event.callerActorId,
         -assertPositiveInteger(event.amount, "amount"),
         "资金已支出。",
         event.reason,
@@ -36,7 +36,7 @@ export function updateEconomy(draft: State, event: EconomyEvent): EconomyEventRe
       return changePurseAmount(
         draft,
         event.purseId,
-        event.ownerActorId,
+        event.callerActorId,
         assertPositiveInteger(event.amount, "amount"),
         "资金已增加。",
         event.reason,
@@ -57,13 +57,13 @@ export function updateEconomy(draft: State, event: EconomyEvent): EconomyEventRe
 function changePurseAmount(
   draft: State,
   purseId: string | undefined,
-  ownerActorId: ActorId | undefined,
+  callerActorId: ActorId | undefined,
   delta: number,
   message: string,
   reason: string,
 ): EconomyEventResult {
   assertNonEmptyString(reason, "reason");
-  const purse = resolvePurse(draft.public.economy.accessibleFunds, purseId, ownerActorId);
+  const purse = resolvePurse(draft.public.economy.accessibleFunds, purseId, callerActorId);
   const nextAmount = purse.amount + delta;
   if (nextAmount < 0) {
     throw new Error(`资金不足: ${purse.label} 只有 ${purse.amount} 円。`);
@@ -90,7 +90,7 @@ function assertAuditableGain(event: Extract<EconomyEvent, { kind: "gain-money" }
 function resolvePurse(
   purses: MoneyPurse[],
   purseId: string | undefined,
-  ownerActorId: ActorId | undefined,
+  callerActorId: ActorId | undefined,
 ): MoneyPurse {
   if (purseId !== undefined) {
     const purse = purses.find((entry) => entry.id === purseId);
@@ -100,12 +100,12 @@ function resolvePurse(
     throw new Error(`资金账户不存在: ${purseId}。当前可用: ${formatPurseIds(purses)}。`);
   }
 
-  if (ownerActorId === undefined) {
-    throw new Error(`资金事件必须提供 purseId；若不确定，可提供 ownerActorId 自动选择账户。`);
+  if (callerActorId === undefined) {
+    throw new Error(`资金事件必须提供 purseId；若不确定，可提供 callerActorId 自动选择账户。`);
   }
 
   const ownedPurses = purses.filter(
-    (entry) => entry.ownerActorId === ownerActorId && entry.access === "held",
+    (entry) => entry.ownerActorId === callerActorId && entry.access === "held",
   );
   if (ownedPurses.length === 1) {
     const purse = ownedPurses[0];
@@ -116,11 +116,11 @@ function resolvePurse(
   }
   if (ownedPurses.length === 0) {
     throw new Error(
-      `actor ${ownerActorId} 没有可自动选择的 held 资金账户。当前可用: ${formatPurseIds(purses)}。`,
+      `actor ${callerActorId} 没有可自动选择的 held 资金账户。当前可用: ${formatPurseIds(purses)}。`,
     );
   }
   throw new Error(
-    `actor ${ownerActorId} 有多个 held 资金账户，请指定 purseId。候选: ${formatPurseIds(ownedPurses)}。`,
+    `actor ${callerActorId} 有多个 held 资金账户，请指定 purseId。候选: ${formatPurseIds(ownedPurses)}。`,
   );
 }
 

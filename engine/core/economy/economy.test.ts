@@ -25,7 +25,7 @@ void test("updateEconomy can spend from actor held purse", () => {
 
   updateEconomy(draft, {
     kind: "spend-money",
-    ownerActorId: "protagonist",
+    callerActorId: "protagonist",
     amount: 8,
     reason: "采购杂货",
   });
@@ -41,7 +41,7 @@ void test("updateEconomy can gain money from an audited source", () => {
 
   updateEconomy(draft, {
     kind: "gain-money",
-    ownerActorId: "protagonist",
+    callerActorId: "protagonist",
     amount: 50,
     source: "earned",
     counterparty: "廷根值夜者小队",

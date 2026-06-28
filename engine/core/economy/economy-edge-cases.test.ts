@@ -110,7 +110,7 @@ void test("add-debt rejects missing debtor actor", () => {
 
 // ─── resolvePurse edge cases ───────────────────────────────────
 
-void test("spend-money requires purseId or ownerActorId", () => {
+void test("spend-money requires purseId or callerActorId", () => {
   const draft = createInitialState();
   assert.throws(
     () =>
@@ -123,7 +123,7 @@ void test("spend-money requires purseId or ownerActorId", () => {
   );
 });
 
-void test("spend-money by ownerActorId throws when multiple held purses exist", () => {
+void test("spend-money by callerActorId throws when multiple held purses exist", () => {
   const draft = createInitialState();
   // add a second held purse so protagonist has >1
   draft.public.economy.accessibleFunds.push({
@@ -138,15 +138,15 @@ void test("spend-money by ownerActorId throws when multiple held purses exist", 
     () =>
       updateEconomy(draft, {
         kind: "spend-money",
-        ownerActorId: "protagonist",
+        callerActorId: "protagonist",
         amount: 5,
         reason: "测试多账户",
       }),
-    /多个 held 资金账户/,
+    /actor .+ 有多个 held 资金账户/,
   );
 });
 
-void test("spend-money by ownerActorId throws when no held purse exists", () => {
+void test("spend-money by callerActorId throws when no held purse exists", () => {
   const draft = createInitialState();
   // protagonist only has "held" purses; move them all to "requires-permission"
   for (const purse of draft.public.economy.accessibleFunds) {
@@ -159,11 +159,11 @@ void test("spend-money by ownerActorId throws when no held purse exists", () => 
     () =>
       updateEconomy(draft, {
         kind: "spend-money",
-        ownerActorId: "protagonist",
+        callerActorId: "protagonist",
         amount: 5,
         reason: "测试无 held 账户",
       }),
-    /没有可自动选择的 held 资金账户/,
+    /actor .+ 没有可自动选择的 held 资金账户/,
   );
 });
 

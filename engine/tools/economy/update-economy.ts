@@ -60,10 +60,10 @@ export const updateEconomyToolDefinition: DomainToolDefinition = {
     purseId: Type.Optional(
       Type.String({
         description:
-          "资金账户 id；可省略并提供 ownerActorId，让工具自动选择该 actor 唯一 held purse",
+          "资金账户 id；可省略并提供 callerActorId，让工具自动选择该 actor 唯一 held purse",
       }),
     ),
-    ownerActorId: Type.Optional(
+    callerActorId: Type.Optional(
       Type.String({
         description: "不确定 purseId 时填写 actorId；若该 actor 只有一个 held purse 会自动选择",
       }),
