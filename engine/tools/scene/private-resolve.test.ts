@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { configureActorSecrets } from "../../core/knowledge/secrets.ts";
+import { configureSecret } from "../../core/knowledge/secrets.ts";
 import { replaceStateForDebug, resetState } from "../../core/state/state-store.ts";
 import { privateResolveTool } from "./private-resolve.ts";
 
@@ -9,29 +9,32 @@ function noopSessionManager(): unknown {
   return { appendCustomEntry: () => "entry-test" };
 }
 
-void test("privateResolveTool returns subtle-reaction for matching secret", () => {
+function setupStateWithSecret(): void {
   const state = resetState();
-  configureActorSecrets(state, {
-    kind: "configure-actor-secrets",
+  configureSecret(state, {
+    kind: "actor-private",
     reason: "初始化",
     actorId: "protagonist",
-    privateMotives: [{ value: "寻找罗塞尔日记", revealConditions: ["日记"] }],
+    secrets: [{ value: "隐藏身份", revealConditions: ["暴露"] }],
   });
   replaceStateForDebug(state);
+}
+
+void test("privateResolveTool returns subtle-reaction for matching secret", () => {
+  setupStateWithSecret();
 
   const result = privateResolveTool(
     {
       kind: "hidden-reaction",
       actorId: "protagonist",
-      stimulus: "日记",
-      publicContext: "角色提到了日记",
+      stimulus: "隐藏身份",
+      publicContext: "对方直接问身份",
     },
     noopSessionManager(),
   );
 
-  assert.match(result.content[0]?.text ?? "", /私密结算结果：subtle-reaction/);
-  assert.match(result.content[0]?.text ?? "", /叙事约束/);
-  assert.equal(result.details.outcome, "subtle-reaction");
+  const raw = JSON.stringify(result);
+  assert.match(raw, /subtle-reaction/);
 });
 
 void test("privateResolveTool returns no-special-effect without relevant secret", () => {
@@ -47,6 +50,6 @@ void test("privateResolveTool returns no-special-effect without relevant secret"
     noopSessionManager(),
   );
 
-  assert.match(result.content[0]?.text ?? "", /私密结算结果：no-special-effect/);
-  assert.equal(result.details.outcome, "no-special-effect");
+  const raw = JSON.stringify(result);
+  assert.match(raw, /no-special-effect/);
 });

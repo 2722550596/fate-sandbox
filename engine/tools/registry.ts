@@ -21,7 +21,7 @@ import { patchStateToolDefinition } from "./debug/patch-state.ts";
 import { resetStateToolDefinition } from "./debug/reset-state.ts";
 import { updateEconomyToolDefinition } from "./economy/update-economy.ts";
 import { updateTrackedItemToolDefinition } from "./inventory/update-tracked-item.ts";
-import { addHiddenWorldFactToolDefinition } from "./knowledge/add-hidden-world-fact.ts";
+import { configureSecretToolDefinition } from "./knowledge/configure-secret.ts";
 import { recallMemoryToolDefinition } from "./knowledge/recall-memory.ts";
 import { recordMemoryToolDefinition } from "./knowledge/record-memory.ts";
 import { revealSecretToolDefinition } from "./knowledge/reveal-secret.ts";
@@ -58,7 +58,7 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   updateActorConditionToolDefinition,
   updateTrackedItemToolDefinition,
   updateActorOutfitToolDefinition,
-  addHiddenWorldFactToolDefinition,
+  configureSecretToolDefinition,
   setScenePresenceToolDefinition,
   upsertActorToolDefinition,
   recordActingFeedbackToolDefinition,
