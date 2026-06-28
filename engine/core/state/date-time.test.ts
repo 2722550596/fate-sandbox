@@ -1,8 +1,8 @@
 import assert from "node:assert";
 // oxlint-disable typescript/no-floating-promises -- node:test 的 it()/describe() 同步重载返回 void，oxlint 类型感知无法区分同步与异步重载。
-import { describe, it } from "node:test";
+import { describe, it, test } from "node:test";
 
-import { advanceIsoTime, diffMinutes, formatHumanTime, isDifferentGameDate } from "./date-time.ts";
+import { advanceIsoTime, diffMinutes, formatHumanTime, isDifferentGameDate, normalizeIsoInstant } from "./date-time.ts";
 
 describe("date-time", () => {
   it("formats LOTM epoch start time (1349-01-01 Monday 07:00)", () => {
@@ -33,4 +33,25 @@ describe("date-time", () => {
   it("detects game-date crossing in UTC", () => {
     assert.equal(isDifferentGameDate("1349-01-01T23:00:00Z", "1349-01-02T01:00:00Z"), true);
   });
+});
+
+void test("normalizeIsoInstant preserves valid ISO instants", () => {
+  assert.equal(
+    normalizeIsoInstant("2004-01-30T08:00:00Z", "test"),
+    "2004-01-30T08:00:00.000Z",
+  );
+});
+
+void test("normalizeIsoInstant accepts ISO with timezone offset", () => {
+  assert.equal(
+    normalizeIsoInstant("2004-01-30T16:00:00+08:00", "test"),
+    "2004-01-30T08:00:00.000Z",
+  );
+});
+
+void test("normalizeIsoInstant throws on invalid input", () => {
+  assert.throws(
+    () => normalizeIsoInstant("not-a-date", "timeField"),
+    /非法timeField/,
+  );
 });
