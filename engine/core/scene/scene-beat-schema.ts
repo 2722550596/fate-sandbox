@@ -48,7 +48,7 @@ export const SCENE_BEAT_MEMORY_INPUT_SCHEMA = Type.Object({
   title: Type.String({ minLength: 1 }),
   summary: Type.String({ minLength: 1 }),
   consequences: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
-  claims: Type.Array(MEMORY_CLAIM_SCHEMA),
+  claims: Type.Optional(Type.Array(MEMORY_CLAIM_SCHEMA)),
 });
 export type SceneBeatMemoryInput = Static<typeof SCENE_BEAT_MEMORY_INPUT_SCHEMA>;
 

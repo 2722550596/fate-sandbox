@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getState, resetState } from "../../core/state/state-store.ts";
+import { beginSceneBeat } from "../../core/scene/scene.ts";
+import { commitState, getState, resetState } from "../../core/state/state-store.ts";
 import { commitTurnTool } from "./commit-turn.ts";
 
 function noopSessionManager(): unknown {
@@ -26,9 +27,23 @@ void test("commitTurnTool advances time with elapsed event", () => {
   assert.ok(after > before);
   assert.match(result.content[0]?.text ?? "", /已提交/);
 });
-
 void test("commitTurnTool applies scene events like set-location", () => {
   resetState();
+  const draft = getState();
+  beginSceneBeat(draft, {
+    reason: "测试",
+    storyWindow: {
+      title: "旅行",
+      currentArcId: "main",
+      allowedActions: [],
+      currentBeatId: "travel",
+      completionCriteria: [],
+      nextBeatHints: [],
+      forbiddenEscalations: [],
+    },
+    objectives: ["到达目的地"],
+  });
+  commitState(draft);
   const sm = noopSessionManager();
 
   const result = commitTurnTool(

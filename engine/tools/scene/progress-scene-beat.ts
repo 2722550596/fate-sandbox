@@ -112,20 +112,22 @@ function sceneBeatMemorySchema(): ReturnType<typeof Type.Object> {
     title: Type.String(),
     summary: Type.String(),
     consequences: Type.Optional(Type.Array(Type.String())),
-    claims: Type.Array(
-      Type.Object({
-        kind: Type.String({
-          description:
-            "mundane / identity / location / affiliation / motive / ability / resource / relationship / event-cause / world-fact",
+    claims: Type.Optional(
+      Type.Array(
+        Type.Object({
+          kind: Type.String({
+            description:
+              "mundane / identity / location / affiliation / motive / ability / resource / relationship / event-cause / world-fact",
+          }),
+          statement: Type.String(),
+          certainty: Type.String({
+            description: "observed / confirmed / inferred / rumor / hypothesis",
+          }),
+          subjectId: Type.Optional(Type.String()),
+          relatedSecretSlotIds: Type.Optional(Type.Array(Type.String())),
+          evidence: Type.Optional(Type.String()),
         }),
-        statement: Type.String(),
-        certainty: Type.String({
-          description: "observed / confirmed / inferred / rumor / hypothesis",
-        }),
-        subjectId: Type.Optional(Type.String()),
-        relatedSecretSlotIds: Type.Optional(Type.Array(Type.String())),
-        evidence: Type.Optional(Type.String()),
-      }),
+      ),
     ),
   });
 }

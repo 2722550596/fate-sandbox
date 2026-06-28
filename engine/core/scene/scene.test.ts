@@ -37,6 +37,7 @@ function withActiveBeat(draft: ReturnType<typeof createInitialState>): void {
 
 void test("updateScene set-location updates scene location", () => {
   const draft = createInitialState();
+  withActiveBeat(draft);
 
   const result = updateScene(draft, {
     kind: "set-location",
@@ -66,9 +67,9 @@ void test("updateScene set-location rejects empty reason", () => {
 // ---------------------------------------------------------------------------
 // set-situation
 // ---------------------------------------------------------------------------
-
 void test("updateScene set-situation updates scene situation", () => {
   const draft = createInitialState();
+  withActiveBeat(draft);
 
   const result = updateScene(draft, {
     kind: "set-situation",
