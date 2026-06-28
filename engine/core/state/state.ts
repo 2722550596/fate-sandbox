@@ -410,17 +410,22 @@ export interface AfflictionState {
 export interface TagEntry {
   name: string;
 }
+export interface ActingCueProgress {
+  key: string;
+  label: string;
+  reason: string;
+  recordedAt: string;
+}
 
 export interface SequenceState {
   currentSequence: string;
   rank: SequenceRank;
   pathway: PathwayId;
   promotionSystem: PromotionSystem;
-  divinity: number;
-  digestionProgress: number;
-  lossOfControlProgress: number;
   /** 序列标签（叙事参考，不影响引擎计算） */
   tags: TagEntry[];
+  /** 扮演线索日志（每条 = 一次可审计的扮演反馈记录） */
+  actingCues: ActingCueProgress[];
 }
 
 

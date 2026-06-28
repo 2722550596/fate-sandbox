@@ -202,9 +202,6 @@ function looseSequenceSchema(): ReturnType<typeof Type.Object> {
         "seer / apprentice / thief / mystery-prayer / spectator / sailor / bard / reader / warrior / sleepless / grave-keeper / hunter / assassin / savant / secret-pryer / monster / apothecary / cultivator / ruffian / arbiter / lawyer / broker",
     }),
     promotionSystem: Type.Optional(Type.String({ description: "potion / other" })),
-    divinity: Type.Optional(Type.Number({ description: "神性值，默认 1" })),
-    digestionProgress: Type.Optional(Type.Integer({ description: "0-100 消化进度，默认 0" })),
-    lossOfControlProgress: Type.Optional(Type.Integer({ description: "0-100 失控进度，默认 0" })),
   });
 }
 

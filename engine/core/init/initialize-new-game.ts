@@ -108,12 +108,8 @@ export interface BeyonderProtagonistOpeningInput {
   rank: SequenceRank;
   pathway: PathwayId;
   promotionSystem?: PromotionSystem;
-  divinity?: number;
-  digestionProgress?: number;
-  lossOfControlProgress?: number;
   roles?: ActorRole[];
   abilities?: string[];
-  ordinaryItems?: string[];
 }
 
 export interface NewGamePresenceInput {
@@ -175,9 +171,6 @@ const BEYONDER_PROTAGONIST_OPENING_SCHEMA = Type.Object({
   rank: SEQUENCE_RANK_SCHEMA,
   pathway: PATHWAY_ID_SCHEMA,
   promotionSystem: Type.Optional(PROMOTION_SYSTEM_SCHEMA),
-  divinity: Type.Optional(Type.Number({ minimum: 0 })),
-  digestionProgress: Type.Optional(Type.Integer({ minimum: 0, maximum: 100 })),
-  lossOfControlProgress: Type.Optional(Type.Integer({ minimum: 0, maximum: 100 })),
   abilities: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
   ordinaryItems: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
 });
@@ -374,9 +367,7 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
       rank: input.rank,
       pathway: input.pathway,
       promotionSystem: input.promotionSystem ?? "potion",
-      divinity: input.divinity ?? 1,
-      digestionProgress: input.digestionProgress ?? 0,
-      lossOfControlProgress: input.lossOfControlProgress ?? 0,
+      actingCues: [],
       tags: [] as TagEntry[],
     },
     identity: {

@@ -349,9 +349,6 @@ void test("upsertActor upsert-sequence sets sequence info on existing actor", ()
       rank: "seq-9",
       pathway: "reader",
       promotionSystem: "potion",
-      divinity: 0,
-      digestionProgress: 0,
-      lossOfControlProgress: 0,
     },
   });
 
@@ -374,9 +371,6 @@ void test("upsertActor upsert-sequence throws on missing actor", () => {
           rank: "seq-9",
           pathway: "reader",
           promotionSystem: "potion",
-          divinity: 0,
-          digestionProgress: 0,
-          lossOfControlProgress: 0,
         },
       }),
     /actor 不存在，无法设置序列/,

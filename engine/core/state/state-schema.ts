@@ -99,10 +99,15 @@ const SEQUENCE_STATE_SCHEMA = Type.Object({
   rank: SEQUENCE_RANK_SCHEMA,
   pathway: PATHWAY_ID_SCHEMA,
   promotionSystem: PROMOTION_SYSTEM_SCHEMA,
-  divinity: Type.Number({ minimum: 0 }),
-  digestionProgress: Type.Integer({ minimum: 0, maximum: 100 }),
-  lossOfControlProgress: Type.Integer({ minimum: 0, maximum: 100 }),
   tags: Type.Array(TAG_ENTRY_SCHEMA),
+  actingCues: Type.Array(
+    Type.Object({
+      key: NON_EMPTY_STRING_SCHEMA,
+      label: NON_EMPTY_STRING_SCHEMA,
+      reason: NON_EMPTY_STRING_SCHEMA,
+      recordedAt: ISO_INSTANT_SCHEMA,
+    }),
+  ),
 });
 
 // ---------------------------------------------------------------------------

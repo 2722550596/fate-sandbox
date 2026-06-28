@@ -123,10 +123,8 @@ function upsertSequence(
     rank: seq.rank,
     pathway: seq.pathway,
     promotionSystem: seq.promotionSystem,
-    divinity: seq.divinity,
-    digestionProgress: seq.digestionProgress,
-    lossOfControlProgress: seq.lossOfControlProgress,
     tags: resolveSequenceTagsForActor(seq.currentSequence),
+    actingCues: [],
   };
 
   return {

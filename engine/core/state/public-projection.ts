@@ -163,13 +163,14 @@ function formatSequence(actor: NonNullable<PublicGameState["actors"][string]>): 
   if (seq === null) {
     return "无序列";
   }
-  return [
+  const parts: string[] = [
     seq.currentSequence,
     `途径${seq.pathway}`,
-    `神性${seq.divinity}`,
-    `消化${seq.digestionProgress}%`,
-    `失控${seq.lossOfControlProgress}%`,
-  ].join("；");
+  ];
+  if (seq.actingCues.length > 0) {
+    parts.push(`扮演${seq.actingCues.length}条`);
+  }
+  return parts.join("；");
 }
 
 function formatAllies(publicState: PublicGameState): string {

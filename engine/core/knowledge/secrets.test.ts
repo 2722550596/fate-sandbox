@@ -21,10 +21,8 @@ function setupActorSequence(draft: ReturnType<typeof createInitialState>): void 
     rank: "seq-9",
     pathway: "seer",
     promotionSystem: "potion",
-    divinity: 0,
-    digestionProgress: 0,
-    lossOfControlProgress: 0,
     tags: [],
+    actingCues: [],
   };
 }
 

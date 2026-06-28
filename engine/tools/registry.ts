@@ -2,6 +2,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 import type { DomainToolDefinition } from "./runtime/tool-definition.ts";
 
+import { recordActingFeedbackToolDefinition } from "./actor/record-acting-feedback.ts";
 import { recordActorKnowledgeToolDefinition } from "./actor/record-actor-knowledge.ts";
 import { retireActorToolDefinition } from "./actor/retire-actor.ts";
 import { setScenePresenceToolDefinition } from "./actor/set-scene-presence.ts";
@@ -28,7 +29,6 @@ import { recordMemoryToolDefinition } from "./knowledge/record-memory.ts";
 import { revealSecretToolDefinition } from "./knowledge/reveal-secret.ts";
 import { lookupToolDefinition } from "./lookup/lookup.ts";
 import { attemptPromotionToolDefinition } from "./lotm/attempt-promotion.ts";
-import { updateCorruptionToolDefinition } from "./lotm/update-corruption.ts";
 import { recordRelationshipSignalToolDefinition } from "./relationship/record-relationship-signal.ts";
 import { renderDomainToolResult } from "./runtime/tool-render.ts";
 import { commitTurnToolDefinition } from "./scene/commit-turn.ts";
@@ -60,6 +60,7 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   addHiddenWorldFactToolDefinition,
   setScenePresenceToolDefinition,
   upsertActorToolDefinition,
+  recordActingFeedbackToolDefinition,
   updateEconomyToolDefinition,
   revealSecretToolDefinition,
   runParallelLineToolDefinition,
@@ -75,7 +76,6 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
 
   resetStateToolDefinition,
   getStateSchemaToolDefinition,
-  updateCorruptionToolDefinition,
   attemptPromotionToolDefinition,
 ];
 

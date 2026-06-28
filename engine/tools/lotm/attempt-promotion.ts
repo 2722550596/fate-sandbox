@@ -1,13 +1,17 @@
 // ---------------------------------------------------------------------------
-// attempt_promotion — 序列晋升工具
+// attempt_promotion — 序列晋升裁决工具
 //
-// 叙事先验版本：引擎不做骰子判定、不计算失控值增加。
-// 引擎只检查消化进度（需 ≥80%），晋升结果由 LLM 叙事决定。
-// 晋升成功通过 upsert_actor 更新序列状态，失败通过 update_corruption 增加失控值。
+// 模式与 resolve_combat_exchange 一致：
+//   引擎只裁决，不改状态。
+//   输出 outcome bands + narrative constraints + state landings，
+//   必须落地的状态变更记入义务账本（obligations ledger）。
 //
-// 设计哲学：
-//   - 晋升的难度取决于：仪式完成度、环境因素、消化进度——这些都是叙事层面的判断
-//   - 引擎只确保 "消化不够就不能晋升" 这个硬边界
+// GM 在叙事完成后通过 commit_turn 清账：
+//   - { kind: "sequence", event: { actorId, currentSequence, rank, pathway, ... } }
+//   - { kind: "memory", event: ... }
+//   - { kind: "actor-condition", event: ... }
+//   - scene event（add-threat / add-objective）
+//   - reveal_secret 工具
 // ---------------------------------------------------------------------------
 
 import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
@@ -15,103 +19,208 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
-import { upsertActor } from "../../core/actor/actor.ts";
-import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
-import { SEQUENCE_RANKS, PATHWAY_IDS } from "../../core/state/state-enum-schemas.ts";
-import { cloneState, commitState } from "../../core/state/state-store.ts";
+import { recordObligation } from "../../core/ledger/obligations.ts";
+import {
+  resolveLOTMPromotion,
+  type LOTMPromotionInput,
+} from "../../core/promotion/promotion-exchange-lotm.ts";
+import { SEQUENCE_RANKS } from "../../core/state/state-enum-schemas.ts";
 import { assertOneOfString } from "../../core/utils/string-enum.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
-import { textResult } from "../runtime/tool-result.ts";
+import { noNumberNarrativeHint } from "../runtime/narrative-hints.ts";
+import { runDomainEventTool } from "../system/domain-tool-runner.ts";
+
+// ===========================================================================
+// 主处理函数
+// ===========================================================================
 
 export function attemptPromotionTool(params: unknown, sessionManager: unknown): ToolResult {
-  const { actorId, targetRank, targetName, pathway, divinity, digestionProgress } =
-    parsePromotionParams(params);
-  const draft = cloneState();
+  const raw = isRecord(params) ? params : {};
 
-  const actor = draft.public.actors[actorId];
-  if (actor === undefined) {
-    return textResult(`actor 不存在: ${actorId}。先用 get_status 查看可用 actor。`, {
-      error: "actor_not_found",
-    });
+  return runDomainEventTool({
+    sessionManager,
+    execute: (draft) => {
+      const actorId = typeof raw["actorId"] === "string" ? raw["actorId"] : "";
+      if (!actorId) throw new Error("attempt_promotion: 缺少 actorId。");
+
+      const actor = draft.public.actors[actorId];
+      if (!actor) throw new Error(`attempt_promotion: actor 不存在: ${actorId}。`);
+      if (!actor.sequence) throw new Error(`attempt_promotion: actor ${actorId} 不是非凡者。`);
+
+      const actingCueCount = actor.sequence.actingCues.length;
+      const targetRank = assertOneOfString(raw["targetRank"], SEQUENCE_RANKS, "targetRank");
+
+      const input: LOTMPromotionInput = {
+        actorId,
+        currentRank: actor.sequence.rank,
+        targetRank,
+        actingCueCount,
+        ritualIntegrity: assertOneOfString(
+          typeof raw["ritualIntegrity"] === "string" ? raw["ritualIntegrity"] : "standard",
+          ["none", "improvised", "standard", "enhanced"],
+          "ritualIntegrity",
+        ),
+        environmentRisk: assertOneOfString(
+          typeof raw["environmentRisk"] === "string" ? raw["environmentRisk"] : "safe",
+          ["safe", "disturbed", "hostile", "chaotic"],
+          "environmentRisk",
+        ),
+        riskTolerance: assertOneOfString(
+          typeof raw["riskTolerance"] === "string" ? raw["riskTolerance"] : "medium",
+          ["low", "medium", "high", "desperate"],
+          "riskTolerance",
+        ),
+        hasMainCharacteristic: raw["hasMainCharacteristic"] === true,
+        hasSupplementaryMaterials: raw["hasSupplementaryMaterials"] === true,
+      };
+
+      const result = resolveLOTMPromotion(draft, input);
+      const landings = result.stateLandings;
+
+      // 记录必须落地的义务
+      const recorded = landings
+        .filter((l) => l.required)
+        .map((l) =>
+          recordObligation(draft, {
+            source: "promotion",
+            kind: landingKindToObligationKind(l.kind),
+            summary: l.reason,
+          }),
+        );
+
+      return { result, recordedObligations: recorded.length };
+    },
+    details: ({ result }) => ({ result }),
+    message: ({ result, recordedObligations }) =>
+      formatPromotionResult(result, recordedObligations),
+  });
+}
+
+// ===========================================================================
+// 状态落点 kind → TurnObligationKind 映射
+// ===========================================================================
+
+// eslint-disable-next-line consistent-return — exhaustive switch over union
+function landingKindToObligationKind(
+  kind: import("../../core/promotion/promotion-exchange-lotm.ts").LOTMPromotionStateLandingKind,
+): import("../../core/state/state.ts").TurnObligationKind {
+  switch (kind) {
+    case "actor-sequence":
+      return "sequence";
+    case "actor-condition":
+      return "actor-condition";
+    case "inventory":
+      return "tracked-item";
+    case "scene-threat":
+      return "scene-threat";
+    case "memory":
+      return "memory";
+    case "reveal-secret":
+      return "reveal-secret";
   }
+}
 
-  // 唯一硬边界：消化进度必须 ≥80%
-  if (digestionProgress < 80) {
-    return textResult(
-      `晋升失败：消化进度不足（${digestionProgress}% < 80%）。请先继续扮演消化魔药。`,
-      { digestionProgress, requiredDigestion: 80, success: false },
+// ===========================================================================
+// 输出格式化
+// ===========================================================================
+
+export function formatPromotionResult(
+  result: import("../../core/promotion/promotion-exchange-lotm.ts").LOTMPromotionResult,
+  recordedObligations: number,
+): string {
+  const lines: string[] = [
+    `晋升裁决：${result.outcome}`,
+    `目标等级：${result.targetRank}`,
+    `扮演准备：${result.actingReadiness}（${result.actingCueCount} 条）`,
+    `综合偏移：${result.totalModifier > 0 ? "+" : ""}${result.totalModifier}`,
+    "",
+    "状态落点：",
+    ...result.stateLandings.map(formatLanding),
+    "",
+    "后果引导：",
+    ...uniqueLines(result.consequenceGuidance).map((l) => `- ${l}`),
+    "",
+    "叙事约束：",
+    ...uniqueLines([...result.narrativeConstraints, noNumberNarrativeHint()]).map((l) => `- ${l}`),
+    "",
+    "禁止写法：",
+    ...uniqueLines(result.forbiddenNarration).map((l) => `- ${l}`),
+    "",
+    `下一行动窗口：${result.nextActionWindow}`,
+  ];
+
+  if (recordedObligations > 0) {
+    lines.push(
+      "",
+      `⚠ 已登记 ${recordedObligations} 条必须落地的义务；本轮 canonical commit 前必须用对应状态事件清账。`,
     );
   }
 
-  // 晋升结果由 LLM 叙事判断，引擎只更新状态
-  // LLM 在调用之前已经通过叙事判断了"仪式是否完成、环境是否合适"
-  // 这里默认允许，因为叙事层已经通过了
-
-  // 晋升成功：更新 actor 的 sequence 信息
-  upsertActor(draft, {
-    kind: "upsert-sequence",
-    sequence: {
-      actorId,
-      currentSequence: targetName,
-      rank: assertOneOfString(targetRank, SEQUENCE_RANKS, "targetRank"),
-      pathway: assertOneOfString(pathway, PATHWAY_IDS, "pathway"),
-      promotionSystem: "potion",
-      divinity: divinity ?? 0,
-      digestionProgress: 0,
-      lossOfControlProgress: 0,
-    },
-    reason: `晋升至 ${targetName}`,
-  });
-
-  commitState(draft);
-  persistStateAfterCommit(sessionManager, {
-    result: { actorId, targetRank, targetName, success: true },
-  });
-
-  return textResult(`【晋升成功】${actorId} 成功晋升至 ${targetName}！`, {
-    actorId,
-    targetRank,
-    targetName,
-    success: true,
-  });
+  return lines.join("\n");
 }
 
-interface PromotionParams {
-  actorId: string;
-  targetRank: string;
-  targetName: string;
-  pathway: string;
-  divinity: number;
-  digestionProgress: number;
+function formatLanding(
+  landing: import("../../core/promotion/promotion-exchange-lotm.ts").LOTMPromotionStateLanding,
+): string {
+  return `- ${landing.required ? "必须" : "可选"} ${landing.kind}: ${landing.reason}`;
 }
 
-function parsePromotionParams(params: unknown): PromotionParams {
-  const raw = isRecord(params) ? params : {};
-  return {
-    actorId: typeof raw.actorId === "string" && raw.actorId.length > 0 ? raw.actorId : "",
-    targetRank: typeof raw.targetRank === "string" ? raw.targetRank : "seq-9",
-    targetName: typeof raw.targetName === "string" ? raw.targetName : "序列9",
-    pathway: typeof raw.pathway === "string" ? raw.pathway : "seer",
-    divinity: typeof raw.divinity === "number" ? raw.divinity : 0,
-    digestionProgress: typeof raw.digestionProgress === "number" ? raw.digestionProgress : 0,
-  };
+function uniqueLines(lines: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.length > 0 && !seen.has(trimmed)) {
+      seen.add(trimmed);
+      unique.push(trimmed);
+    }
+  }
+  return unique;
 }
+
+// ===========================================================================
+// 工具注册
+// ===========================================================================
 
 export const attemptPromotionToolDefinition: DomainToolDefinition = {
   name: "attempt_promotion",
   description:
-    "序列晋升。引擎只检查消化进度（需 ≥80%），不计算骰子判定或失控值。\n\n" +
-    "晋升成功时引擎自动更新 actor 的 sequence 状态。\n" +
-    "晋升失败的后果（失控值增加等）由 LLM 调用 update_corruption 处理。\n\n" +
-    "使用边界：玩家角色或 NPC 的序列晋升流程。\n" +
-    "禁区：跳过消化进度检查直接写入高序列。",
+    "序列晋升裁决。引擎根据序列等级差、扮演积累条数、仪式完整性、环境风险和材料完备度\n" +
+    "输出 outcome bands + narrative constraints + 必须落地的状态变更义务。\n\n" +
+    "引擎不直接写状态——必须落地的义务记入账本，GM 后续通过 commit_turn 或其他工具清账：\n" +
+    "- actor-sequence → commit_turn 的 upsert-sequence 事件\n" +
+    "- actor-condition → update_actor_condition 或 commit_turn\n" +
+    "- inventory → update_tracked_item 或 commit_turn\n" +
+    "- scene-threat → commit_turn 的 add-threat 事件\n" +
+    "- memory → record_memory 或 commit_turn\n" +
+    "- reveal-secret → reveal_secret 工具\n\n" +
+    "使用边界：玩家角色或 NPC 的序列晋升。\n" +
+    "禁区：用此工具代管状态变更，或跳过叙事直接晋升。",
   parameters: Type.Object({
-    actorId: Type.String({ minLength: 1, description: "目标 actor id" }),
-    targetRank: Type.String({ description: "目标序列等级" }),
-    targetName: Type.String({ description: "目标序列名称" }),
-    pathway: Type.String({ description: "途径 ID" }),
-    divinity: Type.Optional(Type.Number({ description: "晋升后的神性值（默认 0）" })),
-    digestionProgress: Type.Number({ description: "当前消化进度 0-100（需 ≥80 才能晋升）" }),
+    actorId: Type.String({ minLength: 1, description: "晋升目标 actor id" }),
+    targetRank: Type.String({
+      description:
+        "目标序列等级（seq-9 / seq-8 / seq-7 / seq-6 / seq-5 / seq-4 / seq-3 / seq-2 / seq-1 / seq-0 / old-one / pillar）",
+    }),
+    ritualIntegrity: Type.Optional(
+      Type.String({
+        description: "仪式完成度：none / improvised / standard（默认） / enhanced",
+      }),
+    ),
+    environmentRisk: Type.Optional(
+      Type.String({ description: "环境风险：safe（默认） / disturbed / hostile / chaotic" }),
+    ),
+    hasMainCharacteristic: Type.Optional(
+      Type.Boolean({ description: "是否拥有主非凡特性/材料（默认 false）" }),
+    ),
+    hasSupplementaryMaterials: Type.Optional(
+      Type.Boolean({ description: "是否拥有辅助材料（默认 false）" }),
+    ),
+    riskTolerance: Type.Optional(
+      Type.String({
+        description: "风险偏好：low / medium（默认） / high / desperate",
+      }),
+    ),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     attemptPromotionTool(params, ctx.sessionManager),

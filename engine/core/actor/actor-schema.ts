@@ -110,9 +110,6 @@ export const SEQUENCE_INPUT_SCHEMA = Type.Object({
   rank: SEQUENCE_RANK_SCHEMA,
   pathway: PATHWAY_ID_SCHEMA,
   promotionSystem: PROMOTION_SYSTEM_SCHEMA,
-  divinity: Type.Number({ minimum: 0 }),
-  digestionProgress: Type.Integer({ minimum: 0, maximum: 100 }),
-  lossOfControlProgress: Type.Integer({ minimum: 0, maximum: 100 }),
 });
 export type SequenceInput = Static<typeof SEQUENCE_INPUT_SCHEMA>;
 
