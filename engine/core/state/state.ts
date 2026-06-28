@@ -185,7 +185,7 @@ export interface ActorAgendaState {
   actorId: ActorId;
   goal: string;
   fear: string;
-  currentOrder: string | null;
+  currentAssignment: string | null;
   lastIndependentActionAt: string | null;
 }
 
@@ -318,7 +318,6 @@ export type PublicActorState =
 export interface ActorBase {
   id: ActorId;
   kind: ActorKind;
-  roles: ActorRole[];
   sequence: SequenceState | null;
   identity: IdentityState;
   presentation: PresentationState;
@@ -346,24 +345,16 @@ export interface OtherActorState extends ActorBase {
   nature: string;
 }
 
-export type ActorRole = SocialRole | FactionRole;
-
-export interface SocialRole {
-  kind: "social";
-  label: string;
-}
-
-export interface FactionRole {
-  kind: "faction";
-  factionId: string;
-  label: string;
-}
+// roles 已移除，合并到 IdentityState.roles: string[]
 
 export interface IdentityState {
   publicIdentity: string;
   background: string;
   lockedFacts: LockedFact[];
+  roles: string[];
 }
+
+
 
 export interface LockedFact {
   id: string;
@@ -549,8 +540,7 @@ export interface DailySummaryMemory {
 
 export interface ActorSecretSlots {
   actorId: ActorId;
-  pathwaySecret?: SecretSlot<string>;
-  sequenceSecret?: SecretSlot<string>;
+  beyonderSecrets: Array<SecretSlot<string>>;
   privateMotives: Array<SecretSlot<string>>;
   unrevealedAffiliations: Array<SecretSlot<string>>;
 }

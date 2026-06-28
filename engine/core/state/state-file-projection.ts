@@ -45,7 +45,7 @@ export interface TimelineActorContext {
 export interface TimelineActorAgendaContext {
   goal: string;
   fear: string;
-  currentOrder: string | null;
+  currentAssignment: string | null;
   lastIndependentActionAt: string | null;
 }
 
@@ -170,7 +170,7 @@ function agendaContext(actorId: string, value: unknown): TimelineActorAgendaCont
   return {
     goal: requireString(agenda["goal"], `actorAgendas.${actorId}.goal`),
     fear: requireString(agenda["fear"], `actorAgendas.${actorId}.fear`),
-    currentOrder: nullableString(agenda["currentOrder"], `actorAgendas.${actorId}.currentOrder`),
+    currentAssignment: nullableString(agenda["currentAssignment"], `actorAgendas.${actorId}.currentAssignment`),
     lastIndependentActionAt: nullableString(
       agenda["lastIndependentActionAt"],
       `actorAgendas.${actorId}.lastIndependentActionAt`,

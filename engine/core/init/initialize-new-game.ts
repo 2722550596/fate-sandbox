@@ -1,7 +1,6 @@
 import type { MemoryClaim } from "../knowledge/memory.ts";
 import type {
   ActorId,
-  ActorRole,
   CurrencyCode,
   LocationState,
   OpeningMode,
@@ -91,7 +90,7 @@ export interface HumanProtagonistOpeningInput {
   apparentAge: string;
   outfit: OutfitState;
   demeanor: string;
-  roles?: ActorRole[];
+  roles?: string[];
   abilities?: string[];
   ordinaryItems?: string[];
 }
@@ -108,7 +107,7 @@ export interface BeyonderProtagonistOpeningInput {
   rank: SequenceRank;
   pathway: PathwayId;
   promotionSystem?: PromotionSystem;
-  roles?: ActorRole[];
+  roles?: string[];
   abilities?: string[];
 }
 
@@ -332,12 +331,12 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
   return {
     id: PROTAGONIST_ACTOR_ID,
     kind: "human",
-    roles: input.roles ?? [],
     sequence: null,
     identity: {
       publicIdentity: input.publicIdentity,
       background: input.background,
       lockedFacts: [],
+      roles: input.roles ?? [],
     },
     presentation: {
       canonicalName: input.canonicalName,
@@ -361,7 +360,6 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
   return {
     id: PROTAGONIST_ACTOR_ID,
     kind: "beyonder",
-    roles: input.roles ?? [],
     sequence: {
       currentSequence: input.currentSequence,
       rank: input.rank,
@@ -374,6 +372,7 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
       publicIdentity: input.publicIdentity,
       background: input.background,
       lockedFacts: [],
+      roles: input.roles ?? [],
     },
     presentation: {
       canonicalName: input.canonicalName,

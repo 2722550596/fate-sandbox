@@ -25,9 +25,8 @@ void test("setScenePresenceTool adds ally actors", () => {
   stateWithAlly.public.actors["ally-1"] = {
     id: "ally-1",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "盟友", background: "协助者", lockedFacts: [] },
+    identity: { publicIdentity: "盟友", background: "协助者", lockedFacts: [], roles: [] },
     presentation: {
       canonicalName: "盟友",
       renderName: "盟友",

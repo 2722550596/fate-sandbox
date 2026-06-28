@@ -33,8 +33,15 @@ const REVEAL_SECRET_TOOL_KIND_SCHEMA = stringEnumSchema(REVEAL_SECRET_TOOL_KINDS
 export const CONFIGURE_SEQUENCE_SECRETS_SCHEMA = Type.Object({
   kind: Type.Literal("configure-sequence-secrets"),
   actorId: Type.String({ minLength: 1 }),
-  pathwaySecret: Type.Optional(SECRET_STRING_INPUT_SCHEMA),
-  sequenceSecret: Type.Optional(SECRET_STRING_INPUT_SCHEMA),
+  beyonderSecrets: Type.Optional(
+    Type.Array(
+      Type.Object({
+        kind: Type.Union([Type.Literal("pathway"), Type.Literal("sequence")]),
+        value: Type.String({ minLength: 1 }),
+        revealConditions: Type.Array(Type.String({ minLength: 1 })),
+      }),
+    ),
+  ),
   reason: Type.String({ minLength: 1 }),
 });
 export type ConfigureSequenceSecretsInput = Static<typeof CONFIGURE_SEQUENCE_SECRETS_SCHEMA>;

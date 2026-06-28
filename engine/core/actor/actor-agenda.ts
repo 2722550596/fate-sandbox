@@ -15,7 +15,7 @@ export interface UpsertActorAgendaInput {
   actorId: ActorId;
   goal: string;
   fear: string;
-  currentOrder: string | null;
+  currentAssignment: string | null;
   lastIndependentActionAt: string | null;
 }
 
@@ -37,7 +37,7 @@ export function upsertActorAgenda(state: State, input: UpsertActorAgendaInput): 
 export function markActorIndependentAction(
   state: State,
   actorId: ActorId,
-  currentOrder: string | null,
+  currentAssignment: string | null,
 ): ActorAgendaState {
   assertActorExists(state, actorId);
   const agenda = findActorAgenda(state, actorId);
@@ -47,7 +47,7 @@ export function markActorIndependentAction(
     );
   }
   agenda.lastIndependentActionAt = state.public.clock.currentAt;
-  agenda.currentOrder = currentOrder;
+  agenda.currentAssignment = currentAssignment;
   return structuredClone(agenda);
 }
 
@@ -122,8 +122,10 @@ function normalizeAgenda(input: UpsertActorAgendaInput): ActorAgendaState {
     actorId: input.actorId,
     goal: normalizeFact(input.goal, "goal"),
     fear: normalizeFact(input.fear, "fear"),
-    currentOrder:
-      input.currentOrder === null ? null : normalizeFact(input.currentOrder, "currentOrder"),
+    currentAssignment:
+      input.currentAssignment === null
+        ? null
+        : normalizeFact(input.currentAssignment, "currentAssignment"),
     lastIndependentActionAt: input.lastIndependentActionAt,
   };
 }

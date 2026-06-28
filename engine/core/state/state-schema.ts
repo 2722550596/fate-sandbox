@@ -120,6 +120,7 @@ const IDENTITY_STATE_SCHEMA = Type.Object({
   lockedFacts: Type.Array(
     Type.Object({ id: NON_EMPTY_STRING_SCHEMA, text: NON_EMPTY_STRING_SCHEMA }),
   ),
+  roles: NON_EMPTY_STRING_ARRAY_SCHEMA,
 });
 
 const OUTFIT_STATE_SCHEMA = Type.Object({
@@ -168,22 +169,6 @@ const ABILITY_STATE_SCHEMA = Type.Object({
   summary: NON_EMPTY_STRING_SCHEMA,
 });
 
-// ---------------------------------------------------------------------------
-// Actor Roles
-// ---------------------------------------------------------------------------
-
-const SOCIAL_ROLE_SCHEMA = Type.Object({
-  kind: Type.Literal("social"),
-  label: NON_EMPTY_STRING_SCHEMA,
-});
-
-const FACTION_ROLE_SCHEMA = Type.Object({
-  kind: Type.Literal("faction"),
-  factionId: NON_EMPTY_STRING_SCHEMA,
-  label: NON_EMPTY_STRING_SCHEMA,
-});
-
-export const ACTOR_ROLE_SCHEMA = Type.Union([SOCIAL_ROLE_SCHEMA, FACTION_ROLE_SCHEMA]);
 
 const RELATIONSHIP_STATE_SCHEMA = Type.Object({
   stance: ACTOR_STANCE_SCHEMA,
@@ -196,7 +181,6 @@ const RELATIONSHIP_STATE_SCHEMA = Type.Object({
 
 const ACTOR_BASE_PROPERTIES = {
   id: NON_EMPTY_STRING_SCHEMA,
-  roles: Type.Array(ACTOR_ROLE_SCHEMA),
   sequence: nullable(SEQUENCE_STATE_SCHEMA),
 
   identity: IDENTITY_STATE_SCHEMA,
@@ -438,8 +422,7 @@ const STRING_SECRET_SLOT_SCHEMA = Type.Object({
 
 const ACTOR_SECRET_SLOTS_SCHEMA = Type.Object({
   actorId: NON_EMPTY_STRING_SCHEMA,
-  pathwaySecret: Type.Optional(STRING_SECRET_SLOT_SCHEMA),
-  sequenceSecret: Type.Optional(STRING_SECRET_SLOT_SCHEMA),
+  beyonderSecrets: Type.Array(STRING_SECRET_SLOT_SCHEMA),
   privateMotives: Type.Array(STRING_SECRET_SLOT_SCHEMA),
   unrevealedAffiliations: Type.Array(STRING_SECRET_SLOT_SCHEMA),
 });
@@ -494,7 +477,7 @@ const ACTOR_AGENDA_STATE_SCHEMA = Type.Object({
   actorId: NON_EMPTY_STRING_SCHEMA,
   goal: NON_EMPTY_STRING_SCHEMA,
   fear: NON_EMPTY_STRING_SCHEMA,
-  currentOrder: nullable(NON_EMPTY_STRING_SCHEMA),
+  currentAssignment: nullable(NON_EMPTY_STRING_SCHEMA),
   lastIndependentActionAt: nullable(ISO_INSTANT_SCHEMA),
 });
 

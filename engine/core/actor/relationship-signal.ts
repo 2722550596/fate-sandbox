@@ -79,10 +79,10 @@ function assertPlayerKnownSignalIsSafe(draft: State, signal: RelationshipSignal)
 function collectUnrevealedSecretStrings(state: State): string[] {
   const out = new Set<string>();
   for (const slots of allActorSecretSlots(state.secrets)) {
-    const pathwaySecret = readUnrevealedValue(slots.pathwaySecret, pickString);
-    if (pathwaySecret !== undefined) out.add(pathwaySecret);
-    const sequenceSecret = readUnrevealedValue(slots.sequenceSecret, pickString);
-    if (sequenceSecret !== undefined) out.add(sequenceSecret);
+    for (const secret of slots.beyonderSecrets) {
+      const value = readUnrevealedValue(secret, pickString);
+      if (value !== undefined) out.add(value);
+    }
     for (const motive of slots.privateMotives) {
       const value = readUnrevealedValue(motive, pickString);
       if (value !== undefined) out.add(value);

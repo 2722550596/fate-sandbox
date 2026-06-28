@@ -194,12 +194,12 @@ function writeActor(draft: State, actor: PublicActorState): void {
 function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
   const base = {
     id: assertNonEmptyString(npc.id, "npc.id"),
-    roles: npc.publicRoles,
     sequence: null,
 
     identity: {
       publicIdentity: assertNonEmptyString(npc.publicIdentity, "npc.publicIdentity"),
       background: assertNonEmptyString(npc.publicIdentity, "npc.publicIdentity"),
+      roles: [],
       lockedFacts: [],
     },
     presentation: {
@@ -241,7 +241,6 @@ function toInitNpcActor(npc: PublicNpcSkeletonInput): PublicActorState {
       details: "玩家可见外观未确认",
     },
     demeanor: npc.demeanor ?? "玩家可见举止未确认",
-    publicRoles: npc.publicRoles ?? [],
     relationshipToProtagonist: npc.relationshipToProtagonist ?? {
       stance: "neutral",
       summary: "尚未建立关系。",

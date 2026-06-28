@@ -13,9 +13,8 @@ function addTestNpc(draft: ReturnType<typeof createInitialState>, actorId: strin
   draft.public.actors[actorId] = {
     id: actorId,
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: actorId, background: "", lockedFacts: [] },
+    identity: { publicIdentity: actorId, background: "", lockedFacts: [], roles: [] },
     presentation: {
       canonicalName: actorId.charAt(0).toUpperCase() + actorId.slice(1),
       renderName: actorId.charAt(0).toUpperCase() + actorId.slice(1),

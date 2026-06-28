@@ -59,8 +59,8 @@ export function configureSequenceSecrets(
 ): ConfigureSequenceSecretsResult {
   assertNonEmptyString(input.reason, "reason");
   assertNonEmptyString(input.actorId, "actorId");
-  if (input.pathwaySecret === undefined && input.sequenceSecret === undefined) {
-    throw new Error("configure-sequence-secrets 必须提供 pathwaySecret 或 sequenceSecret。");
+  if (input.beyonderSecrets === undefined || input.beyonderSecrets.length === 0) {
+    throw new Error("configure-sequence-secrets 必须提供 beyonderSecrets。");
   }
 
   const actor = draft.public.actors[input.actorId];
@@ -73,19 +73,24 @@ export function configureSequenceSecrets(
 
   const existing =
     getActorSecretSlots(draft.secrets, input.actorId) ?? createEmptyActorSecretSlots(input.actorId);
-  if (input.pathwaySecret !== undefined) {
-    existing.pathwaySecret = buildStringSecretSlot(
-      existing.pathwaySecret,
-      `${input.actorId}-pathway`,
-      input.pathwaySecret,
-    );
-  }
-  if (input.sequenceSecret !== undefined) {
-    existing.sequenceSecret = buildStringSecretSlot(
-      existing.sequenceSecret,
-      `${input.actorId}-sequence`,
-      input.sequenceSecret,
-    );
+  if (input.beyonderSecrets !== undefined) {
+    for (const secret of input.beyonderSecrets) {
+      const slotId = `${input.actorId}-${secret.kind}`;
+      const existingIndex = existing.beyonderSecrets.findIndex((s) => s.id === slotId);
+      const newSlot = buildStringSecretSlot(
+        existingIndex >= 0 ? existing.beyonderSecrets[existingIndex] : undefined,
+        slotId,
+        {
+          value: secret.value,
+          revealConditions: secret.revealConditions,
+        },
+      );
+      if (existingIndex >= 0) {
+        existing.beyonderSecrets[existingIndex] = newSlot;
+      } else {
+        existing.beyonderSecrets.push(newSlot);
+      }
+    }
   }
   setActorSecretSlots(draft.secrets, input.actorId, existing);
 
@@ -228,15 +233,11 @@ function applyRevealSecret(
   }
   const slots = getActorSecretSlots(draft.secrets, event.actorId);
   if (slots !== undefined) {
-    const pathwaySecret = slots.pathwaySecret;
-    if (pathwaySecret !== undefined && canRevealStringSlot(event, pathwaySecret)) {
-      pathwaySecret.revealState = "revealed";
-      return { outcome: "revealed", playerSafeMessage: "途径秘密已经揭示。" };
-    }
-    const sequenceSecret = slots.sequenceSecret;
-    if (sequenceSecret !== undefined && canRevealStringSlot(event, sequenceSecret)) {
-      sequenceSecret.revealState = "revealed";
-      return { outcome: "revealed", playerSafeMessage: "序列秘密已经揭示。" };
+    for (const secret of slots.beyonderSecrets) {
+      if (canRevealStringSlot(event, secret)) {
+        secret.revealState = "revealed";
+        return { outcome: "revealed", playerSafeMessage: "非凡者秘密已经揭示。" };
+      }
     }
     if (markForeshadowed(slots, evidence)) {
       return { outcome: "foreshadowed", playerSafeMessage: "线索成立，但尚不足以完全揭示。" };
@@ -275,6 +276,7 @@ function applyRevealSecret(
 function createEmptyActorSecretSlots(actorId: ActorId): ActorSecretSlots {
   return {
     actorId,
+    beyonderSecrets: [],
     privateMotives: [],
     unrevealedAffiliations: [],
   };
@@ -362,8 +364,7 @@ function evidenceMatches<T>(slot: SecretSlot<T>, evidence: string): boolean {
 function markForeshadowed(slots: ActorSecretSlots, evidence: string): boolean {
   let marked = false;
   const allStringSlots: Array<SecretSlot<string>> = [
-    ...(slots.pathwaySecret === undefined ? [] : [slots.pathwaySecret]),
-    ...(slots.sequenceSecret === undefined ? [] : [slots.sequenceSecret]),
+    ...slots.beyonderSecrets,
     ...slots.privateMotives,
     ...slots.unrevealedAffiliations,
   ];

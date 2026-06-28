@@ -30,9 +30,8 @@ function addAllyToState(draft: ReturnType<typeof createInitialState>, id: string
   draft.public.actors[id] = {
     id,
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "盟友", background: "协助者", lockedFacts: [] },
+    identity: { publicIdentity: "盟友", background: "协助者", lockedFacts: [], roles: [] },
     presentation: {
       canonicalName: "盟友",
       renderName: "盟友",
@@ -59,11 +58,11 @@ void test("configureSequenceSecrets configures pathway secret for valid actor", 
     kind: "configure-sequence-secrets",
     reason: "初始化角色秘密",
     actorId: PROTAGONIST_ACTOR_ID,
-    pathwaySecret: { value: "观众", revealConditions: ["途径", "pathway"] },
+    beyonderSecrets: [{ kind: "pathway", value: "观众", revealConditions: ["途径", "pathway"] }],
   });
 
   assert.match(result.message, /序列 secrets 已配置/);
-  const slot = draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.pathwaySecret;
+  const slot = draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.beyonderSecrets[0];
   assert.ok(slot);
   assert.equal(slot?.value, "观众");
 });
@@ -76,11 +75,11 @@ void test("configureSequenceSecrets configures sequence secret for valid actor",
     kind: "configure-sequence-secrets",
     reason: "初始化序列秘密",
     actorId: PROTAGONIST_ACTOR_ID,
-    sequenceSecret: { value: "seq-9", revealConditions: ["序列"] },
+    beyonderSecrets: [{ kind: "sequence", value: "seq-9", revealConditions: ["序列"] }],
   });
 
   assert.match(result.message, /序列 secrets 已配置/);
-  assert.ok(draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.sequenceSecret);
+  assert.ok(draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.beyonderSecrets[0]);
 });
 
 void test("configureSequenceSecrets throws when no secret provided", () => {
@@ -94,7 +93,7 @@ void test("configureSequenceSecrets throws when no secret provided", () => {
         reason: "初始化",
         actorId: PROTAGONIST_ACTOR_ID,
       }),
-    /必须提供 pathwaySecret 或 sequenceSecret/,
+    /必须提供 beyonderSecrets/,
   );
 });
 
@@ -107,7 +106,7 @@ void test("configureSequenceSecrets throws for nonexistent actor", () => {
         kind: "configure-sequence-secrets",
         reason: "初始化",
         actorId: "nonexistent",
-        pathwaySecret: { value: "观众", revealConditions: ["途径"] },
+        beyonderSecrets: [{ kind: "pathway", value: "观众", revealConditions: ["途径"] }],
       }),
     /actor 不存在/,
   );
@@ -122,7 +121,7 @@ void test("configureSequenceSecrets throws for actor without sequence", () => {
         kind: "configure-sequence-secrets",
         reason: "初始化",
         actorId: PROTAGONIST_ACTOR_ID,
-        pathwaySecret: { value: "观众", revealConditions: ["途径"] },
+        beyonderSecrets: [{ kind: "pathway", value: "观众", revealConditions: ["途径"] }],
       }),
     /actor 没有序列/,
   );
@@ -136,17 +135,17 @@ void test("configureSequenceSecrets merges reveal conditions on reconfiguration"
     kind: "configure-sequence-secrets",
     reason: "首次配置",
     actorId: PROTAGONIST_ACTOR_ID,
-    pathwaySecret: { value: "观众", revealConditions: ["途径"] },
+    beyonderSecrets: [{ kind: "pathway", value: "观众", revealConditions: ["途径"] }],
   });
 
   configureSequenceSecrets(draft, {
     kind: "configure-sequence-secrets",
     reason: "补充条件",
     actorId: PROTAGONIST_ACTOR_ID,
-    pathwaySecret: { value: "观众", revealConditions: ["非凡"] },
+    beyonderSecrets: [{ kind: "pathway", value: "观众", revealConditions: ["非凡"] }],
   });
 
-  const slot = draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.pathwaySecret;
+  const slot = draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.beyonderSecrets[0];
   assert.ok(slot);
   assert.deepEqual(slot.revealConditions, ["途径", "非凡"]);
   assert.equal(slot.id, "protagonist-pathway");
@@ -270,7 +269,7 @@ void test("revealSecret reveals pathway secret via claim-reveal", () => {
     kind: "configure-sequence-secrets",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    pathwaySecret: { value: "观众", revealConditions: ["途径", "观众途径"] },
+    beyonderSecrets: [{ kind: "pathway", value: "观众", revealConditions: ["途径", "观众途径"] }],
   });
 
   const result = revealSecret(draft, {
@@ -281,9 +280,9 @@ void test("revealSecret reveals pathway secret via claim-reveal", () => {
   });
 
   assert.equal(result.outcome, "revealed");
-  assert.match(result.playerSafeMessage, /途径秘密已经揭示/);
+  assert.match(result.playerSafeMessage, /非凡者秘密已经揭示/);
   assert.equal(
-    draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.pathwaySecret?.revealState,
+    draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.beyonderSecrets[0]?.revealState,
     "revealed",
   );
 });
@@ -296,7 +295,9 @@ void test("revealSecret reveals sequence secret via observed-reveal", () => {
     kind: "configure-sequence-secrets",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    sequenceSecret: { value: "序列9", revealConditions: ["序列9", "观众途径序列9"] },
+    beyonderSecrets: [
+      { kind: "sequence", value: "序列9", revealConditions: ["序列9", "观众途径序列9"] },
+    ],
   });
 
   const result = revealSecret(draft, {
@@ -307,9 +308,9 @@ void test("revealSecret reveals sequence secret via observed-reveal", () => {
   });
 
   assert.equal(result.outcome, "revealed");
-  assert.match(result.playerSafeMessage, /序列秘密已经揭示/);
+  assert.match(result.playerSafeMessage, /非凡者秘密已经揭示/);
   assert.equal(
-    draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.sequenceSecret?.revealState,
+    draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.beyonderSecrets[0]?.revealState,
     "revealed",
   );
 });
@@ -322,7 +323,7 @@ void test("revealSecret returns foreshadowed with partial evidence", () => {
     kind: "configure-sequence-secrets",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    pathwaySecret: { value: "观众", revealConditions: ["途径", "观众途径"] },
+    beyonderSecrets: [{ kind: "pathway", value: "观众", revealConditions: ["途径", "观众途径"] }],
   });
 
   // Claim doesn't match slot value; evidence matches a reveal condition
@@ -345,7 +346,7 @@ void test("revealSecret returns insufficient-evidence with no match", () => {
     kind: "configure-sequence-secrets",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    pathwaySecret: { value: "观众", revealConditions: ["途径", "观众途径"] },
+    beyonderSecrets: [{ kind: "pathway", value: "观众", revealConditions: ["途径", "观众途径"] }],
   });
 
   const result = revealSecret(draft, {
@@ -383,7 +384,7 @@ void test("revealSecret reveals hidden world fact", () => {
     kind: "configure-sequence-secrets",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    pathwaySecret: { value: "观众", revealConditions: ["途径"] },
+    beyonderSecrets: [{ kind: "pathway", value: "观众", revealConditions: ["途径"] }],
   });
 
   configureHiddenWorldFact(draft, {

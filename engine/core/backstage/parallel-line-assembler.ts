@@ -154,7 +154,8 @@ function buildActorGoals(state: State): string[] {
 }
 
 function formatAgendaGoal(agenda: ActorAgendaState): string {
-  const order = agenda.currentOrder === null ? "" : ` (order: ${agenda.currentOrder})`;
+  const order =
+    agenda.currentAssignment === null ? "" : ` (assignment: ${agenda.currentAssignment})`;
   return `${agenda.actorId}: goal=${agenda.goal}, fear=${agenda.fear}${order}`;
 }
 

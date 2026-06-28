@@ -13,18 +13,22 @@ void test("updateActorAgendaTool upserts and marks independent action", () => {
       actorId: "protagonist",
       goal: "watch the school gate",
       fear: "being boxed in",
-      currentOrder: "wait",
+      currentAssignment: "wait",
     },
     undefined,
   );
   updateActorAgendaTool(
-    { kind: "mark-independent-action", actorId: "protagonist", currentOrder: "circle the gate" },
+    {
+      kind: "mark-independent-action",
+      actorId: "protagonist",
+      currentAssignment: "circle the gate",
+    },
     undefined,
   );
 
   const agenda = cloneState().secrets.actorStates["protagonist"]?.agenda;
   assert.equal(agenda?.actorId, "protagonist");
-  assert.equal(agenda?.currentOrder, "circle the gate");
+  assert.equal(agenda?.currentAssignment, "circle the gate");
   assert.equal(agenda?.lastIndependentActionAt, cloneState().public.clock.currentAt);
 });
 

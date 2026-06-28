@@ -61,19 +61,6 @@ export const RELATIONSHIP_STATE_SCHEMA = Type.Object({
   summary: Type.String({ minLength: 1 }),
 });
 
-const SOCIAL_ROLE_SCHEMA = Type.Object({
-  kind: Type.Literal("social"),
-  label: Type.String({ minLength: 1 }),
-});
-
-const FACTION_ROLE_SCHEMA = Type.Object({
-  kind: Type.Literal("faction"),
-  factionId: Type.String({ minLength: 1 }),
-  label: Type.String({ minLength: 1 }),
-});
-
-export const ACTOR_ROLE_SCHEMA = Type.Union([SOCIAL_ROLE_SCHEMA, FACTION_ROLE_SCHEMA]);
-
 export const PUBLIC_NPC_INPUT_SCHEMA = Type.Object({
   id: Type.String({ minLength: 1 }),
   kind: ACTOR_KIND_SCHEMA,
@@ -83,7 +70,6 @@ export const PUBLIC_NPC_INPUT_SCHEMA = Type.Object({
   apparentAge: Type.String({ minLength: 1 }),
   outfit: OUTFIT_STATE_SCHEMA,
   demeanor: Type.String({ minLength: 1 }),
-  publicRoles: Type.Array(ACTOR_ROLE_SCHEMA),
   relationshipToProtagonist: RELATIONSHIP_STATE_SCHEMA,
   ordinaryItems: Type.Array(Type.String({ minLength: 1 })),
 });
@@ -98,7 +84,6 @@ export const PUBLIC_NPC_SKELETON_INPUT_SCHEMA = Type.Object({
   apparentAge: Type.Optional(Type.String({ minLength: 1 })),
   outfit: Type.Optional(OUTFIT_STATE_SCHEMA),
   demeanor: Type.Optional(Type.String({ minLength: 1 })),
-  publicRoles: Type.Optional(Type.Array(ACTOR_ROLE_SCHEMA)),
   relationshipToProtagonist: Type.Optional(RELATIONSHIP_STATE_SCHEMA),
   ordinaryItems: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
 });

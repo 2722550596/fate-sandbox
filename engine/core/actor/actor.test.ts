@@ -12,9 +12,8 @@ void test("setScenePresence sets present and ally actor IDs", () => {
   draft.public.actors["sherlock"] = {
     id: "sherlock",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "侦探", background: "值夜者", lockedFacts: [] },
+    identity: { publicIdentity: "侦探", background: "值夜者", roles: [], lockedFacts: [] },
     presentation: {
       canonicalName: "Sherlock",
       renderName: "Sherlock",
@@ -70,9 +69,8 @@ void test("setScenePresence deduplicates actor IDs", () => {
   draft.public.actors["sherlock"] = {
     id: "sherlock",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "侦探", background: "值夜者", lockedFacts: [] },
+    identity: { publicIdentity: "侦探", background: "值夜者", roles: [], lockedFacts: [] },
     presentation: {
       canonicalName: "Sherlock",
       renderName: "Sherlock",
@@ -102,9 +100,8 @@ void test("setScenePresence rejects allies who are not present", () => {
   draft.public.actors["leonard"] = {
     id: "leonard",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "诗人", background: "值夜者", lockedFacts: [] },
+    identity: { publicIdentity: "诗人", background: "值夜者", roles: [], lockedFacts: [] },
     presentation: {
       canonicalName: "Leonard",
       renderName: "Leonard",
@@ -206,7 +203,6 @@ void test("upsertActor upsert-public-npc creates a public NPC", () => {
       apparentAge: "20s",
       outfit: { label: "值夜者制服", details: "黑色制服" },
       demeanor: "随性但敏锐",
-      publicRoles: [{ kind: "faction", factionId: "nighthawks", label: "值夜者" }],
       relationshipToProtagonist: { stance: "ally", summary: "值夜者同事" },
       ordinaryItems: [],
     },
@@ -232,7 +228,6 @@ void test("upsertActor upsert-public-npc creates a beyonder NPC with creature ki
       apparentAge: "未知",
       outfit: { label: "不详", details: "" },
       demeanor: "危险",
-      publicRoles: [],
       relationshipToProtagonist: { stance: "hostile", summary: "具有强烈敌意" },
       ordinaryItems: [],
     },
@@ -262,7 +257,6 @@ void test("upsertActor upsert-public-npc rejects empty publicIdentity", () => {
           apparentAge: "20s",
           outfit: { label: "x", details: "" },
           demeanor: "x",
-          publicRoles: [],
           ordinaryItems: [],
           relationshipToProtagonist: { stance: "neutral", summary: "test" },
         },
@@ -304,9 +298,8 @@ void test("upsertActor init-npc does not overwrite existing actor", () => {
   draft.public.actors["existing"] = {
     id: "existing",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "已存在的 NPC", background: "已存在", lockedFacts: [] },
+    identity: { publicIdentity: "已存在的 NPC", background: "已存在", roles: [], lockedFacts: [] },
     presentation: {
       canonicalName: "Existing",
       renderName: "Existing",
@@ -385,9 +378,13 @@ void test("retireActor removes actor and cleans up registries", () => {
   draft.public.actors["dunn"] = {
     id: "dunn",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "值夜者队长", background: "值夜者高层", lockedFacts: [] },
+    identity: {
+      publicIdentity: "值夜者队长",
+      background: "值夜者高层",
+      roles: [],
+      lockedFacts: [],
+    },
     presentation: {
       canonicalName: "Dunn Smith",
       renderName: "Dunn Smith",
@@ -433,9 +430,8 @@ void test("retireActor throws when actor owns tracked items", () => {
   draft.public.actors["dunn"] = {
     id: "dunn",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "队长", background: "值夜者", lockedFacts: [] },
+    identity: { publicIdentity: "队长", background: "值夜者", roles: [], lockedFacts: [] },
     presentation: {
       canonicalName: "Dunn",
       renderName: "Dunn",
@@ -473,9 +469,8 @@ void test("retireActor throws when actor owns a purse", () => {
   draft.public.actors["roselle"] = {
     id: "roselle",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "前值夜者", background: "背景", lockedFacts: [] },
+    identity: { publicIdentity: "前值夜者", background: "背景", roles: [], lockedFacts: [] },
     presentation: {
       canonicalName: "Roselle",
       renderName: "Roselle",
@@ -504,9 +499,8 @@ void test("retireActor throws when actor has outstanding debts", () => {
   draft.public.actors["oath"] = {
     id: "oath",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "欠债者", background: "背景", lockedFacts: [] },
+    identity: { publicIdentity: "欠债者", background: "背景", roles: [], lockedFacts: [] },
     presentation: {
       canonicalName: "Oath",
       renderName: "Oath",
@@ -535,9 +529,8 @@ void test("removeActorEverywhere cleans impressions and relationship signals", (
   draft.public.actors["dunn"] = {
     id: "dunn",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "队长", background: "值夜者", lockedFacts: [] },
+    identity: { publicIdentity: "队长", background: "值夜者", roles: [], lockedFacts: [] },
     presentation: {
       canonicalName: "Dunn",
       renderName: "Dunn",

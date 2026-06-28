@@ -107,12 +107,12 @@ function createInitialProtagonist(): HumanActorState {
   return {
     id: PROTAGONIST_ACTOR_ID,
     kind: "human",
-    roles: [],
     sequence: null,
     identity: {
       publicIdentity: "身份未定的玩家角色",
       background: "开局尚未确认。由初始化或后续记忆事件锁定，不得在叙事中漂移。",
       lockedFacts: [],
+      roles: [],
     },
     presentation: {
       canonicalName: "你",

@@ -165,7 +165,6 @@ function loosePublicNpcSchema(): ReturnType<typeof Type.Object> {
     apparentAge: Type.Optional(Type.String()),
     outfit: Type.Optional(Type.Object({ label: Type.String(), details: Type.String() })),
     demeanor: Type.Optional(Type.String({ description: "玩家可见举止" })),
-    publicRoles: Type.Optional(Type.Array(looseActorRoleSchema())),
     relationshipToProtagonist: Type.Optional(
       Type.Object({
         stance: Type.String({
@@ -175,14 +174,6 @@ function loosePublicNpcSchema(): ReturnType<typeof Type.Object> {
       }),
     ),
     ordinaryItems: Type.Optional(Type.Array(Type.String())),
-  });
-}
-
-function looseActorRoleSchema(): ReturnType<typeof Type.Object> {
-  return Type.Object({
-    kind: Type.String({ description: "social / faction" }),
-    label: Type.Optional(Type.String()),
-    factionId: Type.Optional(Type.String()),
   });
 }
 
@@ -209,7 +200,6 @@ function publicActorSchema(): ReturnType<typeof Type.Object> {
   return Type.Object({
     id: Type.String(),
     kind: Type.String({ description: "human / beyonder / creature / other" }),
-    roles: Type.Array(looseActorRoleSchema()),
     sequence: Type.Unknown({
       description: "序列对象或 null",
     }),

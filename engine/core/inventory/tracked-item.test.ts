@@ -165,9 +165,8 @@ void test("transferTrackedItem to another actor", () => {
   draft.public.actors["dunn"] = {
     id: "dunn",
     kind: "human",
-    roles: [],
     sequence: null,
-    identity: { publicIdentity: "值夜者队长", background: "值夜者", lockedFacts: [] },
+    identity: { publicIdentity: "值夜者队长", background: "值夜者", lockedFacts: [], roles: [] },
     presentation: {
       canonicalName: "Dunn Smith",
       renderName: "Dunn Smith",

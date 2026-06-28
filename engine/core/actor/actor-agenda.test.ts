@@ -21,19 +21,19 @@ void test("upsertActorAgenda creates and replaces an agenda for one actor", () =
     actorId: PROTAGONIST_ACTOR_ID,
     goal: " leave the gate ",
     fear: "being watched",
-    currentOrder: null,
+    currentAssignment: null,
     lastIndependentActionAt: null,
   });
   const replaced = upsertActorAgenda(draft, {
     actorId: PROTAGONIST_ACTOR_ID,
     goal: "cross the street",
     fear: "losing time",
-    currentOrder: "move now",
+    currentAssignment: "move now",
     lastIndependentActionAt: "2004-01-30T07:00:00.000Z",
   });
 
   assert.equal(created.goal, "leave the gate");
-  assert.equal(replaced.currentOrder, "move now");
+  assert.equal(replaced.currentAssignment, "move now");
   assert.equal(Object.keys(draft.secrets.actorStates).length, 1);
   assert.equal(draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.agenda?.goal, "cross the street");
 });
@@ -44,7 +44,7 @@ void test("markActorIndependentAction stamps current time on an existing agenda"
     actorId: PROTAGONIST_ACTOR_ID,
     goal: "watch the road",
     fear: "ambush",
-    currentOrder: "wait",
+    currentAssignment: "wait",
     lastIndependentActionAt: null,
   });
 
@@ -52,7 +52,7 @@ void test("markActorIndependentAction stamps current time on an existing agenda"
 
   assert.equal(agenda.lastIndependentActionAt, draft.public.clock.currentAt);
   assert.equal(
-    draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.agenda?.currentOrder,
+    draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.agenda?.currentAssignment,
     "circle the gate",
   );
 });
@@ -66,7 +66,7 @@ void test("agenda helpers reject missing actors and missing agendas", () => {
         actorId: "ghost",
         goal: "watch",
         fear: "light",
-        currentOrder: null,
+        currentAssignment: null,
         lastIndependentActionAt: null,
       }),
     /actor ghost 不存在/,
