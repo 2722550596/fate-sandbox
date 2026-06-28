@@ -15,9 +15,46 @@ const DATA_ROOT = join(__dirname, "..", "..", "data");
 
 export type LookupKind = "角色" | "地点" | "组织" | "途径" | "物品" | "设定" | "经济" | "机制";
 
+/** English/alias → LookupKind resolution for lenient category matching */
+const CATEGORY_ALIASES: Record<string, LookupKind> = {
+  character: "角色",
+  characters: "角色",
+  npc: "角色",
+  角色: "角色",
+  location: "地点",
+  locations: "地点",
+  place: "地点",
+  地点: "地点",
+  organization: "组织",
+  organizations: "组织",
+  org: "组织",
+  faction: "组织",
+  组织: "组织",
+  pathway: "途径",
+  pathways: "途径",
+  途径: "途径",
+  sequence: "途径",
+  item: "物品",
+  items: "物品",
+  物品: "物品",
+  artifact: "物品",
+  lore: "设定",
+  setting: "设定",
+  设定: "设定",
+  worldbuilding: "设定",
+  economy: "经济",
+  经济: "经济",
+  mechanic: "机制",
+  mechanics: "机制",
+  mechanism: "机制",
+  机制: "机制",
+  rule: "机制",
+  rules: "机制",
+};
+
 export interface LookupRequest {
   query: string;
-  category?: LookupKind;
+  category?: string;
 }
 
 export interface LookupResult {
@@ -75,13 +112,14 @@ export function lookupWorldData(request: LookupRequest): LookupResult {
   }
 
   // 途径走 pathway 索引（易读格式化输出），不走 MD 文件扫描
-  if (request.category === "途径") {
+  const resolvedCategory = resolveCategory(request.category);
+  if (resolvedCategory === "途径") {
     return lookupPathway(request.query);
   }
 
   const query = normalizeQuery(request.query);
   const docs = getDocIndex();
-  const matches = lookupAll(docs, query, request.category);
+  const matches = lookupAll(docs, query, resolvedCategory);
 
   if (matches.length > 0) {
     return { text: formatMatches(matches) };
@@ -216,7 +254,7 @@ function typeToKind(type: string | undefined): LookupKind | undefined {
 // ---------------------------------------------------------------------------
 
 const MAX_FUZZY_RESULTS = 5;
-const MIN_FUZZY_SCORE = 52;
+const MIN_FUZZY_SCORE = 40;
 const BODY_PREVIEW_LENGTH = 600;
 
 /** 途径查询：通过 sequence-lookup.ts 返回途径序列结构 */
@@ -290,20 +328,22 @@ function lookupPathway(query: string): LookupResult {
 }
 
 function lookupAll(docs: MdDocument[], query: string, category?: LookupKind): MatchedEntry[] {
-  let candidates = docs;
-  if (category !== undefined) {
-    candidates = docs.filter((d) => d.kind === category);
-  }
-
-  return fuzzyMatchEntries(candidates, query).toSorted(compareMatches).slice(0, MAX_FUZZY_RESULTS);
+  // Lenient category: always search all docs, but boost matches in the right category
+  return fuzzyMatchEntries(docs, query, category)
+    .toSorted(compareMatches)
+    .slice(0, MAX_FUZZY_RESULTS);
 }
 
-function fuzzyMatchEntries(docs: MdDocument[], query: string): MatchedEntry[] {
+function fuzzyMatchEntries(
+  docs: MdDocument[],
+  query: string,
+  category?: LookupKind,
+): MatchedEntry[] {
   const normalizedQuery = normalizeSearchText(query);
   const queryTerms = splitQueryTerms(query);
 
   return docs
-    .map((doc) => scoreDoc(doc, normalizedQuery, queryTerms))
+    .map((doc) => scoreDoc(doc, normalizedQuery, queryTerms, category))
     .filter((match) => match.score >= MIN_FUZZY_SCORE);
 }
 
@@ -311,70 +351,112 @@ function scoreDoc(
   doc: MdDocument,
   normalizedQuery: string,
   queryTerms: readonly string[],
+  category?: LookupKind,
 ): MatchedEntry {
   const normalizedTitle = normalizeSearchText(doc.title);
   const normalizedAliases = doc.aliases.map(normalizeSearchText);
   const normalizedTags = doc.tags.map(normalizeSearchText);
   const normalizedBody = normalizeSearchText(doc.searchableText);
 
+  // Category bonus: exact match → +15, mismatch → no penalty, wrong category → -10
+  let categoryBonus = 0;
+  if (category !== undefined) {
+    if (doc.kind === category) {
+      categoryBonus = 15;
+    } else {
+      categoryBonus = -10;
+    }
+  }
+
   // 精确匹配标题
   if (normalizedTitle === normalizedQuery) {
-    return makeMatch(doc, 100, "精确匹配");
+    return makeMatch(
+      doc,
+      100 + categoryBonus,
+      categoryBonus > 0 ? "精确匹配（分类优先）" : "精确匹配",
+    );
   }
 
   // 别名精确匹配
   for (const alias of normalizedAliases) {
     if (alias === normalizedQuery) {
-      return makeMatch(doc, 98, "别名精确匹配");
+      return makeMatch(
+        doc,
+        98 + categoryBonus,
+        categoryBonus > 0 ? "别名精确匹配（分类优先）" : "别名精确匹配",
+      );
     }
   }
 
-  // 标题包含关键词
+  // 标题包含查询
   if (normalizedTitle.includes(normalizedQuery)) {
-    return makeMatch(doc, 92, "标题包含关键词");
+    return makeMatch(doc, 92 + categoryBonus, "标题包含查询");
   }
 
-  // 别名包含关键词
+  // 别名包含查询
   for (const alias of normalizedAliases) {
     if (alias.includes(normalizedQuery)) {
-      return makeMatch(doc, 88, "别名包含关键词");
+      return makeMatch(doc, 88 + categoryBonus, "别名包含查询");
     }
   }
 
   // 标签匹配
   for (const tag of normalizedTags) {
     if (tag.includes(normalizedQuery)) {
-      return makeMatch(doc, 85, "标签匹配");
+      return makeMatch(doc, 85 + categoryBonus, "标签匹配");
     }
   }
 
-  // 正文包含关键词
+  // 正文包含查询（完整查询串）
   if (normalizedBody.includes(normalizedQuery)) {
-    return makeMatch(doc, 78, "正文包含关键词");
+    return makeMatch(doc, 78 + categoryBonus, "正文包含查询");
   }
 
-  // 多关键词部分匹配
-  if (queryTerms.length > 1) {
-    const keyTermHits = countContainedTerms(normalizedTitle, queryTerms);
-    const aliasTermHits = countContainedTerms(normalizedAliases.join(" "), queryTerms);
-    const allTermHits = countContainedTerms(normalizedBody, queryTerms);
+  // 单个查询词正文匹配（逐词匹配原文）
+  if (queryTerms.length >= 1) {
+    const normalizedTerms = queryTerms.map(normalizeSearchText);
+    const titleTermHits = countContainedTerms(normalizedTitle, normalizedTerms);
+    const aliasTermHits = countContainedTerms(normalizedAliases.join(" "), normalizedTerms);
+    const bodyTermHits = countContainedTerms(normalizedBody, normalizedTerms);
 
-    if (keyTermHits === queryTerms.length || aliasTermHits === queryTerms.length) {
-      return makeMatch(doc, 88, "名称包含全部关键词");
+    // 名称包含全部关键词
+    if (titleTermHits === normalizedTerms.length) {
+      return makeMatch(doc, 90 + categoryBonus, "标题包含全部关键词");
     }
-    if (allTermHits === queryTerms.length) {
-      return makeMatch(doc, 84, "正文包含全部关键词");
+    if (aliasTermHits === normalizedTerms.length) {
+      return makeMatch(doc, 86 + categoryBonus, "别名包含全部关键词");
     }
-    if (allTermHits > 0) {
-      const partialScore = Math.round(48 + (allTermHits / queryTerms.length) * 28);
-      return makeMatch(doc, partialScore, "正文包含部分关键词");
+
+    // 正文包含全部关键词
+    if (bodyTermHits === normalizedTerms.length) {
+      return makeMatch(doc, 82 + categoryBonus, "正文包含全部关键词");
+    }
+
+    // 正文包含部分关键词
+    if (bodyTermHits > 0) {
+      const partialScore = Math.round(46 + (bodyTermHits / normalizedTerms.length) * 30);
+      return makeMatch(doc, partialScore + categoryBonus, "正文包含部分关键词");
     }
   }
 
-  // 模糊匹配
+  // 正文/别名模糊匹配（bigram similarity）
+  const aliasSim =
+    normalizedAliases.length > 0
+      ? Math.max(...normalizedAliases.map((a) => similarity(a, normalizedQuery)))
+      : 0;
+  const bodySim = similarity(normalizedBody.slice(0, 300), normalizedQuery);
+  const bestFuzzy = Math.max(aliasSim, bodySim);
+
+  if (bestFuzzy >= 0.35) {
+    const fuzzyScore = Math.round(bestFuzzy * 100);
+    const reason = aliasSim >= bodySim ? "别名模糊匹配" : "正文模糊匹配";
+    return makeMatch(doc, fuzzyScore + categoryBonus, reason);
+  }
+
+  // 标题模糊匹配
   const titleSimilarity = similarity(normalizedTitle, normalizedQuery);
   const fuzzyScore = Math.round(titleSimilarity * 100);
-  return makeMatch(doc, fuzzyScore, "模糊匹配");
+  return makeMatch(doc, fuzzyScore + categoryBonus, "标题模糊匹配");
 }
 
 function makeMatch(doc: MdDocument, score: number, reason: string): MatchedEntry {
@@ -433,6 +515,29 @@ function splitQueryTerms(query: string): string[] {
     .split(/[\s,，、/／|｜]+/u)
     .map((term) => term.trim())
     .filter((term) => term.length > 0);
+}
+
+/** Resolve a category string (Chinese or English alias) to a LookupKind, or undefined if unrecognized */
+function resolveCategory(category: string | undefined): LookupKind | undefined {
+  if (category === undefined) return undefined;
+  const trimmed = category.trim();
+  if (trimmed.length === 0) return undefined;
+  // Direct LookupKind match
+  const KIND_VALUES: readonly LookupKind[] = [
+    "角色",
+    "地点",
+    "组织",
+    "途径",
+    "物品",
+    "设定",
+    "经济",
+    "机制",
+  ];
+  for (const kind of KIND_VALUES) {
+    if (trimmed === kind) return kind;
+  }
+  // Alias resolution
+  return CATEGORY_ALIASES[trimmed.toLowerCase()];
 }
 
 function countContainedTerms(text: string, queryTerms: readonly string[]): number {

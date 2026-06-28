@@ -1,5 +1,5 @@
 {
-  "nextId": 47,
+  "nextId": 51,
   "items": [
     {
       "id": 1,
@@ -245,6 +245,30 @@
       "content": "pnpm format & typecheck & lint & test",
       "done": true,
       "created": 1782611190
+    },
+    {
+      "id": 47,
+      "content": "Make category lenient: resolve aliases, search all docs, add score bonus",
+      "done": true,
+      "created": 1782642836
+    },
+    {
+      "id": 48,
+      "content": "Make query matching looser: body/alias bigram fuzzy, single-term n-gram body match, lower threshold",
+      "done": true,
+      "created": 1782642836
+    },
+    {
+      "id": 49,
+      "content": "Expose category in lookup tool, update description for keyword-only semantics",
+      "done": true,
+      "created": 1782642836
+    },
+    {
+      "id": 50,
+      "content": "Typecheck + lint + format",
+      "done": true,
+      "created": 1782642836
     }
   ]
 }
