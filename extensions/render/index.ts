@@ -193,6 +193,7 @@ async function renderProse(
     packet,
     loadProseDigests(),
     rendererNameEntries(state),
+    state,
   );
   const rendererMessages =
     options.variantKey === undefined

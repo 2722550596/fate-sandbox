@@ -1,4 +1,5 @@
 import type { LintFinding } from "../audit/lint-rules.ts";
+import type { State } from "../core/state/state.ts";
 import type { DirectionPacket } from "./packet-schema.ts";
 
 import {
@@ -8,6 +9,7 @@ import {
   minimumProseUnits,
   proseLengthContextFromPacket,
 } from "../audit/lint-rules.ts";
+import { formatHumanTime } from "../core/state/date-time.ts";
 import { isRecord } from "../core/utils/typebox-validation.ts";
 import { parseDirectionPacket } from "./packet-schema.ts";
 
@@ -93,6 +95,7 @@ export function buildRendererMessages(
   packet: DirectionPacket,
   digestOverrides?: ProseDigestOverrides,
   nameEntries: readonly RendererNameEntry[] = [],
+  state?: State,
 ): RendererMessage[] {
   const { turns, currentInputs } = collectRenderedTurns(messages, digestOverrides);
   const fullStart = resolveFullLayerStart(turns);
@@ -120,6 +123,10 @@ export function buildRendererMessages(
       ? currentInputs.join("\n\n")
       : "(No current player input was captured. Use packet.playerAction only.)";
   const finalSections: string[] = ["# Current Player Input", "", currentPlayerInput, ""];
+  if (state !== undefined) {
+    finalSections.push(...buildSceneTimeSection(state));
+    finalSections.push(...buildSceneContextSection(state));
+  }
   finalSections.push(...buildRendererNameSection(nameEntries));
   finalSections.push(
     "# Direction Packet",
@@ -178,6 +185,36 @@ function buildLengthFloorSection(packet: DirectionPacket): string[] {
     "Meet the floor by unfolding real process: player action, every resolvedChange, NPC reaction or silence, body cost, space or object change, and endWindow pressure. Do not pad, summarize, or repeat.",
     "",
   ];
+}
+
+function buildSceneTimeSection(state: State): string[] {
+  const human = formatHumanTime(state.public.clock.currentAt, state.public.clock.timezone);
+  return ["# Current Game Time", "", human.display, ""];
+}
+
+function buildSceneContextSection(state: State): string[] {
+  const scene = state.public.scene;
+  const lines = [
+    "# Scene Context",
+    "",
+    `Location: ${scene.location.region}·${scene.location.site}·${scene.location.detail}`,
+    `Situation: ${scene.situation}`,
+  ];
+  const presentNames = scene.presentActorIds
+    .map((id) => state.public.actors[id]?.presentation.renderName)
+    .filter((name): name is string => name !== undefined);
+  if (presentNames.length > 0) {
+    lines.push(`Present: ${presentNames.join("、")}`);
+  }
+  if (scene.storyWindow !== null) {
+    lines.push("");
+    lines.push(`Active Beat: ${scene.storyWindow.title}`);
+    const objectives = scene.objectives.map((o) => `  - ${o.summary}`);
+    const threats = scene.threats.map((t) => `  - [威胁] ${t.summary}`);
+    lines.push(...objectives, ...threats);
+  }
+  lines.push("");
+  return lines;
 }
 
 function collectRenderedTurns(

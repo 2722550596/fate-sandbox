@@ -3,7 +3,7 @@ import type { Static } from "typebox";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { stringEnumSchema } from "../core/state/state-enum-schemas.ts";
+import { SITUATION_KIND_SCHEMA, stringEnumSchema } from "../core/state/state-enum-schemas.ts";
 import { isRecord, parseTypeBoxValue, trimStringsDeep } from "../core/utils/typebox-validation.ts";
 
 /**
@@ -60,6 +60,32 @@ export const NPC_OMISSION_SCHEMA = Type.Object({
   playerSafeNote: Type.String({ minLength: 1 }),
 });
 export type NpcOmission = Static<typeof NPC_OMISSION_SCHEMA>;
+
+export const SCENE_TIME_SCHEMA = Type.Object({
+  /** 格式化当前时间，如「第五纪1349年1月15日 星期二 14:30」 */
+  display: Type.String({ minLength: 1 }),
+  /** 本轮经过分钟数 */
+  elapsedMinutes: Type.Integer({ minimum: 1 }),
+});
+export type SceneTime = Static<typeof SCENE_TIME_SCHEMA>;
+
+const ACTIVE_BEAT_SCHEMA = Type.Object({
+  title: Type.String({ minLength: 1 }),
+  objectives: Type.Array(Type.String({ minLength: 1 })),
+  threats: Type.Array(Type.String({ minLength: 1 })),
+});
+
+export const SCENE_CONTEXT_SCHEMA = Type.Object({
+  /** 地点文本，如「廷根市·霍伊大学·值夜者据点」 */
+  location: Type.String({ minLength: 1 }),
+  /** 态势 */
+  situation: SITUATION_KIND_SCHEMA,
+  /** 在场 actor 的 renderName 列表 */
+  presentActors: Type.Array(Type.String({ minLength: 1 })),
+  /** 仅在 beat 激活时出现 */
+  beat: Type.Optional(ACTIVE_BEAT_SCHEMA),
+});
+export type SceneContext = Static<typeof SCENE_CONTEXT_SCHEMA>;
 
 export const RENDER_DIRECTION_PACKET_SCHEMA = Type.Object({
   needsRender: Type.Literal(true),
