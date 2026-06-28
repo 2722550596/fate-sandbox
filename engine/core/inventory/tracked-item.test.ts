@@ -152,7 +152,6 @@ void test("transferTrackedItem updates holder and clears location", () => {
     site: "值夜者总部",
     detail: "",
     boundary: "normal",
-    coordinates: { x: 0, y: 0 },
   };
 
   const result = transferTrackedItem(draft, itemId, null, "上交封印物");

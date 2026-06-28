@@ -25,7 +25,6 @@
 - `ActorRole`: only `SocialRole` and `FactionRole` (removed `MasterRole`)
 - `ActorSecretSlots`: `pathwaySecret?` and `sequenceSecret?` (replaced `trueName?` and `hiddenNoblePhantasms`)
 - `TurnObligationKind`: "sequence" (replaced "servant-form")
-- `LocationState`: added `coordinates: { x: number; y: number } | null`
 
 ## Removed Enums
 

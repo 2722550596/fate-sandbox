@@ -16,7 +16,6 @@ export const LOCATION_STATE_SCHEMA = Type.Object({
   site: Type.String({ minLength: 1 }),
   detail: Type.String({ minLength: 1 }),
   boundary: BOUNDARY_KIND_SCHEMA,
-  coordinates: Type.Union([Type.Object({ x: Type.Number(), y: Type.Number() }), Type.Null()]),
 });
 
 export const ELAPSED_TURN_TIME_SCHEMA = Type.Object({
@@ -83,10 +82,8 @@ function normalizeLocation(location: LocationState, fieldName: string): Location
     site: assertNonEmptyString(location.site, `${fieldName}.site`),
     detail: assertNonEmptyString(location.detail, `${fieldName}.detail`),
     boundary: location.boundary,
-    coordinates: location.coordinates,
   };
 }
-
 function assertPositiveInteger(value: number, fieldName: string): number {
   if (!Number.isInteger(value) || value <= 0) {
     throw new Error(`${fieldName} 必须是大于 0 的整数。`);

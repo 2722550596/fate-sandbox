@@ -102,7 +102,6 @@ void test("progressSceneBeatTool rejects non-positive travel elapsedMinutes", ()
               site: "新都",
               detail: "商业街",
               boundary: "normal",
-              coordinates: null,
             },
             elapsedMinutes: 0,
             reason: "移动到新都商业街。",

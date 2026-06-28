@@ -303,7 +303,6 @@ export interface LocationState {
   site: string;
   detail: string;
   boundary: BoundaryKind;
-  coordinates: { x: number; y: number } | null;
 }
 
 // ---------------------------------------------------------------------------

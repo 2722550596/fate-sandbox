@@ -42,7 +42,6 @@ export function createInitialState(): State {
           site: "廷根",
           detail: "廷根大学·校门外",
           boundary: "normal",
-          coordinates: { x: 55.36, y: 26.34 },
         },
         situation: "daily",
         storyWindow: null,
