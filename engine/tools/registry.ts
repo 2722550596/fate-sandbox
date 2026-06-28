@@ -18,6 +18,7 @@ import { runParallelLineToolDefinition } from "./backstage/run-parallel-line.ts"
 import { clearBackstageLockToolDefinition } from "./debug/clear-backstage-lock.ts";
 import { getStateSchemaToolDefinition } from "./debug/get-state-schema.ts";
 import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact.ts";
+import { patchStateToolDefinition } from "./debug/patch-state.ts";
 import { resetStateToolDefinition } from "./debug/reset-state.ts";
 import { updateEconomyToolDefinition } from "./economy/update-economy.ts";
 import { updateTrackedItemToolDefinition } from "./inventory/update-tracked-item.ts";
@@ -36,7 +37,6 @@ import { progressSceneBeatToolDefinition } from "./scene/progress-scene-beat.ts"
 import { submitDirectionPacketToolDefinition } from "./scene/submit-direction-packet.ts";
 import { getStatusToolDefinition } from "./system/get-status.ts";
 import { initializeNewGameToolDefinition } from "./system/initialize-new-game.ts";
-import { patchStateToolDefinition } from "./system/patch-state.ts";
 import { updateHookToolDefinition } from "./system/update-hook.ts";
 
 /** 全部 Domain Event Tool 契约清单；契约本体与实现同文件维护。 */
