@@ -17,6 +17,7 @@
         "allow": [
           "__dirname",
           "__fsn_state_store__",
+          "__intercomProseReady",
           "_characters",
           "_world",
           "_timelines",

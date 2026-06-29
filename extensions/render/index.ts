@@ -679,6 +679,11 @@ function readSuggestedActionsFromDetails(details: Record<string, unknown>): Sugg
 }
 
 function sendProse(pi: ExtensionAPI, text: string, details: Record<string, unknown>): void {
+  // Notify intercom extension of pending prose for cross-process delivery
+  // oxlint-disable-next-line no-unsafe-type-assertion — globalThis interop
+  (globalThis as unknown as { __intercomProseReady?: (t: string) => void }).__intercomProseReady?.(
+    text,
+  );
   pi.sendMessage(
     { customType: PROSE_CUSTOM_TYPE, content: text, display: true, details },
     { triggerTurn: false },

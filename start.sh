@@ -102,6 +102,7 @@ pi \
   -e ./extensions/player-choices/index.ts \
   -e ./extensions/rewind/index.ts \
   -e ./extensions/render/index.ts \
+  -e $HOME/.pi/agent/npm/node_modules/pi-intercom/index.ts \
   --session-dir ./sessions \
   --no-context-files \
   "$@" || pi_exit=$?
