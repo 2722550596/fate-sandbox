@@ -221,13 +221,10 @@ export const ACTOR_CONDITION_EVENT_KINDS = [
 ] as const;
 const ACTOR_CONDITION_EVENT_KIND_SCHEMA = stringEnumSchema(ACTOR_CONDITION_EVENT_KINDS);
 
-const AFFLICTION_SOURCE_SCHEMA = stringEnumSchema([
-  "combat",
-  "beyonder-ability",
-  "environment",
-  "item",
-  "other",
-]);
+const AFFLICTION_SOURCE_SCHEMA = Type.String({
+  description:
+    "来源标识。建议值：combat / beyonder-ability / environment / item / other，但可以是任意自由文本。",
+});
 
 const AFFLICTION_OUTCOME_SCHEMA = stringEnumSchema(["recovered", "stabilized"]);
 

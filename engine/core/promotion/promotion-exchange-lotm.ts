@@ -61,6 +61,8 @@ export interface LOTMPromotionInput {
   hasMainCharacteristic: boolean;
   hasSupplementaryMaterials: boolean;
   riskTolerance: LOTMPromotionRiskTolerance;
+  /** 仪式细节完成度 0.0-1.0，补充 ritualIntegrity 的粒度 */
+  completionDegree?: number;
 }
 
 // ===========================================================================
@@ -184,21 +186,28 @@ function computeContextModifier(input: LOTMPromotionInput, actingReadiness: stri
       mod += 1;
       break;
   }
-
   // 仪式完成度
-  switch (input.ritualIntegrity) {
-    case "none":
-      mod -= 3;
-      break;
-    case "improvised":
-      mod -= 1;
-      break;
-    case "standard":
-      mod += 0;
-      break;
-    case "enhanced":
-      mod += 1;
-      break;
+  {
+    const baseMod = (() => {
+      switch (input.ritualIntegrity) {
+        case "none":
+          return -3;
+        case "improvised":
+          return -1;
+        case "standard":
+          return 0;
+        case "enhanced":
+          return 1;
+        default:
+          return 0;
+      }
+    })();
+    mod += baseMod;
+    // completionDegree 在基值基础上微调（半阶范围内）
+    if (input.completionDegree !== undefined) {
+      const clamped = Math.max(0, Math.min(1, input.completionDegree));
+      mod += (clamped - 0.5) * 0.5;
+    }
   }
 
   // 环境风险

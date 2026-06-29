@@ -106,6 +106,8 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
           ["low", "medium", "high", "desperate"],
           "riskTolerance",
         ),
+        completionDegree:
+          typeof raw["completionDegree"] === "number" ? raw["completionDegree"] : undefined,
         hasMainCharacteristic: raw["hasMainCharacteristic"] === true,
         hasSupplementaryMaterials: raw["hasSupplementaryMaterials"] === true,
       };
@@ -317,6 +319,14 @@ export const attemptPromotionToolDefinition: DomainToolDefinition = {
     riskTolerance: Type.Optional(
       Type.String({
         description: "风险偏好：low / medium（默认） / high / desperate",
+      }),
+    ),
+    completionDegree: Type.Optional(
+      Type.Number({
+        description:
+          "仪式细节完成度（0.0-1.0）。补充 ritualIntegrity 的粒度，0.5 为完全按预期完成。",
+        minimum: 0,
+        maximum: 1,
       }),
     ),
   }),
