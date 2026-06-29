@@ -180,9 +180,19 @@ export const manageFactionClockToolDefinition: DomainToolDefinition = {
     outcomeSummary: Type.Optional(
       Type.String({ description: "reset-clock/resolve-due 必填：兑现结果" }),
     ),
-    dueAt: Type.Optional(Type.String({ description: "schedule-event 必填：游戏内 ISO 时刻" })),
+    dueAt: Type.Optional(
+      Type.String({
+        description:
+          "schedule-event 必填：到期时刻。接受相对偏移（+30min/+2hours/+1day）或 ISO 字符串",
+      }),
+    ),
     eventId: Type.Optional(Type.String({ description: "resolve-due/extend-due 必填" })),
-    newDueAt: Type.Optional(Type.String({ description: "extend-due 必填：新到期时刻" })),
+    newDueAt: Type.Optional(
+      Type.String({
+        description:
+          "extend-due 必填：新到期时刻。接受相对偏移（+30min/+2hours/+1day）或 ISO 字符串",
+      }),
+    ),
     summary: Type.Optional(Type.String({ description: "schedule-event 必填：到期会发生什么" })),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>

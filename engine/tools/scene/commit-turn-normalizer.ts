@@ -2,16 +2,29 @@ import type { ScenePresenceInput } from "../../core/actor/actor.ts";
 import type { MemoryEvent } from "../../core/knowledge/memory.ts";
 import type { TurnCommitEvent, TurnCommitInput } from "../../core/turn/turn-commit.ts";
 
-import { parseSequenceInput } from "../../core/actor/actor-schema.ts";
+import { Type } from "typebox";
+import { Compile } from "typebox/compile";
+
+import { parseActingEvent, parseSequenceInput } from "../../core/actor/actor-schema.ts";
 import { parseEconomyEvent } from "../../core/economy/economy-schema.ts";
 import { parseMemoryEvent } from "../../core/knowledge/memory-schema.ts";
 import { parseSceneEvent } from "../../core/scene/scene-schema.ts";
 import { parseTurnTimePolicySchema } from "../../core/turn/turn-time-schema.ts";
-import { isRecord } from "../../core/utils/typebox-validation.ts";
+import { isRecord, parseTypeBoxValue } from "../../core/utils/typebox-validation.ts";
 import { normalizeActorConditionEvent } from "../actor/actor-condition-normalizer.ts";
 import { normalizeTrackedItemEvent } from "../inventory/tracked-item-normalizer.ts";
 
 const DEFAULT_SUMMARY = "本轮状态变化。";
+
+const OUTFIT_TURN_SCHEMA = Type.Object({
+  actorId: Type.String({ minLength: 1 }),
+  outfit: Type.Object({
+    label: Type.String({ minLength: 1 }),
+    details: Type.String({ minLength: 1 }),
+  }),
+  reason: Type.String({ minLength: 1 }),
+});
+const OUTFIT_TURN_VALIDATOR = Compile(OUTFIT_TURN_SCHEMA);
 const TURN_EVENT_KINDS = [
   "scene",
   "scene-presence",
@@ -20,6 +33,8 @@ const TURN_EVENT_KINDS = [
   "sequence",
   "economy",
   "memory",
+  "outfit",
+  "acting",
 ] as const;
 
 export function normalizeTurnCommitInput(params: unknown): TurnCommitInput {
@@ -82,9 +97,26 @@ function normalizeTurnCommitEvent(value: unknown, summary: string): TurnCommitEv
       };
     case "memory":
       return { kind: normalizedKind, event: normalizeMemoryTurnEvent(event) };
+    case "outfit":
+      return {
+        kind: normalizedKind,
+        event: parseTypeBoxValue(
+          withReason(extractDomainEvent(event, "outfit.event"), summary),
+          "commit_turn outfit.event",
+          OUTFIT_TURN_VALIDATOR,
+        ),
+      };
+    case "acting":
+      return {
+        kind: normalizedKind,
+        event: parseActingEvent(
+          withReason(extractDomainEvent(event, "acting.event"), summary),
+          "commit_turn acting.event",
+        ),
+      };
     default:
       throw new Error(
-        `非法 commit_turn event.kind: ${formatUnknown(event["kind"])}。允许: scene / scene-presence / actor-condition / tracked-item / sequence / economy / memory。`,
+        `非法 commit_turn event.kind: ${formatUnknown(event["kind"])}。允许: scene / scene-presence / actor-condition / tracked-item / sequence / economy / memory / outfit / acting。`,
       );
   }
 }

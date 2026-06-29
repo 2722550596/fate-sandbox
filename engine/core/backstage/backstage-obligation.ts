@@ -23,9 +23,9 @@ import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
 
 /** 单轮时间推进达到此分钟数即触发后台推进义务。沿用 audit 阈值。 */
-export const BACKSTAGE_BIG_TIME_ADVANCE_MINUTES = 30;
+export const BACKSTAGE_BIG_TIME_ADVANCE_MINUTES = 120;
 /** 连续无代价 canonical turn 达到此数即触发。 */
-export const BACKSTAGE_NO_COST_STREAK_LIMIT = 2;
+export const BACKSTAGE_NO_COST_STREAK_LIMIT = 6;
 
 export interface CanonicalTurnBackstageInput {
   /** 本轮推进的游戏内分钟数 */
@@ -135,7 +135,7 @@ function formatTriggerSummary(
     case "time-advance":
       return `本轮推进 ${input.elapsedMinutes} 分钟（≥${BACKSTAGE_BIG_TIME_ADVANCE_MINUTES}）：后台世界线应同步推进一次。`;
     case "no-cost-streak":
-      return `连续 ${BACKSTAGE_NO_COST_STREAK_LIMIT} 轮无机械代价：后台敌对进展应介入一次。`;
+      return `连续 ${BACKSTAGE_NO_COST_STREAK_LIMIT} 轮无机械代价：后台世界线应考虑推进一次。`;
     default:
       return "后台世界线应推进一次。";
   }
@@ -145,9 +145,8 @@ function formatOpenBackstageObligations(obligations: readonly BackstageObligatio
   return [
     "存在未清账的后台世界推进义务，拒绝开始新的 canonical turn。先推进后台世界线：",
     ...obligations.map((entry) => `- [${entry.trigger}] ${entry.summary}`),
-    "清账方式（任选其一）：",
-    "1. run_parallel_line（引擎直接 fork 后台导演，不用手动 spawn）→ 隔轮用返回的 run_id 调 harvest_backstage_candidate（引擎自动取回+验收）→ record_offscreen_event 落地；",
-    "2. 经审查确无可推进时，用 resolve_backstage_line 记录 no-change / blocked（窄结构化理由）。",
-    "导演失败/未调用不算清账。",
+    "清账方式：",
+    "通过子代理 dispatch novel_analyst 查阅原著相关章节作为参考，GM 自行判断后台势力在该时间窗口内的合理进展，用 record_offscreen_event 落地。",
+    "每条 record_offscreen_event 落地自动清掉一条义务。",
   ].join("\n");
 }

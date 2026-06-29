@@ -1,11 +1,14 @@
-import type { PublicGameState } from "./state.ts";
+import type { PublicGameState, SecretGameState } from "./state.ts";
 
 import { formatHookLedger } from "../ledger/hooks.ts";
 import { recentPlayerKnownRelationshipSignals } from "../actor/relationship-signal.ts";
-import { formatHumanTime } from "./date-time.ts";
+import { diffMinutes, formatHumanTime } from "./date-time.ts";
 import { formatAmount } from "../economy/economy-denomination.ts";
 
-export function buildGmBrief(publicState: PublicGameState): string {
+export function buildGmBrief(
+  publicState: PublicGameState,
+  secrets?: SecretGameState,
+): string {
   const protagonist = publicState.actors[publicState.protagonistActorId];
   if (protagonist === undefined) {
     throw new Error(`GM brief failed: protagonist ${publicState.protagonistActorId} missing.`);
@@ -18,8 +21,11 @@ export function buildGmBrief(publicState: PublicGameState): string {
     `态势：${publicState.scene.situation}`,
     `剧情窗口：${formatStoryWindow(publicState)}`,
     `玩家角色：${formatActorLine(protagonist)}`,
+    ...formatProtagonistExtra(protagonist),
     `同行者：${formatAllies(publicState)}`,
     `资源：${formatGmBriefFunds(publicState)}`,
+    ...formatTrackedItemsBrief(publicState),
+    ...formatDebts(publicState),
     `状态效果：${formatCondition(protagonist.condition)}`,
     `当前目标：${formatActiveObjectives(publicState, { separator: "；" })}`,
     `目标推进规则：${formatObjectiveRouting(publicState)}`,
@@ -29,6 +35,10 @@ export function buildGmBrief(publicState: PublicGameState): string {
     ...formatHookLedgerLines(publicState),
     `最近关系信号：${formatRecentRelationshipSignals(publicState)}`,
     `最近重大记忆：${formatRecentEvents(publicState)}`,
+    ...formatPinnedFacts(publicState),
+    ...formatScheduledEvents(publicState, secrets),
+    ...formatSecretsGlance(publicState, secrets),
+    ...formatTurnLog(publicState),
     "本轮工具纪律：每轮 time 必须用 elapsed/travel 推进时间；Scene Beat lifecycle 用 progress_scene_beat；非 Scene Beat lifecycle 的多状态变化用 commit_turn；actor 入场/离场用 set_scene_presence。不要输出 JSON、数值表、schema 字段。",
   ].join("\n");
 }
@@ -151,7 +161,12 @@ function formatStoryWindow(publicState: PublicGameState): string {
 function formatActorLine(actor: NonNullable<PublicGameState["actors"][string]>): string {
   const identity = formatIdentity(actor);
   const sequence = formatSequence(actor);
-  return [actor.presentation.renderName, actor.kind, identity, sequence].join(" / ");
+  const name =
+    actor.presentation.canonicalName !== actor.presentation.renderName &&
+    actor.presentation.canonicalName.length > 0
+      ? `${actor.presentation.renderName}（真名：${actor.presentation.canonicalName}）`
+      : actor.presentation.renderName;
+  return [name, actor.kind, identity, sequence].join(" / ");
 }
 
 function formatIdentity(actor: NonNullable<PublicGameState["actors"][string]>): string {
@@ -173,6 +188,73 @@ function formatSequence(actor: NonNullable<PublicGameState["actors"][string]>): 
   }
   return parts.join("；");
 }
+function formatProtagonistExtra(
+  actor: NonNullable<PublicGameState["actors"][string]>
+): string[] {
+  const lines: string[] = [];
+  const parts: string[] = [];
+  if (actor.presentation.apparentAge.length > 0) {
+    parts.push(`年龄：${actor.presentation.apparentAge}`);
+  }
+  if (actor.presentation.demeanor.length > 0) {
+    parts.push(`风范：${actor.presentation.demeanor}`);
+  }
+  if (parts.length > 0) {
+    lines.push(`  基础：${parts.join(" · ")}`);
+  }
+  if (
+    actor.presentation.outfit.label.length > 0 ||
+    actor.presentation.outfit.details.length > 0
+  ) {
+    const outfitParts: string[] = [];
+    if (actor.presentation.outfit.details.length > 0) {
+      outfitParts.push(actor.presentation.outfit.details);
+    }
+    if (actor.presentation.outfit.label.length > 0) {
+      outfitParts.push(`（${actor.presentation.outfit.label}）`);
+    }
+    lines.push(`  外貌：${outfitParts.join(" ")}`);
+  }
+  if (actor.identity.roles.length > 0) {
+    lines.push(`  社会角色：${actor.identity.roles.join("、")}`);
+  }
+  if (actor.inventory.items.length > 0) {
+    lines.push(`  随身物品：${actor.inventory.items.join("、")}`);
+  }
+  if (actor.abilities.length > 0) {
+    lines.push(
+      `  能力：${actor.abilities.map((a) => `${a.label}：${a.summary}`).join(";")}`
+    );
+  }
+  if (actor.identity.background.length > 0) {
+    lines.push(`  背景：${actor.identity.background}`);
+  }
+  const extraFacts = actor.identity.lockedFacts.filter(
+    (fact) => fact.id !== "setup-identity"
+  );
+  if (extraFacts.length > 0) {
+    lines.push(
+      `  记录：${extraFacts.map((fact) => fact.text).join("；")}`
+    );
+  }
+  const seq = actor.sequence;
+  if (seq !== null) {
+    const seqParts: string[] = [];
+    if (typeof seq.rank === "string" && seq.rank.length > 0) {
+      seqParts.push(`等级：${seq.rank}`);
+    }
+    if (typeof seq.promotionSystem === "string" && seq.promotionSystem.length > 0) {
+      seqParts.push(`晋升：${seq.promotionSystem}`);
+    }
+    if (seq.tags.length > 0) {
+      seqParts.push(`标签：${seq.tags.map((t) => t.name).join("、")}`);
+    }
+    if (seqParts.length > 0) {
+      lines.push(`  序列详情：${seqParts.join(" · ")}`);
+    }
+  }
+  return lines;
+}
 
 function formatAllies(publicState: PublicGameState): string {
   if (publicState.allyActorIds.length === 0) {
@@ -181,36 +263,224 @@ function formatAllies(publicState: PublicGameState): string {
   return publicState.allyActorIds
     .map((actorId) => publicState.actors[actorId])
     .filter((actor) => actor !== undefined)
-    .map(
-      (actor) => `${actor.presentation.renderName}（${actor.relationshipToProtagonist.summary}）`,
-    )
-    .join("；");
+    .map((actor) => {
+      const base = `${actor.presentation.renderName}（${actor.relationshipToProtagonist.summary}）`;
+      const extra: string[] = [];
+      if (actor.relationshipToProtagonist.stance.length > 0) {
+        extra.push(`立场：${actor.relationshipToProtagonist.stance}`);
+      }
+      if (
+        actor.presentation.outfit.label.length > 0 ||
+        actor.presentation.outfit.details.length > 0
+      ) {
+        const outfitText =
+          actor.presentation.outfit.details.length > 0
+            ? `${actor.presentation.outfit.details}（${actor.presentation.outfit.label}）`
+            : actor.presentation.outfit.label;
+        extra.push(`外貌：${outfitText}`);
+      }
+      if (extra.length > 0) {
+        return `${base} [${extra.join(" ")}]`;
+      }
+      return base;
+    })
+    .join(";");
 }
 
 function formatGmBriefFunds(publicState: PublicGameState): string {
   const purseLines = publicState.economy.accessibleFunds
     .map((purse) => `${purse.label}: ${formatAmount(purse.amount, purse.currencyType ?? "loen")}`)
     .join("、");
-  const keyItems = Object.values(publicState.trackedItems)
-    .filter((item) => item.visibility === "player-known")
-    .map((item) => item.label)
-    .slice(0, 5);
-  const itemText = keyItems.length === 0 ? "无关键物品" : `关键物品：${keyItems.join("、")}`;
-  return `可访问资金 ${purseLines}；${itemText}`;
+  return `可访问资金 ${purseLines}`;
+}
+
+/** 关键物品列表（GM 全可见，不按 player-known 过滤）。 */
+function formatTrackedItemsBrief(publicState: PublicGameState): string[] {
+  const items = Object.values(publicState.trackedItems).toSorted((left, right) =>
+    left.label.localeCompare(right.label),
+  );
+  if (items.length === 0) return [];
+  const itemLines = items.map((item) => {
+    const holder =
+      item.holderActorId === null
+        ? "未携带"
+        : (publicState.actors[item.holderActorId]?.presentation.renderName ?? item.holderActorId);
+    const notes = item.notes.length > 0 ? ` · ${item.notes.join("；")}` : "";
+    return `    - ${item.label}（${item.kind} · ${item.condition} · ${holder}${notes}）`;
+  });
+  return [`  关键物品：`, ...itemLines];
+}
+
+/** 债务列表。 */
+function formatDebts(publicState: PublicGameState): string[] {
+  if (publicState.economy.debts.length === 0) return [];
+  const debtLines = publicState.economy.debts.map((debt) => {
+    const debtorName =
+      publicState.actors[debt.debtorActorId]?.presentation.renderName ?? debt.debtorActorId;
+    const reason = debt.reason.length > 0 ? `（${debt.reason}）` : "";
+    return `    - ${debtorName} 欠 ${debt.creditor}：${formatAmount(debt.amount, "loen")}${reason}`;
+  });
+  return [`  债务：`, ...debtLines];
 }
 
 function formatCondition(
   condition: NonNullable<PublicGameState["actors"][string]>["condition"],
 ): string {
-  const lines = condition.afflictions.map((effect) => `${effect.source}:${effect.text}`);
+  const lines = condition.afflictions.map((effect) => {
+    const base = `${effect.source}:${effect.text}`;
+    return effect.expectedDuration !== null
+      ? `${base}（预期${effect.expectedDuration}）`
+      : base;
+  });
   return lines.length === 0 ? "无显著状态效果" : lines.join("；");
+}
+
+/**
+ * 将事件时间转为相对当前时间的描述（5分钟前 / 3小时前 / 2天前）。
+ */
+function formatRelativeEventTime(eventIso: string, currentIso: string): string {
+  const minutes = diffMinutes(eventIso, currentIso);
+  if (minutes <= 0) return "刚刚";
+  if (minutes < 60) return `${minutes}分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}小时前`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}天前`;
+  return formatHumanTime(eventIso).display;
 }
 
 function formatRecentEvents(publicState: PublicGameState): string {
   const recent = publicState.memory.eventLog.slice(-3);
   return recent.length === 0
     ? "无"
-    : recent.map((event) => `${event.title}：${event.summary}`).join("；");
+    : recent
+        .map((event) => {
+          const consequences =
+            event.consequences.length > 0 ? ` → ${event.consequences.join(";")}` : "";
+          const relativeTime = formatRelativeEventTime(event.time, publicState.clock.currentAt);
+          return `${event.title}：${event.summary}${consequences}（${relativeTime}）`;
+        })
+        .join(";");
+}
+
+function formatPinnedFacts(publicState: PublicGameState): string[] {
+  const facts = publicState.memory.pinnedFacts.slice(-3);
+  if (facts.length === 0) return [];
+  return [
+    "固定事实：",
+    ...facts.map(
+      (fact) =>
+        `    [${fact.scope}] ${fact.text}`,
+    ),
+  ];
+}
+
+function formatScheduledEvents(
+  publicState: PublicGameState,
+  secrets?: SecretGameState,
+): string[] {
+  const events = secrets?.scheduledEvents;
+  if (events === undefined || events.length === 0) return [];
+  const currentAt = publicState.clock.currentAt;
+  return [
+    "待办日程：",
+    ...events.map((event) => {
+      const time = formatHumanTime(event.dueAt, publicState.clock.timezone);
+      const minDiff = diffMinutes(event.dueAt, currentAt);
+      const prefix =
+        minDiff <= 0
+          ? "⚠️ 已到期！"
+          : minDiff < 60
+            ? `${minDiff}分钟后`
+            : minDiff < 1440
+              ? `${Math.floor(minDiff / 60)}小时后`
+              : `${Math.floor(minDiff / 1440)}天后`;
+      return `    ${event.id}: ${event.summary}（${time.display} · ${prefix}）`;
+    }),
+  ];
+}
+function formatSecretsGlance(
+  publicState: PublicGameState,
+  secrets?: SecretGameState,
+): string[] {
+  if (secrets === undefined) return [];
+  const icons: Record<string, string> = { hidden: "🔒", foreshadowed: "🔮", revealed: "✅" };
+
+  // 主角秘密
+  const protagonistSecrets = secrets.actorStates[publicState.protagonistActorId];
+  const protagonistLines: string[] = [];
+  if (protagonistSecrets?.secrets !== undefined) {
+    for (const [label, slots] of [
+      ["非凡", protagonistSecrets.secrets.beyonderSecrets],
+      ["动机", protagonistSecrets.secrets.privateMotives],
+      ["关联", protagonistSecrets.secrets.unrevealedAffiliations],
+    ] as const) {
+      const counts = new Map<string, number>();
+      for (const slot of slots) {
+        const key = icons[slot.revealState] ?? "?";
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      for (const [icon, count] of counts) {
+        protagonistLines.push(`${label}${icon}${count}`);
+      }
+    }
+  }
+
+  // 世界隐藏事实（未揭示的）
+  const worldFacts = secrets.hiddenWorldFacts.filter(
+    (fact) => fact.revealState !== "revealed"
+  );
+
+  // 最近揭示事件
+  const recentReveals = secrets.secretEventLog.slice(-2).map(
+    (event) => {
+      const time = formatHumanTime(event.time, publicState.clock.timezone);
+      const actors = event.relatedActorIds.length > 0
+        ? `（${event.relatedActorIds.join("、")}）`
+        : "";
+      return `${time.display}：${event.summary}${actors}`;
+    },
+  );
+
+  const hasAny =
+    protagonistLines.length > 0 ||
+    worldFacts.length > 0 ||
+    recentReveals.length > 0;
+  if (!hasAny) return [];
+
+  const summary: string[] = [];
+  if (protagonistLines.length > 0) {
+    const name =
+      publicState.actors[publicState.protagonistActorId]?.presentation.renderName ??
+      publicState.protagonistActorId;
+    summary.push(`主角（${name}）：${protagonistLines.join(" ")}`);
+  }
+  if (worldFacts.length > 0) {
+    summary.push(`世界隐藏事实：${worldFacts.length}项🔒`);
+  }
+
+  const lines: string[] = ["秘密纵览："];
+  lines.push(...summary.map((s) => `  · ${s}`));
+  if (recentReveals.length > 0) {
+    lines.push("  最近揭示：", ...recentReveals.map((r) => `    - ${r}`));
+  }
+  lines.push("  （summarize_secrets 查看完整秘密状态）");
+  return lines;
+}
+
+function formatTurnLog(publicState: PublicGameState): string[] {
+  const entries = publicState.turnLog.slice(-3);
+  if (entries.length === 0) return [];
+  return [
+    "最近轮次：",
+    ...entries.map((entry) => {
+      const timeDesc =
+        entry.time.kind === "travel"
+          ? `travel → ${entry.time.location.region}·${entry.time.location.site}·${entry.time.location.detail}`
+          : `elapsed${entry.time.reason.length > 0 ? `: ${entry.time.reason}` : ""}`;
+      return `    ${entry.id}: ${entry.summary}（${timeDesc}, +${entry.time.elapsedMinutes}min, ${entry.eventCount}事件）`;
+    }),
+  ];
 }
 
 function formatRecentRelationshipSignals(publicState: PublicGameState): string {

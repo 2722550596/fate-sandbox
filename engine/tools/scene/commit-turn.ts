@@ -49,17 +49,22 @@ export function commitTurnTool(params: unknown, sessionManager: unknown): ToolRe
 export const commitTurnToolDefinition: DomainToolDefinition = {
   name: "commit_turn",
   description:
-    "每轮叙事结束时一次性提交本轮领域事件。用于一轮内聚合多个状态变化。\n\n" +
+    "State 层收口：每轮叙事结束时一次性提交本轮全部机械状态变化。\n\n" +
+    "设计逻辑：一轮 GM 回复内只能调一次，用 events[] 数组聚合本轮所有领域事件\n" +
+    "（时间/场景/伤势/物品/资金/记忆/序列），一次落地。它是 state 层面的\n" +
+    "「写」入口——没有它，时钟不推进、turn log 为空、backstage 义务不触发。\n" +
+    "它不是最终收尾工具——调完 commit_turn 后还需调 submit_direction_packet\n\n" +
     "【使用边界】\n" +
-    "- 每次 canonical turn 都必须提交顶层 time\n" +
-    "- 一轮内同时改变时间、地点、目标、伤势、物品、资金、记忆或序列变更\n" +
-    "- Scene Beat 开启/收口优先用 progress_scene_beat\n" +
-    "- resolve_combat 登记的义务必须在本次 events 里落地\n\n" +
+    "- 每轮必调一次，events 数组一次打包本轮所有状态变化\n" +
+    "- 顶层 time 必填（elapsed / travel）；时间推进不走 events\n" +
+    "- 同一事件内可混写多种 kind（例：scene.set-location + economy.spend-money + memory.pin-fact）\n" +
+    "- Scene Beat 开启/收口走 progress_scene_beat，不走这里\n" +
+    "- resolve_combat 登记的义务必须在 events 里落地\n\n" +
     "禁区：\n" +
-    "- 把它当裸 patch\n" +
-    "- 在 events 里写时间或移动\n" +
-    "- 提交隐藏事实到 public\n" +
-    "- 同一回复连续提交多个前台 canonical turn",
+    "- 同一回复内调多次（你只用调一次打包就行）\n" +
+    "- 在 events 里写时间或移动（走顶层 time）\n" +
+    "- 把它当裸 patch 用（必须表达领域事件语义）\n" +
+    "- 提交隐藏事实到 public（你应该通过 reveal_secret 控制曝露）",
   parameters: Type.Object({
     summary: Type.Optional(
       Type.String({
@@ -70,7 +75,8 @@ export const commitTurnToolDefinition: DomainToolDefinition = {
     events: Type.Array(
       Type.Object({
         kind: Type.String({
-          description: "scene / scene-presence / actor-condition / sequence / economy / memory",
+          description:
+            "scene / scene-presence / actor-condition / outfit / acting / sequence / economy / memory",
         }),
         event: Type.Unknown({
           description:

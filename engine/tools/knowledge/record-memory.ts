@@ -85,8 +85,17 @@ export const recordMemoryToolDefinition: DomainToolDefinition = {
     title: Type.Optional(Type.String()),
     summary: Type.Optional(Type.String()),
     consequences: Type.Optional(Type.Array(Type.String())),
-    startDate: Type.Optional(Type.String()),
-    endDate: Type.Optional(Type.String()),
+    startDate: Type.Optional(
+      Type.String({
+        description:
+          "record-daily-summary 必填：摘要起始。接受相对偏移（-4hours/-1day）或 ISO 字符串",
+      }),
+    ),
+    endDate: Type.Optional(
+      Type.String({
+        description: "record-daily-summary 必填：摘要结束。接受相对偏移（-30min/+0）或 ISO 字符串",
+      }),
+    ),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     recordMemoryTool(params, ctx.sessionManager),

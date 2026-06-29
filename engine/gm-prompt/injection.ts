@@ -2,10 +2,13 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { formatPresenceImpressionCards } from "../core/actor/actor-impression.ts";
+import {
+  formatPresenceImpressionCards,
+  formatSettlementImpressionExtra,
+} from "../core/actor/actor-impression.ts";
 import { buildBackstageGmBrief } from "../core/backstage/backstage-brief.ts";
 import { buildGmBrief } from "../core/state/public-projection.ts";
-import { getPublicState, getState } from "../core/state/state-store.ts";
+import { getState } from "../core/state/state-store.ts";
 import { isRecord } from "../core/utils/typebox-validation.ts";
 import {
   loadPromptPreset,
@@ -143,6 +146,9 @@ function resolvePromptModuleBody(module: PromptPresetModule): string {
   if (module.source.name === "presence-impressions") {
     return buildPresenceImpressionsText();
   }
+  if (module.source.name === "renderer-presence-impressions") {
+    return buildRendererPresenceImpressionsText();
+  }
   if (module.source.name === "backstage-ledger") {
     return buildBackstageLedgerText();
   }
@@ -202,16 +208,37 @@ function buildPresenceImpressionsText(): string {
     if (text === null) {
       return "当前场景没有在场 NPC 印象卡。重要 NPC 入场后用 update_actor_impression 建立印象卡。";
     }
-    return [
-      "当前在场 NPC 印象卡（由 presence 自动路由）：",
-      "",
-      text,
+    const settlementExtra = formatSettlementImpressionExtra(state);
+    const sections = ["当前在场 NPC 印象卡（由 presence 自动路由）：", "", text];
+    if (settlementExtra.length > 0) {
+      sections.push("", settlementExtra);
+    }
+    sections.push(
       "",
       "NPC 台词、行动、情绪必须与印象卡一致。重大变化后用 update_actor_impression 更新。",
       "台词必须复刻「语癖/对话范例」里的用词、断句与语气：一句换个角色说也成立的中性功能台词算失败。宁可说得片面、留白、跳跃，也要是这个角色会说的话。",
-    ].join("\n");
+    );
+    return sections.join("\n");
   } catch {
     return "印象卡注入失败；可能尚未初始化状态。";
+  }
+}
+
+function buildRendererPresenceImpressionsText(): string {
+  try {
+    const state = getState();
+    const text = formatPresenceImpressionCards(state);
+    if (text === null) {
+      return "";
+    }
+    return [
+      "在场角色刻画参照：",
+      "",
+      text,
+      "NPC 台词须使用「语癖/对话范例」里的用词、断句与语气。",
+    ].join("\n");
+  } catch {
+    return "";
   }
 }
 
@@ -234,10 +261,11 @@ function buildBackstageLedgerText(): string {
 }
 
 function buildStatePressureText(): string {
+  const fullState = getState();
   return [
     "当前机械状态简报由 public state 派生，只读参考，工具返回值优先。",
     "",
-    buildGmBrief(getPublicState()),
+    buildGmBrief(fullState.public, fullState.secrets),
     "",
     "这份简报只用于压住叙事倾向，不能替代工具调用；本轮任何工具返回值都覆盖简报。",
   ].join("\n");

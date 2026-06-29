@@ -10,6 +10,7 @@ import type { FactionClock, ScheduledEvent, State } from "../state/state.ts";
 
 import { Temporal } from "@js-temporal/polyfill";
 
+import { resolveRelativeTime } from "../state/date-time.ts";
 import { createId } from "../utils/ids.ts";
 import {
   assertIsoDateString,
@@ -105,7 +106,10 @@ export function retireFactionClock(draft: State, clockId: string, reason: string
 }
 
 export function scheduleEvent(draft: State, dueAt: string, summary: string): ScheduledEvent {
-  const due = assertIsoDateString(dueAt, "dueAt");
+  const due = assertIsoDateString(
+    resolveRelativeTime(dueAt, draft.public.clock.currentAt),
+    "dueAt",
+  );
   if (Temporal.Instant.compare(Temporal.Instant.from(due), currentInstant(draft)) <= 0) {
     throw new Error(`非法 dueAt: ${due} 不晚于当前游戏时间 ${draft.public.clock.currentAt}。`);
   }
@@ -146,7 +150,10 @@ export function extendScheduledEvent(
   reason: string,
 ): ScheduledEvent {
   assertNonEmptyString(reason, "reason");
-  const due = assertIsoDateString(newDueAt, "newDueAt");
+  const due = assertIsoDateString(
+    resolveRelativeTime(newDueAt, draft.public.clock.currentAt),
+    "newDueAt",
+  );
   const event = requireScheduledEvent(draft, eventId);
   if (Temporal.Instant.compare(Temporal.Instant.from(due), currentInstant(draft)) <= 0) {
     throw new Error(`非法 newDueAt: ${due} 不晚于当前游戏时间，展期无意义。`);

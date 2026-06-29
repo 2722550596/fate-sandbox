@@ -67,7 +67,7 @@
     },
     {
       "id": "backstage-ledger",
-      "enabled": true,
+      "enabled": false,
       "slot": "pre-response",
       "priority": 12,
       "header": "backstage_ledger",

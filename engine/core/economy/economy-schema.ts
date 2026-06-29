@@ -79,6 +79,7 @@ export const UPDATE_PURSE_EVENT_SCHEMA = Type.Object({
 export const ADD_DEBT_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("add-debt"),
   debtorActorId: Type.String({ minLength: 1 }),
+  callerActorId: Type.Optional(Type.String({ minLength: 1 })),
   creditor: Type.String({ minLength: 1 }),
   amount: AMOUNT_SCHEMA,
   reason: Type.String({ minLength: 1 }),

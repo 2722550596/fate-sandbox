@@ -112,7 +112,7 @@ void test("presentActorImpressions returns only in-scene cards", () => {
   assert.equal(present[0]?.actorId, "rin");
 });
 
-void test("formatPresenceImpressionCards formats cards for injection", () => {
+void test("formatPresenceImpressionCards formats cards with actor fields for injection", () => {
   const draft = createInitialState();
   addTestNpc(draft, "rin");
 
@@ -131,6 +131,12 @@ void test("formatPresenceImpressionCards formats cards for injection", () => {
   assert.match(text, /Rin/);
   assert.match(text, /Confident and sharp/);
   assert.match(text, /Tsundere edge/);
+  // 新追加的 actor 本体字段
+  assert.match(text, /身份：rin/);
+  assert.match(text, /外表年龄：20s/);
+  assert.match(text, /外貌：default/);
+  assert.match(text, /风范：neutral/);
+  assert.match(text, /立场：neutral/);
 });
 
 void test("formatPresenceImpressionCards returns null when no NPC present", () => {

@@ -116,4 +116,46 @@ function pad2(value: number): string {
 }
 
 /** LOTM 第五纪起始时刻的 ISO 字符串，供 state-store 使用。 */
+
+/**
+ * 将人性化时间输入解析为绝对 ISO 字符串。
+ * 接受 ISO 字符串（直通）或相对偏移（+30min / +2hours / +1day / -4hours）。
+ * 拒绝纯自然语言时间；LLM 必须给出明确的单位和方向。
+ */
+export function resolveRelativeTime(input: string, currentIso: string): string {
+  // 先试 ISO 直通
+  try {
+    return normalizeIsoInstant(input, "relative time");
+  } catch {
+    // not ISO, try relative
+  }
+  const trimmed = input.trim();
+  const match = /^([+-])(\d+)(min|mins|hour|hours|day|days)$/.exec(trimmed);
+  if (match === null) {
+    throw new Error(
+      `无法解析时间: ${trimmed}。接受 ISO 字符串或相对偏移（+30min / +2hours / +1day / -4hours）。`
+    );
+  }
+  const value = Number(match[2]) * (match[1] === "+" ? 1 : -1);
+  const unit = match[3];
+  const instant = Temporal.Instant.from(currentIso);
+  let result: Temporal.Instant;
+  switch (unit) {
+    case "min":
+    case "mins":
+      result = instant.add({ minutes: value });
+      break;
+    case "hour":
+    case "hours":
+      result = instant.add({ hours: value });
+      break;
+    case "day":
+    case "days":
+      result = instant.add({ hours: value * 24 });
+      break;
+    default:
+      throw new Error(`不支持的时间单位: ${unit}。支持: min/mins/hour/hours/day/days。`);
+  }
+  return result.toString({ smallestUnit: "millisecond" });
+}
 export const LOTM_EPOCH_ISO = EPOCH_ISO;

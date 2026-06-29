@@ -34,6 +34,15 @@
       "source": "agents/protagonist-impression.md"
     },
     {
+      "id": "scene-impressions",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 45,
+      "header": "scene_impressions",
+      "source": "runtime:renderer-presence-impressions"
+    },
+
+    {
       "id": "output-contract",
       "enabled": true,
       "slot": "final-contract",

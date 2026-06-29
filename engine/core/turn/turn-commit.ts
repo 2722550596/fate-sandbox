@@ -1,14 +1,17 @@
+import type { ActingResult } from "../actor/acting.ts";
 import type { ActorConditionEvent, ActorConditionEventResult } from "../actor/actor-condition.ts";
-import type { SequenceInput } from "../actor/actor-schema.ts";
+import type { ActingEvent, SequenceInput } from "../actor/actor-schema.ts";
 import type { ScenePresenceInput, ScenePresenceResult } from "../actor/actor.ts";
 import type { EconomyEvent, EconomyEventResult } from "../economy/economy.ts";
 import type { TrackedItemEvent } from "../inventory/tracked-item-schema.ts";
 import type { TrackedItemEventResult } from "../inventory/tracked-item.ts";
 import type { MemoryEvent, MemoryEventResult } from "../knowledge/memory.ts";
 import type { SceneEvent, SceneEventResult } from "../scene/scene.ts";
-import type { State, TurnTimePolicy } from "../state/state.ts";
+import type { OutfitState, State, TurnTimePolicy } from "../state/state.ts";
 
+import { recordActing } from "../actor/acting.ts";
 import { updateActorCondition } from "../actor/actor-condition.ts";
+import { changeActorOutfit } from "../actor/actor-impression.ts";
 import { setScenePresence, upsertActor } from "../actor/actor.ts";
 import { collectBackstageDueNotices } from "../backstage/faction-clock.ts";
 import { updateEconomy } from "../economy/economy.ts";
@@ -26,6 +29,12 @@ export interface SequenceEventResult {
   message: string;
 }
 
+export interface OutfitTurnEvent {
+  actorId: string;
+  outfit: OutfitState;
+  reason: string;
+}
+
 export type TurnCommitEvent =
   | { kind: "scene"; event: SceneEvent }
   | { kind: "scene-presence"; event: ScenePresenceInput }
@@ -33,7 +42,9 @@ export type TurnCommitEvent =
   | { kind: "tracked-item"; event: TrackedItemEvent }
   | { kind: "sequence"; event: SequenceEvent }
   | { kind: "economy"; event: EconomyEvent }
-  | { kind: "memory"; event: MemoryEvent };
+  | { kind: "memory"; event: MemoryEvent }
+  | { kind: "outfit"; event: OutfitTurnEvent }
+  | { kind: "acting"; event: ActingEvent };
 
 export interface TurnCommitInput {
   summary: string;
@@ -48,7 +59,9 @@ export type TurnCommitEventResult =
   | { kind: "tracked-item"; result: TrackedItemEventResult }
   | { kind: "sequence"; result: SequenceEventResult }
   | { kind: "economy"; result: EconomyEventResult }
-  | { kind: "memory"; result: MemoryEventResult };
+  | { kind: "memory"; result: MemoryEventResult }
+  | { kind: "outfit"; result: { message: string } }
+  | { kind: "acting"; result: ActingResult };
 
 export interface TurnCommitResult {
   message: string;
@@ -100,6 +113,18 @@ function applyTurnEvent(
       return { kind: event.kind, result: updateEconomy(draft, event.event) };
     case "memory":
       return { kind: event.kind, result: recordMemory(draft, event.event) };
+    case "outfit":
+      return {
+        kind: event.kind,
+        result: changeActorOutfit(
+          draft,
+          event.event.actorId,
+          event.event.outfit,
+          event.event.reason,
+        ),
+      };
+    case "acting":
+      return { kind: event.kind, result: recordActing(draft, event.event) };
     default:
       throw new Error("unreachable turn commit event kind");
   }
