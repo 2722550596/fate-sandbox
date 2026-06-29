@@ -5,24 +5,31 @@ import { Type } from "typebox";
 
 import { parsePrivateResolveEvent } from "../../core/knowledge/secrets-schema.ts";
 import { privateResolve } from "../../core/knowledge/secrets.ts";
-import { runDomainEventTool } from "../system/domain-tool-runner.ts";
+import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
+import { cloneState, commitState } from "../../core/state/state-store.ts";
+import { textResult } from "../runtime/tool-result.ts";
 
-export function privateResolveTool(params: unknown, sessionManager: unknown): ToolResult {
-  return runDomainEventTool({
-    sessionManager,
-    execute: (draft) =>
-      privateResolve(draft, parsePrivateResolveEvent(params, "private_resolve 参数")),
-    details: (result) => ({ outcome: result.outcome }),
-    message: formatResult,
-  });
-}
-
-function formatResult(result: ReturnType<typeof privateResolve>): string {
+function formatResult(
+  result: import("../../core/knowledge/secrets.ts").PrivateResolveResult,
+): string {
   return [
     `私密结算结果：${result.outcome}`,
     "叙事约束：",
     ...result.narrativeConstraints.map((entry) => `- ${entry}`),
   ].join("\n");
+}
+
+export async function privateResolveTool(
+  params: unknown,
+  sessionManager: unknown,
+): Promise<ToolResult> {
+  const draft = cloneState();
+  const event = parsePrivateResolveEvent(params, "private_resolve 参数");
+  const result = await privateResolve(draft, event);
+  commitState(draft);
+  const details: Record<string, unknown> = { outcome: result.outcome };
+  persistStateAfterCommit(sessionManager, details);
+  return textResult(formatResult(result), details);
 }
 
 export const privateResolveToolDefinition: DomainToolDefinition = {

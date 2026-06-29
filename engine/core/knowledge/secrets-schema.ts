@@ -42,7 +42,7 @@ export const CONFIGURE_WORLD_FACT_SCHEMA = Type.Object({
   kind: Type.Literal("world-fact"),
   text: Type.String({ minLength: 1 }),
   revealConditions: Type.Array(Type.String({ minLength: 1 })),
-  relatedActorIds: Type.Array(Type.String({ minLength: 1 })),
+  relatedActorIds: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
   reason: Type.String({ minLength: 1 }),
 });
 

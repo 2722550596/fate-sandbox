@@ -279,15 +279,15 @@ void test("revealSecret returns foreshadowed with partial evidence", async () =>
     kind: "actor-beyonder",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "他其实是玫瑰学派的人", revealConditions: ["玫瑰"] }],
+    secrets: [{ value: "他才是真正的市长", revealConditions: ["市长", "真实身份"] }],
   });
 
   // Claim is completely unrelated; evidence tangentially suggests a condition
   const result = await revealSecret(draft, {
     kind: "claim-reveal",
     actorId: PROTAGONIST_ACTOR_ID,
-    claim: "他的穿着打扮总是很正式",
-    evidence: "我在他房间里看到了一本关于玫瑰的旧书",
+    claim: "今天的天气不错",
+    evidence: "我亲眼看到他在市政厅签署了市长的任命文件",
   });
 
   assert.equal(result.outcome, "foreshadowed");
@@ -357,7 +357,7 @@ void test("revealSecret reveals hidden world fact", async () => {
 // privateResolve
 // ===========================================================================
 
-void test("privateResolve hidden-reaction detects relevant secret", () => {
+void test("privateResolve hidden-reaction detects relevant secret", async () => {
   const draft = createInitialState();
 
   configureSecret(draft, {
@@ -367,7 +367,7 @@ void test("privateResolve hidden-reaction detects relevant secret", () => {
     secrets: [{ value: "寻找罗塞尔日记", revealConditions: ["日记"] }],
   });
 
-  const result = privateResolve(draft, {
+  const result = await privateResolve(draft, {
     kind: "hidden-reaction",
     actorId: PROTAGONIST_ACTOR_ID,
     stimulus: "日记",
@@ -377,10 +377,10 @@ void test("privateResolve hidden-reaction detects relevant secret", () => {
   assert.equal(result.outcome, "subtle-reaction");
 });
 
-void test("privateResolve hidden-reaction returns no-special-effect without relevant secret", () => {
+void test("privateResolve hidden-reaction returns no-special-effect without relevant secret", async () => {
   const draft = createInitialState();
 
-  const result = privateResolve(draft, {
+  const result = await privateResolve(draft, {
     kind: "hidden-reaction",
     actorId: PROTAGONIST_ACTOR_ID,
     stimulus: "无关话题",
@@ -390,7 +390,7 @@ void test("privateResolve hidden-reaction returns no-special-effect without rele
   assert.equal(result.outcome, "no-special-effect");
 });
 
-void test("privateResolve secret-compatibility detects both actors have secrets", () => {
+void test("privateResolve secret-compatibility detects both actors have secrets", async () => {
   const draft = createInitialState();
 
   addAllyToState(draft, "ally-1");
@@ -408,7 +408,7 @@ void test("privateResolve secret-compatibility detects both actors have secrets"
     secrets: [{ value: "隐藏身份", revealConditions: ["身份"] }],
   });
 
-  const result = privateResolve(draft, {
+  const result = await privateResolve(draft, {
     kind: "secret-compatibility",
     actorId: PROTAGONIST_ACTOR_ID,
     targetActorId: "ally-1",
@@ -418,12 +418,12 @@ void test("privateResolve secret-compatibility detects both actors have secrets"
   assert.equal(result.outcome, "no-special-effect");
 });
 
-void test("privateResolve secret-compatibility returns no-special-effect without secrets", () => {
+void test("privateResolve secret-compatibility returns no-special-effect without secrets", async () => {
   const draft = createInitialState();
 
   addAllyToState(draft, "ally-1");
 
-  const result = privateResolve(draft, {
+  const result = await privateResolve(draft, {
     kind: "secret-compatibility",
     actorId: PROTAGONIST_ACTOR_ID,
     targetActorId: "ally-1",

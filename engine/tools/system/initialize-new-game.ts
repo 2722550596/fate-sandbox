@@ -15,7 +15,8 @@ export function initializeNewGameTool(params: unknown, sessionManager: unknown):
     execute: (draft) =>
       initializeNewGame(draft, parseNewGameInitializationInput(params, "initialize_new_game 参数")),
     details: resultDetails,
-    message: (result) => result.message,
+    message: (result) =>
+      `新游戏 state 已初始化。protagonist actor ID: ${result.protagonistActorId}。`,
   });
 }
 
@@ -33,6 +34,9 @@ export const initializeNewGameToolDefinition: DomainToolDefinition = {
     "- 用它替代后续领域事件工具",
   parameters: Type.Object({
     kind: Type.String({ description: "human-protagonist / beyonder-protagonist" }),
+    actorId: Type.Optional(
+      Type.String({ description: "protagonist actor ID（留空自动为 protagonist）" }),
+    ),
     scenario: Type.Object({
       presetId: Type.String({
         description:
@@ -46,7 +50,7 @@ export const initializeNewGameToolDefinition: DomainToolDefinition = {
     }),
     protagonist: Type.Unknown({
       description:
-        "human: canonicalName/renderName/publicIdentity/background/apparentAge/outfit/demeanor/roles/abilities/ordinaryItems；beyonder additionally pathway/sequence/rank/promotionSystem。renderName 是正文固定用名，中文名优先。",
+        "human: canonicalName/renderName/publicIdentity/background/apparentAge/outfit/demeanor/roles/abilities/ordinaryItems；beyonder additionally pathway/sequence/rank/promotionSystem。renderName 是正文固定用名，中文名优先。abilities 每项为 {label, summary} 对象，id 自动生成。",
     }),
     presence: Type.Optional(
       Type.Object({

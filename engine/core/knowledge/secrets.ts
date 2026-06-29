@@ -17,7 +17,7 @@ import type { SecretCandidate } from "./semantic-reveal.ts";
 import { getActorSecretSlots, setActorSecretSlots } from "../actor/secret-actor-state.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
-import { judgeSecrets } from "./semantic-reveal.ts";
+import { judgeSecrets, judgeHiddenReaction, judgeCompatibility } from "./semantic-reveal.ts";
 export type {
   ConfigureSecretInput,
   PrivateResolveEvent,
@@ -68,14 +68,6 @@ function mergeRevealConditions(existing: string[], incoming: string[]): string[]
   return merged;
 }
 
-function slugifySecretIdPart(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\u4e00-\u9fff]+/gu, "-")
-    .replace(/^-|-$/gu, "");
-}
-
 function buildStringSecretSlot(
   existing: SecretSlot<string> | undefined,
   id: string,
@@ -93,20 +85,15 @@ function buildStringSecretSlot(
 }
 
 function appendStringSecretSlots(
+  draft: State,
   slots: Array<SecretSlot<string>>,
-  actorId: ActorId,
-  slotKind: string,
   inputs: SecretStringInput[],
 ): void {
   for (const input of inputs) {
     const value = assertNonEmptyString(input.value, "secret.value");
     const existingIndex = slots.findIndex((slot) => slot.value === value);
     const existing = existingIndex === -1 ? undefined : slots[existingIndex];
-    const slot = buildStringSecretSlot(
-      existing,
-      `${actorId}-${slotKind}-${slugifySecretIdPart(value)}`,
-      input,
-    );
+    const slot = buildStringSecretSlot(existing, createId(draft, "sec"), input);
     if (existingIndex === -1) {
       slots.push(slot);
     } else {
@@ -127,10 +114,6 @@ function createEmptyActorSecretSlots(actorId: ActorId): ActorSecretSlots {
 function revealEvidenceText(event: RevealSecretEvent): string {
   const needle = event.kind === "claim-reveal" ? event.claim : event.trigger;
   return `${needle}\n${event.evidence}`;
-}
-
-function secretText(slots: ActorSecretSlots): string {
-  return JSON.stringify(slots).toLowerCase();
 }
 
 // ===========================================================================
@@ -163,7 +146,7 @@ function configureActorBeyonderSecrets(
 
   const existing =
     getActorSecretSlots(draft.secrets, input.actorId) ?? createEmptyActorSecretSlots(input.actorId);
-  appendStringSecretSlots(existing.beyonderSecrets, input.actorId, "beyonder", input.secrets);
+  appendStringSecretSlots(draft, existing.beyonderSecrets, input.secrets);
   setActorSecretSlots(draft.secrets, input.actorId, existing);
   recordSecretEvent(draft, `${input.actorId} 的非凡者秘密已配置`, [input.actorId]);
 
@@ -182,7 +165,7 @@ function configureActorPrivateSecrets(
 
   const existing =
     getActorSecretSlots(draft.secrets, input.actorId) ?? createEmptyActorSecretSlots(input.actorId);
-  appendStringSecretSlots(existing.privateMotives, input.actorId, "motive", input.secrets);
+  appendStringSecretSlots(draft, existing.privateMotives, input.secrets);
   setActorSecretSlots(draft.secrets, input.actorId, existing);
   recordSecretEvent(draft, `${input.actorId} 的隐藏动机/归属已配置`, [input.actorId]);
 
@@ -202,7 +185,7 @@ function configureWorldFact(
       existing.revealConditions,
       input.revealConditions,
     );
-    if (input.relatedActorIds.length > 0) {
+    if (input.relatedActorIds !== undefined && input.relatedActorIds.length > 0) {
       existing.relatedActorIds = input.relatedActorIds;
     }
     return { message: `世界事实已更新：${input.text}` };
@@ -211,7 +194,7 @@ function configureWorldFact(
   draft.secrets.hiddenWorldFacts.push({
     id: createId(draft, "world-fact"),
     text: input.text,
-    relatedActorIds: input.relatedActorIds,
+    relatedActorIds: input.relatedActorIds ?? [],
     revealConditions: [
       ...new Set(input.revealConditions.map((c: string) => c.trim()).filter(Boolean)),
     ],
@@ -360,48 +343,97 @@ export interface PrivateResolveResult {
   narrativeConstraints: string[];
 }
 
-export function privateResolve(draft: State, event: PrivateResolveEvent): PrivateResolveResult {
+export async function privateResolve(
+  draft: State,
+  event: PrivateResolveEvent,
+): Promise<PrivateResolveResult> {
   return event.kind === "hidden-reaction"
-    ? hiddenReaction(draft, event)
-    : secretCompatibility(draft, event);
+    ? await hiddenReaction(draft, event)
+    : await secretCompatibility(draft, event);
 }
 
-function hiddenReaction(
+async function hiddenReaction(
   draft: State,
   event: Extract<PrivateResolveEvent, { kind: "hidden-reaction" }>,
-): PrivateResolveResult {
+): Promise<PrivateResolveResult> {
   assertNonEmptyString(event.stimulus, "stimulus");
   assertNonEmptyString(event.actorId, "actorId");
-  const slots = getActorSecretSlots(draft.secrets, event.actorId);
-  const hasRelevantSecret =
-    slots !== undefined && secretText(slots).includes(event.stimulus.toLowerCase());
+  assertNonEmptyString(event.publicContext, "publicContext");
 
-  if (!hasRelevantSecret) {
+  const slots = getActorSecretSlots(draft.secrets, event.actorId);
+  if (slots === undefined) {
     return {
       outcome: "no-special-effect",
       narrativeConstraints: ["NPC 反应无异常。渲染器正常叙事即可。"],
     };
   }
-  const secretCount = [
-    ...slots.beyonderSecrets,
-    ...slots.privateMotives,
-    ...slots.unrevealedAffiliations,
-  ].filter((s) => s.revealState !== "revealed").length;
 
-  if (secretCount > 3) {
+  // 构建候选秘密列表
+  const candidates: SecretCandidate[] = [];
+  for (const s of slots.beyonderSecrets) {
+    if (s.revealState !== "revealed") {
+      candidates.push({
+        id: s.id,
+        kind: "actor-beyonder",
+        value: s.value,
+        conditions: s.revealConditions,
+      });
+    }
+  }
+  for (const s of slots.privateMotives) {
+    if (s.revealState !== "revealed") {
+      candidates.push({
+        id: s.id,
+        kind: "actor-private",
+        value: s.value,
+        conditions: s.revealConditions,
+      });
+    }
+  }
+  for (const s of slots.unrevealedAffiliations) {
+    if (s.revealState !== "revealed") {
+      candidates.push({
+        id: s.id,
+        kind: "actor-private",
+        value: s.value,
+        conditions: s.revealConditions,
+      });
+    }
+  }
+
+  if (candidates.length === 0) {
+    return {
+      outcome: "no-special-effect",
+      narrativeConstraints: ["NPC 反应无异常。渲染器正常叙事即可。"],
+    };
+  }
+
+  // 语义推理判断：stimulus + publicContext 是否触及隐藏秘密
+  const judgments = await judgeHiddenReaction(event.stimulus, event.publicContext, candidates);
+
+  const triggeredCount = judgments.filter((j) => j.triggered).length;
+
+  if (triggeredCount === 0) {
+    return {
+      outcome: "no-special-effect",
+      narrativeConstraints: ["NPC 反应无异常。渲染器正常叙事即可。"],
+    };
+  }
+
+  if (triggeredCount > 3) {
     return {
       outcome: "dangerous-escalation",
       narrativeConstraints: [
-        `NPC 隐藏秘密被刺激触及。渲染器用「对方神色骤变/突然沉默/试图转移话题」来表现。`,
+        "NPC 隐藏秘密被刺激触及。渲染器用「对方神色骤变/突然沉默/试图转移话题」来表现。",
         "不允许直接描写隐藏秘密的具体内容。",
       ],
     };
   }
-  if (secretCount > 1) {
+  if (triggeredCount > 1) {
     return {
       outcome: "strong-reaction",
       narrativeConstraints: [
-        `NPC 有明显的隐藏反应。渲染器用「眼神闪烁/停顿片刻/语气变得谨慎」来表现。`,
+        "NPC 有明显的隐藏反应。渲染器用「眼神闪烁/停顿片刻/语气变得谨慎」来表现。",
         "不允许直接描写隐藏秘密的具体内容。",
       ],
     };
@@ -409,16 +441,16 @@ function hiddenReaction(
   return {
     outcome: "subtle-reaction",
     narrativeConstraints: [
-      `NPC 有细微的隐藏反应。渲染器用「不易察觉的停顿/指尖微动」来表现。`,
+      "NPC 有细微的隐藏反应。渲染器用「不易察觉的停顿/指尖微动」来表现。",
       "不允许直接描写隐藏秘密的具体内容。",
     ],
   };
 }
 
-function secretCompatibility(
+async function secretCompatibility(
   draft: State,
   event: Extract<PrivateResolveEvent, { kind: "secret-compatibility" }>,
-): PrivateResolveResult {
+): Promise<PrivateResolveResult> {
   assertNonEmptyString(event.actorId, "actorId");
   assertNonEmptyString(event.targetActorId, "targetActorId");
 
@@ -432,12 +464,32 @@ function secretCompatibility(
     };
   }
 
-  const aText = secretText(slotsA);
-  const bText = secretText(slotsB);
-  const interaction = event.interaction.toLowerCase();
-  const hasSharedSecret = aText.includes(interaction) && bText.includes(interaction);
+  // 收集未揭示的秘密值
+  const secretsA: string[] = [];
+  for (const s of [
+    ...slotsA.beyonderSecrets,
+    ...slotsA.privateMotives,
+    ...slotsA.unrevealedAffiliations,
+  ]) {
+    if (s.revealState !== "revealed") secretsA.push(s.value);
+  }
+  const secretsB: string[] = [];
+  for (const s of [
+    ...slotsB.beyonderSecrets,
+    ...slotsB.privateMotives,
+    ...slotsB.unrevealedAffiliations,
+  ]) {
+    if (s.revealState !== "revealed") secretsB.push(s.value);
+  }
 
-  if (!hasSharedSecret) {
+  // 语义推理判断：两方的隐藏秘密之间是否存在关联
+  const judgment = await judgeCompatibility({
+    secretsA,
+    secretsB,
+    interaction: event.interaction,
+  });
+
+  if (!judgment.compatible) {
     return {
       outcome: "no-special-effect",
       narrativeConstraints: ["两方之间无隐藏相性影响。"],

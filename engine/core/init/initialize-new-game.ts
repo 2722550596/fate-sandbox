@@ -69,6 +69,7 @@ export interface HumanNewGameInput {
   presence?: NewGamePresenceInput;
   knownFacts?: NewGameKnownFactInput[];
   reason: string;
+  actorId?: string;
 }
 
 export interface BeyonderNewGameInput {
@@ -78,6 +79,7 @@ export interface BeyonderNewGameInput {
   presence?: NewGamePresenceInput;
   knownFacts?: NewGameKnownFactInput[];
   reason: string;
+  actorId?: string;
 }
 
 export interface HumanProtagonistOpeningInput {
@@ -89,7 +91,7 @@ export interface HumanProtagonistOpeningInput {
   outfit: OutfitState;
   demeanor: string;
   roles?: string[];
-  abilities?: string[];
+  abilities?: Array<{ label: string; summary: string }>;
   ordinaryItems?: string[];
 }
 
@@ -106,7 +108,7 @@ export interface BeyonderProtagonistOpeningInput {
   pathway: PathwayId;
   promotionSystem?: PromotionSystem;
   roles?: string[];
-  abilities?: string[];
+  abilities?: Array<{ label: string; summary: string }>;
 }
 
 export interface NewGamePresenceInput {
@@ -124,6 +126,7 @@ export interface NewGameKnownFactInput {
 export interface NewGameInitializationResult {
   message: string;
   steps: string[];
+  protagonistActorId: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -151,6 +154,12 @@ const NEW_GAME_KNOWN_FACT_SCHEMA = Type.Object({
   subject: Type.Optional(Type.String({ minLength: 1 })),
   text: Type.String({ minLength: 1 }),
 });
+// 开局输入：abilities 不带 id（由 build 自动生成）
+const ABILITY_INPUT_SCHEMA = Type.Object({
+  label: Type.String({ minLength: 1 }),
+  summary: Type.String({ minLength: 1 }),
+});
+
 const HUMAN_PROTAGONIST_OPENING_SCHEMA = Type.Object({
   canonicalName: Type.String({ minLength: 1 }),
   renderName: Type.Optional(Type.String({ minLength: 1 })),
@@ -160,7 +169,7 @@ const HUMAN_PROTAGONIST_OPENING_SCHEMA = Type.Object({
   outfit: OUTFIT_STATE_SCHEMA,
   demeanor: Type.String({ minLength: 1 }),
   roles: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
-  abilities: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
+  abilities: Type.Optional(Type.Array(ABILITY_INPUT_SCHEMA)),
   ordinaryItems: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
 });
 
@@ -177,7 +186,7 @@ const BEYONDER_PROTAGONIST_OPENING_SCHEMA = Type.Object({
   pathway: PATHWAY_ID_SCHEMA,
   promotionSystem: Type.Optional(PROMOTION_SYSTEM_SCHEMA),
   roles: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
-  abilities: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
+  abilities: Type.Optional(Type.Array(ABILITY_INPUT_SCHEMA)),
 });
 
 export const NEW_GAME_KINDS = ["human-protagonist", "beyonder-protagonist"] as const;
@@ -189,6 +198,7 @@ const HUMAN_NEW_GAME_INPUT_SCHEMA = Type.Object({
   protagonist: HUMAN_PROTAGONIST_OPENING_SCHEMA,
   presence: Type.Optional(NEW_GAME_PRESENCE_INPUT_SCHEMA),
   reason: Type.String({ minLength: 1 }),
+  actorId: Type.Optional(Type.String()),
   knownFacts: Type.Optional(Type.Array(NEW_GAME_KNOWN_FACT_SCHEMA)),
 });
 
@@ -198,6 +208,7 @@ const BEYONDER_NEW_GAME_INPUT_SCHEMA = Type.Object({
   protagonist: BEYONDER_PROTAGONIST_OPENING_SCHEMA,
   presence: Type.Optional(NEW_GAME_PRESENCE_INPUT_SCHEMA),
   reason: Type.String({ minLength: 1 }),
+  actorId: Type.Optional(Type.String()),
   knownFacts: Type.Optional(Type.Array(NEW_GAME_KNOWN_FACT_SCHEMA)),
 });
 
@@ -287,7 +298,8 @@ export function initializeNewGame(
   input: NewGameInitializationInput,
 ): NewGameInitializationResult {
   const steps: string[] = [];
-  Object.assign(draft, createInitialState());
+  const actorId = input.actorId ?? PROTAGONIST_ACTOR_ID;
+  Object.assign(draft, createInitialState(actorId));
   steps.push("reset-state");
 
   applyScenario(draft, { ...input.scenario, reason: input.scenario.reason ?? input.reason });
@@ -296,14 +308,14 @@ export function initializeNewGame(
   if (input.kind === "human-protagonist") {
     upsertActor(draft, {
       kind: "setup-protagonist",
-      actor: buildHumanProtagonist(input.protagonist),
+      actor: buildHumanProtagonist(input.protagonist, actorId),
       reason: input.reason,
     });
     steps.push("setup-human-protagonist");
   } else {
     upsertActor(draft, {
       kind: "setup-protagonist",
-      actor: buildBeyonderProtagonist(input.protagonist),
+      actor: buildBeyonderProtagonist(input.protagonist, actorId),
       reason: input.reason,
     });
     steps.push("setup-beyonder-protagonist");
@@ -322,7 +334,7 @@ export function initializeNewGame(
     recordMemory(draft, {
       kind: "pin-fact",
       scope: fact.scope,
-      subject: fact.subject ?? PROTAGONIST_ACTOR_ID,
+      subject: fact.subject ?? actorId,
       text: fact.text,
       claims: fact.claims ?? [{ kind: "mundane", statement: fact.text, certainty: "confirmed" }],
       sourceEventId: null,
@@ -330,13 +342,15 @@ export function initializeNewGame(
     steps.push("record-known-fact");
   }
 
-  assertNewGameInitialized(draft, input);
-  return { message: "新游戏 state 已初始化。", steps };
+  assertNewGameInitialized(draft, actorId, input.kind);
+  return { message: "新游戏 state 已初始化。", steps, protagonistActorId: actorId };
 }
-
-function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActorState {
+function buildHumanProtagonist(
+  input: HumanProtagonistOpeningInput,
+  actorId: string,
+): PublicActorState {
   return {
-    id: PROTAGONIST_ACTOR_ID,
+    id: actorId,
     kind: "human",
     sequence: null,
     identity: {
@@ -354,18 +368,21 @@ function buildHumanProtagonist(input: HumanProtagonistOpeningInput): PublicActor
     },
     condition: { afflictions: [] },
     inventory: { items: input.ordinaryItems ?? [] },
-    abilities: (input.abilities ?? []).map((summary, index) => ({
+    abilities: (input.abilities ?? []).map((ability, index) => ({
       id: `ability-protagonist-${index + 1}`,
-      label: summary,
-      summary,
+      label: ability.label,
+      summary: ability.summary,
     })),
     relationshipToProtagonist: { stance: "self", summary: "玩家本人。" },
   };
 }
 
-function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): PublicActorState {
+function buildBeyonderProtagonist(
+  input: BeyonderProtagonistOpeningInput,
+  actorId: string,
+): PublicActorState {
   return {
-    id: PROTAGONIST_ACTOR_ID,
+    id: actorId,
     kind: "beyonder",
     sequence: {
       currentSequence: input.currentSequence,
@@ -390,26 +407,30 @@ function buildBeyonderProtagonist(input: BeyonderProtagonistOpeningInput): Publi
     },
     condition: { afflictions: [] },
     inventory: { items: [] },
-    abilities: (input.abilities ?? []).map((summary, index) => ({
+    abilities: (input.abilities ?? []).map((ability, index) => ({
       id: `ability-protagonist-${index + 1}`,
-      label: summary,
-      summary,
+      label: ability.label,
+      summary: ability.summary,
     })),
     relationshipToProtagonist: { stance: "self", summary: "玩家本人。" },
   };
 }
-function assertNewGameInitialized(state: State, input: NewGameInitializationInput): void {
-  const protagonist = state.public.actors[PROTAGONIST_ACTOR_ID];
+function assertNewGameInitialized(
+  state: State,
+  actorId: string,
+  kind?: "human-protagonist" | "beyonder-protagonist",
+): void {
+  const protagonist = state.public.actors[actorId];
   if (protagonist === undefined) {
     throw new Error("新游戏初始化失败：protagonist actor 不存在。");
   }
-  if (state.public.protagonistActorId !== PROTAGONIST_ACTOR_ID) {
-    throw new Error("新游戏初始化失败：protagonistActorId 必须是 protagonist。");
+  if (state.public.protagonistActorId !== actorId) {
+    throw new Error("新游戏初始化失败：protagonistActorId 不匹配。");
   }
   if (state.public.scenario.title.trim().length === 0) {
     throw new Error("新游戏初始化失败：scenario 未配置。");
   }
-  if (input.kind === "beyonder-protagonist") {
+  if (kind === "beyonder-protagonist") {
     if (protagonist.sequence === null) {
       throw new Error("新游戏初始化失败：非凡者 protagonist 缺少 sequence。");
     }

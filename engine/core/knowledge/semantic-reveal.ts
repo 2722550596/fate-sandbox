@@ -97,7 +97,7 @@ const JUDGE_SYSTEM_PROMPT = `你是一个秘密揭示推理引擎。你的任务
 1. **needleMatch（推理指向性）**：
    玩家的声称/观察本身（不依赖证据）是否指向/暗示/涉及该秘密？
    - "他身上的气息让我想起灵教团" → 指向灵教团相关秘密
-   - "他在刻意避开占卜" → 可能指向与占卜/命运有关的秘密
+   - "他在刻意避开占卜" → 可能指向与占卜有关的秘密
    - 不是文本相似，而是逻辑关联
 
 2. **evidenceMatch（证据支撑度）**：
@@ -107,10 +107,10 @@ const JUDGE_SYSTEM_PROMPT = `你是一个秘密揭示推理引擎。你的任务
    - 证据不需要提到条件原文，只要合理支撑即可
 
 判断原则：
-- 松散但合理：不要求严谨的逻辑证明，只要有合理推断空间就算
-- 排除泛泛：如果 claim 只是"他很神秘"而没有具体信息，不算指向
-- 允许多种表达：同义词、比喻、婉转暗示都算
-- 跨语言合理：中文秘密可以被英文线索推理出来
+- **needleMatch 严格**：只凭玩家的声称/观察本身，不看证据。如果声称本身没有直接或强暗示指向秘密，就不算匹配。
+- 排除间接：如果 claim 只是描述了无关表象（如"穿蓝衬衫"）而证据让模型联想到秘密，仍不能算 needleMatch
+- **evidenceMatch 宽松**：只要证据文本包含或合理暗示了任意一个揭示条件，就算匹配。即使只是关键词或近似概念也算。
+- 允许多种表达：同义词、比喻、婉转暗示、乃至部分关键词的出现都算 evidenceMatch
 - 条件满足其一即算 evidenceMatch
 
 输出格式：纯 JSON 数组，不要包含其他任何文字。
@@ -121,9 +121,9 @@ const JUDGE_SYSTEM_PROMPT = `你是一个秘密揭示推理引擎。你的任务
   类型: claim-reveal
   声称: "我怀疑他是命运途径的非凡者。他能让硬币在每次关键时刻都落在正确的一面。"
   证据: "我观察到他每次做重大决策前都会抛硬币，而且结果总是对他有利。"
-  候选: [{"id": "s0", "value": "序列9占卜家", "conditions": ["命运", "占卜", "幸运"]}]
+  候选: [{"id": "s0", "value": "序列7幸运儿", "conditions": ["命运", "怪物", "幸运"]}]
 推理：
-  声称中"命运途径"+"硬币落在正确一面" → 指向占卜家（命运途径的基础序列）
+  声称中"命运途径"+"硬币落在正确一面" → 指向幸运儿（命运途径的序列7）
   证据中"抛硬币"+"总是对他有利" → 支撑条件"幸运"和"命运"
 输出：
   [{"id": "s0", "needleMatch": true, "evidenceMatch": true}]`;
@@ -166,11 +166,15 @@ const judgeModel: Model<"openai-completions"> = {
   api: "openai-completions",
   provider: "siliconflow",
   baseUrl: API_BASE,
-  reasoning: false,
+  reasoning: true,
   input: ["text"],
   cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
   contextWindow: 32768,
   maxTokens: 4096,
+  compat: {
+    thinkingFormat: "qwen", // ← 新增：用 enable_thinking 参数
+    supportsDeveloperRole: false, // ← 新增：不用 developer role
+  },
 };
 
 // ===========================================================================
@@ -266,7 +270,7 @@ export async function judgeSecrets(
       },
       {
         apiKey: API_KEY,
-        temperature: 0.1,
+        temperature: 0.7,
         maxTokens: 2048,
       },
     );
@@ -320,4 +324,277 @@ function buildFullResult(
   return allCandidates
     .map((c) => resultMap.get(c.id))
     .filter((j): j is SlotJudgment => j !== undefined);
+}
+
+// ===========================================================================
+// 隐藏反应判断（for private_resolve hidden-reaction）
+// ===========================================================================
+
+export interface HiddenReactionJudgment {
+  id: string;
+  triggered: boolean;
+}
+
+/**
+ * 隐藏反应快速通道：子串匹配。
+ * stimulus 包含某个 condition 即视为触发。
+ */
+function findHiddenReactionFast(
+  stimulus: string,
+  candidates: SecretCandidate[],
+): [HiddenReactionJudgment[], SecretCandidate[]] {
+  const matched: HiddenReactionJudgment[] = [];
+  const unmatched: SecretCandidate[] = [];
+  const stimulusLower = stimulus.toLowerCase();
+
+  for (const c of candidates) {
+    const triggered = c.conditions.some(
+      (cond) => cond.length > 0 && stimulusLower.includes(cond.toLowerCase()),
+    );
+    if (triggered) {
+      matched.push({ id: c.id, triggered: true });
+    } else {
+      unmatched.push(c);
+    }
+  }
+
+  return [matched, unmatched];
+}
+
+const HIDDEN_REACTION_SYSTEM_PROMPT = `你是一个隐藏反应推理引擎。你的任务是判断玩家的言行（stimulus）是否触及了一个角色的隐藏秘密。
+
+你需要判断 stimulus（玩家说了什么/做了什么）是否与某个隐藏秘密有语义关联。
+
+判断原则：
+- 只要 stimulus 与秘密的内容、主题、相关人物或事件有合理关联，即视为触发（triggered: true）
+- 不需要确凿证据，只要有合理联想空间就算
+- 排除泛泛：如果 stimulus 只是"他很奇怪"这种空泛描述，没有具体指向，不算触发
+- 允许多种表达：同义词、比喻、婉转暗示都算
+
+输出格式：纯 JSON 数组，不要包含其他任何文字。
+每条：{"id": "秘密ID", "triggered": true/false}`;
+
+function buildHiddenReactionPrompt(
+  stimulus: string,
+  publicContext: string,
+  candidates: SecretCandidate[],
+): string {
+  const lines: string[] = [
+    `当前的言行（stimulus）: ${stimulus}`,
+    `场景上下文（publicContext）: ${publicContext}`,
+    "",
+    "角色的隐藏秘密:",
+  ];
+
+  for (const c of candidates) {
+    const conds = c.conditions.join(", ");
+    lines.push(
+      `  {"id": "${c.id}", "kind": "${c.kind}", "value": "${c.value}", "conditions": ["${conds}"]}`,
+    );
+  }
+
+  lines.push("");
+  lines.push("对每个秘密判断是否被触及。只输出 JSON 数组，不要包含任何其他文字。");
+
+  return lines.join("\n");
+}
+
+function parseHiddenReactionResponse(raw: string): HiddenReactionJudgment[] {
+  const trimmed = raw.trim();
+  const start = trimmed.indexOf("[");
+  const end = trimmed.lastIndexOf("]");
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error(`无法从 LLM 回复中提取 JSON 数组:\n${trimmed.slice(0, 500)}`);
+  }
+  const jsonText = trimmed.slice(start, end + 1);
+  const parsed: unknown = JSON.parse(jsonText);
+
+  if (!Array.isArray(parsed)) {
+    throw new Error(`LLM 回复格式不符合预期`);
+  }
+
+  return parsed.map((item: unknown) => {
+    // oxlint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    const record = item as Record<string, unknown>;
+    if (typeof record["id"] !== "string") throw new Error(`missing id`);
+    return {
+      id: record["id"],
+      // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
+      triggered: !!record["triggered"],
+    };
+  });
+}
+
+/**
+ * 判断刺激是否触及角色的隐藏秘密。
+ * 两阶段：快速子串匹配 + LLM 推理回退。
+ */
+export async function judgeHiddenReaction(
+  stimulus: string,
+  publicContext: string,
+  candidates: SecretCandidate[],
+  options: JudgeSecretsOptions = {},
+): Promise<HiddenReactionJudgment[]> {
+  if (candidates.length === 0) return [];
+
+  // 阶段 1：快速通道
+  const [fastMatched, remaining] = findHiddenReactionFast(stimulus, candidates);
+
+  if (remaining.length === 0 || options.skipLlm) {
+    return buildHiddenFullResult(candidates, fastMatched, remaining);
+  }
+
+  // 阶段 2：LLM 推理通道
+  try {
+    const prompt = buildHiddenReactionPrompt(stimulus, publicContext, remaining);
+    const response = await complete(
+      judgeModel,
+      {
+        systemPrompt: HIDDEN_REACTION_SYSTEM_PROMPT,
+        messages: [{ role: "user", content: prompt, timestamp: Date.now() }],
+      },
+      {
+        apiKey: API_KEY,
+        temperature: 0.3,
+        maxTokens: 2048,
+      },
+    );
+
+    const textBlock = response.content.find((b) => b.type === "text");
+    const rawText = textBlock?.text ?? "";
+    if (rawText.length === 0) {
+      return buildHiddenFullResult(candidates, fastMatched, remaining);
+    }
+
+    const llmJudgments = parseHiddenReactionResponse(rawText);
+
+    // 合并
+    const resultMap = new Map<string, HiddenReactionJudgment>();
+    for (const j of fastMatched) resultMap.set(j.id, j);
+    for (const j of llmJudgments) resultMap.set(j.id, j);
+
+    return candidates
+      .map((c) => resultMap.get(c.id))
+      .filter((j): j is HiddenReactionJudgment => j !== undefined);
+  } catch (e) {
+    console.error("[semantic-reveal] hidden-reaction LLM 调用失败，降级:", e);
+    return buildHiddenFullResult(candidates, fastMatched, remaining);
+  }
+}
+
+function buildHiddenFullResult(
+  allCandidates: SecretCandidate[],
+  fastMatched: HiddenReactionJudgment[],
+  remaining: SecretCandidate[],
+): HiddenReactionJudgment[] {
+  const resultMap = new Map<string, HiddenReactionJudgment>();
+  for (const j of fastMatched) resultMap.set(j.id, j);
+  for (const c of remaining) {
+    if (!resultMap.has(c.id)) {
+      resultMap.set(c.id, { id: c.id, triggered: false });
+    }
+  }
+  return allCandidates
+    .map((c) => resultMap.get(c.id))
+    .filter((j): j is HiddenReactionJudgment => j !== undefined);
+}
+
+// ===========================================================================
+// 秘密兼容性判断（for private_resolve secret-compatibility）
+// ===========================================================================
+
+export interface CompatibilityInput {
+  secretsA: string[];
+  secretsB: string[];
+  interaction: string;
+}
+
+export interface CompatibilityJudgment {
+  compatible: boolean;
+}
+
+const COMPATIBILITY_SYSTEM_PROMPT = `你是一个秘密兼容性推理引擎。你的任务是判断两个角色的隐藏秘密之间是否存在关联。
+
+"兼容"的定义：
+- 两个角色共享相同的秘密（都在寻找同一件东西、属于同一组织）
+- 一个角色的秘密与另一个角色的秘密有直接冲突（一个要保护某物，另一个要摧毁它）
+- 两个秘密涉及相同的人物、事件或组织
+
+判断原则：
+- 只要存在合理关联即视为兼容（compatible: true）
+- 不要求完全相同的秘密，概念层面有关联即可
+- 无关的秘密不兼容
+
+输出格式：纯 JSON。
+{"compatible": true/false}`;
+
+function buildCompatibilityPrompt(input: CompatibilityInput): string {
+  return [
+    `角色 A 的隐藏秘密:`,
+    ...input.secretsA.map((s) => `- ${s}`),
+    "",
+    `角色 B 的隐藏秘密:`,
+    ...input.secretsB.map((s) => `- ${s}`),
+    "",
+    `当前互动类型: ${input.interaction}`,
+    "",
+    "判断是否存在隐藏兼容性。只输出 JSON，不要包含任何其他文字。",
+  ].join("\n");
+}
+
+function parseCompatibilityResponse(raw: string): CompatibilityJudgment {
+  const trimmed = raw.trim();
+  const start = trimmed.indexOf("{");
+  const end = trimmed.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error(`无法从 LLM 回复中提取 JSON 对象:\n${trimmed.slice(0, 500)}`);
+  }
+  const jsonText = trimmed.slice(start, end + 1);
+  const parsed: unknown = JSON.parse(jsonText);
+
+  // oxlint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+  const record = parsed as Record<string, unknown>;
+  return {
+    // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
+    compatible: !!record["compatible"],
+  };
+}
+
+/**
+ * 判断两个角色之间的隐藏秘密是否存在兼容性关联。
+ */
+export async function judgeCompatibility(
+  input: CompatibilityInput,
+  options: JudgeSecretsOptions = {},
+): Promise<CompatibilityJudgment> {
+  if (input.secretsA.length === 0 || input.secretsB.length === 0 || options.skipLlm) {
+    return { compatible: false };
+  }
+
+  try {
+    const prompt = buildCompatibilityPrompt(input);
+    const response = await complete(
+      judgeModel,
+      {
+        systemPrompt: COMPATIBILITY_SYSTEM_PROMPT,
+        messages: [{ role: "user", content: prompt, timestamp: Date.now() }],
+      },
+      {
+        apiKey: API_KEY,
+        temperature: 0.3,
+        maxTokens: 1024,
+      },
+    );
+
+    const textBlock = response.content.find((b) => b.type === "text");
+    const rawText = textBlock?.text ?? "";
+    if (rawText.length === 0) {
+      return { compatible: false };
+    }
+
+    return parseCompatibilityResponse(rawText);
+  } catch (e) {
+    console.error("[semantic-reveal] compatibility LLM 调用失败，降级:", e);
+    return { compatible: false };
+  }
 }

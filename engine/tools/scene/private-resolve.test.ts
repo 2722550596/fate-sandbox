@@ -20,10 +20,10 @@ function setupStateWithSecret(): void {
   replaceStateForDebug(state);
 }
 
-void test("privateResolveTool returns subtle-reaction for matching secret", () => {
+void test("privateResolveTool returns subtle-reaction for matching secret", async () => {
   setupStateWithSecret();
 
-  const result = privateResolveTool(
+  const result = await privateResolveTool(
     {
       kind: "hidden-reaction",
       actorId: "protagonist",
@@ -37,10 +37,10 @@ void test("privateResolveTool returns subtle-reaction for matching secret", () =
   assert.match(raw, /subtle-reaction/);
 });
 
-void test("privateResolveTool returns no-special-effect without relevant secret", () => {
+void test("privateResolveTool returns no-special-effect without relevant secret", async () => {
   resetState();
 
-  const result = privateResolveTool(
+  const result = await privateResolveTool(
     {
       kind: "hidden-reaction",
       actorId: "protagonist",

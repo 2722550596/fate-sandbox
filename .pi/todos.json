@@ -1,5 +1,5 @@
 {
-  "nextId": 83,
+  "nextId": 89,
   "items": [
     {
       "id": 1,
@@ -461,6 +461,42 @@
       "content": "9: format, typecheck, lint, test",
       "done": true,
       "created": 1782699328
+    },
+    {
+      "id": 83,
+      "content": "B: 添加 ABILITY_INPUT_SCHEMA",
+      "done": true,
+      "created": 1782712444
+    },
+    {
+      "id": 84,
+      "content": "B: 改 HUMAN/BEYONDER schema 和 TS types",
+      "done": true,
+      "created": 1782712444
+    },
+    {
+      "id": 85,
+      "content": "B: 改 buildHumanProtagonist/buildBeyonderProtagonist",
+      "done": true,
+      "created": 1782712444
+    },
+    {
+      "id": 86,
+      "content": "B: 更新 tool description",
+      "done": true,
+      "created": 1782712444
+    },
+    {
+      "id": 87,
+      "content": "B: 更新 skills/start-game/SKILL.md",
+      "done": true,
+      "created": 1782712444
+    },
+    {
+      "id": 88,
+      "content": "B: 验证测试",
+      "done": true,
+      "created": 1782712444
     }
   ]
 }

@@ -6,9 +6,9 @@ import { generateSeed } from "../utils/seeded-rng.ts";
 
 export const PROTAGONIST_ACTOR_ID = "protagonist";
 
-export function createInitialState(): State {
+export function createInitialState(protagonistActorId: string = PROTAGONIST_ACTOR_ID): State {
   const now = nowIso();
-  const protagonist = createInitialProtagonist();
+  const protagonist = createInitialProtagonist(protagonistActorId);
   return {
     meta: {
       schemaVersion: CURRENT_STATE_SCHEMA_VERSION,
@@ -45,20 +45,20 @@ export function createInitialState(): State {
         },
         situation: "daily",
         storyWindow: null,
-        presentActorIds: [PROTAGONIST_ACTOR_ID],
+        presentActorIds: [protagonistActorId],
         objectives: [],
         threats: [],
         lastResolvedAt: LOTM_EPOCH_ISO,
       },
-      actors: { [PROTAGONIST_ACTOR_ID]: protagonist },
+      actors: { [protagonistActorId]: protagonist },
       trackedItems: {},
-      protagonistActorId: PROTAGONIST_ACTOR_ID,
+      protagonistActorId,
       allyActorIds: [],
       economy: {
         accessibleFunds: [
           {
             id: "purse-protagonist-cash",
-            ownerActorId: PROTAGONIST_ACTOR_ID,
+            ownerActorId: protagonistActorId,
             label: "随身便士",
             amount: 24,
             currencyType: "loen",
@@ -72,7 +72,7 @@ export function createInitialState(): State {
           {
             id: "fact-opening-identity-unfixed",
             scope: "protagonist",
-            subject: PROTAGONIST_ACTOR_ID,
+            subject: protagonistActorId,
             text: "玩家角色身份尚未锁定；不得默认是非凡者、普通人或穿越者。",
             since: LOTM_EPOCH_ISO,
             sourceEventId: null,
@@ -103,9 +103,9 @@ export function createInitialState(): State {
   };
 }
 
-function createInitialProtagonist(): HumanActorState {
+function createInitialProtagonist(id: string): HumanActorState {
   return {
-    id: PROTAGONIST_ACTOR_ID,
+    id,
     kind: "human",
     sequence: null,
     identity: {

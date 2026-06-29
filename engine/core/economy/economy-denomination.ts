@@ -39,7 +39,7 @@ const DENOMINATIONS: Record<CurrencyType, readonly DenominationDef[]> = {
 // 最小单位标签
 // ===========================================================================
 
-const SMALLEST_UNIT_LABELS: Record<CurrencyType, string> = {
+export const SMALLEST_UNIT_LABELS: Record<CurrencyType, string> = {
   loen: "便士",
   fesac: "戈比",
   intis: "科佩",
@@ -86,7 +86,13 @@ export function parseAmountString(input: string, currencyType: CurrencyType): nu
     throw new Error(`parseAmountString: 无效的金额字符串「${input}」。`);
   }
 
-  const pattern = /(\d+)\s*([^\d\s]+)/g;
+  // 只匹配数字 + 当前币种的中文单位名（如「1金镑5苏勒」），不匹配缩写（s/d/pound）
+  const chineseUnits = DENOMINATIONS[currencyType]
+    .map((d) => d.aliases[0])
+    .filter((u): u is string => u !== undefined)
+    .toSorted((a, b) => b.length - a.length) // 长名优先（金霍恩先于霍恩）
+    .join("|");
+  const pattern = new RegExp(`(\\d+)\\s*(${chineseUnits})`, "g");
   let match: RegExpExecArray | null;
   let total = 0;
   while ((match = pattern.exec(input)) !== null) {
@@ -95,15 +101,17 @@ export function parseAmountString(input: string, currencyType: CurrencyType): nu
     if (rawAmount === undefined || rawLabel === undefined) continue;
     const amount = parseInt(rawAmount, 10);
     if (amount <= 0) continue;
-    const label = rawLabel;
-    const def = findDenomination(label, currencyType);
+    const def = findDenomination(rawLabel, currencyType);
     if (def === undefined) {
-      throw new Error(`未知面值「${label}」；${currencyType} 支持: ${listAliases(currencyType)}`);
+      throw new Error(
+        `未知面值「${rawLabel}」；${currencyType} 支持: ${listAliases(currencyType)}`,
+      );
     }
+    total += amount * def.toSmallest;
   }
 
   if (total <= 0) {
-    throw new Error(`无法解析金额字符串「${input}」。格式示例: 1金镑5苏勒, 3s12d, 5便士`);
+    throw new Error(`无法解析金额字符串「${input}」。格式示例: 1金镑5苏勒`);
   }
 
   return total;

@@ -132,7 +132,7 @@ description: 开始/重新开始 LOTM lotm-sandbox。以流程机收集玩家立
 可选字段：
 
 - `protagonist.roles: string[]` — 社会身份标签，如 `["值夜者实习"]`
-- `protagonist.abilities: string[]` — 角色已知能力简述，如 `["基础格斗", "街头生存常识"]`
+- `protagonist.abilities: {label:string, summary:string}[]` — 角色已知能力列表，每项含名称和简述。如 `[{"label": "基础格斗", "summary": "练过一些军体拳"}, {"label": "街头生存", "summary": "在廷根东区的流浪经验"}]`
 - `protagonist.ordinaryItems: string[]` — 起始随身物品，如 `["旧钱袋", "火柴"]`
 - `knownFacts: array` — 开局已知事实列表，每条含 `scope`（protagonist/npc/faction/world）+ `text`
 

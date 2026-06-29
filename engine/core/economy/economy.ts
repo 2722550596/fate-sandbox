@@ -2,6 +2,7 @@ import type { ActorId, MoneyPurse, State } from "../state/state.ts";
 
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString, assertNonNegativeInteger } from "../utils/typebox-validation.ts";
+import { SMALLEST_UNIT_LABELS } from "./economy-denomination.ts";
 
 function assertPositiveInteger(value: unknown, fieldName: string): number {
   const amount = assertNonNegativeInteger(value, fieldName);
@@ -73,7 +74,9 @@ function changePurseAmount(
   const purse = resolvePurse(draft.public.economy.accessibleFunds, purseId, callerActorId);
   const nextAmount = purse.amount + delta;
   if (nextAmount < 0) {
-    throw new Error(`资金不足: ${purse.label} 只有 ${purse.amount} 円。`);
+    throw new Error(
+      `资金不足: ${purse.label} 只有 ${purse.amount}${SMALLEST_UNIT_LABELS[purse.currencyType]}。`,
+    );
   }
   purse.amount = nextAmount;
   return { message };
