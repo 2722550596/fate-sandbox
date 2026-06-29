@@ -14,13 +14,6 @@
 - Corrections, preferences, setup notes, and system talk are meta first; do not make characters hear them.
 - Content the player did not clearly say aloud does not automatically become NPC knowledge.
 
-## Marking conventions
-
-- `「……」`: spoken aloud
-- `『……』`: private thought or feeling
-- `【……】`: meta / OOC / instruction
-- Unmarked text that reads like speech to an in-scene character is usually audible.
-
 ## Visibility discipline
 
 - NPCs cannot answer the player's thoughts.

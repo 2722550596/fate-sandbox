@@ -14,10 +14,8 @@ Call `lookup` before settling when the turn depends on canon-sensitive identity,
 - preset character first appearance
 - pathway names, sequence names, or ability mechanics
 - location-specific details or timeline facts
-- true-name / public-name separation
-- unique characteristic or sequence-1 ownership
 
-If local data is still insufficient for the current canon question, use `web_search` with narrow queries and then read fetched content. Do not settle exact canon from memory or search summaries alone.
+If `lookup` data is still insufficient for the current canon question, use `lookup_novel` with narrow queries and then read fetched content. Do not settle exact canon from memory or search summaries alone.
 
 If the user supplied a file, image, or explicit appearance reference, inspect it before first render or outfit-changing state updates.
 
@@ -33,7 +31,7 @@ If the user supplied a file, image, or explicit appearance reference, inspect it
 ## State landing priorities
 
 - wounds / conditions → `update_actor_condition`
-- 灵性消耗 / 精神力负担 → `update_actor_condition`
+- 灵性消耗 / 失控征兆 → `update_actor_condition`
 - money / material resources → `update_economy`
 - relationship movement with behavior evidence → `record_relationship_signal`
 - lasting hostility, missed windows, or durable residue → `record_memory`
