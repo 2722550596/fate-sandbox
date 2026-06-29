@@ -25,10 +25,12 @@ import { configureSecretToolDefinition } from "./knowledge/configure-secret.ts";
 import { recallMemoryToolDefinition } from "./knowledge/recall-memory.ts";
 import { recordMemoryToolDefinition } from "./knowledge/record-memory.ts";
 import { revealSecretToolDefinition } from "./knowledge/reveal-secret.ts";
+import { summarizeSecretsToolDefinition } from "./knowledge/summarize-secrets.ts";
 import { lookupAbilityToolDefinition } from "./lookup/ability-lookup-tool.ts";
 import { lookupEconomyToolDefinition } from "./lookup/economy-lookup.ts";
 import { lookupToolDefinition } from "./lookup/lookup-rag.ts";
 import { lookupNovelToolDefinition } from "./lookup/novel-lookup.ts";
+import { lookupSequenceToolDefinition } from "./lookup/sequence-lookup-tool.ts";
 import { attemptPromotionToolDefinition } from "./lotm/attempt-promotion.ts";
 import { recordRelationshipSignalToolDefinition } from "./relationship/record-relationship-signal.ts";
 import { renderDomainToolResult } from "./runtime/tool-render.ts";
@@ -64,6 +66,7 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   recordActingFeedbackToolDefinition,
   updateEconomyToolDefinition,
   revealSecretToolDefinition,
+  summarizeSecretsToolDefinition,
   privateResolveToolDefinition,
   submitDirectionPacketToolDefinition,
   updateHookToolDefinition,
@@ -76,6 +79,7 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
 
   debugSignalToolDefinition,
   lookupAbilityToolDefinition,
+  lookupSequenceToolDefinition,
   resetStateToolDefinition,
   getStateSchemaToolDefinition,
   attemptPromotionToolDefinition,

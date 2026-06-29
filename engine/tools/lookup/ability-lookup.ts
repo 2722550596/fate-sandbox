@@ -280,13 +280,64 @@ export function lookupAbilities(raw: string, only = false): AbilityLookupResult 
         `无法解析能力查询："${raw}"。`,
         "",
         "支持的格式：",
-        '  - 序列名：  "秘偶大师"、"占卜家"（唯一，自动识别）',
-        '  - 途径-序列："占卜家途径-序列5"（含 序列0～9／支柱／旧日）',
-        "  - 追加 only=true 只显示该序列能力，不展示累积链。",
+        '  - 途径-序列："占卜家途径-序列5"',
+        "    查询高序列会自动展示从序列9起全部低序列能力。",
+        "    追加 only=true 只显示该序列能力，不展示累积链。",
+        '  - 序列名：  "秘偶大师"、"占卜家"（自动识别所属途径）',
+        '  - 能力名：  "占卜"（搜索所有途径中包含该名称的能力）',
       ].join("\n"),
     };
   }
   return lookupAbility(parsed);
+}
+
+/**
+ * Search abilities by name (substring match). Returns null when nothing matches.
+ * This is a fallback for when pathway-rank and sequence-name queries both fail.
+ */
+export function searchAbilitiesByName(raw: string): AbilityLookupResult | null {
+  const data = loadRaw();
+  const matches: Array<{ key: string; pathway: string; rank: string; entry: AbilityEntry }> = [];
+
+  for (const [key, entries] of Object.entries(data)) {
+    const match = key.match(PATHWAY_RANK_RE);
+    if (match === null) continue;
+    const pathway = match[1]!;
+    const rank = match[2]!;
+
+    for (const entry of entries) {
+      if (entry.name.includes(raw)) {
+        matches.push({ key, pathway, rank, entry });
+      }
+    }
+  }
+
+  if (matches.length === 0) return null;
+
+  // Group by pathway-rank for display
+  const grouped = new Map<string, { pathway: string; rank: string; entries: AbilityEntry[] }>();
+  for (const m of matches) {
+    const g = grouped.get(m.key);
+    if (g) {
+      g.entries.push(m.entry);
+    } else {
+      grouped.set(m.key, { pathway: m.pathway, rank: m.rank, entries: [m.entry] });
+    }
+  }
+
+  const lines: string[] = [`找到以下包含「${raw}」的能力：`, ""];
+  for (const [, g] of grouped) {
+    const seqName = g.entries[0]!.sequenceName;
+    lines.push(`╔══ ${g.pathway}途径 — ${g.rank}：${seqName} ══╗`);
+    for (const entry of g.entries) {
+      lines.push("");
+      lines.push(`【${entry.type}】${entry.name}`);
+      lines.push(entry.description);
+    }
+    lines.push("");
+  }
+
+  return { text: lines.join("\n").trimEnd() };
 }
 
 /** All indexed pathway names for discovery. */

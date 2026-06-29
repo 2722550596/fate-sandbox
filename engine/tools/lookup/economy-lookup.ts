@@ -38,6 +38,7 @@ interface PriceMeta {
 interface PriceCategory {
   id: string;
   name: string;
+  type?: string;
   prices: Record<string, string>;
 }
 
@@ -93,6 +94,14 @@ function load(): EconomyPriceTable {
         "（预期顶层键「非凡物品价格表」下为 version/meta/categories 结构）",
     );
   }
+
+  // 追加日用品价格表（raw 已确认为 object，展开键集以便访问其他顶层键）
+  const rawRecord = raw as Record<string, unknown>;
+  const daily = rawRecord["日用品价格表"];
+  if (daily !== undefined && isEconomyPriceTable(daily)) {
+    root.categories.push(...daily.categories);
+  }
+
   cached = root;
   return root;
 }
@@ -131,6 +140,19 @@ function matchCategories(
   }
   if (results.length > 0) return results;
 
+  // 所有字符均匹配回退（中文分词场景："房租"的字都在"租房市场"里）
+  const chars = Array.from(normalized);
+  if (chars.length >= 2) {
+    for (const cat of cats) {
+      const target = cat.name + cat.id;
+      const allCharsMatch = chars.every((c) => target.includes(c));
+      if (allCharsMatch) {
+        results.push({ cat, reason: "所有字符均匹配" });
+      }
+    }
+    if (results.length > 0) return results;
+  }
+
   // Fuzzy on any price value (e.g. "400" → match categories with 400 in prices)
   for (const cat of cats) {
     for (const price of Object.values(cat.prices)) {
@@ -143,13 +165,23 @@ function matchCategories(
 
   return results;
 }
+/** 渲染日用商品类别的价格表（product→price 平铺） */
+function renderDailyCategory(cat: PriceCategory): string[] {
+  const lines: string[] = [`【${cat.name}】（${cat.id}）`];
+  for (const [product, price] of Object.entries(cat.prices)) {
+    lines.push(`  ${product}：${price}`);
+  }
+  return lines;
+}
 
-/** 渲染单个类别的价格表，可选按序列等级筛选 */
+/** 渲染单个类别的价格表。日用类别平铺渲染，序列类别按 rank 筛选。 */
 function renderCategory(
   cat: PriceCategory,
   rankFilter: string | undefined,
   currency: string,
 ): string[] {
+  if (cat.type === "daily") return renderDailyCategory(cat);
+
   const lines: string[] = [`【${cat.name}】（${cat.id}）`];
 
   const keys = rankFilter !== undefined ? [rankFilter] : RANK_ORDER;
@@ -264,6 +296,7 @@ export function lookupEconomyPrice(query: EconomyQuery): EconomyLookupResult {
       "",
     ];
     for (const cat of categories) {
+      if (cat.type === "daily") continue;
       const price = cat.prices[seqKey];
       if (price !== undefined) {
         const hireLabel = cat.id === "combat-hire" ? `雇佣1名${label}` : label;
@@ -351,20 +384,22 @@ export function lookupEconomyTool(params: unknown): ToolResult {
 export const lookupEconomyToolDefinition: DomainToolDefinition = {
   name: "lookup_economy",
   description:
-    "查询非凡世界物品/服务的公允价格表。单位为金镑。\n\n" +
+    "查询非凡世界物品/服务的公允价格表，以及廷根市日用物价/收入参考。\n" +
+    "非凡物品单位为金镑；日用物价单位为便士（1金镑=20苏勒=240便士）。\n\n" +
     "参数说明：\n" +
     "  - 不传任何参数 → 列出所有可查的价格类别（含 id 和名称）\n" +
-    '  - category（字符串）→ 类别 id（如 "potion-formula"）或中文名称关键词（如 "魔药"）\n' +
-    "  - sequence（数字 1-9）→ 筛选序列等级，可单独使用跨类别查询，或与 category 组合\n" +
-    "  - query（字符串）→ 关键词自由搜索，匹配类别名和价格区间\n\n" +
-    "使用边界：判断物品/服务公允价、魔药配方/非凡特性/神奇物品/灵性材料/雇佣/服务定价参考。\n" +
-    "禁区：不要编造表中不存在的价格类别或序列数据，一切以本表为准。",
+    '  - category（字符串）→ 类别 id（如 "food-staple" 或 "potion-formula"）或名称关键词\n' +
+    "  - sequence（数字 1-9）→ 筛选序列等级（仅对非凡物品有效），可单独或与 category 组合\n" +
+    "  - query（字符串）→ 关键词搜索，匹配类别名和价格文本\n\n" +
+    "使用边界：判断物品/服务公允价、魔药配方/非凡特性/神奇物品/灵性材料/雇佣/服务定价参考、" +
+    "日用消费/房租/交通/教育/收入参考。\n" +
+    "禁区：不要编造表中不存在的价格类别或数据，一切以本表为准。",
   parameters: Type.Object({
     category: Type.Optional(
       Type.String({
         description:
-          '价格类别标识或名称关键词。id 精确匹配（如 "potion-formula"），' +
-          '也支持中文名称模糊匹配（如 "魔药"、"神奇物品"）。',
+          '价格类别标识或名称关键词。id 精确匹配（如 "food-staple" 或 "potion-formula"），' +
+          '也支持中文名称模糊匹配（如 "魔药"、"房租"）。',
       }),
     ),
     sequence: Type.Optional(

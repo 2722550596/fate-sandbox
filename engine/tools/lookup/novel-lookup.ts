@@ -266,8 +266,10 @@ export interface NovelQuery {
   volume?: string;
   /** 章节号：单章 "5"，范围 "1-20"，逗号分隔 "1,3,5" */
   chapter?: string;
-  /** 关键词搜索（在章节标题中匹配） */
+  /** 关键词搜索（搜索标题和正文） */
   query?: string;
+  /** 是否搜索正文（默认为 true）。设为 false 则只搜索标题 */
+  fulltext?: boolean;
   /** 只返回清单，不返回正文（默认 false） */
   list?: boolean;
   /** 批量读取时每章最大字符数（默认 2000） */
@@ -276,6 +278,21 @@ export interface NovelQuery {
   limit?: number;
   /** 分页偏移（默认 0） */
   offset?: number;
+}
+
+/** 从正文中提取关键词周围的上下文摘录（~40 字前 + ~60 字后） */
+function extractSnippet(content: string, keyword: string): string {
+  const idx = content.normalize("NFKC").indexOf(keyword.normalize("NFKC"));
+  if (idx === -1) return "";
+
+  const start = Math.max(0, idx - 40);
+  const end = Math.min(content.length, idx + keyword.length + 60);
+
+  let snippet = content.slice(start, end);
+  if (start > 0) snippet = "……" + snippet;
+  if (end < content.length) snippet = snippet + "……";
+
+  return snippet;
 }
 
 export interface NovelLookupResult {
@@ -290,38 +307,69 @@ export function lookupNovel(query: NovelQuery): NovelLookupResult {
   const offset = query.offset ?? 0;
 
   // ========== Mode 1: keyword search across all chapters ==========
+  // ========== Mode 1: keyword search across all chapters ==========
   if (query.query !== undefined && query.volume === undefined) {
     const q = query.query.trim();
-    const matches: ChapterIndex[] = [];
+    const normalizedQ = q.normalize("NFKC");
+    const titleMatches: ChapterIndex[] = [];
+    const contentMatches: Array<{ chapter: ChapterIndex; snippet: string }> = [];
 
     for (const vol of volumes) {
       for (const ch of vol.chapters) {
-        if (ch.chapterTitle.normalize("NFKC").includes(q.normalize("NFKC"))) {
-          matches.push(ch);
+        if (ch.chapterTitle.normalize("NFKC").includes(normalizedQ)) {
+          titleMatches.push(ch);
+        } else if (query.fulltext !== false) {
+          // 内容搜索
+          try {
+            const content = readFileSync(ch.filePath, "utf-8");
+            if (content.normalize("NFKC").includes(normalizedQ)) {
+              const snippet = extractSnippet(content, normalizedQ);
+              contentMatches.push({ chapter: ch, snippet });
+            }
+          } catch {
+            // 跳过无法读取的文件
+          }
         }
       }
     }
 
-    if (matches.length === 0) {
-      return { text: `未在章节标题中匹配到「${q}」。` };
+    const totalMatches = titleMatches.length + contentMatches.length;
+    if (totalMatches === 0) {
+      return { text: `未在章节标题和正文中匹配到「${q}」。` };
     }
 
-    const sliced = matches.slice(offset, offset + Math.min(limit, MAX_SEARCH_RESULTS));
-    const lines: string[] = [`🔍 在章节标题中搜索「${q}」，共 ${matches.length} 条结果：`, ""];
+    const lines: string[] = [
+      `🔍 搜索「${q}」，标题匹配 ${titleMatches.length} 条，正文匹配 ${contentMatches.length} 条：`,
+      "",
+    ];
 
-    for (const ch of sliced) {
+    // 标题匹配：显示章节标题 + 正文（list 模式下仅标题）
+    const titleSliced = titleMatches.slice(offset, offset + Math.min(limit, MAX_SEARCH_RESULTS));
+    for (const ch of titleSliced) {
       lines.push(formatChapterHeader(ch));
       if (query.list !== true) {
-        const body = readChapterContent(ch, maxChars);
-        lines.push(body);
+        lines.push(readChapterContent(ch, maxChars));
         lines.push("");
       }
     }
 
-    if (matches.length > offset + sliced.length) {
-      lines.push(
-        `……还有 ${matches.length - (offset + sliced.length)} 条未显示（使用 limit/offset 翻页）。`,
-      );
+    // 正文匹配：显示章节标题 + 上下文摘录
+    const contentOffset = Math.max(0, offset - titleMatches.length);
+    const contentSliced = contentMatches.slice(
+      contentOffset,
+      contentOffset + Math.min(limit, MAX_SEARCH_RESULTS),
+    );
+    for (const { chapter: ch, snippet } of contentSliced) {
+      lines.push(formatChapterHeader(ch));
+      if (query.list !== true) {
+        lines.push(snippet);
+        lines.push("");
+      }
+    }
+
+    const displayedCount = titleSliced.length + contentSliced.length;
+    if (totalMatches > displayedCount) {
+      lines.push(`……还有 ${totalMatches - displayedCount} 条未显示（使用 limit/offset 翻页）。`);
     }
 
     return { text: lines.join("\n").trimEnd() };
@@ -389,26 +437,62 @@ export function lookupNovel(query: NovelQuery): NovelLookupResult {
   // ========== Mode 5: volume + keyword search ==========
   if (query.chapter === undefined && query.query !== undefined) {
     const q = query.query.trim();
-    const matches = vol.chapters.filter((ch) =>
-      ch.chapterTitle.normalize("NFKC").includes(q.normalize("NFKC")),
-    );
+    const normalizedQ = q.normalize("NFKC");
+    const titleMatches: ChapterIndex[] = [];
+    const contentMatches: Array<{ chapter: ChapterIndex; snippet: string }> = [];
 
-    if (matches.length === 0) {
-      return { text: `在【${vol.volumeLabel}】中未找到标题含「${q}」的章节。` };
+    for (const ch of vol.chapters) {
+      if (ch.chapterTitle.normalize("NFKC").includes(normalizedQ)) {
+        titleMatches.push(ch);
+      } else if (query.fulltext !== false) {
+        try {
+          const content = readFileSync(ch.filePath, "utf-8");
+          if (content.normalize("NFKC").includes(normalizedQ)) {
+            const snippet = extractSnippet(content, normalizedQ);
+            contentMatches.push({ chapter: ch, snippet });
+          }
+        } catch {
+          // 跳过无法读取的文件
+        }
+      }
     }
 
-    const sliced = matches.slice(offset, offset + limit);
+    const totalMatches = titleMatches.length + contentMatches.length;
+    if (totalMatches === 0) {
+      return { text: `在【${vol.volumeLabel}】中未找到含「${q}」的章节。` };
+    }
+
     const lines: string[] = [
-      `🔍 在【${vol.volumeLabel}】中搜索「${q}」，共 ${matches.length} 条：`,
+      `🔍 在【${vol.volumeLabel}】中搜索「${q}」，标题匹配 ${titleMatches.length} 条，正文匹配 ${contentMatches.length} 条：`,
       "",
     ];
-    for (const ch of sliced) {
+
+    // 标题匹配：显示全文
+    const titleSliced = titleMatches.slice(offset, offset + limit);
+    for (const ch of titleSliced) {
       lines.push(formatChapterHeader(ch));
       if (query.list !== true) {
         lines.push(readChapterContent(ch, maxChars));
         lines.push("");
       }
     }
+
+    // 正文匹配：显示摘录
+    const contentOffset = Math.max(0, offset - titleMatches.length);
+    const contentSliced = contentMatches.slice(contentOffset, contentOffset + limit);
+    for (const { chapter: ch, snippet } of contentSliced) {
+      lines.push(formatChapterHeader(ch));
+      if (query.list !== true) {
+        lines.push(snippet);
+        lines.push("");
+      }
+    }
+
+    const displayedCount = titleSliced.length + contentSliced.length;
+    if (totalMatches > displayedCount) {
+      lines.push(`……还有 ${totalMatches - displayedCount} 条未显示（使用 limit/offset 翻页）。`);
+    }
+
     return { text: lines.join("\n").trimEnd() };
   }
 
@@ -523,7 +607,8 @@ export const lookupNovelToolDefinition: DomainToolDefinition = {
     `  - 不传任何参数 → 列出所有卷\n` +
     `  - volume（字符串）→ 卷名，支持卷序号 "001"、"第一部"、"小丑"、"无面人" 等\n` +
     `  - chapter（字符串）→ 章节号，单章 "5"、范围 "1-20"、逗号列表 "1,3,5"\n` +
-    `  - query（字符串）→ 在章节标题中搜索关键词\n` +
+    `  - query（字符串）→ 搜索关键词，搜索标题和正文（默认全文搜索）\n` +
+    `  - fulltext（布尔值）→ 是否搜索正文，默认 true。设为 false 则只搜索标题\n` +
     `  - list（布尔值）→ 只返回清单不返回正文，默认 false\n` +
     `  - maxChars（数字）→ 每章最多返回字符数，默认 2000\n` +
     `  - limit（数字）→ 最多返回章节数，默认 10\n` +
@@ -543,7 +628,12 @@ export const lookupNovelToolDefinition: DomainToolDefinition = {
     ),
     query: Type.Optional(
       Type.String({
-        description: `在章节标题中搜索关键词，如 "阿兹克"、"晋升仪式"、"封印物"。`,
+        description: `搜索关键词。默认在章节标题和正文中全文搜索；设置 fulltext=false 则只搜索标题。`,
+      }),
+    ),
+    fulltext: Type.Optional(
+      Type.Boolean({
+        description: "是否搜索正文，默认为 true。设为 false 则只搜索标题。",
       }),
     ),
     list: Type.Optional(
