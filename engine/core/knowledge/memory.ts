@@ -9,6 +9,7 @@ import type { MemoryClaim, MemoryEvent } from "./memory-schema.ts";
 
 import { allActorSecretSlots } from "../actor/secret-actor-state.ts";
 import { settleOldestObligation } from "../ledger/obligations.ts";
+import { resolveRelativeTime } from "../state/date-time.ts";
 import { createId } from "../utils/ids.ts";
 import { assertIsoDateString, assertNonEmptyString } from "../utils/typebox-validation.ts";
 
@@ -179,8 +180,14 @@ function recordDailySummary(
   const id = createId(draft, "daily");
   draft.public.memory.dailySummaries.push({
     id,
-    startDate: assertIsoDateString(event.startDate, "startDate"),
-    endDate: assertIsoDateString(event.endDate, "endDate"),
+    startDate: assertIsoDateString(
+      resolveRelativeTime(event.startDate, draft.public.clock.currentAt),
+      "startDate",
+    ),
+    endDate: assertIsoDateString(
+      resolveRelativeTime(event.endDate, draft.public.clock.currentAt),
+      "endDate",
+    ),
     summary: assertNonEmptyString(event.summary, "summary"),
   });
   return { dailySummaryId: id };

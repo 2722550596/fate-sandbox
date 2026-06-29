@@ -17,6 +17,7 @@ import type { SecretCandidate } from "./semantic-reveal.ts";
 import { getActorSecretSlots, setActorSecretSlots } from "../actor/secret-actor-state.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
+import { recordMemory } from "./memory.ts";
 import { judgeSecrets, judgeHiddenReaction, judgeCompatibility } from "./semantic-reveal.ts";
 export type {
   ConfigureSecretInput,
@@ -42,6 +43,7 @@ export type RevealSecretOutcome =
 export interface RevealSecretResult {
   outcome: RevealSecretOutcome;
   narrativeConstraints: string[];
+  revealedSecrets?: Array<{ kind: string; summary: string }>;
 }
 
 // ===========================================================================
@@ -312,12 +314,49 @@ export async function revealSecret(
       }
     }
   }
-
   if (revealed) {
+    // ── 收集被揭示的秘密，同步到 public memory ──
+    const revealedEntries: Array<{ kind: string; value: string }> = [];
+
+    for (const fact of draft.secrets.hiddenWorldFacts) {
+      if (fact.revealState === "revealed") {
+        revealedEntries.push({ kind: "world-fact", value: fact.text });
+      }
+    }
+    const revealedActorSlots = getActorSecretSlots(draft.secrets, event.actorId);
+    if (revealedActorSlots !== undefined) {
+      for (const s of revealedActorSlots.beyonderSecrets) {
+        if (s.revealState === "revealed")
+          revealedEntries.push({ kind: "actor-beyonder", value: s.value });
+      }
+      for (const s of revealedActorSlots.privateMotives) {
+        if (s.revealState === "revealed")
+          revealedEntries.push({ kind: "actor-private", value: s.value });
+      }
+      for (const s of revealedActorSlots.unrevealedAffiliations) {
+        if (s.revealState === "revealed")
+          revealedEntries.push({ kind: "actor-private", value: s.value });
+      }
+    }
+
+    const isProtagonist = event.actorId === draft.public.protagonistActorId;
+    for (const entry of revealedEntries) {
+      const scope = entry.kind === "world-fact" ? "world" : isProtagonist ? "protagonist" : "npc";
+      recordMemory(draft, {
+        kind: "pin-fact",
+        scope,
+        subject: event.actorId,
+        text: entry.value,
+        sourceEventId: null,
+        claims: [{ kind: "mundane", statement: entry.value, certainty: "confirmed" }],
+      });
+    }
+
     recordSecretEvent(draft, `${event.actorId} 的秘密被揭示`, [event.actorId]);
     return {
       outcome: "revealed",
-      narrativeConstraints: ["该事实已从 hidden-canonical 转为 public，渲染器可正常使用"],
+      narrativeConstraints: ["该事实已从 hidden-canonical 转为 public，并同步到 public memory。"],
+      revealedSecrets: revealedEntries.map((e) => ({ kind: e.kind, summary: e.value })),
     };
   }
 

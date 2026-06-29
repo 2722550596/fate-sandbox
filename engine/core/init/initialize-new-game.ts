@@ -20,7 +20,7 @@ import type { TypeBoxValidator } from "../utils/typebox-validation.ts";
 import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
-import { getCampaignPreset } from "../../../data/campaign-presets.ts";
+import { getCampaignPreset, type OpeningHooks } from "../../../data/campaign-presets.ts";
 import { OUTFIT_STATE_SCHEMA } from "../actor/actor-schema.ts";
 import { setScenePresence, upsertActor } from "../actor/actor.ts";
 import { recordMemory } from "../knowledge/memory.ts";
@@ -127,8 +127,11 @@ export interface NewGameInitializationResult {
   message: string;
   steps: string[];
   protagonistActorId: string;
+  /** preset 的完整 premise 文本，首次开局时可辅助 GM 理解场景脉络。 */
+  premise?: string;
+  /** preset 的 openingHooks（按主角 archetype 分），供 GM 开场叙事使用。 */
+  openingHooks?: OpeningHooks;
 }
-
 // ---------------------------------------------------------------------------
 // initialize_new_game 工具边界 schema
 // ---------------------------------------------------------------------------
@@ -236,7 +239,13 @@ export function parseNewGameInitializationInput(
     NEW_GAME_VARIANT_VALIDATORS,
   );
 }
-function applyScenario(draft: State, input: NewGameScenarioInput): void {
+function applyScenario(
+  draft: State,
+  input: NewGameScenarioInput,
+): {
+  premise: string;
+  openingHooks: OpeningHooks | undefined;
+} {
   const reason = assertNonEmptyString(input.reason ?? "", "reason");
   const preset = getCampaignPreset(input.presetId);
   const title: string = input.title ?? preset.title;
@@ -291,6 +300,8 @@ function applyScenario(draft: State, input: NewGameScenarioInput): void {
     summary: reason,
     consequences: [`当前时间线: ${timeline}`, `本地时区: ${timezone}`],
   });
+
+  return { premise, openingHooks: preset.openingHooks };
 }
 
 export function initializeNewGame(
@@ -302,7 +313,10 @@ export function initializeNewGame(
   Object.assign(draft, createInitialState(actorId));
   steps.push("reset-state");
 
-  applyScenario(draft, { ...input.scenario, reason: input.scenario.reason ?? input.reason });
+  const { premise, openingHooks } = applyScenario(draft, {
+    ...input.scenario,
+    reason: input.scenario.reason ?? input.reason,
+  });
   steps.push("configure-scenario");
 
   if (input.kind === "human-protagonist") {
@@ -343,7 +357,13 @@ export function initializeNewGame(
   }
 
   assertNewGameInitialized(draft, actorId, input.kind);
-  return { message: "新游戏 state 已初始化。", steps, protagonistActorId: actorId };
+  return {
+    message: "新游戏 state 已初始化。",
+    steps,
+    protagonistActorId: actorId,
+    premise,
+    openingHooks,
+  };
 }
 function buildHumanProtagonist(
   input: HumanProtagonistOpeningInput,

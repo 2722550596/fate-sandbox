@@ -18,7 +18,7 @@ export function getStatusTool(sessionManager?: unknown): ToolResult {
   const revision = statusRevision(state);
   rejectRepeatedStatusRead(sessionManager, revision);
   rememberStatusRead(sessionManager, revision);
-  return textResult(buildGmBrief(state.public));
+  return textResult(buildGmBrief(state.public, state.secrets));
 }
 
 function rejectRepeatedStatusRead(sessionManager: unknown, revision: string): void {

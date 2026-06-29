@@ -9,14 +9,30 @@ import {
 } from "../../core/init/initialize-new-game.ts";
 import { resultDetails, runDomainEventTool } from "./domain-tool-runner.ts";
 
+function buildInitializationMessage(result: Awaited<ReturnType<typeof initializeNewGame>>): string {
+  const lines: string[] = [
+    `新游戏 state 已初始化。protagonist actor ID: ${result.protagonistActorId}。`,
+  ];
+  if (result.premise !== undefined) {
+    lines.push(`预设前提：${result.premise}`);
+  }
+  if (result.openingHooks !== undefined) {
+    for (const [key, hook] of Object.entries(result.openingHooks)) {
+      if (hook !== undefined) {
+        lines.push(`[${key}] ${hook}`);
+      }
+    }
+  }
+  return lines.join("\n");
+}
+
 export function initializeNewGameTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
     execute: (draft) =>
       initializeNewGame(draft, parseNewGameInitializationInput(params, "initialize_new_game 参数")),
     details: resultDetails,
-    message: (result) =>
-      `新游戏 state 已初始化。protagonist actor ID: ${result.protagonistActorId}。`,
+    message: buildInitializationMessage,
   });
 }
 
