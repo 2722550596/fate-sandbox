@@ -140,6 +140,14 @@ export const submitDirectionPacketToolDefinition: DomainToolDefinition = {
           "渲染所需原作事实预填；渲染器没有 lookup，缺位它就会编（叙事轮必填，可为空数组）",
       }),
     ),
+    constraints: Type.Optional(
+      Type.Object({
+        forbiddenContent: Type.Array(Type.String(), {
+          description:
+            "渲染器不得写入或暗示的原文/意象列表。用于标注本轮应回避的话题、尚未揭示的伏笔，或玩家不希望在正文里看到的特定内容。非 binding",
+        }),
+      }),
+    ),
     directReply: Type.Optional(
       Type.String({ description: "直答轮的回复内容（needsRender=false 时必填）" }),
     ),
