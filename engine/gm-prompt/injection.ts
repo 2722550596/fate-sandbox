@@ -36,12 +36,9 @@ interface PromptModule {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, "..", "..");
 
-export function buildSystemPrompt(baseSystemPrompt: string): string {
-  return (
-    baseSystemPrompt +
-    "\n" +
-    readFileSync(join(PROJECT_ROOT, "agents", "system-settlement.md"), "utf-8")
-  );
+export function buildSystemPrompt(_baseSystemPrompt: string): string {
+  // 忽略 pi 默认 prompt，只输出纯 GM 提示词
+  return readFileSync(join(PROJECT_ROOT, "agents", "system-settlement.md"), "utf-8").trimEnd();
 }
 
 /** 结算器（Pass A）主循环注入：只装 settlement/both 模块，零 style/render 模块。 */

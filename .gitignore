@@ -7,6 +7,7 @@
 .pi/agent/
 .pi/npm/
 .pi-lens/
+.omp/
 
 # Build / deps
 node_modules/
@@ -20,3 +21,4 @@ spikes/pi-actors/.out/
 # Environment variables (API keys)
 .env
 .rag-cache/
+.debug/

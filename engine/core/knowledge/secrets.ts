@@ -12,10 +12,12 @@ import type {
   RevealSecretEvent,
   SecretStringInput,
 } from "./secrets-schema.ts";
+import type { SecretCandidate } from "./semantic-reveal.ts";
 
 import { getActorSecretSlots, setActorSecretSlots } from "../actor/secret-actor-state.ts";
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString } from "../utils/typebox-validation.ts";
+import { judgeSecrets } from "./semantic-reveal.ts";
 export type {
   ConfigureSecretInput,
   PrivateResolveEvent,
@@ -127,74 +129,6 @@ function revealEvidenceText(event: RevealSecretEvent): string {
   return `${needle}\n${event.evidence}`;
 }
 
-function slotMatches<T>(slot: SecretSlot<T>, text: string): boolean {
-  const needle = text.toLowerCase();
-  const serialized = String(slot.value).toLowerCase();
-  return needle.includes(serialized);
-}
-
-function evidenceMatches<T>(slot: SecretSlot<T>, evidence: string): boolean {
-  const normalized = evidence.toLowerCase();
-  return slot.revealConditions.some((condition) => normalized.includes(condition.toLowerCase()));
-}
-
-function canRevealStringSlot(event: RevealSecretEvent, slot: SecretSlot<string>): boolean {
-  if (slot.revealState === "revealed") return false;
-  const needle = event.kind === "claim-reveal" ? event.claim : event.trigger;
-  return slotMatches(slot, needle) && evidenceMatches(slot, revealEvidenceText(event));
-}
-
-function tryRevealWorldFact(fact: HiddenWorldFact, event: RevealSecretEvent): boolean {
-  if (fact.revealState === "revealed") return false;
-  const needle = event.kind === "claim-reveal" ? event.claim : event.trigger;
-  const evidence = revealEvidenceText(event);
-  if (needle.includes(fact.text)) {
-    // Try evidence matching against world fact's revealConditions
-    const evidenceNormalized = evidence.toLowerCase();
-    const matched = fact.revealConditions.some((condition) =>
-      evidenceNormalized.includes(condition.toLowerCase()),
-    );
-    if (matched) {
-      fact.revealState = "revealed";
-      return true;
-    }
-  }
-  return false;
-}
-
-function markWorldFactForeshadowed(draft: State, evidence: string): boolean {
-  let marked = false;
-  const evidenceNormalized = evidence.toLowerCase();
-  for (const fact of draft.secrets.hiddenWorldFacts) {
-    if (
-      fact.revealState === "hidden" &&
-      fact.revealConditions.some((condition) =>
-        evidenceNormalized.includes(condition.toLowerCase()),
-      )
-    ) {
-      fact.revealState = "foreshadowed";
-      marked = true;
-    }
-  }
-  return marked;
-}
-
-function markForeshadowed(slots: ActorSecretSlots, evidence: string): boolean {
-  let marked = false;
-  const allStringSlots: Array<SecretSlot<string>> = [
-    ...slots.beyonderSecrets,
-    ...slots.privateMotives,
-    ...slots.unrevealedAffiliations,
-  ];
-  for (const slot of allStringSlots) {
-    if (slot.revealState === "hidden" && evidenceMatches(slot, evidence)) {
-      slot.revealState = "foreshadowed";
-      marked = true;
-    }
-  }
-  return marked;
-}
-
 function secretText(slots: ActorSecretSlots): string {
   return JSON.stringify(slots).toLowerCase();
 }
@@ -290,7 +224,10 @@ function configureWorldFact(
 // revealSecret — 纯揭示
 // ===========================================================================
 
-export function revealSecret(draft: State, event: RevealSecretEvent): RevealSecretResult {
+export async function revealSecret(
+  draft: State,
+  event: RevealSecretEvent,
+): Promise<RevealSecretResult> {
   assertNonEmptyString(event.actorId, "actorId");
   const actor = draft.public.actors[event.actorId];
   if (actor === undefined) {
@@ -298,42 +235,102 @@ export function revealSecret(draft: State, event: RevealSecretEvent): RevealSecr
   }
 
   const evidence = revealEvidenceText(event);
+  const needle = event.kind === "claim-reveal" ? event.claim : event.trigger;
 
-  // 1. Try all unrevealed world facts
-  let worldRevealed = false;
-  for (const fact of draft.secrets.hiddenWorldFacts) {
-    if (tryRevealWorldFact(fact, event)) {
-      worldRevealed = true;
-    }
-  }
+  // 收集所有候选秘密
+  const candidates: SecretCandidate[] = [];
+  const slotLookup = new Map<string, SecretSlot<string>>();
+  const factLookup = new Map<string, HiddenWorldFact>();
 
-  // 2. Try actor secret slots
-  let slotRevealed = false;
-  let slotForeshadowed = false;
   const slots = getActorSecretSlots(draft.secrets, event.actorId);
   if (slots !== undefined) {
-    for (const secret of slots.beyonderSecrets) {
-      if (canRevealStringSlot(event, secret)) {
-        secret.revealState = "revealed";
-        slotRevealed = true;
+    for (const s of slots.beyonderSecrets) {
+      if (s.revealState !== "revealed") {
+        candidates.push({
+          id: s.id,
+          kind: "actor-beyonder",
+          value: s.value,
+          conditions: s.revealConditions,
+        });
+        slotLookup.set(s.id, s);
       }
     }
-    for (const secret of slots.privateMotives) {
-      if (canRevealStringSlot(event, secret)) {
-        secret.revealState = "revealed";
-        slotRevealed = true;
+    for (const s of slots.privateMotives) {
+      if (s.revealState !== "revealed") {
+        candidates.push({
+          id: s.id,
+          kind: "actor-private",
+          value: s.value,
+          conditions: s.revealConditions,
+        });
+        slotLookup.set(s.id, s);
       }
     }
-    for (const secret of slots.unrevealedAffiliations) {
-      if (canRevealStringSlot(event, secret)) {
-        secret.revealState = "revealed";
-        slotRevealed = true;
+    for (const s of slots.unrevealedAffiliations) {
+      if (s.revealState !== "revealed") {
+        candidates.push({
+          id: s.id,
+          kind: "actor-private",
+          value: s.value,
+          conditions: s.revealConditions,
+        });
+        slotLookup.set(s.id, s);
       }
     }
-    slotForeshadowed = markForeshadowed(slots, evidence);
   }
 
-  if (worldRevealed || slotRevealed) {
+  for (const fact of draft.secrets.hiddenWorldFacts) {
+    if (fact.revealState !== "revealed") {
+      candidates.push({
+        id: fact.id,
+        kind: "world-fact",
+        value: fact.text,
+        conditions: fact.revealConditions,
+      });
+      factLookup.set(fact.id, fact);
+    }
+  }
+
+  if (candidates.length === 0) {
+    return {
+      outcome: "insufficient-evidence",
+      narrativeConstraints: ["所有已知秘密已被揭示，无可揭示内容"],
+    };
+  }
+
+  // 推理判断（两阶段：子串快速通道 + LLM 推理通道）
+  const judgments = await judgeSecrets({ kind: event.kind, needle, evidence }, candidates);
+
+  // 应用判断结果
+  let revealed = false;
+  let foreshadowed = false;
+
+  for (const j of judgments) {
+    const fact = factLookup.get(j.id);
+    if (fact !== undefined) {
+      if (j.needleMatch && j.evidenceMatch) {
+        fact.revealState = "revealed";
+        revealed = true;
+      } else if (!j.needleMatch && j.evidenceMatch && fact.revealState === "hidden") {
+        fact.revealState = "foreshadowed";
+        foreshadowed = true;
+      }
+      continue;
+    }
+
+    const slot = slotLookup.get(j.id);
+    if (slot !== undefined) {
+      if (j.needleMatch && j.evidenceMatch) {
+        slot.revealState = "revealed";
+        revealed = true;
+      } else if (!j.needleMatch && j.evidenceMatch && slot.revealState === "hidden") {
+        slot.revealState = "foreshadowed";
+        foreshadowed = true;
+      }
+    }
+  }
+
+  if (revealed) {
     recordSecretEvent(draft, `${event.actorId} 的秘密被揭示`, [event.actorId]);
     return {
       outcome: "revealed",
@@ -341,7 +338,7 @@ export function revealSecret(draft: State, event: RevealSecretEvent): RevealSecr
     };
   }
 
-  if (slotForeshadowed || markWorldFactForeshadowed(draft, evidence)) {
+  if (foreshadowed) {
     return {
       outcome: "foreshadowed",
       narrativeConstraints: ["线索成立，但尚不足以完全揭示。渲染器可用预感/梦境/异象等方式暗示"],

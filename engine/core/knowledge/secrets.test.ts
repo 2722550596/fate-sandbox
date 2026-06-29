@@ -221,7 +221,7 @@ void test("configureSecret world-fact merges reveal conditions for existing fact
 // revealSecret
 // ===========================================================================
 
-void test("revealSecret reveals beyonder secret via claim-reveal", () => {
+void test("revealSecret reveals beyonder secret via claim-reveal", async () => {
   const draft = createInitialState();
   setupActorSequence(draft);
 
@@ -232,7 +232,7 @@ void test("revealSecret reveals beyonder secret via claim-reveal", () => {
     secrets: [{ value: "我是占卜家", revealConditions: ["占卜家", "途径"] }],
   });
 
-  const result = revealSecret(draft, {
+  const result = await revealSecret(draft, {
     kind: "claim-reveal",
     actorId: PROTAGONIST_ACTOR_ID,
     claim: "我是占卜家",
@@ -246,7 +246,7 @@ void test("revealSecret reveals beyonder secret via claim-reveal", () => {
   );
 });
 
-void test("revealSecret reveals beyonder secret via observed-reveal", () => {
+void test("revealSecret reveals beyonder secret via observed-reveal", async () => {
   const draft = createInitialState();
   setupActorSequence(draft);
 
@@ -257,7 +257,7 @@ void test("revealSecret reveals beyonder secret via observed-reveal", () => {
     secrets: [{ value: "序列9占卜家", revealConditions: ["序列9", "占卜家"] }],
   });
 
-  const result = revealSecret(draft, {
+  const result = await revealSecret(draft, {
     kind: "observed-reveal",
     actorId: PROTAGONIST_ACTOR_ID,
     trigger: "施展了序列9占卜家的能力",
@@ -271,7 +271,7 @@ void test("revealSecret reveals beyonder secret via observed-reveal", () => {
   );
 });
 
-void test("revealSecret returns foreshadowed with partial evidence", () => {
+void test("revealSecret returns foreshadowed with partial evidence", async () => {
   const draft = createInitialState();
   setupActorSequence(draft);
 
@@ -279,22 +279,22 @@ void test("revealSecret returns foreshadowed with partial evidence", () => {
     kind: "actor-beyonder",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "我是占卜家", revealConditions: ["占卜家", "途径"] }],
+    secrets: [{ value: "他其实是玫瑰学派的人", revealConditions: ["玫瑰"] }],
   });
 
-  // Claim doesn't match slot value; evidence matches a reveal condition
-  const result = revealSecret(draft, {
+  // Claim is completely unrelated; evidence tangentially suggests a condition
+  const result = await revealSecret(draft, {
     kind: "claim-reveal",
     actorId: PROTAGONIST_ACTOR_ID,
-    claim: "他的能力看起来很高级",
-    evidence: "观察到的现象符合占卜家途径的特征",
+    claim: "他的穿着打扮总是很正式",
+    evidence: "我在他房间里看到了一本关于玫瑰的旧书",
   });
 
   assert.equal(result.outcome, "foreshadowed");
   assert.ok(result.narrativeConstraints[0]?.includes("尚不足以完全揭示"));
 });
 
-void test("revealSecret returns insufficient-evidence with no match", () => {
+void test("revealSecret returns insufficient-evidence with no match", async () => {
   const draft = createInitialState();
   setupActorSequence(draft);
 
@@ -305,7 +305,7 @@ void test("revealSecret returns insufficient-evidence with no match", () => {
     secrets: [{ value: "我是占卜家", revealConditions: ["占卜家", "途径"] }],
   });
 
-  const result = revealSecret(draft, {
+  const result = await revealSecret(draft, {
     kind: "claim-reveal",
     actorId: PROTAGONIST_ACTOR_ID,
     claim: "不相关的事情",
@@ -315,11 +315,11 @@ void test("revealSecret returns insufficient-evidence with no match", () => {
   assert.equal(result.outcome, "insufficient-evidence");
 });
 
-void test("revealSecret throws for nonexistent actor", () => {
+void test("revealSecret throws for nonexistent actor", async () => {
   const draft = createInitialState();
 
-  assert.throws(
-    () =>
+  await assert.rejects(
+    async () =>
       revealSecret(draft, {
         kind: "claim-reveal",
         actorId: "nonexistent",
@@ -330,7 +330,7 @@ void test("revealSecret throws for nonexistent actor", () => {
   );
 });
 
-void test("revealSecret reveals hidden world fact", () => {
+void test("revealSecret reveals hidden world fact", async () => {
   const draft = createInitialState();
   setupActorSequence(draft);
 
@@ -342,7 +342,7 @@ void test("revealSecret reveals hidden world fact", () => {
     relatedActorIds: [PROTAGONIST_ACTOR_ID],
   });
 
-  const result = revealSecret(draft, {
+  const result = await revealSecret(draft, {
     kind: "claim-reveal",
     actorId: PROTAGONIST_ACTOR_ID,
     claim: "真实造物主早已陨落",

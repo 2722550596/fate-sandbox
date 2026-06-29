@@ -4,7 +4,9 @@ import { Type } from "typebox";
 
 import { parseRevealSecretInput } from "../../core/knowledge/secrets-schema.ts";
 import { revealSecret } from "../../core/knowledge/secrets.ts";
-import { runDomainEventTool } from "../system/domain-tool-runner.ts";
+import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
+import { cloneState, commitState } from "../../core/state/state-store.ts";
+import { textResult } from "../runtime/tool-result.ts";
 
 function formatResult(
   result: import("../../core/knowledge/secrets.ts").RevealSecretResult,
@@ -45,11 +47,12 @@ export const revealSecretToolDefinition: DomainToolDefinition = {
     evidence: Type.String({ description: "匹配证据，必须包含 revealConditions 中的关键词" }),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) => {
-    return runDomainEventTool({
-      sessionManager: ctx.sessionManager,
-      execute: (draft) => revealSecret(draft, parseRevealSecretInput(params, "reveal_secret 参数")),
-      details: (result) => ({ outcome: result.outcome }),
-      message: (result) => formatResult(result),
-    });
+    const draft = cloneState();
+    const event = parseRevealSecretInput(params, "reveal_secret 参数");
+    const result = await revealSecret(draft, event);
+    commitState(draft);
+    const details: Record<string, unknown> = { outcome: result.outcome };
+    persistStateAfterCommit(ctx.sessionManager, details);
+    return textResult(formatResult(result), details);
   },
 };
