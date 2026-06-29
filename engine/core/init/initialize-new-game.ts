@@ -1,7 +1,6 @@
 import type { MemoryClaim } from "../knowledge/memory.ts";
 import type {
   ActorId,
-  CurrencyCode,
   LocationState,
   OpeningMode,
   OutfitState,
@@ -56,9 +55,8 @@ export interface NewGameScenarioInput {
   timezone?: TimeZoneId;
   startedAt?: string;
   currentAt?: string;
-  location?: LocationState;
   situation?: SituationKind;
-  currency?: CurrencyCode;
+  location?: LocationState;
   startingFunds?: number;
   purseLabel?: string;
   reason?: string;
@@ -243,7 +241,6 @@ function applyScenario(draft: State, input: NewGameScenarioInput): void {
   );
   const location: LocationState = input.location ?? preset.location;
   const situation: SituationKind = input.situation ?? preset.situation;
-  const currency: CurrencyCode = input.currency ?? preset.economy.currency;
   const startingFunds: number = input.startingFunds ?? preset.economy.startingFunds;
   const purseLabel: string = input.purseLabel ?? preset.economy.purseLabel;
 
@@ -255,7 +252,6 @@ function applyScenario(draft: State, input: NewGameScenarioInput): void {
   draft.public.scene.location = location;
   draft.public.scene.situation = situation;
   draft.public.scene.lastResolvedAt = currentAt;
-  draft.public.economy.currency = currency;
   draft.public.economy.accessibleFunds = [
     {
       id: "purse-protagonist-cash",
@@ -263,6 +259,7 @@ function applyScenario(draft: State, input: NewGameScenarioInput): void {
       label: purseLabel,
       amount: startingFunds,
       access: "held",
+      currencyType: "loen",
     },
   ];
   draft.public.memory.pinnedFacts = [

@@ -3,6 +3,7 @@ import type { PublicGameState } from "./state.ts";
 import { formatHookLedger } from "../ledger/hooks.ts";
 import { recentPlayerKnownRelationshipSignals } from "../actor/relationship-signal.ts";
 import { formatHumanTime } from "./date-time.ts";
+import { formatAmount } from "../economy/economy-denomination.ts";
 
 export function buildGmBrief(publicState: PublicGameState): string {
   const protagonist = publicState.actors[publicState.protagonistActorId];
@@ -187,13 +188,15 @@ function formatAllies(publicState: PublicGameState): string {
 }
 
 function formatGmBriefFunds(publicState: PublicGameState): string {
-  const total = publicState.economy.accessibleFunds.reduce((sum, purse) => sum + purse.amount, 0);
+  const purseLines = publicState.economy.accessibleFunds
+    .map((purse) => `${purse.label}: ${formatAmount(purse.amount, purse.currencyType ?? "loen")}`)
+    .join("、");
   const keyItems = Object.values(publicState.trackedItems)
     .filter((item) => item.visibility === "player-known")
     .map((item) => item.label)
     .slice(0, 5);
   const itemText = keyItems.length === 0 ? "无关键物品" : `关键物品：${keyItems.join("、")}`;
-  return `可访问资金 ${total.toLocaleString()} 便士；${itemText}`;
+  return `可访问资金 ${purseLines}；${itemText}`;
 }
 
 function formatCondition(
@@ -241,7 +244,7 @@ function formatFunds(publicState: PublicGameState): string {
           : (publicState.actors[purse.ownerActorId]?.presentation.renderName ?? purse.ownerActorId);
       const accessTag =
         purse.access === "held" ? "随身持有" : purse.access === "shared" ? "共享" : "需许可";
-      return `- ${purse.label}（${owner} · ${accessTag}）：${purse.amount.toLocaleString()} ${publicState.economy.currency}`;
+      return `- ${purse.label}（${owner} · ${accessTag}）：${formatAmount(purse.amount, purse.currencyType ?? "loen")}`;
     })
     .join("\n");
 }

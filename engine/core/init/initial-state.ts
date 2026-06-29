@@ -55,13 +55,13 @@ export function createInitialState(): State {
       protagonistActorId: PROTAGONIST_ACTOR_ID,
       allyActorIds: [],
       economy: {
-        currency: "penny",
         accessibleFunds: [
           {
             id: "purse-protagonist-cash",
             ownerActorId: PROTAGONIST_ACTOR_ID,
             label: "随身便士",
             amount: 24,
+            currencyType: "loen",
             access: "held",
           },
         ],

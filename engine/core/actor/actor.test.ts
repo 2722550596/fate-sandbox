@@ -488,6 +488,7 @@ void test("retireActor throws when actor owns a purse", () => {
     ownerActorId: "roselle",
     label: "Roselle 的资金",
     amount: 100,
+    currencyType: "loen",
     access: "held",
   });
 

@@ -10,7 +10,6 @@ import { normalizeIsoInstant } from "./date-time.ts";
 import { STORY_WINDOW_STATE_SCHEMA } from "../scene/scene-schema.ts";
 import {
   ACTOR_STANCE_SCHEMA,
-  CURRENCY_CODE_SCHEMA,
   MEMORY_SCOPE_SCHEMA,
   OFFSCREEN_EVENT_SOURCE_SCHEMA,
   OFFSCREEN_EVENT_VISIBILITY_SCHEMA,
@@ -30,6 +29,7 @@ import {
   TRACKED_ITEM_VISIBILITY_SCHEMA,
 } from "./state-enum-schemas.ts";
 import { LOCATION_STATE_SCHEMA } from "../turn/turn-time-schema.ts";
+import { CURRENCY_TYPE_SCHEMA } from "../economy/economy-schema.ts";
 import { isRecord, parseTypeBoxValue, trimStringsDeep } from "../utils/typebox-validation.ts";
 
 const NON_EMPTY_STRING_SCHEMA = Type.String({ minLength: 1 });
@@ -245,6 +245,7 @@ const MONEY_PURSE_SCHEMA = Type.Object({
   ownerActorId: NON_EMPTY_STRING_SCHEMA,
   label: NON_EMPTY_STRING_SCHEMA,
   amount: NON_NEGATIVE_INTEGER_SCHEMA,
+  currencyType: CURRENCY_TYPE_SCHEMA,
   access: PURSE_ACCESS_SCHEMA,
 });
 
@@ -257,7 +258,6 @@ const DEBT_STATE_SCHEMA = Type.Object({
 });
 
 const ECONOMY_STATE_SCHEMA = Type.Object({
-  currency: CURRENCY_CODE_SCHEMA,
   accessibleFunds: Type.Array(MONEY_PURSE_SCHEMA),
   debts: Type.Array(DEBT_STATE_SCHEMA),
 });

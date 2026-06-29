@@ -19,33 +19,16 @@ export interface EconomyEventResult {
   message: string;
 }
 
-/** Currency type → RMB conversion rate (1 unit of base currency = X RMB) */
-const CURRENCY_TO_RMB: Record<string, number> = {
-  loen: 1000,
-  fesac: 200,
-  intis: 400,
-  feynapotter: 100,
-};
-
-function convertCurrency(amount: number, fromType: string, toType: string): number {
-  if (fromType === toType) return amount;
-  const fromRate = CURRENCY_TO_RMB[fromType] ?? 1000;
-  const toRate = CURRENCY_TO_RMB[toType] ?? 1000;
-  return Math.round((amount * fromRate) / toRate);
-}
-
 export function updateEconomy(draft: State, event: EconomyEvent): EconomyEventResult {
   assertNonEmptyString(event.reason, "reason");
   switch (event.kind) {
     case "spend-money": {
       const rawAmount = assertPositiveInteger(event.amount, "amount");
-      const currencyType = event.currencyType ?? "loen";
-      const loenAmount = convertCurrency(rawAmount, currencyType, "loen");
       return changePurseAmount(
         draft,
         event.purseId,
         event.callerActorId,
-        -loenAmount,
+        -rawAmount,
         "资金已支出。",
         event.reason,
       );
@@ -53,13 +36,11 @@ export function updateEconomy(draft: State, event: EconomyEvent): EconomyEventRe
     case "gain-money": {
       assertAuditableGain(event);
       const rawAmount = assertPositiveInteger(event.amount, "amount");
-      const currencyType = event.currencyType ?? "loen";
-      const loenAmount = convertCurrency(rawAmount, currencyType, "loen");
       return changePurseAmount(
         draft,
         event.purseId,
         event.callerActorId,
-        loenAmount,
+        rawAmount,
         "资金已增加。",
         event.reason,
       );
@@ -67,8 +48,7 @@ export function updateEconomy(draft: State, event: EconomyEvent): EconomyEventRe
     case "add-purse": {
       const rawAmount = assertPositiveInteger(event.amount, "amount");
       const currencyType = event.currencyType ?? "loen";
-      const loenAmount = convertCurrency(rawAmount, currencyType, "loen");
-      return addPurse(draft, { ...event, amount: loenAmount });
+      return addPurse(draft, { ...event, amount: rawAmount, currencyType });
     }
     case "update-purse":
       return updatePurse(draft, event);
@@ -168,6 +148,7 @@ function addPurse(
     ownerActorId: event.ownerActorId,
     label: assertNonEmptyString(event.label, "label"),
     amount: assertPositiveInteger(event.amount, "amount"),
+    currencyType: event.currencyType ?? "loen",
     access: event.access,
   });
   return { message: "资金账户已加入。" };
@@ -200,7 +181,7 @@ function addDebt(
     .filter((p) => p.ownerActorId === event.debtorActorId)
     .reduce((sum, p) => sum + p.amount, 0);
   const maxDebt = Math.max(totalFunds * 1000, 1000); // 至少 1000 so small amounts don't zero out
-  if (event.amount > maxDebt) {
+  if (assertPositiveInteger(event.amount, "amount") > maxDebt) {
     throw new Error(
       `借贷金额 ${event.amount} 超过上限 ${maxDebt}（当前可支配资金 ${totalFunds} × 1000）。`,
     );

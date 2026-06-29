@@ -1,3 +1,4 @@
+import type { CurrencyType } from "../../core/economy/economy-schema.ts";
 import type { EconomyEvent } from "../../core/economy/economy.ts";
 import type { State } from "../../core/state/state.ts";
 import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
@@ -5,15 +6,32 @@ import type { ToolResult } from "../runtime/tool-result.ts";
 
 import { Type } from "typebox";
 
+import { parseAmountString } from "../../core/economy/economy-denomination.ts";
 import { parseEconomyEvent } from "../../core/economy/economy-schema.ts";
 import { updateEconomy } from "../../core/economy/economy.ts";
+import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { resultDetails, runDomainEventTool } from "../system/domain-tool-runner.ts";
 
 export function updateEconomyTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
     execute: (draft) => {
-      const event = parseEconomyEvent(params, "update_economy 参数");
+      const raw = isRecord(params) ? params : {};
+
+      // Normalize amount: if string, parse as denomination notation
+      let normalized = { ...raw };
+      const rawAmount = raw["amount"];
+      if (typeof rawAmount === "string") {
+        const purse = resolvePurseFromEvent(draft, normalized);
+        if (purse === undefined) {
+          throw new Error(
+            "无法解析金额字符串：未指定 purseId 且无法自动选择 purse。请提供 purseId。",
+          );
+        }
+        normalized = { ...normalized, amount: parseAmountString(rawAmount, purse.currencyType) };
+      }
+
+      const event = parseEconomyEvent(normalized, "update_economy 参数");
       assertExistingPurseIdIfPresent(draft, event);
       return updateEconomy(draft, event);
     },
@@ -41,6 +59,24 @@ function formatPurseIds(draft: State): string {
   return purseIds.length === 0 ? "无" : purseIds.join(", ");
 }
 
+function resolvePurseFromEvent(
+  draft: State,
+  raw: Record<string, unknown>,
+): { currencyType: CurrencyType } | undefined {
+  const purseId = typeof raw["purseId"] === "string" ? raw["purseId"] : undefined;
+  if (purseId !== undefined) {
+    return draft.public.economy.accessibleFunds.find((p) => p.id === purseId);
+  }
+  const callerActorId = typeof raw["callerActorId"] === "string" ? raw["callerActorId"] : undefined;
+  if (callerActorId !== undefined) {
+    const held = draft.public.economy.accessibleFunds.filter(
+      (p) => p.ownerActorId === callerActorId && p.access === "held",
+    );
+    return held.length === 1 ? held[0] : undefined;
+  }
+  return undefined;
+}
+
 export const updateEconomyToolDefinition: DomainToolDefinition = {
   name: "update_economy",
   description:
@@ -50,8 +86,7 @@ export const updateEconomyToolDefinition: DomainToolDefinition = {
     "- gain-money：获得收入、报酬、销售（必须说明 counterparty 与可审计 source）\n" +
     "- add-purse：新增资金池——组织金库、客户预付款、委托人的保证金（新建时设定初始金额）\n" +
     "- update-purse：修改已有钱包的 label 或 access 权限（不可改金额）\n" +
-    "- add-debt / resolve-debt：记录和清偿债务\n\n" +
-    "currencyType: 货币类型（loen-鲁恩金镑/fesac-弗萨克金霍恩/intis-因蒂斯费尔金/feynapotter-费内波特金里索），默认 loen。金额会按官方汇率自动换算后入账。\n\n" +
+    "amount 可以是数字（最小单位整数，如 300 便士）或字符串（如「1金镑5苏勒」），系统自动换算。\n\n" +
     "禁区：把同行者资金说成玩家随身现金、资金不足时免费兜底，或用 gain-money 设目标数值/凭空发财。",
   parameters: Type.Object({
     kind: Type.String({
@@ -92,12 +127,6 @@ export const updateEconomyToolDefinition: DomainToolDefinition = {
     ),
     amount: Type.Optional(
       Type.Unknown({ description: "金额；可填 number 或数字字符串，由领域工具校验。" }),
-    ),
-    currencyType: Type.Optional(
-      Type.String({
-        description:
-          "货币类型（loen-鲁恩金镑/fesac-弗萨克金霍恩/intis-因蒂斯费尔金/feynapotter-费内波特金里索），默认 loen",
-      }),
     ),
     reason: Type.String(),
   }),

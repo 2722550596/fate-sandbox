@@ -1,9 +1,5 @@
 import type { OffscreenEvent } from "../backstage/parallel-line.ts";
 import type {
-  ActorKind,
-  ActorStance,
-  BoundaryKind,
-  CurrencyCode,
   MemoryFactScope,
   OpeningMode,
   PathwayId,
@@ -11,6 +7,9 @@ import type {
   PurseAccess,
   RuleSetId,
   SceneThreatSeverity,
+  BoundaryKind,
+  ActorKind,
+  ActorStance,
   SequenceRank,
   SituationKind,
   TimelineId,
@@ -19,6 +18,7 @@ import type {
   TrackedItemKind,
   TrackedItemVisibility,
 } from "./state-enum-schemas.ts";
+import type { CurrencyType } from "../economy/economy-schema.ts";
 
 export type {
   OffscreenEvent,
@@ -479,7 +479,6 @@ export interface TrackedItemState {
 // ---------------------------------------------------------------------------
 
 export interface EconomyState {
-  currency: CurrencyCode;
   accessibleFunds: MoneyPurse[];
   debts: DebtState[];
 }
@@ -488,6 +487,7 @@ export interface MoneyPurse {
   id: string;
   ownerActorId: ActorId;
   label: string;
+  currencyType: CurrencyType;
   amount: number;
   access: PurseAccess;
 }

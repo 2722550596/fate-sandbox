@@ -131,9 +131,9 @@ void test("spend-money by callerActorId throws when multiple held purses exist",
     ownerActorId: "protagonist",
     label: "备用现金",
     amount: 50,
+    currencyType: "loen",
     access: "held",
   });
-
   assert.throws(
     () =>
       updateEconomy(draft, {

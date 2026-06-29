@@ -1,5 +1,5 @@
 {
-  "nextId": 74,
+  "nextId": 83,
   "items": [
     {
       "id": 1,
@@ -407,6 +407,60 @@
       "content": "C14: renderer intercomEvent support",
       "done": false,
       "created": 1782687373
+    },
+    {
+      "id": 74,
+      "content": "1: create economy-denomination.ts (parseAmountString + formatAmount)",
+      "done": true,
+      "created": 1782699328
+    },
+    {
+      "id": 75,
+      "content": "2: update MoneyPurse type in state.ts (add currencyType)",
+      "done": true,
+      "created": 1782699328
+    },
+    {
+      "id": 76,
+      "content": "3: update economy-schema.ts (amount: string|number, remove currencyType from events)",
+      "done": true,
+      "created": 1782699328
+    },
+    {
+      "id": 77,
+      "content": "4: update economy.ts (remove RMB conversion, use parseAmountString)",
+      "done": true,
+      "created": 1782699328
+    },
+    {
+      "id": 78,
+      "content": "5: update update-economy.ts tool (normalize + description)",
+      "done": true,
+      "created": 1782699328
+    },
+    {
+      "id": 79,
+      "content": "6: update initial-state.ts + initialize-new-game.ts",
+      "done": true,
+      "created": 1782699328
+    },
+    {
+      "id": 80,
+      "content": "7: update public-projection.ts (formatAmount display)",
+      "done": true,
+      "created": 1782699328
+    },
+    {
+      "id": 81,
+      "content": "8: update tests",
+      "done": true,
+      "created": 1782699328
+    },
+    {
+      "id": 82,
+      "content": "9: format, typecheck, lint, test",
+      "done": true,
+      "created": 1782699328
     }
   ]
 }

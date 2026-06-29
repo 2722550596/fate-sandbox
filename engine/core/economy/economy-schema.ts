@@ -38,14 +38,13 @@ export const ECONOMY_EVENT_KINDS = [
 ] as const;
 const ECONOMY_EVENT_KIND_SCHEMA = stringEnumSchema(ECONOMY_EVENT_KINDS);
 
-const NON_NEGATIVE_AMOUNT_SCHEMA = Type.Integer({ minimum: 0 });
+const AMOUNT_SCHEMA = Type.Union([Type.Integer({ minimum: 0 }), Type.String({ minLength: 1 })]);
 
 export const SPEND_MONEY_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("spend-money"),
   purseId: Type.Optional(Type.String({ minLength: 1 })),
   callerActorId: Type.Optional(Type.String({ minLength: 1 })),
-  amount: NON_NEGATIVE_AMOUNT_SCHEMA,
-  currencyType: Type.Optional(CURRENCY_TYPE_SCHEMA),
+  amount: AMOUNT_SCHEMA,
   reason: Type.String({ minLength: 1 }),
 });
 
@@ -53,8 +52,7 @@ export const GAIN_MONEY_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("gain-money"),
   purseId: Type.Optional(Type.String({ minLength: 1 })),
   callerActorId: Type.Optional(Type.String({ minLength: 1 })),
-  amount: NON_NEGATIVE_AMOUNT_SCHEMA,
-  currencyType: Type.Optional(CURRENCY_TYPE_SCHEMA),
+  amount: AMOUNT_SCHEMA,
   source: MONEY_GAIN_SOURCE_SCHEMA,
   counterparty: Type.String({ minLength: 1 }),
   reason: Type.String({ minLength: 1 }),
@@ -64,7 +62,7 @@ export const ADD_PURSE_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("add-purse"),
   ownerActorId: Type.String({ minLength: 1 }),
   label: Type.String({ minLength: 1 }),
-  amount: NON_NEGATIVE_AMOUNT_SCHEMA,
+  amount: AMOUNT_SCHEMA,
   currencyType: Type.Optional(CURRENCY_TYPE_SCHEMA),
   access: PURSE_ACCESS_SCHEMA,
   reason: Type.String({ minLength: 1 }),
@@ -82,7 +80,7 @@ export const ADD_DEBT_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("add-debt"),
   debtorActorId: Type.String({ minLength: 1 }),
   creditor: Type.String({ minLength: 1 }),
-  amount: NON_NEGATIVE_AMOUNT_SCHEMA,
+  amount: AMOUNT_SCHEMA,
   reason: Type.String({ minLength: 1 }),
 });
 
