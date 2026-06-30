@@ -49,22 +49,7 @@ export function commitTurnTool(params: unknown, sessionManager: unknown): ToolRe
 export const commitTurnToolDefinition: DomainToolDefinition = {
   name: "commit_turn",
   description:
-    "State 层收口：每轮叙事结束时一次性提交本轮全部机械状态变化。\n\n" +
-    "设计逻辑：一轮 GM 回复内只能调一次，用 events[] 数组聚合本轮所有领域事件\n" +
-    "（时间/场景/伤势/物品/资金/记忆/序列），一次落地。它是 state 层面的\n" +
-    "「写」入口——没有它，时钟不推进、turn log 为空、backstage 义务不触发。\n" +
-    "它不是最终收尾工具——调完 commit_turn 后还需调 submit_direction_packet\n\n" +
-    "【使用边界】\n" +
-    "- 每轮必调一次，events 数组一次打包本轮所有状态变化\n" +
-    "- 顶层 time 必填（elapsed / travel）；时间推进不走 events\n" +
-    "- 同一事件内可混写多种 kind（例：scene.set-location + economy.spend-money + memory.pin-fact）\n" +
-    "- Scene Beat 开启/收口走 progress_scene_beat，不走这里\n" +
-    "- resolve_combat 登记的义务必须在 events 里落地\n\n" +
-    "禁区：\n" +
-    "- 同一回复内调多次（你只用调一次打包就行）\n" +
-    "- 在 events 里写时间或移动（走顶层 time）\n" +
-    "- 把它当裸 patch 用（必须表达领域事件语义）\n" +
-    "- 提交隐藏事实到 public（你应该通过 reveal_secret 控制曝露）",
+    '每轮叙事结束时，用这个工具一次性提交本轮所有状态变化。把这轮里发生的各种变化——经济收支、记忆记录、角色状态、场景更新——打包放进 events 数组。每轮只能调一次。\n\n时间推进：顶层 time 必填，elapsedMinutes >= 1（即使感觉只过了瞬间也至少 1 分钟）。时间推进是独立的，不要写在 events 里。\n地点移动：用 time.kind=travel，不用写 events。\n\nevents 数组示例：\n  { kind: "economy", event: { purseId: "purse-xxx", amount: 9, reason: "买面包" } }\n  { kind: "memory", event: { kind: "pin-fact", scope: "protagonist", text: "..." } }\n  { kind: "actor-condition", event: { kind: "add-affliction", actorId: "...", ... } }\n\n允许的 event kind：\n- scene：场景更新（如添加威胁、解决目标）\n- scene-presence：调整当前场景的在场 NPC\n- actor-condition：给角色添加/移除状态效果或装备\n- outfit：更换角色的外貌/着装\n- acting：记录角色的非凡特征行为\n- sequence：更新角色的非凡途径/序列信息\n- economy：经济收支\n- memory：记录记忆或钉住关键事实\n\n【什么时候用】\n- 每轮叙事正文写完之后，把该落地的状态变化一次性提交\n- events 里可以混写多种 kind，同一种也可以写多条\n\n【注意区分】\n- Scene Beat 的开启和收口用 progress_scene_beat，不是 commit_turn\n- 隐藏事实不要直接写到 public 状态里——用 reveal_secret 控制曝露时机\n\n【不要这样做】\n- 同一回复里调多次 commit_turn（一轮只有一次）\n- 在 events 里写时间推进或地点移动（走顶层 time）\n- 把 commit_turn 当成裸 JSON patch 用——每个 event 应该表达一个有意义的领域变化',
   parameters: Type.Object({
     summary: Type.Optional(
       Type.String({
@@ -80,7 +65,7 @@ export const commitTurnToolDefinition: DomainToolDefinition = {
         }),
         event: Type.Unknown({
           description:
-            "对应领域事件载荷；scene event 不包含时间/移动；resolve-objective 只用于当前目标",
+            "领域事件载荷，格式取决于 kind：scene→{kind,title?,objectives?...} 、economy→{kind,amount,...} 、memory→{kind,scope,text,...} 等。不包含时间/移动。",
         }),
       }),
     ),

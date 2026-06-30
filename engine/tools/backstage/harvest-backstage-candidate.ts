@@ -49,10 +49,10 @@ export function harvestBackstageCandidateTool(
 function buildGuidance(candidate: ParallelLineOutput): string {
   const lands = candidate.outcome === "progress" || candidate.outcome === "escalation";
   const path = lands
-    ? "审查通过后用 record_offscreen_event 落地（lineId/actorIds/timeRange 照抄；privateSummary→summary；secretStateChanges→consequences；futureHooks→futureHooks；从 activePressurePalette 选 slot 填 pressureType/可选 pressureSlotId）。落地即清掉最旧一条后台义务。"
-    : `候选 outcome=${candidate.outcome}：经审查确无可落地进展时，用 resolve_backstage_line 记录 no-change / blocked（窄结构化理由）。`;
+    ? "审查通过后，用 record_offscreen_event 落地到幕后状态里（把候选中的信息对应填进去：summary 写事件概述、consequences 写后果、futureHooks 写后续线索）。落地会自动清掉一条后台待办提醒。"
+    : `候选判定为 outcome=${candidate.outcome}：经审查确认确实没有值得落地的新进展时，用 resolve_backstage_line 记录理由（no-change/blocked）。`;
   return [
-    "backstage 候选已通过 engine 验收（ParallelLineOutput 结构合法）。",
+    "后台候选已通过结构验收，可以审查了。",
     `- lineId: ${candidate.lineId}`,
     `- outcome: ${candidate.outcome}`,
     `- actorIds: ${candidate.actorIds.join(", ") || "(none)"}`,
@@ -62,7 +62,7 @@ function buildGuidance(candidate: ParallelLineOutput): string {
       ? `- riskFlags: ${candidate.riskFlags.join("; ")}`
       : "- riskFlags: (none)",
     "",
-    "禁区：privateSummary / secretStateChanges 不得原样展示给玩家；publicLeakCandidates 才是玩家安全投影。",
+    "注意：候选中的 privateSummary 和 secretStateChanges 不得直接展示给玩家——只有 publicLeakCandidates 中的内容才是玩家可以安全感知到的投影。",
     path,
   ].join("\n");
 }
@@ -70,16 +70,7 @@ function buildGuidance(candidate: ParallelLineOutput): string {
 export const harvestBackstageCandidateToolDefinition: DomainToolDefinition = {
   name: "harvest_backstage_candidate",
   description:
-    "按 run_id 从 director 的持久 session 取回裸候选并过 engine 验收，返回结构合法的 ParallelLineOutput 供审查后落地。\n\n" +
-    "【使用边界】\n" +
-    "- run_parallel_line 异步起 director 后，隔轮（约 10-20s）用其返回的 run_id 调本工具；engine 自动定位 session、抽取候选、做结构校验\n" +
-    "- run 尚未产出候选 / run_id 不存在会报错：稍后重试或核对 run_id\n" +
-    "- 验收失败（非法 JSON / 缺字段）会报错：重开 director 或修正后重试\n" +
-    "流程：run_parallel_line（异步）→ 隔轮 harvest_backstage_candidate(run_id) 验收 → 审查 → record_offscreen_event / resolve_backstage_line 落地清账。\n\n" +
-    "禁区：\n" +
-    "- 跳过验收直接落地未经结构校验的候选\n" +
-    "- 把 privateSummary 原样展示给玩家\n" +
-    "- 本工具不落地、不改 canonical state；落地用 record_offscreen_event / resolve_backstage_line",
+    "取回后台导演产出的候选取回审查。\n\nrun_parallel_line 启动后台导演后，导演会在后台异步运行。隔一轮后用 run_parallel_line 返回的 run_id 调这个工具，引擎会自动定位到导演的 session、取出它的输出、并且做结构验收。\n\n【什么时候用】\n- 调完 run_parallel_line 后隔一轮（约 10-20 秒），用返回的 run_id 取候选\n\n操作流程：\n1. run_parallel_line（异步启动）\n2. → 隔一轮调 harvest_backstage_candidate(run_id) 验收\n3. → 审查输出 → 有进展：record_offscreen_event 落地 / 没进展：resolve_backstage_line 清账\n\n常见错误：\n- run 还没产出候选或 run_id 不对：稍后重试或核对 run_id\n- 验收失败（JSON 格式或字段不完整）：重新启动导演或修正后重试\n\n【不要这样做】\n- 不经过验收就直接落地未经结构校验的候选\n- 把候选中的 privateSummary 原样展示给玩家\n- 这个工具只取回内容，不做落地——落地用 record_offscreen_event 或 resolve_backstage_line",
   parameters: Type.Object({
     run_id: Type.String({
       description:

@@ -56,12 +56,13 @@ export function runParallelLineTool(params: unknown, sessionManager: unknown): T
     }),
     message: ({ handle: h }) =>
       [
-        "后台 director 已【异步起飞】（engine 直接 fork hermetic pi -p，不经主循环、不阻塞本回合）：",
+        "后台导演已经启动（异步运行中，不阻塞本轮叙事）：",
         `  run_id=${h.runId}  model=${h.model}  session_dir=${h.sessionDir}  pid=${h.pid ?? "?"}`,
         "",
-        `隔轮（约 10-20s 后）用 run_id=${h.runId} 调 harvest_backstage_candidate（engine 自动取回，无需手动读 session / inspect）→`,
-        "审查 → record_offscreen_event（progress/escalation，落地即清义务）",
-        "或 resolve_backstage_line（no-change/blocked）。导演失败/未起不算清账。",
+        "下一步：隔一轮（约 10-20 秒后）用 run_id 调 harvest_backstage_candidate 取回导演的输出 →",
+        "审查 → 有进展用 record_offscreen_event 落地（落地即自动清掉待办提醒）",
+        "或确认无进展用 resolve_backstage_line 清账（no-change/blocked）。",
+        "注意：导演失败或还没跑完不算清账，你需要再试一次。",
       ].join("\n"),
   });
 }
@@ -130,15 +131,7 @@ function optionalBoolean(value: unknown): boolean | undefined {
 export const runParallelLineToolDefinition: DomainToolDefinition = {
   name: "run_parallel_line",
   description:
-    "engine 装配 hermetic director prompt 并【直接异步 fork 后台导演】（detached pi -p，不经主循环、不阻塞）。GM 只给 lineId + timeWindow + 可选偏好，一次调用即起异步后台线。\n\n" +
-    "【使用边界】\n" +
-    "- 需推进后台世界线，不想手写全部 ParallelLineInput\n" +
-    "- gm-tool-policy 触发 parallel-line（跳时 >10-30min、beat 关闭、连续 2 轮无代价）\n" +
-    "流程：调 run_parallel_line（引擎自动起后台导演）→ 隔轮从 session_dir 取裸候选 → harvest_backstage_candidate 验收 → 审查 → record_offscreen_event / resolve_backstage_line 落地。你不需要手动 spawn。\n\n" +
-    "禁区：\n" +
-    "- 绕过 engine 装配手写完整 ParallelLineInput / director prompt\n" +
-    "- 把 privateFacts / privateSummary 原样写进玩家可见正文\n" +
-    "- 不过 harvest_backstage_candidate 验收就落地",
+    "启动一个后台导演（子代理）来推演幕后世界的动向。\n\n你只需要给一条后台线的标识（比如「廷根值夜者巡逻线」）和一个时间窗口，引擎会自动 fork 一个独立子代理去推演那段时间里幕后发生了什么——NPC 势力怎么动、有什么变数、是否升级。整个过程不阻塞本轮叙事，你可以继续写正文。\n\n【什么时候用】\n- 需要推进后台世界线，但不想手动推演全部细节\n- 长时间跳过后（>30 分钟）、Beat 收口后、连续多轮玩家不消耗资源时——这些时机系统会提示你该跑后台了\n\n操作流程：\n1. 调 run_parallel_line → 引擎自动 fork 后台导演（异步，不阻塞本轮）\n2. 隔一轮（约 10-20 秒后）用返回的 run_id 调 harvest_backstage_candidate 取回导演的输出\n3. 审查输出 → 有进展用 record_offscreen_event 落地 → 没进展用 resolve_backstage_line 清账\n\n【不要这样做】\n- 不要把子代理返回的 privateFacts / privateSummary 原样写进玩家可见的正文里\n- 不要绕过 harvest_backstage_candidate 的验收就直接落地\n- 不要手写完整的 ParallelLineInput 来绕过引擎装配的导演 prompt",
   parameters: Type.Object({
     lineId: Type.String({
       description: "后台线标识，如 tingen-nightwatch-patrol、backlund-machinery-investigation",

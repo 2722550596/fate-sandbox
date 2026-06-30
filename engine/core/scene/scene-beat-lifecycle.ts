@@ -234,7 +234,7 @@ function formatBeginMessage(time: SceneEventResult, beat: SceneBeatResult): stri
   return [
     time.message,
     beat.message,
-    "叙事节奏：此工具已开启新的自然接续局面；接下来应停止压入下一前台冲突，写出入口压力和可接点。",
+    "叙事节奏提醒：你刚刚用 progress_scene_beat begin 开启了一个新的 Scene Beat，已经为接下来的叙事铺好了舞台。\n这个回复里不应该再继续推进另一个前台冲突——接下来该做的是把入口写活：\n- 这个 Beat 为什么紧迫、诱人、或者让玩家不得不接？（入口压力）\n- 玩家角色在这个 Beat 里能做什么、往哪个方向走？（可接点）\n\n让新 Beat 的入口本身成为正文的焦点，而不是匆匆开场就跳到下一段。",
   ].join("\n");
 }
 
@@ -256,7 +256,7 @@ function formatCompleteMessage(
     lines.push(situation.message);
   }
   lines.push(
-    "叙事节奏：此工具已收口当前 beat；除必要修复或后台落点外，不要在同一回复继续游玩 nextBeat。最终正文需写足收口过程、代价、NPC 反应与自然可接的新局面。",
+    "叙事节奏提醒：你刚刚收口了当前的 Scene Beat。即使你传入了 nextBeat 参数，也请注意：\n\n不要在这个回复里直接继续游玩下一个 Beat。收口之后的正文应该写足这些：\n- 收口的过程：这个 Beat 的目标是如何了结的？\n- 代价：角色付出了什么（资源、伤势、人情、时间）？\n- NPC 的反应：在场所见者对结局有什么态度、对白或行动？\n- 自然浮现的新局面：Beat 收口后场景里出现的下一段走向，让玩家知道接下来可以做什么。\n\n让当前 Beat 的结尾成为一轮完整的叙事收束，而不是匆匆过场跳到下一段。下一段戏留到下一轮再演。",
   );
   return lines.join("\n");
 }

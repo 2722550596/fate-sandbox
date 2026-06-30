@@ -1,17 +1,3 @@
-/**
- * Backstage world-motion obligation ledger（backlog #5 runtime 闭环）。
- *
- * 问题：parallel-line 触发条件命中很多次，实际调用 0 次——后台世界运动只靠
- * prompt/audit 自觉，无人看守。
- *
- * 方案（纯账本 + 延迟硬阻断，全在 engine/tool 层，不依赖子代理同步调用）：
- * - canonical turn 收尾时按可检测核心集评估触发器，命中即生成一条 backstage
- *   obligation（独立于 public obligations，落在 secrets）。
- * - 下一 canonical turn 开始前若仍有未清账的 obligation，硬拒绝提交。
- * - 清账只能由显式动作完成：record_offscreen_event 落地候选（outcome=landed），
- *   或 resolve_backstage_line 记录经审查的 no-change / blocked。子代理失败不清账。
- */
-
 import type {
   BackstageObligation,
   BackstageResolutionOutcome,
@@ -131,22 +117,22 @@ function formatTriggerSummary(
 ): string {
   switch (trigger) {
     case "beat-complete":
-      return "Scene Beat 收口：后台世界线应同步推进一次。";
+      return "Scene Beat 收口了——幕后的世界也该跟着推进一轮。用 run_parallel_line 跑个后台导演，或者自己推演后 record_offscreen_event。";
     case "time-advance":
-      return `本轮推进 ${input.elapsedMinutes} 分钟（≥${BACKSTAGE_BIG_TIME_ADVANCE_MINUTES}）：后台世界线应同步推进一次。`;
+      return `本轮推进了 ${input.elapsedMinutes} 分钟（≥${BACKSTAGE_BIG_TIME_ADVANCE_MINUTES} 分钟触发阈值）——时间跨度够大，幕后的世界也该同步推进一轮。`;
     case "no-cost-streak":
-      return `连续 ${BACKSTAGE_NO_COST_STREAK_LIMIT} 轮无机械代价：后台世界线应考虑推进一次。`;
+      return `连续 ${BACKSTAGE_NO_COST_STREAK_LIMIT} 轮都没有消耗资源或产生代价——幕后的世界应该有点动静了。考虑跑一轮后台线。`;
     default:
-      return "后台世界线应推进一次。";
+      return "有后台待处理。先处理再开始新的一轮。";
   }
 }
 
 function formatOpenBackstageObligations(obligations: readonly BackstageObligation[]): string {
   return [
-    "存在未清账的后台世界推进义务，拒绝开始新的 canonical turn。先推进后台世界线：",
+    "存在未处理的后台世界线推进提醒，无法开始新的一轮。请先处理后台：",
     ...obligations.map((entry) => `- [${entry.trigger}] ${entry.summary}`),
-    "清账方式：",
-    "通过子代理 dispatch novel_analyst 查阅原著相关章节作为参考，GM 自行判断后台势力在该时间窗口内的合理进展，用 record_offscreen_event 落地。",
-    "每条 record_offscreen_event 落地自动清掉一条义务。",
+    "处理方式：",
+    "用 record_offscreen_event 记录幕后发生的事件（有真实进展时），或用 resolve_backstage_line 确认本轮无变化（no-change/blocked）。",
+    "每条 record_offscreen_event 落地后会自动清掉一条待办。",
   ].join("\n");
 }

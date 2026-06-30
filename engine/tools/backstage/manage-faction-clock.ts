@@ -153,18 +153,7 @@ const EXTEND_DUE_VALIDATOR = Compile(EXTEND_DUE_SCHEMA);
 export const manageFactionClockToolDefinition: DomainToolDefinition = {
   name: "manage_faction_clock",
   description:
-    "管理幕后阵营进度钟与到期义务。时钟与到期事件对玩家不可见；到期或填满时 canonical commit 会催账。\n\n" +
-    "【使用边界】\n" +
-    "- 幕后势力开始持续行动线：upsert-clock\n" +
-    "- 幕后势力有实质进展：advance-clock\n" +
-    "- 未来某时必然发生的事：schedule-event\n" +
-    "- commit 返回催账时：resolve-due 或 extend-due\n" +
-    "- 时钟填满后：先兑现格局变化，再 reset-clock 或 retire-clock\n\n" +
-    "禁区：\n" +
-    "- 直接把时钟内容或到期事件写给玩家\n" +
-    "- 无理由 advance\n" +
-    "- 用 extend-due 无限拖延\n" +
-    "- 时钟填满后只归零不兑现变化",
+    "管理幕后势力的进度钟和预定的到期事件。\n\n这就像你桌上摆的 GM 笔记——记录着某个 NPC 势力正在暗中推进的计划还有多久完成、某件必然会发生的事预计什么时候触发。这些时钟和到期事件只记录在幕后状态里，玩家看不到。当时钟填满或事件到期时，系统会提醒你处理。\n\n【各操作说明】\n- upsert-clock：创建一个新的进度钟，或更新已有的（比如「教会调查进度 0/6」）\n- advance-clock：推进某个进度钟的进度（比如调查有突破了 +2）\n- reset-clock：时钟填满后，兑现一次格局变化，然后归零（比如教会终于查到了线索）\n- retire-clock：这个进度线已经结束了，移除这个时钟\n- schedule-event：预定一个未来必然会发生的事件（比如「3 天后神秘聚会」）\n- resolve-due：到期事件发生了，记录结果并移除\n- extend-due：到期事件还没准备好触发，延期到更晚\n\n【不要这样做】\n- 把时钟内容或到期事件直接写进玩家可见的正文里\n- 没有合理依据就推进时钟\n- 用 extend-due 无限拖延同一件事\n- 时钟填满后只归零不兑现格局变化",
   parameters: Type.Object({
     kind: Type.String({
       description:

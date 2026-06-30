@@ -20,15 +20,7 @@ export function setScenePresenceTool(params: unknown, sessionManager: unknown): 
 export const setScenePresenceToolDefinition: DomainToolDefinition = {
   name: "set_scene_presence",
   description:
-    "更新当前场景在场 actor 与同行者；materialization 与 physical presence 分离，避免 upsert_actor 兼做入/离场。\n\n" +
-    "【使用边界】\n" +
-    "- 已存在 actor 入场/离场/同行者变化\n" +
-    "- upsert_actor materialize 新 actor 后声明是否在场\n" +
-    "- 场景切换但不需 progress_scene_beat\n\n" +
-    "禁区：\n" +
-    "- 写入不存在的 actorId（先用 upsert_actor materialize）\n" +
-    "- 用 upsert_actor 暗示在场变化\n" +
-    "- 把秘密角色/Hidden Fact 暴露到 Public Actor Registry",
+    "更新当前场景的在场角色和同行者名单。谁在场、谁不在场——用这个工具声明，不要用 upsert_actor 或 update_scene 顺带处理。\n\n【什么时候用】\n- 已有角色入场、离场\n- 用 upsert_actor 创建新角色后，声明他是否在当前场景中\n- 场景切换但不需要开启新的 Scene Beat 时\n\n【不要这样做】\n- 写入不存在的 actorId（先用 upsert_actor 创建角色）\n- 用 upsert_actor 隐含地在场变化\n- 把秘密角色或隐藏身份暴露到公开角色列表里",
   parameters: Type.Object({
     presentActorIds: Type.Array(Type.String()),
     allyActorIds: Type.Array(Type.String()),

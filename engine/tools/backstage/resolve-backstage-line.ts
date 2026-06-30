@@ -60,13 +60,7 @@ function parseInput(params: unknown): BackstageResolutionInput {
 export const resolveBackstageLineToolDefinition: DomainToolDefinition = {
   name: "resolve_backstage_line",
   description:
-    "清掉一条未清账的后台世界推进义务——仅用于经审查确认本轮后台无可落地推进的情形。\n\n" +
-    "【使用边界】\n" +
-    "- run_parallel_line / parallel-line 子代理审查后判定 no-change（确无新进展）或 blocked（被设定/beat 阻断）\n" +
-    "- 有真实后台进展时不要用本工具，用 record_offscreen_event 落地\n\n" +
-    "禁区：\n" +
-    "- 子代理失败/未调用就用本工具糊弄清账\n" +
-    "- 用它替代 record_offscreen_event 落地真实事件",
+    "确认本轮后台确实没有值得记录的新进展，把待办提醒清掉。\n\n系统会在特定时机提醒你推进后台世界线（Beat 收口后、长时间跳过后等）。如果你审查后确认这个时间窗口里确实没有值得记录的新事件，用这个工具告诉系统「知道了，确实没发生什么」，把提醒清掉。\n\n【什么时候用】\n- 审查了后台线，确认最近这个时间窗口内确实没有任何有意义的新进展（no-change）\n- 或者当前剧情设定 / Beat 边界天然阻止了后台线在这个窗口内推进（blocked）\n\n注意：如果后台真的有新进展，不要用这个工具糊弄——用 record_offscreen_event 落地真实事件。\n\n【不能这样做】\n- 子代理还没跑完或者失败了就用这个工具糊弄清账\n- 用它替代 record_offscreen_event 来抹掉真实的后台进展",
   parameters: Type.Object({
     outcome: Type.String({ description: "no-change / blocked" }),
     reasonCode: Type.String({

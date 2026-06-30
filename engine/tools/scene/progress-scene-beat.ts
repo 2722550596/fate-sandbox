@@ -23,13 +23,13 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
       // 延迟硬阻断：上一轮触发的后台推进义务未清账则拒绝本次 canonical turn。
       assertNoOpenBackstageObligation(draft);
       const result = progressSceneBeat(draft, input);
-      // canonical commit 对账点：裁决义务未清账则拒绝提交（backlog #4）
-      assertNoOpenObligations(draft);
+      // canonical commit 对账点：complete 时必须清账，begin 放行（begin 后才可清账）
+      if (input.kind === "complete") assertNoOpenObligations(draft);
       // beat 转换是 canonical turn：收口触发后台推进义务。
       recordCanonicalTurnForBackstage(draft, {
         elapsedMinutes: input.time.elapsedMinutes,
         hasCost: true,
-        beatBoundary: input.kind === "complete",
+        beatBoundary: input.kind === "complete" && draft.public.scene.threats.length > 0,
       });
       // 幕后催账：到期义务/填满时钟 + 待 harvest 的后台 run 随返回值提醒（backlog #3）
       return {
@@ -52,25 +52,23 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
 export const progressSceneBeatToolDefinition: DomainToolDefinition = {
   name: "progress_scene_beat",
   description:
-    "推进 Scene Beat lifecycle：用 begin 开启有界行动窗口，用 complete 收口当前 beat。\n\n" +
-    "【使用边界】\n" +
-    "- 复杂调查、潜入、对峙、撤退、战斗准备等场景用 kind=begin\n" +
-    "- 当前 beat 收口、解决目标、清理威胁、可选进入 nextBeat 时用 kind=complete\n" +
-    "- begin / complete 都必须填写 time\n\n" +
-    "禁区：\n" +
-    "- 用它记录长期目标或幕后真相\n" +
-    "- 在当前无剧情窗口或无目标时强行 complete\n" +
-    "- complete 后继续压入下一 foreground beat",
+    "开启或收口一个 Scene Beat（叙事段落）。\n\nScene Beat 是「有明确目标和边界的叙事单元」——比如一场对峙、一次潜入、一场谈判、一段调查。\n用 begin 开启一段新的叙事段落，设定目标与局势；用 complete 收口它，记录结果与后续走向。\n\n【begin vs complete 字段速查】\n  kind=begin 必填：title（标题）, objectives（目标列表）, purpose（为什么进入这个 Beat）, time（时间推进）, situation（局势类型）\n  kind=complete 必填：outcome（收口结果）, time（时间推进）\n  kind=begin 可选：beatId, actionPolicy, threats, presence\n  kind=complete 可选：nextBeat（下一段叙事）, memory（战役记忆）, presence, situation\n\n【什么时候用】\n- begin：调查现场、潜入据点、与关键 NPC 对峙、撤退、准备战斗——总之需要明确目标的场景段落\n- complete：当前 Beat 的目标已经解决或不可达了，收口并记录结果；可以选传入 nextBeat 顺滑过渡到下一段\n- begin 和 complete 都必须携带 time，elapsedMinutes >= 1（即使感觉很短的互动也至少 1 分钟）\n\n【不要这样做】\n- 不要用它记录长期目标或幕后真相（那属于 offscreen 事件或秘密配置）\n- 当前没有活跃 Beat 时不要强行 complete\n- complete 之后不要在同一回复里继续推进下一个前台冲突——那属于下一轮",
   parameters: Type.Object({
     kind: Type.String({ description: "begin / complete" }),
     title: Type.Optional(Type.String({ description: "begin 必填：beat 标题" })),
     objectives: Type.Optional(
-      Type.Array(Type.String({ description: "begin/nextBeat 必填：1-5 个玩家可见目标" })),
+      Type.Array(
+        Type.String({ description: "begin/nextBeat 必填：这个 Beat 的目标列表，1-5 条，玩家可见" }),
+      ),
     ),
-    purpose: Type.Optional(Type.String({ description: "begin 必填：进入原因" })),
-    outcome: Type.Optional(Type.String({ description: "complete 必填：收口结果" })),
+    purpose: Type.Optional(
+      Type.String({ description: "begin 必填：为什么要进入这个 Beat？发生了什么导致它开启？" }),
+    ),
+    outcome: Type.Optional(
+      Type.String({ description: "complete 必填：这个 Beat 如何结束的？目标达成还是不了了之？" }),
+    ),
     time: timePolicySchema(),
-    beatId: Type.Optional(Type.String({ description: "可选；begin 省略时自动生成" })),
+    beatId: Type.Optional(Type.String({ description: "可选，省略时自动生成" })),
     actionPolicy: Type.Optional(sceneBeatActionPolicySchema()),
     threats: Type.Optional(
       Type.Array(
@@ -85,7 +83,8 @@ export const progressSceneBeatToolDefinition: DomainToolDefinition = {
     memory: Type.Optional(sceneBeatMemorySchema()),
     nextBeat: Type.Optional(
       Type.Unknown({
-        description: "complete 可选：下一 Scene Beat 对象或 null",
+        description:
+          "complete 可选：收口后直接进入下一段叙事。传一个对象，包含 title, objectives, 可选 threats/presence/situation 等。传 null 表示没有下一段。",
       }),
     ),
   }),

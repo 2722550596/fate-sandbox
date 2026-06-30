@@ -46,15 +46,7 @@ function assertNotPlayerKnown(params: unknown): void {
 export const recordOffscreenEventToolDefinition: DomainToolDefinition = {
   name: "record_offscreen_event",
   description:
-    "写入玩家不可见或仅预示的幕后事件；用于平行线 subagent 候选落地。\n\n" +
-    "【使用边界】\n" +
-    "- 平行线 subagent 返回的 offscreen/secret 事件要成为 canonical secret state\n" +
-    "- NPC 阵营在视野外侦察/准备/转移/调结界/传令\n" +
-    "- 保存 future hooks 但暂不入 public memory\n\n" +
-    "禁区：\n" +
-    "- 写入 player-known（公开事实用 record_memory 或对应 update 工具）\n" +
-    "- 把 privateSummary 原样展示给玩家\n" +
-    "- 越过剧情窗口或违反 forbiddenEscalations",
+    "记录玩家看不到的幕后事件。\n\nNPC 阵营在视野外做了什么、暗中的侦察和准备、未来可能浮出水面的线索——这些都可以通过这个工具记录到秘密状态里。玩家不会直接看到这些内容，但可以通过剧情中的蛛丝马迹（传闻、梦境、异常投影、后果）间接感知到。\n\n【什么时候用】\n- 后台导演（subagent）产出的候选事件要落地到状态里\n- NPC 阵营在玩家视野外行动：侦察、准备、转移、调动、传令\n- 记录未来可能触发的线索或 hook，但暂时不公开到玩家记忆里\n\n【visibility 含义】\n- secret：完全隐藏，玩家不应知道\n- foreshadowed：玩家可能会通过梦境、传闻、异常波动等方式有所感知，但不确定具体内容\n\n【不要这样做】\n- 不要写入玩家已经知道的事实（那属于 record_memory 或其他 update 工具）\n- 不要把 privateSummary 原样展示给玩家\n- 不要越过剧情窗口的边界或违反 forbiddenEscalations",
   parameters: Type.Object({
     lineId: Type.String(),
     actorIds: Type.Array(Type.String()),
