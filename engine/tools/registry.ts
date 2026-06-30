@@ -14,6 +14,7 @@ import { updateActorOutfitToolDefinition } from "./actor/update-actor-outfit.ts"
 import { upsertActorToolDefinition } from "./actor/upsert-actor.ts";
 import { recordOffscreenEventToolDefinition } from "./backstage/record-offscreen-event.ts";
 import { clearBackstageLockToolDefinition } from "./debug/clear-backstage-lock.ts";
+import { clearObligationToolDefinition } from "./debug/clear-obligation.ts";
 import { debugSignalToolDefinition } from "./debug/debug-signal.ts";
 import { getStateSchemaToolDefinition } from "./debug/get-state-schema.ts";
 import { overrideLockedFactToolDefinition } from "./debug/override-locked-fact.ts";
@@ -76,7 +77,7 @@ const TOOL_DEFINITIONS: readonly DomainToolDefinition[] = [
   patchStateToolDefinition,
   overrideLockedFactToolDefinition,
   clearBackstageLockToolDefinition,
-
+  clearObligationToolDefinition,
   debugSignalToolDefinition,
   lookupAbilityToolDefinition,
   lookupSequenceToolDefinition,

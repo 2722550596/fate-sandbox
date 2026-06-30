@@ -59,7 +59,7 @@ void test("configureSecret actor-beyonder configures secrets for valid actor", (
     kind: "actor-beyonder",
     reason: "初始化角色秘密",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "我可以占卜未来", revealConditions: ["占卜", "预言"] }],
+    secrets: [{ value: "我可以占卜未来", revealCondition: "占卜、预言" }],
   });
 
   assert.match(result.message, /非凡者秘密已配置/);
@@ -77,8 +77,8 @@ void test("configureSecret actor-beyonder configures multiple secrets", () => {
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
     secrets: [
-      { value: "我可以占卜未来", revealConditions: ["占卜", "预言"] },
-      { value: "我知道源质的本质", revealConditions: ["源质"] },
+      { value: "我可以占卜未来", revealCondition: "占卜、预言" },
+      { value: "我知道源质的本质", revealCondition: "源质" },
     ],
   });
 
@@ -95,7 +95,7 @@ void test("configureSecret actor-beyonder throws for nonexistent actor", () => {
         kind: "actor-beyonder",
         reason: "初始化",
         actorId: "nonexistent",
-        secrets: [{ value: "秘密", revealConditions: ["条件"] }],
+        secrets: [{ value: "秘密", revealCondition: "条件" }],
       }),
     /actor 不存在/,
   );
@@ -109,19 +109,19 @@ void test("configureSecret actor-beyonder merges reveal conditions on reconfigur
     kind: "actor-beyonder",
     reason: "首次配置",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "我可以占卜未来", revealConditions: ["占卜"] }],
+    secrets: [{ value: "我可以占卜未来", revealCondition: "占卜" }],
   });
 
   configureSecret(draft, {
     kind: "actor-beyonder",
-    reason: "补充条件",
+    reason: "重新配置时覆盖 revealCondition",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "我可以占卜未来", revealConditions: ["预言"] }],
+    secrets: [{ value: "我可以占卜未来", revealCondition: "预言" }],
   });
 
   const slot = draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.beyonderSecrets[0];
   assert.ok(slot);
-  assert.deepEqual(slot?.revealConditions, ["占卜", "预言"]);
+  assert.strictEqual(slot?.revealCondition, "预言");
 });
 
 void test("configureSecret actor-beyonder works for human actor (no sequence required)", () => {
@@ -131,7 +131,7 @@ void test("configureSecret actor-beyonder works for human actor (no sequence req
     kind: "actor-beyonder",
     reason: "预配",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "疑似与非凡有关", revealConditions: ["非凡"] }],
+    secrets: [{ value: "疑似与非凡有关", revealCondition: "非凡" }],
   });
 
   assert.match(result.message, /非凡者秘密已配置/);
@@ -148,14 +148,14 @@ void test("configureSecret actor-private configures private secrets", () => {
     kind: "actor-private",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "寻找罗塞尔日记", revealConditions: ["日记"] }],
+    secrets: [{ value: "寻找罗塞尔日记", revealCondition: "日记" }],
   });
 
   assert.match(result.message, /actor secrets 已配置/);
   const slot = draft.secrets.actorStates[PROTAGONIST_ACTOR_ID]?.secrets?.privateMotives;
   assert.equal(slot?.length, 1);
   assert.equal(slot?.[0]?.value, "寻找罗塞尔日记");
-  assert.deepEqual(slot?.[0]?.revealConditions, ["日记"]);
+  assert.strictEqual(slot?.[0]?.revealCondition, "日记");
 });
 
 void test("configureSecret actor-private throws for nonexistent actor", () => {
@@ -167,7 +167,7 @@ void test("configureSecret actor-private throws for nonexistent actor", () => {
         kind: "actor-private",
         reason: "初始化",
         actorId: "nonexistent",
-        secrets: [{ value: "test", revealConditions: ["test"] }],
+        secrets: [{ value: "test", revealCondition: "test" }],
       }),
     /actor 不存在/,
   );
@@ -184,7 +184,7 @@ void test("configureSecret world-fact adds new hidden world fact", () => {
     kind: "world-fact",
     reason: "设定世界观",
     text: "真实造物主早已陨落",
-    revealConditions: ["真实造物主", "陨落"],
+    revealCondition: "真实造物主、陨落",
     relatedActorIds: [],
   });
 
@@ -201,7 +201,7 @@ void test("configureSecret world-fact merges reveal conditions for existing fact
     kind: "world-fact",
     reason: "首次设定",
     text: "真实造物主早已陨落",
-    revealConditions: ["真实造物主"],
+    revealCondition: "真实造物主",
     relatedActorIds: [],
   });
 
@@ -209,12 +209,12 @@ void test("configureSecret world-fact merges reveal conditions for existing fact
     kind: "world-fact",
     reason: "补充条件",
     text: "真实造物主早已陨落",
-    revealConditions: ["陨落"],
+    revealCondition: "陨落",
     relatedActorIds: [],
   });
 
   assert.equal(draft.secrets.hiddenWorldFacts.length, 1);
-  assert.deepEqual(draft.secrets.hiddenWorldFacts[0]?.revealConditions, ["真实造物主", "陨落"]);
+  assert.strictEqual(draft.secrets.hiddenWorldFacts[0]?.revealCondition, "陨落");
 });
 
 // ===========================================================================
@@ -229,7 +229,7 @@ void test("revealSecret reveals beyonder secret via claim-reveal", async () => {
     kind: "actor-beyonder",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "我是占卜家", revealConditions: ["占卜家", "途径"] }],
+    secrets: [{ value: "我是占卜家", revealCondition: "占卜家、途径" }],
   });
 
   const result = await revealSecret(draft, {
@@ -254,7 +254,7 @@ void test("revealSecret reveals beyonder secret via observed-reveal", async () =
     kind: "actor-beyonder",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "序列9占卜家", revealConditions: ["序列9", "占卜家"] }],
+    secrets: [{ value: "序列9占卜家", revealCondition: "序列9、占卜家" }],
   });
 
   const result = await revealSecret(draft, {
@@ -279,7 +279,7 @@ void test("revealSecret returns foreshadowed with partial evidence", async () =>
     kind: "actor-beyonder",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "他才是真正的市长", revealConditions: ["市长", "真实身份"] }],
+    secrets: [{ value: "他才是真正的市长", revealCondition: "市长、真实身份" }],
   });
 
   // Claim is completely unrelated; evidence tangentially suggests a condition
@@ -302,7 +302,7 @@ void test("revealSecret returns insufficient-evidence with no match", async () =
     kind: "actor-beyonder",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "我是占卜家", revealConditions: ["占卜家", "途径"] }],
+    secrets: [{ value: "我是占卜家", revealCondition: "占卜家、途径" }],
   });
 
   const result = await revealSecret(draft, {
@@ -338,7 +338,7 @@ void test("revealSecret reveals hidden world fact", async () => {
     kind: "world-fact",
     reason: "世界观设定",
     text: "真实造物主早已陨落",
-    revealConditions: ["真实造物主", "早已陨落"],
+    revealCondition: "真实造物主、早已陨落",
     relatedActorIds: [PROTAGONIST_ACTOR_ID],
   });
 
@@ -364,7 +364,7 @@ void test("privateResolve hidden-reaction detects relevant secret", async () => 
     kind: "actor-private",
     reason: "初始化",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "寻找罗塞尔日记", revealConditions: ["日记"] }],
+    secrets: [{ value: "寻找罗塞尔日记", revealCondition: "日记" }],
   });
 
   const result = await privateResolve(draft, {
@@ -399,13 +399,13 @@ void test("privateResolve secret-compatibility detects both actors have secrets"
     kind: "actor-private",
     reason: "初始化主角",
     actorId: PROTAGONIST_ACTOR_ID,
-    secrets: [{ value: "寻找罗塞尔日记", revealConditions: ["日记"] }],
+    secrets: [{ value: "寻找罗塞尔日记", revealCondition: "日记" }],
   });
   configureSecret(draft, {
     kind: "actor-private",
     reason: "初始化盟友",
     actorId: "ally-1",
-    secrets: [{ value: "隐藏身份", revealConditions: ["身份"] }],
+    secrets: [{ value: "隐藏身份", revealCondition: "身份" }],
   });
 
   const result = await privateResolve(draft, {

@@ -10,7 +10,9 @@ import { normalizeIsoInstant } from "./date-time.ts";
 import { STORY_WINDOW_STATE_SCHEMA } from "../scene/scene-schema.ts";
 import {
   ACTOR_STANCE_SCHEMA,
+  INTENSITY_LEVEL_SCHEMA,
   MEMORY_SCOPE_SCHEMA,
+  NARRATIVE_WEIGHT_LEVEL_SCHEMA,
   OFFSCREEN_EVENT_SOURCE_SCHEMA,
   OFFSCREEN_EVENT_VISIBILITY_SCHEMA,
   OPENING_MODE_SCHEMA,
@@ -106,6 +108,8 @@ const SEQUENCE_STATE_SCHEMA = Type.Object({
       label: NON_EMPTY_STRING_SCHEMA,
       reason: NON_EMPTY_STRING_SCHEMA,
       recordedAt: ISO_INSTANT_SCHEMA,
+      intensity: INTENSITY_LEVEL_SCHEMA,
+      narrativeWeight: NARRATIVE_WEIGHT_LEVEL_SCHEMA,
     }),
   ),
 });
@@ -417,7 +421,7 @@ const STRING_SECRET_SLOT_SCHEMA = Type.Object({
   id: NON_EMPTY_STRING_SCHEMA,
   value: NON_EMPTY_STRING_SCHEMA,
   revealState: SECRET_REVEAL_STATE_SCHEMA,
-  revealConditions: NON_EMPTY_STRING_ARRAY_SCHEMA,
+  revealCondition: NON_EMPTY_STRING_SCHEMA,
 });
 
 const ACTOR_SECRET_SLOTS_SCHEMA = Type.Object({
@@ -431,7 +435,7 @@ const HIDDEN_WORLD_FACT_SCHEMA = Type.Object({
   id: NON_EMPTY_STRING_SCHEMA,
   text: NON_EMPTY_STRING_SCHEMA,
   relatedActorIds: NON_EMPTY_STRING_ARRAY_SCHEMA,
-  revealConditions: NON_EMPTY_STRING_ARRAY_SCHEMA,
+  revealCondition: NON_EMPTY_STRING_SCHEMA,
   revealState: SECRET_REVEAL_STATE_SCHEMA,
 });
 

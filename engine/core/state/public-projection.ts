@@ -1,6 +1,7 @@
 import type { PublicGameState, SecretGameState } from "./state.ts";
 
 import { formatHookLedger } from "../ledger/hooks.ts";
+import { OBLIGATION_KIND_GUIDANCE } from "../ledger/obligations.ts";
 import { recentPlayerKnownRelationshipSignals } from "../actor/relationship-signal.ts";
 import { diffMinutes, formatHumanTime } from "./date-time.ts";
 import { formatAmount } from "../economy/economy-denomination.ts";
@@ -50,10 +51,13 @@ function formatHookLedgerLines(publicState: PublicGameState): string[] {
 
 function formatOpenObligationLines(publicState: PublicGameState): string[] {
   if (publicState.obligations.length === 0) return [];
-  const entries = publicState.obligations
-    .map((entry) => `[${entry.kind}] ${entry.summary}`)
-    .join("；");
-  return [`⚠ 未清裁决义务（canonical commit 前必须落地）：${entries}`];
+  const lines: string[] = ["⚠ 未清裁决义务（canonical commit 前必须落地）："];
+  for (const entry of publicState.obligations) {
+    lines.push(
+      `  ${entry.id}: [${entry.kind}] ${entry.summary} → 💡 ${OBLIGATION_KIND_GUIDANCE[entry.kind]}`,
+    );
+  }
+  return lines;
 }
 
 export function buildStatusMarkdown(publicState: PublicGameState): string {
@@ -306,7 +310,7 @@ function formatTrackedItemsBrief(publicState: PublicGameState): string[] {
         ? "未携带"
         : (publicState.actors[item.holderActorId]?.presentation.renderName ?? item.holderActorId);
     const notes = item.notes.length > 0 ? ` · ${item.notes.join("；")}` : "";
-    return `    - ${item.label}（${item.kind} · ${item.condition} · ${holder}${notes}）`;
+    return `    - ${item.id}: ${item.label}（${item.kind} · ${item.condition} · ${holder}${notes}）`;
   });
   return [`  关键物品：`, ...itemLines];
 }
@@ -327,7 +331,7 @@ function formatCondition(
   condition: NonNullable<PublicGameState["actors"][string]>["condition"],
 ): string {
   const lines = condition.afflictions.map((effect) => {
-    const base = `${effect.source}:${effect.text}`;
+    const base = `${effect.id}: ${effect.source}:${effect.text}`;
     return effect.expectedDuration !== null
       ? `${base}（预期${effect.expectedDuration}）`
       : base;
@@ -533,7 +537,7 @@ function formatTrackedItems(publicState: PublicGameState): string {
           ? "未随身持有"
           : (publicState.actors[item.holderActorId]?.presentation.renderName ?? item.holderActorId);
       const notes = item.notes.length === 0 ? "" : `；${item.notes.join("；")}`;
-      return `- ${item.label}（${holder}；${item.condition}${notes}）`;
+      return `- ${item.id}: ${item.label}（${holder}；${item.condition}${notes}）`;
     })
     .join("\n");
 }

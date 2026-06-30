@@ -2,7 +2,7 @@ import type { ActorId, MoneyPurse, State } from "../state/state.ts";
 
 import { createId } from "../utils/ids.ts";
 import { assertNonEmptyString, assertNonNegativeInteger } from "../utils/typebox-validation.ts";
-import { SMALLEST_UNIT_LABELS } from "./economy-denomination.ts";
+import { formatAmount } from "./economy-denomination.ts";
 
 function assertPositiveInteger(value: unknown, fieldName: string): number {
   const amount = assertNonNegativeInteger(value, fieldName);
@@ -25,29 +25,15 @@ export function updateEconomy(draft: State, event: EconomyEvent): EconomyEventRe
   switch (event.kind) {
     case "spend-money": {
       const rawAmount = assertPositiveInteger(event.amount, "amount");
-      return changePurseAmount(
-        draft,
-        event.purseId,
-        event.callerActorId,
-        -rawAmount,
-        "资金已支出。",
-        event.reason,
-      );
+      return changePurseAmount(draft, event.purseId, event.callerActorId, -rawAmount, event.reason);
     }
     case "gain-money": {
       assertAuditableGain(event);
       const rawAmount = assertPositiveInteger(event.amount, "amount");
-      return changePurseAmount(
-        draft,
-        event.purseId,
-        event.callerActorId,
-        rawAmount,
-        "资金已增加。",
-        event.reason,
-      );
+      return changePurseAmount(draft, event.purseId, event.callerActorId, rawAmount, event.reason);
     }
     case "add-purse": {
-      const rawAmount = assertPositiveInteger(event.amount, "amount");
+      const rawAmount = assertNonNegativeInteger(event.amount, "amount");
       const currencyType = event.currencyType ?? "loen";
       return addPurse(draft, { ...event, amount: rawAmount, currencyType });
     }
@@ -67,7 +53,6 @@ function changePurseAmount(
   purseId: string | undefined,
   callerActorId: ActorId | undefined,
   delta: number,
-  message: string,
   reason: string,
 ): EconomyEventResult {
   assertNonEmptyString(reason, "reason");
@@ -75,11 +60,15 @@ function changePurseAmount(
   const nextAmount = purse.amount + delta;
   if (nextAmount < 0) {
     throw new Error(
-      `资金不足: ${purse.label} 只有 ${purse.amount}${SMALLEST_UNIT_LABELS[purse.currencyType]}。`,
+      `资金不足: ${purse.label} 只有 ${formatAmount(purse.amount, purse.currencyType)}。`,
     );
   }
+  const absDelta = Math.abs(delta);
+  const action = delta < 0 ? "支出" : "收入";
   purse.amount = nextAmount;
-  return { message };
+  return {
+    message: `已${action}：${formatAmount(absDelta, purse.currencyType)}。${purse.label}余额：${formatAmount(nextAmount, purse.currencyType)}。`,
+  };
 }
 
 function assertAuditableGain(event: Extract<EconomyEvent, { kind: "gain-money" }>): void {
@@ -146,15 +135,19 @@ function addPurse(
   if (draft.public.actors[event.ownerActorId] === undefined) {
     throw new Error(`owner actor 不存在: ${event.ownerActorId}`);
   }
+  const validatedAmount = assertNonNegativeInteger(event.amount, "amount");
+  const currencyType = event.currencyType ?? "loen";
   draft.public.economy.accessibleFunds.push({
     id: createId(draft, "purse"),
     ownerActorId: event.ownerActorId,
     label: assertNonEmptyString(event.label, "label"),
-    amount: assertPositiveInteger(event.amount, "amount"),
-    currencyType: event.currencyType ?? "loen",
+    amount: validatedAmount,
+    currencyType,
     access: event.access,
   });
-  return { message: "资金账户已加入。" };
+  return {
+    message: `资金账户已加入：${event.label}，初始金额 ${formatAmount(validatedAmount, currencyType)}。`,
+  };
 }
 
 function updatePurse(

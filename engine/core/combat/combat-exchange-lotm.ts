@@ -371,7 +371,7 @@ function buildLOTMNarrativeConstraints(
   } else {
     if (combinedDelta >= 2) {
       constraints.push(
-        "序列层级压制默认成立；低位方只能靠相性、环境、情报、牺牲资源或改换目标争取局部窗口。",
+        "序列层级压制默认成立；低位方只能靠相性、环境、情报、牺牲资源或改换目标争取局部窗口，但仍被碾压。",
       );
     }
 

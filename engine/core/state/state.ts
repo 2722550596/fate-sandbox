@@ -10,6 +10,8 @@ import type {
   BoundaryKind,
   ActorKind,
   ActorStance,
+  IntensityLevel,
+  NarrativeWeightLevel,
   SequenceRank,
   SituationKind,
   TimelineId,
@@ -406,6 +408,8 @@ export interface ActingCueProgress {
   label: string;
   reason: string;
   recordedAt: string;
+  intensity: IntensityLevel;
+  narrativeWeight: NarrativeWeightLevel;
 }
 
 export interface SequenceState {
@@ -549,14 +553,14 @@ export interface SecretSlot<T> {
   id: string;
   value: T;
   revealState: "hidden" | "foreshadowed" | "revealed";
-  revealConditions: string[];
+  revealCondition: string;
 }
 
 export interface HiddenWorldFact {
   id: string;
   text: string;
   relatedActorIds: string[];
-  revealConditions: string[];
+  revealCondition: string;
   revealState: "hidden" | "foreshadowed" | "revealed";
 }
 

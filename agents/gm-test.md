@@ -100,6 +100,8 @@ commit_turn
 │ ├── scene → 6 个子 kind（location/situation/objective/threat）
 │ ├── scene-presence → 纯粹场景人物清单
 │ ├── actor-condition → 3 个子 kind（伤/病/异常状态）
+│ ├── outfit → 换装
+│ ├── acting → 扮演/消化
 │ ├── tracked-item → 3 个子 kind（增/转/改）
 │ ├── sequence → 1 个操作（设序列）
 │ ├── economy → 6 个子 kind（花/赚/账户/债务）

@@ -38,7 +38,7 @@ void test("buildBackstageDirectorPrompt carries privateFacts (hidden knowledge b
     id: "secret-1",
     text: "Caster secretly drains townsfolk prana",
     relatedActorIds: [],
-    revealConditions: [],
+    revealCondition: "",
     revealState: "hidden",
   });
 
@@ -57,7 +57,7 @@ void test("buildBackstageContextBlock is a closed, secret-free safe projection",
     id: "secret-2",
     text: "hidden grail corruption codeword zzz-secret",
     relatedActorIds: [],
-    revealConditions: [],
+    revealCondition: "",
     revealState: "hidden",
   });
 

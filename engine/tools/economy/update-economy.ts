@@ -84,7 +84,7 @@ export const updateEconomyToolDefinition: DomainToolDefinition = {
     "【event kind 场景指南】\n" +
     "- spend-money：日常消费、购买、付费\n" +
     "- gain-money：获得收入、报酬、销售（必须说明 counterparty 与可审计 source）\n" +
-    "- add-purse：新增资金池——组织金库、客户预付款、委托人的保证金（新建时设定初始金额）\n" +
+    "- add-purse：新增资金池——组织金库、客户预付款、委托人的保证金。必填：ownerActorId, label, amount, access（held/shared/requires-permission）\n" +
     "- update-purse：修改已有钱包的 label 或 access 权限（不可改金额）\n" +
     "amount 可以是数字（最小单位整数，如 300 便士）或字符串（如「1金镑5苏勒」），系统自动换算。\n\n" +
     "禁区：把同行者资金说成玩家随身现金、资金不足时免费兜底，或用 gain-money 设目标数值/凭空发财。",

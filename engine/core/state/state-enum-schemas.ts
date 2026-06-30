@@ -259,6 +259,18 @@ export type TrackedItemVisibility = Static<typeof TRACKED_ITEM_VISIBILITY_SCHEMA
 
 export const SCENE_THREAT_SEVERITIES = ["low", "medium", "high", "lethal"] as const;
 export const SCENE_THREAT_SEVERITY_SCHEMA = stringEnumSchema(SCENE_THREAT_SEVERITIES);
+
+// ---------------------------------------------------------------------------
+// Acting — 扮演消化维度
+// ---------------------------------------------------------------------------
+
+export const INTENSITY_LEVELS = ["cursory", "moderate", "deep", "pivotal"] as const;
+export const INTENSITY_LEVEL_SCHEMA = stringEnumSchema(INTENSITY_LEVELS);
+export type IntensityLevel = Static<typeof INTENSITY_LEVEL_SCHEMA>;
+
+export const NARRATIVE_WEIGHT_LEVELS = ["casual", "witnessed", "significant", "fateful"] as const;
+export const NARRATIVE_WEIGHT_LEVEL_SCHEMA = stringEnumSchema(NARRATIVE_WEIGHT_LEVELS);
+export type NarrativeWeightLevel = Static<typeof NARRATIVE_WEIGHT_LEVEL_SCHEMA>;
 export type SceneThreatSeverity = Static<typeof SCENE_THREAT_SEVERITY_SCHEMA>;
 
 

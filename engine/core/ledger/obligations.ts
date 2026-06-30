@@ -44,7 +44,7 @@ export function settleOldestObligation(
   return settled;
 }
 
-const OBLIGATION_KIND_GUIDANCE: Record<TurnObligationKind, string> = {
+export const OBLIGATION_KIND_GUIDANCE: Record<TurnObligationKind, string> = {
   "scene-objective": "commit_turn 的 scene 事件（add-objective / resolve-objective）",
   "scene-threat": "commit_turn 的 scene 事件（add-threat / clear-threat）",
   "actor-condition": "actor-condition 事件（update_actor_condition 或 commit_turn）",

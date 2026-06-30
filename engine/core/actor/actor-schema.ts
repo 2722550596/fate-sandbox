@@ -9,6 +9,8 @@ import { Compile } from "typebox/compile";
 import {
   ACTOR_KIND_SCHEMA,
   ACTOR_STANCE_SCHEMA,
+  INTENSITY_LEVEL_SCHEMA,
+  NARRATIVE_WEIGHT_LEVEL_SCHEMA,
   PATHWAY_ID_SCHEMA,
   PROMOTION_SYSTEM_SCHEMA,
   SEQUENCE_RANK_SCHEMA,
@@ -176,10 +178,12 @@ const ACTING_EVENT_KIND_SCHEMA = stringEnumSchema(ACTING_EVENT_KINDS);
 
 const NON_EMPTY_STRING = Type.String({ minLength: 1 });
 
-/** 单条扮演行为记录：key=行为维度标识, label=显示名 */
+/** 单条扮演行为记录：key=行为维度标识, label=显示名, intensity=扮演深度, narrativeWeight=叙事密度 */
 const CUE_ENTRY_SCHEMA = Type.Object({
   key: NON_EMPTY_STRING,
   label: NON_EMPTY_STRING,
+  intensity: INTENSITY_LEVEL_SCHEMA,
+  narrativeWeight: NARRATIVE_WEIGHT_LEVEL_SCHEMA,
 });
 
 export const ADVANCE_ACTING_EVENT_SCHEMA = Type.Object({
@@ -248,7 +252,7 @@ export const RESOLVE_CONDITION_EVENT_SCHEMA = Type.Object({
 export const UPDATE_WOUND_EVENT_SCHEMA = Type.Object({
   kind: Type.Literal("update-wound"),
   actorId: Type.String({ minLength: 1 }),
-  conditionId: Type.String({ minLength: 1 }),
+  conditionId: Type.Optional(Type.String({ minLength: 1 })),
   text: Type.Optional(Type.String({ minLength: 1 })),
   source: Type.Optional(AFFLICTION_SOURCE_SCHEMA),
   expectedDuration: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),

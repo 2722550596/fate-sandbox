@@ -24,9 +24,10 @@ export function normalizeActorConditionEvent(
 }
 
 function guardUpdateWoundConditionId(input: Record<string, unknown>): void {
-  if (input["kind"] === "update-wound" && isBlank(input["conditionId"])) {
+  if (input["kind"] !== "update-wound") return;
+  if (isBlank(input["conditionId"]) && isBlank(input["text"])) {
     throw new Error(
-      "update-wound 必须提供已有 wound 的 conditionId；更换服装/外观请使用 update_actor_outfit 工具。",
+      "update-wound 必须提供 conditionId（更新已有）或 text（新建）；更换服装/外观请使用 update_actor_outfit 工具。",
     );
   }
 }

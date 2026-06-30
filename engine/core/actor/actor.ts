@@ -122,7 +122,7 @@ function upsertSequence(
     currentSequence: seq.currentSequence,
     rank: seq.rank,
     pathway: seq.pathway,
-    promotionSystem: seq.promotionSystem,
+    promotionSystem: seq.promotionSystem ?? "potion",
     tags: resolveSequenceTagsForActor(seq.currentSequence),
     actingCues: [],
   };
@@ -210,7 +210,7 @@ function toSafePublicActor(npc: PublicNpcInput): PublicActorState {
       demeanor: assertNonEmptyString(npc.demeanor, "npc.demeanor"),
     },
     condition: { afflictions: [] },
-    inventory: { items: [] },
+    inventory: { items: npc.ordinaryItems ?? [] },
     abilities: [],
     relationshipToProtagonist: npc.relationshipToProtagonist,
   };
@@ -234,6 +234,7 @@ function toInitNpcActor(npc: PublicNpcSkeletonInput): PublicActorState {
     id: npc.actorId,
     kind: npc.npcKind ?? "human",
     canonicalName: npc.canonicalName,
+    renderName: npc.renderName,
     publicIdentity: npc.publicIdentity,
     apparentAge: npc.apparentAge ?? "玩家可见年龄未确认",
     outfit: npc.outfit ?? {

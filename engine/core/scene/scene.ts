@@ -494,7 +494,7 @@ function formatLastObjectiveError(): string {
 function assertBeatObjectives(objectives: readonly string[]): void {
   if (objectives.length < MIN_BEAT_OBJECTIVES || objectives.length > MAX_BEAT_OBJECTIVES) {
     throw new Error(
-      `Scene Beat 需要 ${MIN_BEAT_OBJECTIVES}-${MAX_BEAT_OBJECTIVES} 个 Scene Objective，当前 ${objectives.length} 个。`,
+      `objectives 数量超出限制。最多接受 ${MAX_BEAT_OBJECTIVES} 个，当前传入了 ${objectives.length} 个。请合并或拆分场景目标。`,
     );
   }
 }

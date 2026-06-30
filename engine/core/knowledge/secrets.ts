@@ -59,30 +59,17 @@ function recordSecretEvent(draft: State, summary: string, relatedActorIds: strin
   });
 }
 
-function mergeRevealConditions(existing: string[], incoming: string[]): string[] {
-  const merged: string[] = [];
-  for (const condition of [...existing, ...incoming]) {
-    const normalized = assertNonEmptyString(condition, "revealCondition");
-    if (!merged.includes(normalized)) {
-      merged.push(normalized);
-    }
-  }
-  return merged;
-}
-
 function buildStringSecretSlot(
   existing: SecretSlot<string> | undefined,
   id: string,
   input: SecretStringInput,
 ): SecretSlot<string> {
+  const revealCondition = assertNonEmptyString(input.revealCondition, "revealCondition");
   return {
     id: existing?.id ?? id,
     value: assertNonEmptyString(input.value, "secret.value"),
     revealState: existing?.revealState ?? "hidden",
-    revealConditions: mergeRevealConditions(
-      existing?.revealConditions ?? [],
-      input.revealConditions,
-    ),
+    revealCondition,
   };
 }
 
@@ -178,15 +165,11 @@ function configureWorldFact(
   draft: State,
   input: ConfigureSecretInput & { kind: "world-fact" },
 ): ConfigureSecretResult {
-  assertNonEmptyString(input.text, "text");
-  assertNonEmptyString(input.reason, "reason");
+  const revealCondition = assertNonEmptyString(input.revealCondition, "revealCondition");
 
   const existing = draft.secrets.hiddenWorldFacts.find((fact) => fact.text === input.text);
   if (existing !== undefined) {
-    existing.revealConditions = mergeRevealConditions(
-      existing.revealConditions,
-      input.revealConditions,
-    );
+    existing.revealCondition = revealCondition;
     if (input.relatedActorIds !== undefined && input.relatedActorIds.length > 0) {
       existing.relatedActorIds = input.relatedActorIds;
     }
@@ -197,9 +180,7 @@ function configureWorldFact(
     id: createId(draft, "world-fact"),
     text: input.text,
     relatedActorIds: input.relatedActorIds ?? [],
-    revealConditions: [
-      ...new Set(input.revealConditions.map((c: string) => c.trim()).filter(Boolean)),
-    ],
+    revealCondition,
     revealState: "hidden",
   });
   return { message: `世界事实已记录：${input.text}` };
@@ -235,7 +216,7 @@ export async function revealSecret(
           id: s.id,
           kind: "actor-beyonder",
           value: s.value,
-          conditions: s.revealConditions,
+          revealCondition: s.revealCondition,
         });
         slotLookup.set(s.id, s);
       }
@@ -246,7 +227,7 @@ export async function revealSecret(
           id: s.id,
           kind: "actor-private",
           value: s.value,
-          conditions: s.revealConditions,
+          revealCondition: s.revealCondition,
         });
         slotLookup.set(s.id, s);
       }
@@ -257,7 +238,7 @@ export async function revealSecret(
           id: s.id,
           kind: "actor-private",
           value: s.value,
-          conditions: s.revealConditions,
+          revealCondition: s.revealCondition,
         });
         slotLookup.set(s.id, s);
       }
@@ -270,7 +251,7 @@ export async function revealSecret(
         id: fact.id,
         kind: "world-fact",
         value: fact.text,
-        conditions: fact.revealConditions,
+        revealCondition: fact.revealCondition,
       });
       factLookup.set(fact.id, fact);
     }
@@ -283,7 +264,7 @@ export async function revealSecret(
     };
   }
 
-  // 推理判断（两阶段：子串快速通道 + LLM 推理通道）
+  // 推理判断（纯 LLM 路径）
   const judgments = await judgeSecrets({ kind: event.kind, needle, evidence }, candidates);
 
   // 应用判断结果
@@ -293,10 +274,10 @@ export async function revealSecret(
   for (const j of judgments) {
     const fact = factLookup.get(j.id);
     if (fact !== undefined) {
-      if (j.needleMatch && j.evidenceMatch) {
+      if (j.verdict === "revealed") {
         fact.revealState = "revealed";
         revealed = true;
-      } else if (!j.needleMatch && j.evidenceMatch && fact.revealState === "hidden") {
+      } else if (j.verdict === "hinted" && fact.revealState === "hidden") {
         fact.revealState = "foreshadowed";
         foreshadowed = true;
       }
@@ -305,10 +286,10 @@ export async function revealSecret(
 
     const slot = slotLookup.get(j.id);
     if (slot !== undefined) {
-      if (j.needleMatch && j.evidenceMatch) {
+      if (j.verdict === "revealed") {
         slot.revealState = "revealed";
         revealed = true;
-      } else if (!j.needleMatch && j.evidenceMatch && slot.revealState === "hidden") {
+      } else if (j.verdict === "hinted" && slot.revealState === "hidden") {
         slot.revealState = "foreshadowed";
         foreshadowed = true;
       }
@@ -415,7 +396,7 @@ async function hiddenReaction(
         id: s.id,
         kind: "actor-beyonder",
         value: s.value,
-        conditions: s.revealConditions,
+        revealCondition: s.revealCondition,
       });
     }
   }
@@ -425,7 +406,7 @@ async function hiddenReaction(
         id: s.id,
         kind: "actor-private",
         value: s.value,
-        conditions: s.revealConditions,
+        revealCondition: s.revealCondition,
       });
     }
   }
@@ -435,7 +416,7 @@ async function hiddenReaction(
         id: s.id,
         kind: "actor-private",
         value: s.value,
-        conditions: s.revealConditions,
+        revealCondition: s.revealCondition,
       });
     }
   }

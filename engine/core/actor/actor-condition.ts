@@ -81,22 +81,35 @@ function updateWound(
   if (actor === undefined) {
     throw new Error(`actor 不存在: ${event.actorId}`);
   }
-  const affliction = actor.condition.afflictions.find((a) => a.id === event.conditionId);
-  if (affliction === undefined) {
-    throw new Error(
-      `affliction 不存在于 ${formatActorLabel(actor)}: ${event.conditionId}。当前 actor 可用 afflictions: ${formatAvailableAfflictions(actor.condition.afflictions)}`,
-    );
+
+  if (event.conditionId !== undefined) {
+    // —— 更新已有 wound ——
+    const affliction = actor.condition.afflictions.find((a) => a.id === event.conditionId);
+    if (affliction === undefined) {
+      throw new Error(
+        `affliction 不存在于 ${formatActorLabel(actor)}: ${event.conditionId}。当前 actor 可用 afflictions: ${formatAvailableAfflictions(actor.condition.afflictions)}`,
+      );
+    }
+    if (event.text !== undefined) {
+      affliction.text = event.text;
+    }
+    if (event.source !== undefined) {
+      affliction.source = event.source;
+    }
+    if (event.expectedDuration !== undefined) {
+      affliction.expectedDuration = event.expectedDuration;
+    }
+    return { message: `异常状态已更新：${event.conditionId}。` };
   }
-  if (event.text !== undefined) {
-    affliction.text = event.text;
-  }
-  if (event.source !== undefined) {
-    affliction.source = event.source;
-  }
-  if (event.expectedDuration !== undefined) {
-    affliction.expectedDuration = event.expectedDuration;
-  }
-  return { message: `异常状态已更新：${event.conditionId}。` };
+
+  // —— 新建 wound ——
+  actor.condition.afflictions.push({
+    id: createId(draft, "affliction"),
+    source: assertNonEmptyString(event.source, "source"),
+    text: assertNonEmptyString(event.text, "text"),
+    expectedDuration: event.expectedDuration ?? null,
+  });
+  return { message: `异常状态已创建：${actor.id}。` };
 }
 
 function formatActorLabel(actor: PublicActorState): string {

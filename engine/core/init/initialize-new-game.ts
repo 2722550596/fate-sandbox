@@ -260,6 +260,18 @@ function applyScenario(
     "currentAt",
   );
   const location: LocationState = input.location ?? preset.location;
+
+  // preset 的 location 可能是占位值（如 custom_worldline 的 "待定"），用户未显式传入时自动补默认地点
+  if (
+    input.location === undefined &&
+    location.region === "待定" &&
+    location.site === "待定" &&
+    location.detail === "待定"
+  ) {
+    location.region = "廷根市";
+    location.site = "廷根市";
+    location.detail = "廷根市";
+  }
   const situation: SituationKind = input.situation ?? preset.situation;
   const startingFunds: number = input.startingFunds ?? preset.economy.startingFunds;
   const purseLabel: string = input.purseLabel ?? preset.economy.purseLabel;

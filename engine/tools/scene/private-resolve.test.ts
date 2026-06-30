@@ -15,7 +15,7 @@ function setupStateWithSecret(): void {
     kind: "actor-private",
     reason: "初始化",
     actorId: "protagonist",
-    secrets: [{ value: "隐藏身份", revealConditions: ["暴露"] }],
+    secrets: [{ value: "隐藏身份", revealCondition: "暴露" }],
   });
   replaceStateForDebug(state);
 }

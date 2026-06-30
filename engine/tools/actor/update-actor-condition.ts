@@ -19,7 +19,12 @@ export function updateActorConditionTool(params: unknown, sessionManager: unknow
 export const updateActorConditionToolDefinition: DomainToolDefinition = {
   name: "update_actor_condition",
   description:
-    "更新 actor 的非凡者状态效果（affliction）。\n\n" +
+    "更新 actor 的状态效果（affliction）。\n\n" +
+    "【操作对应表】\n" +
+    "  新建伤口/状态：update-wound（不传 conditionId，传 text + source）\n" +
+    "  更新已有伤口：  update-wound（传 conditionId + 可选 text/source/expectedDuration）\n" +
+    "  添加 Buff/Debuff：add-affliction（传 text + source + name/type/value 等）\n" +
+    "  移除状态：      resolve-condition（传 conditionId + outcome）\n\n" +
     "【使用边界】\n" +
     "- 添加/移除状态效果（buff/debuff/risk/flag），对应 add-status-effect / remove-status-effect\n" +
     "- 更改外观/服装请使用 update_actor_outfit 工具\n\n" +
@@ -32,6 +37,12 @@ export const updateActorConditionToolDefinition: DomainToolDefinition = {
     }),
     actorId: Type.Optional(
       Type.String({ description: "目标 actor id；必须已存在于 public actors" }),
+    ),
+    text: Type.Optional(
+      Type.String({
+        description:
+          "add-affliction / update-wound 新建时必填：状态效果描述文本。update-wound 更新已有状态时可选，省略保留原值。",
+      }),
     ),
     name: Type.Optional(Type.String({ description: "add-status-effect 必填：效果名称" })),
     type: Type.Optional(
@@ -46,13 +57,17 @@ export const updateActorConditionToolDefinition: DomainToolDefinition = {
     valueType: Type.Optional(Type.String({ description: "add-status-effect：percentage / fixed" })),
     value: Type.Optional(Type.Number({ description: "add-status-effect：效果数值" })),
     duration: Type.Optional(Type.Integer({ description: "add-status-effect：持续轮数" })),
-    source: Type.Optional(Type.String({ description: "add-status-effect：效果来源" })),
+    source: Type.Optional(
+      Type.String({ description: "add-affliction / update-wound 新建时必填：效果来源" }),
+    ),
     conditionId: Type.Optional(
-      Type.String({ description: "remove-status-effect 必填：要移除的效果 id" }),
+      Type.String({
+        description: "update-wound 更新已有状态 / resolve-condition 移除时必填：现有 affliction id",
+      }),
     ),
     outcome: Type.Optional(
       Type.String({
-        description: "remove-status-effect：recovered / expired / removed",
+        description: "resolve-condition：recovered / stabilized",
       }),
     ),
     reason: Type.Optional(Type.String()),

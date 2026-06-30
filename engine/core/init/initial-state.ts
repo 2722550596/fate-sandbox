@@ -40,7 +40,7 @@ export function createInitialState(protagonistActorId: string = PROTAGONIST_ACTO
         location: {
           region: "鲁恩王国",
           site: "廷根",
-          detail: "廷根大学·校门外",
+          detail: "廷根某地",
           boundary: "normal",
         },
         situation: "daily",

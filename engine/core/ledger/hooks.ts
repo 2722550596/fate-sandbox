@@ -91,9 +91,9 @@ export function formatHookLedger(hooks: readonly HookState[]): string | undefine
   const live = hooks.filter((hook) => !TERMINAL_STATUSES.includes(hook.status));
   if (live.length === 0) return undefined;
   const entries = live
-    .map((hook) => `[${hook.status}] ${hook.label}（出现 ${hook.surfaceCount} 次）`)
+    .map((hook) => `[${hook.status}] ${hook.id}: ${hook.label}（出现 ${hook.surfaceCount} 次）`)
     .join("；");
-  return `悬念账本：${entries}。复现/升级必须经 update_hook 并带新状态；active+escalated 同时最多 ${MAX_ACTIVE_HOOKS} 条。`;
+  return `悬念账本：${entries}。复现/升级必须经 update_hook 并带 hookId；active+escalated 同时最多 ${MAX_ACTIVE_HOOKS} 条。`;
 }
 
 function recordSurface(draft: State, hook: HookState, novelty: string): void {

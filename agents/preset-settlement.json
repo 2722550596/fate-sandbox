@@ -90,6 +90,14 @@
       "source": "runtime:presence-impressions"
     },
     {
+      "id": "test_direction",
+      "enabled": false,
+      "slot": "pre-response",
+      "priority": 14,
+      "header": "test_direction",
+      "source": "agents/gm-test.md"
+    },
+    {
       "id": "direction-contract",
       "enabled": true,
       "slot": "final-contract",

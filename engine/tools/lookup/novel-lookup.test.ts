@@ -6,14 +6,14 @@ import { lookupNovel } from "./novel-lookup.ts";
 void test("lookupNovel: list all volumes", () => {
   const result = lookupNovel({});
   assert(result.text.includes("《诡秘之主》"));
-  assert(result.text.includes("第一部"));
+  assert(result.text.includes("第一卷"));
 });
 
 void test("lookupNovel: volume only lists chapters", () => {
   const result = lookupNovel({ volume: "001" });
-  // 卷显示格式为 "卷 001：第一部·小丑"
+  // 卷显示格式为 "卷 001：第一卷·小丑"
   assert(result.text.includes("卷 001"));
-  assert(result.text.includes("第一部") && result.text.includes("小丑"));
+  assert(result.text.includes("第一卷") && result.text.includes("小丑"));
 });
 void test("lookupNovel: title keyword search", () => {
   // 搜标题关键词，不搜正文
@@ -29,7 +29,7 @@ void test("lookupNovel: no match returns appropriate message", () => {
 
 void test("lookupNovel: volume + keyword search", () => {
   const result = lookupNovel({ volume: "001", query: "占卜", fulltext: false });
-  // 应该能在第一部找到占卜相关章节（克莱恩的占卜家序列）
+  // 应该能在第一卷找到占卜相关章节（克莱恩的占卜家序列）
   assert(result.text.includes("占卜") || result.text.includes("未"));
 });
 

@@ -35,7 +35,7 @@ export function debugSignalTool(params: unknown): ToolResult {
 export const debugSignalToolDefinition: DomainToolDefinition = {
   name: "debug_signal",
   description:
-    "记录调试信号到 .debug/ 目录的 JSONL 文件。用于 GM 调试、状态快照、prompt 追踪。\n\n" +
+    "上报bug。用于测试和开发调试、状态快照、prompt 追踪。\n\n" +
     "使用边界：需要记录调试信息时使用。\n" +
     "禁区：在正常游戏流程中滥用。",
   parameters: Type.Object({

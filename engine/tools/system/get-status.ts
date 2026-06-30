@@ -56,7 +56,7 @@ function isObject(value: unknown): value is object {
 export const getStatusToolDefinition: DomainToolDefinition = {
   name: "get_status",
   description:
-    "查看玩家可见状态摘要；返回 GM brief 风格读模型，不展示完整 JSON。\n\n" +
+    "查看玩家可见摘要；返回 GM brief 风格读模型，不展示完整 JSON。\n\n" +
     "使用边界：当前回合缺少可用 GM brief/工具结果、玩家询问状态/同行者/资源/剧情账本，或工具失败后一次性同步玩家可见状态。\n" +
     "禁区：状态未变化时重复刷新、凭记忆叙述机械事实，或要求/输出 canonical state JSON。",
   parameters: Type.Object({}),
@@ -68,7 +68,7 @@ export const getStatusRawToolDefinition: DomainToolDefinition = {
   name: "get_status_raw",
   description:
     "查看完整 JSON 状态。返回 canonical state 的全貌，包括 secrets、后台事件等 GM 视角完整数据。\n\n" +
-    "使用边界：需要查看 state 全貌进行 debug/诊断，或需要确认秘密状态、债务列表、actor 完整参数时。\n" +
+    "使用边界：需要查看 state 全貌进行 debug/诊断，或需要确认完整参数时。\n" +
     "禁区：常规叙事流程中代替 get_status。",
   parameters: Type.Object({}),
   execute: async (_toolCallId, _params, _signal, _onUpdate, ctx) => {

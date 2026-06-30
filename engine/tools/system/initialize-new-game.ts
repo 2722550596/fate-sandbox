@@ -23,6 +23,7 @@ function buildInitializationMessage(result: Awaited<ReturnType<typeof initialize
       }
     }
   }
+  lines.push("注意：初始化仅意味着初始框架已配置，后续领域事件仍需手动配置，不能跳过。");
   return lines.join("\n");
 }
 

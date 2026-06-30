@@ -44,7 +44,7 @@ description: 开始/重新开始 LOTM lotm-sandbox。以流程机收集玩家立
 
 - 必须调用 `initialize_new_game`；不要手动拼 `reset_state` / `configure_scenario` / `upsert_actor` / `reveal_secret` 初始化链。
 - 如果 `initialize_new_game` 的简化输入不足以表达特殊开局，先用它建立最小可运行 state，再用窄领域工具补充明确缺口；不要回退到裸 patch。
-- 如果开局涉及冷门设定、憑依/伪装/身份分裂、外观错位、途径例外、真名/公开名分离、跨世界角色、剧情时点或 NPC 知识边界，必须先做 canon-sensitive research：本地 `lookup` 不足以覆盖身份层、外观层、知识边界和时点时，继续用 `web_search` 查证，再初始化或写开场。
+- 如果开局涉及冷门设定、伪装/身份分裂、外观错位、途径例外、真名/公开名分离、跨世界角色、剧情时点或 NPC 知识边界，必须先做 canon-sensitive research：本地 `lookup` 系列工具不足以覆盖身份层、外观层、知识边界和时点时，继续用 `web_search` 查证，再初始化或写开场。
 
 ---
 
@@ -64,7 +64,7 @@ description: 开始/重新开始 LOTM lotm-sandbox。以流程机收集玩家立
 可以直接一句话描述，比如：
 「默认」
 「第一次玩，按新手模式来」
-「廷根，我是刚从值夜人入职的非凡者」
+「廷根，我是刚从值夜者入职的非凡者」
 「贝克兰德，我是来投靠教会的非凡者学徒」
 「1351 年拜亚姆，一个试图隐姓埋名的中序列非凡者」
 「穿越者，刚在廷根街头醒来，还不知道自己在哪里」
@@ -105,7 +105,7 @@ description: 开始/重新开始 LOTM lotm-sandbox。以流程机收集玩家立
 
 统一使用 `initialize_new_game`。这个工具会重置 state、配置 campaign、写入 protagonist、设置在场 actor，并在非凡者 protagonist 开局时配置隐藏序列 secret。
 
-### A. 普通人类 protagonist（本地普通人 / 穿越者 / 非凡者学徒）
+### A. 普通人类 protagonist（本地土著 / 普通人 / 穿越者）
 
 调用 `initialize_new_game kind=human-protagonist`。
 
@@ -131,7 +131,7 @@ description: 开始/重新开始 LOTM lotm-sandbox。以流程机收集玩家立
 
 可选字段：
 
-- `protagonist.roles: string[]` — 社会身份标签，如 `["值夜者实习"]`
+- `protagonist.roles: string[]` — 社会身份标签，如 `["值夜者"]`
 
 **顶层可选字段：**
 
@@ -209,11 +209,7 @@ description: 开始/重新开始 LOTM lotm-sandbox。以流程机收集玩家立
 - 康斯坦特 1349（因蒂斯）：`presetId=condat_1349`，timezone=`UTC+1`
 - 自定义世界线：`presetId=custom_worldline`，时间/地点/货币占位，初始化时用 scenario 覆盖项填入开局问答结果
 
-非凡者世界线注意：
-
-- 没有从者、令咒、圣杯战争；不要把 Fate 结构带入。
-- 战斗用 `resolve_combat`，对手是序列非凡者/失控者/秘祈人/封印物/海盗等，不是 Servant。
-- 原作主角线是否已发生/正在发生由开局确认，不要默认玩家替代克莱恩。
+注意：原作主角线是否已发生/正在发生由开局确认，不要默认玩家替代克莱恩。
 
 时间规则：
 
@@ -223,7 +219,7 @@ description: 开始/重新开始 LOTM lotm-sandbox。以流程机收集玩家立
 
 克莱恩线（tingen_1349_klein）注意：
 
-- 提供了廷根/值夜人时间线的初始结构。
+- 提供了廷根/值夜者时间线的初始结构。
 - 不要强制原作事件顺序自动发生；玩家可以偏离剧情。
 - 不要把后续贝克兰德/拜亚姆/序列晋升自动带入。
 

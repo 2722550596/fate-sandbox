@@ -2,10 +2,11 @@ import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 
 import { Type } from "typebox";
 
+import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
 import { cloneState, commitState } from "../../core/state/state-store.ts";
 import { textResult, type ToolResult } from "../runtime/tool-result.ts";
 
-export function clearBackstageLockTool(params: unknown, _sessionManager: unknown): ToolResult {
+export function clearBackstageLockTool(params: unknown, sessionManager: unknown): ToolResult {
   const raw = params;
   const runId =
     typeof raw === "object" && raw !== null && "runId" in raw
@@ -49,6 +50,7 @@ export function clearBackstageLockTool(params: unknown, _sessionManager: unknown
   }
 
   commitState(draft);
+  persistStateAfterCommit(sessionManager, { cleared });
 
   if (cleared.length === 0) {
     return textResult("没有需要清理的 backstage 锁。backstage 状态干净。", { cleared: [] });

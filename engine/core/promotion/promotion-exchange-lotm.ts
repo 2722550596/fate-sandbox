@@ -13,9 +13,9 @@
 // ---------------------------------------------------------------------------
 
 import type { SequenceRank } from "../state/state-enum-schemas.ts";
-import type { State } from "../state/state.ts";
+import type { State, ActingCueProgress } from "../state/state.ts";
 
-import { getActingReadiness } from "../actor/acting.ts";
+import { computeActingWeightedScore, getActingReadiness } from "../actor/acting.ts";
 import { lotmRankDelta } from "../combat/lotm-rank.ts";
 import { seededRandomInt } from "../utils/seeded-rng.ts";
 
@@ -54,15 +54,15 @@ export interface LOTMPromotionInput {
   actorId: string;
   currentRank: SequenceRank;
   targetRank: SequenceRank;
-  /** 已积累的扮演记录条数（引擎据此推导准备程度） */
-  actingCueCount: number;
+  /** 扮演线索记录（引擎据此计算加权总分的消化准备程度） */
+  actingCues: ActingCueProgress[];
+  /** 当前游戏时间，用于检查时间闸 */
+  currentTime: string;
   ritualIntegrity: LOTMRitualIntegrity;
   environmentRisk: LOTMEnvironmentRisk;
   hasMainCharacteristic: boolean;
   hasSupplementaryMaterials: boolean;
   riskTolerance: LOTMPromotionRiskTolerance;
-  /** 仪式细节完成度 0.0-1.0，补充 ritualIntegrity 的粒度 */
-  completionDegree?: number;
 }
 
 // ===========================================================================
@@ -110,8 +110,9 @@ export function resolveLOTMPromotion(
   const rankDelta = lotmRankDelta(input.targetRank, input.currentRank);
   const gap = resolveTierGap(input.targetRank);
 
-  // 2. 从扮演条数推导准备程度
-  const actingReadiness = getActingReadiness(input.actingCueCount);
+  // 2. 从扮演线索计算加权总分，推导准备程度
+  const weightedScore = computeActingWeightedScore(input.actingCues);
+  const actingReadiness = getActingReadiness(weightedScore);
 
   // 3. 上下文 modifier
   const modifier = computeContextModifier(input, actingReadiness);
@@ -132,7 +133,7 @@ export function resolveLOTMPromotion(
     outcome,
     tierGap: gap,
     actingReadiness,
-    actingCueCount: input.actingCueCount,
+    actingCueCount: input.actingCues.length,
     totalModifier: modifier,
     stateLandings,
     consequenceGuidance,
@@ -203,11 +204,6 @@ function computeContextModifier(input: LOTMPromotionInput, actingReadiness: stri
       }
     })();
     mod += baseMod;
-    // completionDegree 在基值基础上微调（半阶范围内）
-    if (input.completionDegree !== undefined) {
-      const clamped = Math.max(0, Math.min(1, input.completionDegree));
-      mod += (clamped - 0.5) * 0.5;
-    }
   }
 
   // 环境风险
@@ -411,7 +407,7 @@ function buildPromotionNarrativeConstraints(
   const constraints: string[] = [];
 
   constraints.push(`晋升目标：${input.currentRank} → ${input.targetRank}`);
-  constraints.push(`扮演积累：${input.actingCueCount} 条（${actingReadiness}）`);
+  constraints.push(`扮演积累：${input.actingCues.length} 条（${actingReadiness}）`);
 
   if (outcome === "triumph" || outcome === "success-with-cost" || outcome === "scarred-success") {
     constraints.push("晋升成功后 actor 获得新序列的能力，可参考对应能力列表描写");

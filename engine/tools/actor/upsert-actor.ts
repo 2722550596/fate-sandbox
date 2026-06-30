@@ -35,8 +35,9 @@ function prepareUpsertActorParams(params: unknown): unknown {
     case "setup-protagonist":
       return { ...params, actor: normalizeSetupProtagonistActor(params["actor"]) };
     case "upsert-public-npc":
+      return { ...params, npc: normalizeNpcInput(params["npc"], false) };
     case "init-npc":
-      return { ...params, npc: normalizeNpcInput(params["npc"]) };
+      return { ...params, npc: normalizeNpcInput(params["npc"], true) };
     case "upsert-sequence":
       return { ...params, sequence: normalizeSequenceInput(params["sequence"]) };
     default:
@@ -44,9 +45,17 @@ function prepareUpsertActorParams(params: unknown): unknown {
   }
 }
 
-function normalizeNpcInput(value: unknown): unknown {
+function normalizeNpcInput(value: unknown, isInitNpc: boolean): unknown {
   if (!isRecord(value)) {
     return value;
+  }
+  // init-npc 的 schema 用 actorId，upsert-public-npc 用 id
+  // normalize 让两种参数名互相兼容
+  if (isInitNpc && value["id"] !== undefined && value["actorId"] === undefined) {
+    return { ...value, actorId: value["id"] };
+  }
+  if (!isInitNpc && value["actorId"] !== undefined && value["id"] === undefined) {
+    return { ...value, id: value["actorId"] };
   }
   return { ...value };
 }
@@ -124,11 +133,24 @@ export const upsertActorToolDefinition: DomainToolDefinition = {
   name: "upsert_actor",
   description:
     "将 protagonist、公开 NPC 或序列信息写入 public actor registry。\n\n" +
+    "【kind 对照表】不同 kind 使用的参数不同：\n" +
+    "  setup-protagonist：{ kind, actor, reason }\n" +
+    "    actor 为完整 PublicActorState 对象（id/kind/presentation/inventory/abilities 等）\n" +
+    "  init-npc：{ kind, npc, reason }\n" +
+    "    npc.actorId（非 id）、npc.canonicalName、npc.renderName（可选）、npc.publicIdentity、\n" +
+    "    npc.apparentAge、npc.outfit、npc.demeanor、npc.relationshipToProtagonist、\n" +
+    "    npc.ordinaryItems（可选，字符串数组）\n" +
+    "  upsert-public-npc：{ kind, npc, reason }\n" +
+    "    npc.id（非 actorId）、npc.canonicalName、npc.renderName（可选）、npc.publicIdentity、\n" +
+    "    npc.apparentAge、npc.outfit、npc.demeanor、npc.relationshipToProtagonist、\n" +
+    "    npc.ordinaryItems（必填字符串数组）\n" +
+    "  upsert-sequence：{ kind, sequence, reason }\n" +
+    "    sequence.actorId、sequence.currentSequence、sequence.rank、sequence.pathway\n\n" +
     "【使用边界】\n" +
-    "- 重要 NPC 只需可被 scene/presence 引用：init-npc\n" +
-    "- 重要 NPC 需要完整公开投影：upsert-public-npc\n" +
+    "- 只需被 scene/presence 引用：init-npc\n" +
+    "- 需要完整公开投影：upsert-public-npc\n" +
     "- 开局确认玩家角色：setup-protagonist\n" +
-    "- 更新角色序列信息：upsert-sequence\n\n" +
+    "- 更新序列信息：upsert-sequence\n\n" +
     "禁区：\n" +
     "- 对普通 NPC 使用 upsert-sequence\n" +
     "- 把本局不需要追踪的角色全量写进 state",
@@ -192,7 +214,11 @@ function looseSequenceSchema(): ReturnType<typeof Type.Object> {
       description:
         "seer / apprentice / marauder / spectator / bard / sailor / reader / secrets-suppliant / sleepless / corpse-collector / warrior / mystery-pryer / savant / hunter / assassin / apothecary / planter / lawyer / arbiter / prisoner / criminal / monster / dancer / villain / patient / scrooge / broker / astronomy-aficionado / tramp / dreamless / babbler / prayermonger",
     }),
-    promotionSystem: Type.Optional(Type.String({ description: "potion / other" })),
+    promotionSystem: Type.Optional(
+      Type.String({
+        description: "potion / bestowal / bestowed / other；缺省为 potion（魔药体系）",
+      }),
+    ),
   });
 }
 

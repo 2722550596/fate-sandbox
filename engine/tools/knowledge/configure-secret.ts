@@ -25,7 +25,7 @@ export const configureSecretToolDefinition: DomainToolDefinition = {
     "- actor-beyonder：对 actor 配置非凡力量相关的隐藏秘密（能力秘密、途径知识、扮演体悟等）\n" +
     "- actor-private：对 actor 配置私人动机、未公开关联等非超凡秘密\n" +
     "- world-fact：配置世界/战役级隐藏事实（源质本质、末日预言等世界观秘密）\n\n" +
-    "同一 text/value 重复调用会合并 revealConditions（upsert 语义）。\n\n" +
+    "同一 text/value 重复调用会覆盖 revealCondition（upsert 语义）。\n\n" +
     "【禁区】\n" +
     "- 在揭示后追加证据（用 reveal_secret）\n" +
     "- 配置玩家已知的公开信息",
@@ -44,9 +44,9 @@ export const configureSecretToolDefinition: DomainToolDefinition = {
       Type.Array(
         Type.Object({
           value: Type.String({ description: "秘密内容（自由文本）" }),
-          revealConditions: Type.Array(
-            Type.String({ description: "可被 claim/trigger 命中的短线索词" }),
-          ),
+          revealCondition: Type.String({
+            description: "自然语言描述的秘密揭示条件（哪些言行/线索可能触发揭示）",
+          }),
         }),
         {
           description: "secret 列表（actor-beyonder / actor-private 必填）",
@@ -58,9 +58,9 @@ export const configureSecretToolDefinition: DomainToolDefinition = {
         description: "世界隐藏事实内容（world-fact 必填）",
       }),
     ),
-    revealConditions: Type.Optional(
-      Type.Array(Type.String(), {
-        description: "可被 claim/trigger 命中的短线索词（world-fact 必填）",
+    revealCondition: Type.Optional(
+      Type.String({
+        description: "自然语言描述的世界事实揭示条件（world-fact 必填）",
       }),
     ),
     relatedActorIds: Type.Optional(

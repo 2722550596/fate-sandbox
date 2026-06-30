@@ -83,14 +83,14 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
         pathway = actor.sequence!.pathway;
       }
 
-      const actingCueCount = isFirstPromotion ? 0 : actor.sequence!.actingCues.length;
       const targetRank = assertOneOfString(raw["targetRank"], SEQUENCE_RANKS, "targetRank");
 
       const input: LOTMPromotionInput = {
         actorId,
         currentRank,
         targetRank,
-        actingCueCount,
+        actingCues: isFirstPromotion ? [] : actor.sequence!.actingCues,
+        currentTime: draft.public.clock.currentAt,
         ritualIntegrity: assertOneOfString(
           typeof raw["ritualIntegrity"] === "string" ? raw["ritualIntegrity"] : "standard",
           ["none", "improvised", "standard", "enhanced"],
@@ -106,8 +106,6 @@ export function attemptPromotionTool(params: unknown, sessionManager: unknown): 
           ["low", "medium", "high", "desperate"],
           "riskTolerance",
         ),
-        completionDegree:
-          typeof raw["completionDegree"] === "number" ? raw["completionDegree"] : undefined,
         hasMainCharacteristic: raw["hasMainCharacteristic"] === true,
         hasSupplementaryMaterials: raw["hasSupplementaryMaterials"] === true,
       };
@@ -275,13 +273,14 @@ function uniqueLines(lines: readonly string[]): string[] {
 export const attemptPromotionToolDefinition: DomainToolDefinition = {
   name: "attempt_promotion",
   description:
-    "序列晋升裁决。引擎根据序列等级差、扮演积累条数、仪式完整性、环境风险和材料完备度\n" +
+    "序列晋升裁决。引擎根据序列等级差、扮演积累（加权总分）、仪式完整性、环境风险和材料完备度\n" +
     "输出 outcome bands + narrative constraints + 必须落地的状态变更义务。\n\n" +
     "【成功时自动处理】\n" +
     "晋升成功（triumph / success-with-cost / scarred-success）时引擎自动：\n" +
-    "- 更新 actor 序列等级（actor.sequence.rank → targetRank）\n" +
+    "- 普通人首次晋升序列9：从 human 变为 beyonder\n" +
+    "- 更新 actor 序列等级、路径、序列名（actor.sequence）\n" +
     "- 重置扮演记录（actingCues = []）\n" +
-    "- 从 data/abilities/pathway_abilities.json 自动填充该等级能力\n\n" +
+    "- 自动填充该等级能力\n\n" +
     "其余必须落地的义务记入账本，GM 后续通过 commit_turn 或其他工具清账：\n" +
     "- actor-condition → update_actor_condition 或 commit_turn\n" +
     "- inventory → update_tracked_item 或 commit_turn\n" +
@@ -319,14 +318,6 @@ export const attemptPromotionToolDefinition: DomainToolDefinition = {
     riskTolerance: Type.Optional(
       Type.String({
         description: "风险偏好：low / medium（默认） / high / desperate",
-      }),
-    ),
-    completionDegree: Type.Optional(
-      Type.Number({
-        description:
-          "仪式细节完成度（0.0-1.0）。补充 ritualIntegrity 的粒度，0.5 为完全按预期完成。",
-        minimum: 0,
-        maximum: 1,
       }),
     ),
   }),

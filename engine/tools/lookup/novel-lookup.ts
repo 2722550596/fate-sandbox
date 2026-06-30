@@ -53,7 +53,6 @@ interface VolumeMeta {
 // Constants
 // ===========================================================================
 
-const MAX_CHARS_DEFAULT = 2_000;
 const MAX_CHAPTERS_DEFAULT = 10;
 const MAX_SEARCH_RESULTS = 20;
 
@@ -75,7 +74,7 @@ function parseVolumeDir(dirName: string): { seq: string; label: string } | null 
   const label = match[2]!.replace(/_/g, "·");
   return { seq: match[1]!, label };
 }
-
+const MAX_CHARS_DEFAULT = 10_000;
 /**
  * Parse a chapter filename like "063_第六十三章_ 解梦.md"
  * → { num: 63, chapterLabel: "第六十三章", title: "解梦" }
@@ -191,7 +190,7 @@ function parseChapterSpec(spec: string): number[] | null {
   if (rangeMatch !== null) {
     const start = parseInt(rangeMatch[1]!, 10);
     const end = parseInt(rangeMatch[2]!, 10);
-    if (Number.isNaN(start) || Number.isNaN(end) || start < 1 || end < start) return null;
+    if (Number.isNaN(start) || Number.isNaN(end) || start < 0 || end < start) return null;
     const result: number[] = [];
     for (let i = start; i <= end; i++) result.push(i);
     return result;
@@ -203,7 +202,7 @@ function parseChapterSpec(spec: string): number[] | null {
     const nums: number[] = [];
     for (const part of parts) {
       const n = parseInt(part.trim(), 10);
-      if (Number.isNaN(n) || n < 1) return null;
+      if (Number.isNaN(n) || n < 0) return null;
       nums.push(n);
     }
     return nums;
@@ -211,7 +210,7 @@ function parseChapterSpec(spec: string): number[] | null {
 
   // Single: "5"
   const single = parseInt(trimmed, 10);
-  if (Number.isNaN(single) || single < 1) return null;
+  if (Number.isNaN(single) || single < 0) return null;
   return [single];
 }
 
@@ -259,7 +258,6 @@ function chapterSummary(chapter: ChapterIndex): string {
 
 // ===========================================================================
 // Public query API
-// ===========================================================================
 
 export interface NovelQuery {
   /** 卷名：数字序号 "001"、中文 "第一部"、"小丑"、"无面人" 等 */
@@ -310,20 +308,25 @@ export function lookupNovel(query: NovelQuery): NovelLookupResult {
   // ========== Mode 1: keyword search across all chapters ==========
   if (query.query !== undefined && query.volume === undefined) {
     const q = query.query.trim();
-    const normalizedQ = q.normalize("NFKC");
+    const keywords = q
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((k) => k.normalize("NFKC"));
     const titleMatches: ChapterIndex[] = [];
     const contentMatches: Array<{ chapter: ChapterIndex; snippet: string }> = [];
 
     for (const vol of volumes) {
       for (const ch of vol.chapters) {
-        if (ch.chapterTitle.normalize("NFKC").includes(normalizedQ)) {
+        const titleNorm = ch.chapterTitle.normalize("NFKC");
+        if (keywords.every((kw) => titleNorm.includes(kw))) {
           titleMatches.push(ch);
         } else if (query.fulltext !== false) {
           // 内容搜索
           try {
             const content = readFileSync(ch.filePath, "utf-8");
-            if (content.normalize("NFKC").includes(normalizedQ)) {
-              const snippet = extractSnippet(content, normalizedQ);
+            const contentNorm = content.normalize("NFKC");
+            if (keywords.every((kw) => contentNorm.includes(kw))) {
+              const snippet = extractSnippet(content, keywords[0]!);
               contentMatches.push({ chapter: ch, snippet });
             }
           } catch {
@@ -437,18 +440,23 @@ export function lookupNovel(query: NovelQuery): NovelLookupResult {
   // ========== Mode 5: volume + keyword search ==========
   if (query.chapter === undefined && query.query !== undefined) {
     const q = query.query.trim();
-    const normalizedQ = q.normalize("NFKC");
+    const keywords = q
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((k) => k.normalize("NFKC"));
     const titleMatches: ChapterIndex[] = [];
     const contentMatches: Array<{ chapter: ChapterIndex; snippet: string }> = [];
 
     for (const ch of vol.chapters) {
-      if (ch.chapterTitle.normalize("NFKC").includes(normalizedQ)) {
+      const titleNorm = ch.chapterTitle.normalize("NFKC");
+      if (keywords.every((kw) => titleNorm.includes(kw))) {
         titleMatches.push(ch);
       } else if (query.fulltext !== false) {
         try {
           const content = readFileSync(ch.filePath, "utf-8");
-          if (content.normalize("NFKC").includes(normalizedQ)) {
-            const snippet = extractSnippet(content, normalizedQ);
+          const contentNorm = content.normalize("NFKC");
+          if (keywords.every((kw) => contentNorm.includes(kw))) {
+            const snippet = extractSnippet(content, keywords[0]!);
             contentMatches.push({ chapter: ch, snippet });
           }
         } catch {
@@ -541,16 +549,21 @@ export function lookupNovel(query: NovelQuery): NovelLookupResult {
   }
 
   // Full content
+  const isSingleChapter = sliced.length === 1;
+  const safeMaxChars = isSingleChapter ? Infinity : maxChars;
+
   const lines: string[] = [
     `📖 【${vol.volumeLabel}】批量读取（${chSpec}）：`,
-    `（每章最多 ${maxChars} 字符，共 ${matched.length} 章，显示 ${sliced.length} 章）`,
+    isSingleChapter
+      ? `（读取中...）`
+      : `（每章最多 ${maxChars} 字符，共 ${matched.length} 章，显示 ${sliced.length} 章）`,
     "",
   ];
 
   for (const { chapter: ch } of sliced) {
     lines.push(`━━━ ${formatChapterHeader(ch)} ━━━`);
     lines.push("");
-    lines.push(readChapterContent(ch, maxChars));
+    lines.push(readChapterContent(ch, safeMaxChars));
     lines.push("");
   }
 
@@ -607,10 +620,10 @@ export const lookupNovelToolDefinition: DomainToolDefinition = {
     `  - 不传任何参数 → 列出所有卷\n` +
     `  - volume（字符串）→ 卷名，支持卷序号 "001"、"第一部"、"小丑"、"无面人" 等\n` +
     `  - chapter（字符串）→ 章节号，单章 "5"、范围 "1-20"、逗号列表 "1,3,5"\n` +
-    `  - query（字符串）→ 搜索关键词，搜索标题和正文（默认全文搜索）\n` +
+    `  - query（字符串）→ 搜索关键词。空格分隔多词为 AND 匹配，如 "老尼尔 值夜者" 同时搜索两个词\n` +
     `  - fulltext（布尔值）→ 是否搜索正文，默认 true。设为 false 则只搜索标题\n` +
     `  - list（布尔值）→ 只返回清单不返回正文，默认 false\n` +
-    `  - maxChars（数字）→ 每章最多返回字符数，默认 2000\n` +
+    `  - maxChars（数字）→ 每章最多返回字符数，默认 4000；读取单章时不截断\n` +
     `  - limit（数字）→ 最多返回章节数，默认 10\n` +
     `  - offset（数字）→ 分页偏移，默认 0\n\n` +
     `使用边界：查阅原著设定、角色台词、事件经过、能力描述等原始出处。\n` +
@@ -628,7 +641,7 @@ export const lookupNovelToolDefinition: DomainToolDefinition = {
     ),
     query: Type.Optional(
       Type.String({
-        description: `搜索关键词。默认在章节标题和正文中全文搜索；设置 fulltext=false 则只搜索标题。`,
+        description: `搜索关键词。支持空格分隔的多词 AND 匹配，如 "老尼尔 值夜者" 同时搜索两个词。默认全文搜索；设置 fulltext=false 则只搜索标题。`,
       }),
     ),
     fulltext: Type.Optional(
@@ -643,7 +656,7 @@ export const lookupNovelToolDefinition: DomainToolDefinition = {
     ),
     maxChars: Type.Optional(
       Type.Number({
-        description: "批量读取时每章最多返回字符数，超长自动截断。默认 2000。",
+        description: "批量读取时每章最多返回字符数，超长自动截断。默认 4000；读取单章时不截断。",
       }),
     ),
     limit: Type.Optional(

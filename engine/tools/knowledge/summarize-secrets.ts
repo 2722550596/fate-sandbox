@@ -32,9 +32,8 @@ function formatSecretSlots(label: string, slots: ActorSecretSlots["beyonderSecre
     if (s.revealState === "revealed") {
       lines.push(`    ${icon} ${s.value}`);
     } else {
-      const conditions =
-        s.revealConditions.length > 0 ? `  ← 线索: ${s.revealConditions.join("、")}` : "";
-      lines.push(`    ${icon} ${s.value}${conditions}`);
+      const condition = s.revealCondition.length > 0 ? `  ← 条件: ${s.revealCondition}` : "";
+      lines.push(`    ${icon} ${s.value}${condition}`);
     }
   }
   return lines;
@@ -95,9 +94,8 @@ function buildWorldFactsSummary(facts: HiddenWorldFact[]): string[] {
     } else {
       const related =
         f.relatedActorIds.length > 0 ? `（关联: ${f.relatedActorIds.join("、")}）` : "";
-      const conditions =
-        f.revealConditions.length > 0 ? `  ← 线索: ${f.revealConditions.join("、")}` : "";
-      lines.push(`  ${icon} ${f.text}${related}${conditions}`);
+      const condition = f.revealCondition.length > 0 ? `  ← 条件: ${f.revealCondition}` : "";
+      lines.push(`  ${icon} ${f.text}${related}${condition}`);
     }
   }
   return lines;

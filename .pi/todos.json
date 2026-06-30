@@ -1,5 +1,5 @@
 {
-  "nextId": 89,
+  "nextId": 98,
   "items": [
     {
       "id": 1,
@@ -497,6 +497,61 @@
       "content": "B: 验证测试",
       "done": true,
       "created": 1782712444
+    },
+    {
+      "id": 89,
+      "content": "Bump MAX_CHARS_DEFAULT 2000→4000",
+      "done": true,
+      "created": 1782744472
+    },
+    {
+      "id": 90,
+      "content": "Mode 1 (global search): multi-keyword AND search",
+      "done": true,
+      "created": 1782744472
+    },
+    {
+      "id": 91,
+      "content": "Mode 5 (volume-scoped search): multi-keyword AND search",
+      "done": true,
+      "created": 1782744472
+    },
+    {
+      "id": 92,
+      "content": "Tool/param descriptions: mention multi-keyword",
+      "done": true,
+      "created": 1782744472
+    },
+    {
+      "id": 93,
+      "content": "typecheck + lint + format",
+      "done": true,
+      "created": 1782744472
+    },
+    {
+      "id": 94,
+      "content": "Bug 1: add persistStateAfterCommit to updateActorImpressionTool",
+      "done": true,
+      "created": 1782751109
+    },
+    {
+      "id": 95,
+      "content": "Bug 2: toSafePublicActor use npc.ordinaryItems for inventory.items",
+      "done": true,
+      "created": 1782751109
+    },
+    {
+      "id": 96,
+      "content": "Bug 3: toInitNpcActor pass renderName through",
+      "done": true,
+      "created": 1782751109
+    },
+    {
+      "id": 97,
+      "content": "给哥哥整理 novel-lookup 的实现说明",
+      "done": false,
+      "created": 1782806939,
+      "tag": "done"
     }
   ]
 }

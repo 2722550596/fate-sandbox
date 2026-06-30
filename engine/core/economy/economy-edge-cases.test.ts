@@ -19,7 +19,7 @@ void test("add-purse creates a held purse for existing actor", () => {
     reason: "创建备用资金账户",
   });
 
-  assert.equal(result.message, "资金账户已加入。");
+  assert.equal(result.message, "资金账户已加入：备用资金，初始金额 8苏勒4便士。");
   assert.equal(draft.public.economy.accessibleFunds.length, beforeCount + 1);
   const purse = draft.public.economy.accessibleFunds.find((p) => p.label === "备用资金")!;
   assert.equal(purse.amount, 100);
@@ -75,20 +75,19 @@ void test("add-purse rejects empty label", () => {
   );
 });
 
-void test("add-purse rejects zero amount", () => {
+void test("add-purse allows zero amount for empty account", () => {
   const draft = createInitialState();
-  assert.throws(
-    () =>
-      updateEconomy(draft, {
-        kind: "add-purse",
-        ownerActorId: "protagonist",
-        label: "空账户",
-        amount: 0,
-        access: "held",
-        reason: "测试",
-      }),
-    /必须大于 0/,
-  );
+  const result = updateEconomy(draft, {
+    kind: "add-purse",
+    ownerActorId: "protagonist",
+    label: "空账户",
+    amount: 0,
+    access: "held",
+    reason: "创建空账户",
+  });
+  assert.equal(result.message, "资金账户已加入：空账户，初始金额 0便士。");
+  const purse = draft.public.economy.accessibleFunds.find((p) => p.label === "空账户")!;
+  assert.equal(purse.amount, 0);
 });
 
 // ─── add-debt ──────────────────────────────────────────────────

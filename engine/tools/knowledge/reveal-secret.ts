@@ -44,7 +44,7 @@ export const revealSecretToolDefinition: DomainToolDefinition = {
         description: "GM 观察到的触发现象（observed-reveal 必填）",
       }),
     ),
-    evidence: Type.String({ description: "匹配证据，必须包含 revealConditions 中的关键词" }),
+    evidence: Type.String({ description: "匹配证据，应与 revealCondition 描述的条件相符" }),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) => {
     const draft = cloneState();

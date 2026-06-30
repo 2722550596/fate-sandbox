@@ -13,7 +13,7 @@ import { parseTaggedTypeBoxUnion, trimStringsDeep } from "../utils/typebox-valid
  */
 export const SECRET_STRING_INPUT_SCHEMA = Type.Object({
   value: Type.String({ minLength: 1 }),
-  revealConditions: Type.Array(Type.String({ minLength: 1 })),
+  revealCondition: Type.String({ minLength: 1 }),
 });
 export type SecretStringInput = Static<typeof SECRET_STRING_INPUT_SCHEMA>;
 
@@ -41,7 +41,7 @@ export const CONFIGURE_ACTOR_PRIVATE_SCHEMA = Type.Object({
 export const CONFIGURE_WORLD_FACT_SCHEMA = Type.Object({
   kind: Type.Literal("world-fact"),
   text: Type.String({ minLength: 1 }),
-  revealConditions: Type.Array(Type.String({ minLength: 1 })),
+  revealCondition: Type.String({ minLength: 1 }),
   relatedActorIds: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
   reason: Type.String({ minLength: 1 }),
 });
