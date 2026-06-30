@@ -171,8 +171,8 @@ if ($DevMode) {
 $BackstageSessionsDir = Join-Path $ProjectAgentDir 'backstage-sessions'
 New-Item -ItemType Directory -Force -Path $BackstageSessionsDir | Out-Null
 
-if ($env:FATE_RENDER_MODEL) {
-  Write-Host "Render pass model override: FATE_RENDER_MODEL=$env:FATE_RENDER_MODEL"
+if ($env:RENDER_MODEL) {
+  Write-Host "Render pass model override: RENDER_MODEL=$env:RENDER_MODEL"
 } else {
   Write-Host "Render pass reuses the settlement model."
 }

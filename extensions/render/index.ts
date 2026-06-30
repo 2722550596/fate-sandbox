@@ -326,7 +326,7 @@ async function streamProse(
       // 渲染器有自己的稳定前缀（分层散文史），独立缓存分区提升命中率。
       sessionId: rendererSessionId(ctx, "render"),
       // 实测 OAuth 渠道不 honor 1h TTL（静默按 5m 处理），默认 short 免付 2× 写价；
-      // 渠道哪天生效了可用 FATE_RENDER_CACHE=long 打开。
+      // 渠道哪天生效了可用 RENDER_CACHE=long 打开。
       cacheRetention: resolveRenderCacheRetention(ctx),
     },
   );
@@ -554,27 +554,27 @@ type CacheRetention = "none" | "short" | "long";
 /**
  * 渲染器缓存保留档：默认 short（Anthropic 5m，写价 1.25×）。
  * 实测 Claude OAuth 渠道不 honor `ttl: "1h"`，静默按 5m 处理——long 档
- * 只多付 2× 写价不换任何保留；`FATE_RENDER_CACHE=long|none` 可覆盖。
+ * 只多付 2× 写价不换任何保留；`RENDER_CACHE=long|none` 可覆盖。
  * digest writer 前缀不复用，不走这个档。
  */
 function resolveRenderCacheRetention(ctx: ExtensionContext): CacheRetention {
-  const raw = process.env["FATE_RENDER_CACHE"]?.trim();
+  const raw = process.env["RENDER_CACHE"]?.trim();
   if (raw === undefined || raw === "") {
     return "short";
   }
   if (raw === "none" || raw === "short" || raw === "long") {
     return raw;
   }
-  notify(ctx, `FATE_RENDER_CACHE 应为 none|short|long，得到：${raw}，已回退 short`, "warning");
+  notify(ctx, `RENDER_CACHE 应为 none|short|long，得到：${raw}，已回退 short`, "warning");
   return "short";
 }
 
 /**
- * 文风 lint 失败后的整轮重写次数。默认 3 次；`FATE_RENDER_LINT_RETRIES=0`
+ * 文风 lint 失败后的整轮重写次数。默认 3 次；`RENDER_LINT_RETRIES=0`
  * 可关闭自动返工，最大 6 次避免坏模型烧空上下文和预算。
  */
 function resolveRenderLintRetries(ctx: ExtensionContext): number {
-  const raw = process.env["FATE_RENDER_LINT_RETRIES"]?.trim();
+  const raw = process.env["RENDER_LINT_RETRIES"]?.trim();
   if (raw === undefined || raw === "") {
     return DEFAULT_RENDER_LINT_RETRIES;
   }
@@ -582,7 +582,7 @@ function resolveRenderLintRetries(ctx: ExtensionContext): number {
   if (!Number.isInteger(value) || value < 0 || value > MAX_RENDER_LINT_RETRIES) {
     notify(
       ctx,
-      `FATE_RENDER_LINT_RETRIES 应为 0~${MAX_RENDER_LINT_RETRIES} 的整数，得到：${raw}，已回退 ${DEFAULT_RENDER_LINT_RETRIES}`,
+      `RENDER_LINT_RETRIES 应为 0~${MAX_RENDER_LINT_RETRIES} 的整数，得到：${raw}，已回退 ${DEFAULT_RENDER_LINT_RETRIES}`,
       "warning",
     );
     return DEFAULT_RENDER_LINT_RETRIES;
@@ -591,40 +591,40 @@ function resolveRenderLintRetries(ctx: ExtensionContext): number {
 }
 
 /**
- * 渲染器 temperature：`FATE_RENDER_TEMPERATURE=0.9` 之类。默认不传
+ * 渲染器 temperature：`RENDER_TEMPERATURE=0.9` 之类。默认不传
  * （部分 provider/模型拒绝该参数，误传会让每轮渲染都回退机械摘要）；
  * 设了但解析不出或越界时告警并忽略。
  */
 function resolveRenderTemperature(ctx: ExtensionContext): number | undefined {
-  const raw = process.env["FATE_RENDER_TEMPERATURE"]?.trim();
+  const raw = process.env["RENDER_TEMPERATURE"]?.trim();
   if (raw === undefined || raw === "") {
     return undefined;
   }
   const value = Number(raw);
   if (!Number.isFinite(value) || value < 0 || value > 2) {
-    notify(ctx, `FATE_RENDER_TEMPERATURE 应为 0~2 的数字，得到：${raw}，已忽略`, "warning");
+    notify(ctx, `RENDER_TEMPERATURE 应为 0~2 的数字，得到：${raw}，已忽略`, "warning");
     return undefined;
   }
   return value;
 }
 
 /**
- * 渲染轮可以跑在与结算轮不同的模型上：`FATE_RENDER_MODEL=provider/model-id`。
+ * 渲染轮可以跑在与结算轮不同的模型上：`RENDER_MODEL=provider/model-id`。
  * 未设置或找不到时回退到结算轮的当前模型。
  */
 function resolveRendererModel(ctx: ExtensionContext): ExtensionContext["model"] {
-  const override = process.env["FATE_RENDER_MODEL"]?.trim();
+  const override = process.env["RENDER_MODEL"]?.trim();
   if (override === undefined || override === "") {
     return ctx.model;
   }
   const slash = override.indexOf("/");
   if (slash <= 0 || slash === override.length - 1) {
-    notify(ctx, `FATE_RENDER_MODEL 格式应为 provider/model-id，得到：${override}`, "warning");
+    notify(ctx, `RENDER_MODEL 格式应为 provider/model-id，得到：${override}`, "warning");
     return ctx.model;
   }
   const model = ctx.modelRegistry.find(override.slice(0, slash), override.slice(slash + 1));
   if (model === undefined) {
-    notify(ctx, `FATE_RENDER_MODEL 未命中任何已注册模型：${override}，回退结算模型`, "warning");
+    notify(ctx, `RENDER_MODEL 未命中任何已注册模型：${override}，回退结算模型`, "warning");
     return ctx.model;
   }
   return model;

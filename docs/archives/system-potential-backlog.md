@@ -394,7 +394,7 @@ interface TimelinePressureSlot {
 
 ## 18. Windows 启动脚本双 pass parity
 
-- [x] 状态：已完成（2026-06-14）。`start.ps1` 现在与 `start.sh` 一样加载 `extensions/two-pass-render/index.ts`，并提示 `FATE_RENDER_MODEL` 覆盖状态。后续维护启动脚本时必须保持两边 extension 列表一致。
+- [x] 状态：已完成（2026-06-14）。`start.ps1` 现在与 `start.sh` 一样加载 `extensions/two-pass-render/index.ts`，并提示 `RENDER_MODEL` 覆盖状态。后续维护启动脚本时必须保持两边 extension 列表一致。
 
 ## 19. actor id opaque 化 + name→id resolver（关 firewall key 侧信道 / 换主角地基）
 
