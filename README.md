@@ -4,11 +4,124 @@
 
 基于 Fate Sandbox 引擎重构，将原著的世界书、序列体系、非凡特性、经济系统和叙事规则移植为可交互的叙事 runtime。
 
-## Requirements
+## 从零开始
 
-- Node.js >= 24
-- pnpm 11.3.0
-- pi coding agent
+### 1. 装 Node.js
+
+本游戏需要 **Node.js >= 24** 和 **pnpm 11.3.0**。如果还没有：
+
+```bash
+# 推荐用 nvm 装 Node（装完会自动选好版本）
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+exec bash
+nvm install 24
+nvm use 24
+
+# 装 pnpm
+corepack enable && corepack prepare pnpm@11.3.0 --activate
+```
+
+Windows 用户可以装 [nvm-windows](https://github.com/coreybutler/nvm-windows/releases)，然后用管理员 PowerShell 装 pnpm。
+
+> **💡 Windows 用户强烈推荐用 WSL2**（见下文），这样可以直接走 Linux 流程，不用折腾原生 Windows 环境。
+
+### 2. 装 pi coding agent
+
+[pi.dev](https://pi.dev) — 本游戏的运行底座，一个本地优先的 AI coding agent。
+
+任选一种方式：
+
+```bash
+# 推荐 — 一键脚本
+curl -fsSL https://pi.dev/install.sh | sh
+
+# 或用 npm
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+
+# 或用 bun
+bun add -g --ignore-scripts @earendil-works/pi-coding-agent
+```
+
+Windows PowerShell（如果不用 WSL）：
+
+```powershell
+powershell -c "irm https://pi.dev/install.ps1 | iex"
+# 或用 npm
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+```
+
+装完后在终端里跑一下 `pi --version`，能正常输出版本号就说明装好了。
+
+### 3. Windows 用户：WSL2（推荐）
+
+如果在 Windows 上玩，**强烈建议装 WSL2**。原生 PowerShell 体验差、路径问题多，WSL 里就是完整 Linux 环境。
+
+管理员 PowerShell 一行搞定：
+
+```powershell
+wsl --install -d Ubuntu
+```
+
+重启后开 Ubuntu 终端，继续走上面的 Linux 流程装 Node.js + pnpm + pi 即可。Ubuntu 终端里 `curl -fsSL https://pi.dev/install.sh | sh` 就能装 pi。
+
+### 4. 开玩
+
+```bash
+# 先装依赖
+pnpm install
+
+# 复制环境变量模板（必须！否则 lookup 和秘密揭示功能不可用）
+cp .env.example .env
+# 然后编辑 .env，填入 SILICONFLOW_API_KEY（从 https://cloud.siliconflow.cn 获取）
+
+# 启动
+./start.sh
+```
+
+Windows 原生 PowerShell（不推荐，但能用）：
+
+```powershell
+pnpm install
+cp .env.example .env
+# 编辑 .env 填 key
+.\start.ps1
+```
+
+如果 PowerShell 执行策略拦截脚本，可在当前窗口临时放开：
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\start.ps1
+```
+
+首次启动会看到 pi 的界面。如果没登录 pi，先跑 `/login` 或按提示配置 API provider。
+
+然后在输入框里输入：
+
+```txt
+/skill:start-game
+```
+
+或直接用自然语言说"开始游戏"。推荐用 `/skill:start-game`，它会按项目的开局流程初始化。
+
+常用 UI 命令：
+
+```txt
+/status     查看当前时间、地点、目标、威胁和资源
+/inventory  查看当前玩家可见资金与物品
+/compact    手动压缩聊天上下文（项目已接管压缩策略，自动压缩同样生效）
+/reroll     重新渲染最后一条正文：保留结算事实，只替换可见小说文本
+/fuck [N]   快速回退到倒数第 N 次输入（默认 1）：中断生成、删除废弃分支、原输入回填输入框
+```
+
+`/reroll` 是"正文不满意重写"：只重跑双 pass 的渲染段，不重新结算、
+不推进时间、不改游戏状态；它只能作用于当前最后一条正文。
+
+`/fuck` 是"坏输入急救"：刚发出去就后悔时用它回到输入前一刻，游戏状态会自动回滚到回退点快照。被废弃的分支会从 session 文件中物理删除，不可恢复；如果想保留分支对比不同走向，请用 pi 自带的 `/tree`。
+
+`/status` 和 `/inventory` 是 UI 面板，不是剧情动作；它们用于命令行里查看自己当前知道/持有的东西。
+
+看到右下角类似 `0.0%` 和一个方块时，那通常是 pi 的上下文/状态 UI，不是下载进度条。首次启动如果没有 API/model 配置，界面可能看起来像"卡住"，但实际是在等你输入命令或配置模型渠道。
 
 ## Environment
 
@@ -37,58 +150,6 @@ cp .env.example .env
 | `RENDER_MODEL`         | 复用结算模型                    | 渲染轮（Pass B）专用模型   |
 | `RENDER_TEMPERATURE`   | 不传                            | 渲染轮温度参数             |
 | `RENDER_CACHE`         | `short`                         | 渲染轮 prompt cache 保留档 |
-
-## Quick Start
-
-### Linux / macOS
-
-```bash
-pnpm install
-./start.sh
-```
-
-### Windows PowerShell
-
-```powershell
-pnpm install
-.\start.ps1
-```
-
-如果 PowerShell 执行策略拦截脚本，可在当前窗口临时放开：
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\start.ps1
-```
-
-进入 pi 界面后，先确认模型/API 已经配置好；如果没登录，先按自己的 pi 环境执行 `/login` 或配置 provider。
-
-然后在输入框里输入：
-
-```txt
-/skill:start-game
-```
-
-或直接用自然语言说"开始游戏"。推荐用 `/skill:start-game`，它会按项目的开局流程初始化。
-
-常用 UI 命令：
-
-```txt
-/status     查看当前时间、地点、目标、威胁和资源
-/inventory  查看当前玩家可见资金与物品
-/compact    手动压缩聊天上下文（项目已接管压缩策略，自动压缩同样生效）
-/reroll     重新渲染最后一条正文：保留结算事实，只替换可见小说文本
-/fuck [N]   快速回退到倒数第 N 次输入（默认 1）：中断生成、删除废弃分支、原输入回填输入框
-```
-
-`/reroll` 是"正文不满意重写"：只重跑双 pass 的渲染段，不重新结算、
-不推进时间、不改游戏状态；它只能作用于当前最后一条正文。
-
-`/fuck` 是"坏输入急救"：刚发出去就后悔时用它回到输入前一刻，游戏状态会自动回滚到回退点快照。被废弃的分支会从 session 文件中物理删除，不可恢复；如果想保留分支对比不同走向，请用 pi 自带的 `/tree`。
-
-`/status` 和 `/inventory` 是 UI 面板，不是剧情动作；它们用于命令行里查看自己当前知道/持有的东西。
-
-看到右下角类似 `0.0%` 和一个方块时，那通常是 pi 的上下文/状态 UI，不是下载进度条。首次启动如果没有 API/model 配置，界面可能看起来像"卡住"，但实际是在等你输入命令或配置模型渠道。
 
 ## Model Notes
 
