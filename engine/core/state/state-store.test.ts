@@ -6,7 +6,7 @@ import { cloneState, commitState, getPublicState, getState, hydrateState, patchS
 void test("resetState creates a valid initial state", () => {
   const state = resetState();
 
-  assert.equal(state.meta.schemaVersion, 6);
+  assert.equal(state.meta.schemaVersion, 0);
   assert.equal(state.public.protagonistActorId, "protagonist");
   assert.equal(typeof state.meta.rngSeed, "number");
 });
@@ -74,7 +74,7 @@ void test("replaceStateForDebug rejects invalid state", () => {
 
   assert.throws(
     () => replaceStateForDebug({ invalid: true } as never),
-    /非法.?状态/,
+    /非法.?状态|state migration/,
   );
 });
 
@@ -97,7 +97,7 @@ void test("commitState rejects invalid state", () => {
 
   assert.throws(
     () => commitState({ invalid: true } as never),
-    /非法.?状态/,
+    /非法.?状态|state migration/,
   );
 });
 
@@ -125,9 +125,8 @@ void test("hydrateState accepts { state } wrapper", () => {
 
 void test("hydrateState rejects invalid data", () => {
   resetState();
-
   assert.throws(
     () => hydrateState({ invalid: true }),
-    /非法.?状态/,
+    /非法.?状态|state migration/,
   );
 });

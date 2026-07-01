@@ -5,6 +5,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { formatHumanTime, nowIso } from "./date-time.ts";
 import { createInitialState } from "./initial-state.ts";
 import { parseStateSchema } from "./state-schema.ts";
+import { migrateRawGameState } from "./state-migration.ts";
 import { formatUnknown, isRecord } from "../utils/typebox-validation.ts";
 
 const DEBUG_STATE_PATH = "state/state.json";
@@ -105,7 +106,6 @@ function toStateExport(state: State): StateExport {
     },
   };
 }
-
 function assertState(raw: unknown): State {
   if (!isRecord(raw)) {
     throw new Error(`非法状态: ${formatUnknown(raw)}。状态必须是对象。`);
@@ -114,7 +114,7 @@ function assertState(raw: unknown): State {
   if (!isRecord(stateRaw)) {
     throw new Error(`非法状态: ${formatUnknown(raw)}。state 必须是对象。`);
   }
-  return parseStateSchema(stateRaw);
+  return parseStateSchema(migrateRawGameState(stateRaw));
 }
 
 function touchState(state: State): State {
