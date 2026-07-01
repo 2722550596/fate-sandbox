@@ -434,13 +434,15 @@ pnpm format && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 
 **description 编写**：必须包含使用边界（何时用）和禁区（何时不用）。参考 `roll_dice` 的简洁模式或 `commit_turn` 的详细模式。
 
-### State Schema 现状（⚠️ 重要）
+### State Schema 现状
 
-- `CURRENT_STATE_SCHEMA_VERSION = 6`（`engine/core/state/state.ts:604`）
-- **完全没有 migration 函数** — schemaVersion 只写入不读取
-- 唯一兼容机制：TypeBox `Clean()` 静默丢弃未知字段
-- 这意味着新增/重命名字段后，旧 state 加载时新字段为 undefined → 运行时可能崩溃
-- 添加 migration 是必须的 TODO
+- `CURRENT_STATE_SCHEMA_VERSION = 0`（`engine/core/state/state.ts:606`，发布前已归零）
+- 迁移链在 `engine/core/state/state-migration.ts`，线性版本迁移：每个函数负责 v_n → v_{n+1}
+- 迁移入口在 `state-store.ts` 的 `assertState()`，在加载所有持久化状态前自动执行
+- 新增/重命名字段时必须：
+  1. 更新 `currentStateSchemaVersion` 版本号
+  2. 在 `state-migration.ts` 添加对应的迁移函数并注册到 `migrateOneSchemaVersion` 路由
+  3. 添加迁移测试
 
 ### 测试模式速查
 
