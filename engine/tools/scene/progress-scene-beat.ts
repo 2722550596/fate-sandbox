@@ -36,7 +36,9 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
         hasCost: true,
         beatBoundary: input.kind === "complete" && draft.public.scene.threats.length > 0,
       });
-      draft.public.pendingDirectionPacket = true;
+      if (input.kind === "complete") {
+        draft.public.pendingDirectionPacket = true;
+      }
       // 幕后催账：到期义务/填满时钟 + 待 harvest 的后台 run 随返回值提醒（backlog #3）
       return {
         result,
