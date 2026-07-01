@@ -6,6 +6,7 @@ import { Type } from "typebox";
 
 import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
 import { cloneState, commitState } from "../../core/state/state-store.ts";
+import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { textResult } from "../runtime/tool-result.ts";
 
 export function adjustClockTool(params: unknown, sessionManager: unknown): ToolResult {
@@ -23,10 +24,10 @@ export function adjustClockTool(params: unknown, sessionManager: unknown): ToolR
 }
 
 function assertValidIsoString(params: unknown): string {
-  if (typeof params !== "object" || params === null) {
+  if (!isRecord(params)) {
     throw new Error("adjust_clock 参数必须包含 targetTime（ISO 8601 字符串）");
   }
-  const raw = (params as Record<string, unknown>)["targetTime"];
+  const raw = params["targetTime"];
   if (typeof raw !== "string" || raw.length === 0) {
     throw new Error("adjust_clock.targetTime 必须是非空字符串");
   }
@@ -34,13 +35,18 @@ function assertValidIsoString(params: unknown): string {
   try {
     Temporal.Instant.from(raw);
   } catch {
-    throw new Error(`adjust_clock.targetTime 不是合法的 ISO 8601 时间字符串：${raw}。格式示例：2004-02-01T14:00:00.000Z`);
+    throw new Error(
+      `adjust_clock.targetTime 不是合法的 ISO 8601 时间字符串：${raw}。格式示例：2004-02-01T14:00:00.000Z`,
+    );
   }
   return raw;
 }
 
 function assertReason(params: unknown): string {
-  const raw = (params as Record<string, unknown>)["reason"];
+  if (!isRecord(params)) {
+    throw new Error("adjust_clock.reason 必须是非空字符串");
+  }
+  const raw = params["reason"];
   if (typeof raw !== "string" || raw.length === 0) {
     throw new Error("adjust_clock.reason 必须是非空字符串");
   }
@@ -63,8 +69,7 @@ export const adjustClockToolDefinition: DomainToolDefinition = {
     "- 调完时钟后注意同步 scene.lastResolvedAt（如有必要）",
   parameters: Type.Object({
     targetTime: Type.String({
-      description:
-        "目标时钟时间，ISO 8601 格式，如 2004-02-01T14:00:00.000Z。应等于叙事当前时间",
+      description: "目标时钟时间，ISO 8601 格式，如 2004-02-01T14:00:00.000Z。应等于叙事当前时间",
     }),
     reason: Type.String({ description: "为什么需要调整时钟？和叙事时间差了多少？" }),
   }),

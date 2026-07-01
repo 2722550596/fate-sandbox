@@ -5,7 +5,7 @@ import { Type } from "typebox";
 import { Compile } from "typebox/compile";
 
 import { BOUNDARY_KIND_SCHEMA } from "../state/state-enum-schemas.ts";
-import { parseTaggedTypeBoxUnion } from "../utils/typebox-validation.ts";
+import { isRecord, parseTaggedTypeBoxUnion } from "../utils/typebox-validation.ts";
 
 export const TURN_TIME_KIND_SCHEMA = Type.Unsafe<TurnTimePolicy["kind"]>({
   enum: ["elapsed", "travel"],
@@ -61,16 +61,15 @@ export function parseTurnTimePolicySchema(value: unknown, fieldName: string): Tu
  * 2. elapsedMinutes 对象展开为数字并提升 reason
  */
 function normalizeToolTime(value: unknown): unknown {
-  if (typeof value !== "object" || value === null) return value;
-  const record = value as Record<string, unknown>;
-  const kind = typeof record["kind"] === "string" && record["kind"] !== ""
-    ? record["kind"]
-    : "elapsed";
+  if (!isRecord(value)) return value;
+  const record = value;
+  const kind =
+    typeof record["kind"] === "string" && record["kind"] !== "" ? record["kind"] : "elapsed";
   const em = record["elapsedMinutes"];
-  if (typeof em !== "object" || em === null) {
+  if (!isRecord(em)) {
     return { ...record, kind };
   }
-  const emRecord = em as Record<string, unknown>;
+  const emRecord = em;
   if (typeof emRecord["minutes"] !== "number" && typeof emRecord["minutes"] !== "string") {
     return { ...record, kind };
   }

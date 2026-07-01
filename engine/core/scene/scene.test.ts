@@ -132,7 +132,7 @@ void test("beginSceneBeat rejects zero objectives", () => {
         storyWindow: storyWindow(),
         objectives: [],
       }),
-    /需要 1-5 个/,
+    /数量超出限制/,
   );
 });
 
@@ -146,7 +146,7 @@ void test("beginSceneBeat rejects too many objectives", () => {
         storyWindow: storyWindow(),
         objectives: Array.from({ length: 6 }, (_, i) => `目标${i + 1}`),
       }),
-    /需要 1-5 个/,
+    /数量超出限制/,
   );
 });
 

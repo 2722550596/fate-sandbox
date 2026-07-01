@@ -16,7 +16,7 @@ export function timePolicySchema(): ReturnType<typeof Type.Object> {
         }),
         reason: Type.String({
           description:
-            "列出正文里哪些活动耗了时间，例如：\"在廷根街市调查 2 小时 + 去诊所 1 小时 + 吃晚饭 1 小时\"",
+            '列出正文里哪些活动耗了时间，例如："在廷根街市调查 2 小时 + 去诊所 1 小时 + 吃晚饭 1 小时"',
         }),
       }),
     ),

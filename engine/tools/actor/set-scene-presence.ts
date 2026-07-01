@@ -19,7 +19,8 @@ export function setScenePresenceTool(params: unknown, sessionManager: unknown): 
 
 export const setScenePresenceToolDefinition: DomainToolDefinition = {
   name: "set_scene_presence",
-  description: "更新当前场景的在场角色和同行者名单。谁在场、谁不在场——用这个工具声明，不要用 upsert_actor 或 update_scene 顺带处理。\n\n" +
+  description:
+    "更新当前场景的在场角色和同行者名单。谁在场、谁不在场——用这个工具声明，不要用 upsert_actor 或 update_scene 顺带处理。\n\n" +
     "【参数关系】\n" +
     "- allyActorIds 是 presentActorIds 的子集：每个 ally 必须先在场\n" +
     "- 想让某角色成为同行者（ally），必须同时出现在 presentActorIds 和 allyActorIds 中\n" +

@@ -44,7 +44,7 @@ void test("runParallelLineTool engine-forks the async director (no main-loop spa
     assert.match(calls[0]?.prompt ?? "", /"lineId": "caster-ryudou"/);
 
     const text = result.content[0]?.text ?? "";
-    assert.match(text, /异步起飞/);
+    assert.match(text, /后台导演已经启动/);
     assert.match(text, /run_id=bl-caster-ryudou/);
     assert.match(text, /harvest_backstage_candidate/);
     // GM is no longer asked to spawn anything

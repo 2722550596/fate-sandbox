@@ -101,7 +101,10 @@ function normalizeTurnCommitEvent(value: unknown, summary: string): TurnCommitEv
       return {
         kind: normalizedKind,
         event: parseActingEvent(
-          { kind: "advance-acting", ...withReason(extractDomainEvent(event, "acting.event"), summary) },
+          {
+            kind: "advance-acting",
+            ...withReason(extractDomainEvent(event, "acting.event"), summary),
+          },
           "commit_turn acting.event",
         ),
       };
@@ -229,8 +232,6 @@ function withReason(
 function normalizeReason(value: unknown, fallback: string): string {
   return normalizeOptionalString(value) ?? fallback;
 }
-
-
 
 function normalizeOptionalString(value: unknown): string | null {
   if (typeof value !== "string") {

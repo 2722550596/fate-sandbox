@@ -77,7 +77,8 @@ export const recordMemoryToolDefinition: DomainToolDefinition = {
           description: "事实陈述，如「克莱恩能逆走四步上灰雾」",
         }),
         certainty: Type.String({
-          description: "证据确信度。observed=亲眼所见、confirmed=已确认、inferred=推理得出、rumor=传闻、hypothesis=假设。非 mundane claim 用 rumor/hypothesis 时不需要 evidence/secret 关联，但措辞必须不确定",
+          description:
+            "证据确信度。observed=亲眼所见、confirmed=已确认、inferred=推理得出、rumor=传闻、hypothesis=假设。非 mundane claim 用 rumor/hypothesis 时不需要 evidence/secret 关联，但措辞必须不确定",
         }),
         subjectId: Type.Optional(Type.String()),
         relatedSecretSlotIds: Type.Optional(
@@ -91,7 +92,7 @@ export const recordMemoryToolDefinition: DomainToolDefinition = {
         evidence: Type.Optional(
           Type.String({
             description:
-              "非 mundane claim 标 confirmed/observed/inferred 时的证据描述。可以是角色的行动记录、NPC 的证词、角色的观察等可直接审计的来源。例如：\"克莱恩在灰雾之上观察罗塞尔笔记时确认了这一点\"",
+              '非 mundane claim 标 confirmed/observed/inferred 时的证据描述。可以是角色的行动记录、NPC 的证词、角色的观察等可直接审计的来源。例如："克莱恩在灰雾之上观察罗塞尔笔记时确认了这一点"',
           }),
         ),
       }),

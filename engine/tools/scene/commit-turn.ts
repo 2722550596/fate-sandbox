@@ -71,23 +71,23 @@ export const commitTurnToolDefinition: DomainToolDefinition = {
         }),
         event: Type.Unknown({
           description:
-            "领域事件载荷，两层嵌套：外层 kind 声明领域类型（如 memory），内层 event 对象含具体子类型（如 { kind: \"pin-fact\", ... }）。\n" +
+            '领域事件载荷，两层嵌套：外层 kind 声明领域类型（如 memory），内层 event 对象含具体子类型（如 { kind: "pin-fact", ... }）。\n' +
             "格式速查（外层 kind→内层 event 结构）：\n" +
             "  scene（内层 event.kind 决定字段）：\n" +
-            "    add-objective → { kind:\"add-objective\", summary, reason }\n" +
-            "    resolve-objective → { kind:\"resolve-objective\", objectiveSummary/objectiveId?, reason }（不能解决最后一个目标，走 progress_scene_beat complete）\n" +
-            "    add-threat → { kind:\"add-threat\", summary, severity:\"low\"|\"medium\"|\"high\"|\"lethal\", reason }\n" +
-            "    clear-threat → { kind:\"clear-threat\", threatSummary/threatId?, reason }（threatSummary 和 objectiveSummary 不同——别弄混）\n" +
-            "    set-location → { kind:\"set-location\", location:{region,site,detail,boundary}, reason }\n" +
-            "    set-situation → { kind:\"set-situation\", situation:\"daily\"|\"investigation\"|\"social\"|\"combat\"|\"ritual\"|\"escape\"|\"downtime\", reason }\n" +
+            '    add-objective → { kind:"add-objective", summary, reason }\n' +
+            '    resolve-objective → { kind:"resolve-objective", objectiveSummary/objectiveId?, reason }（不能解决最后一个目标，走 progress_scene_beat complete）\n' +
+            '    add-threat → { kind:"add-threat", summary, severity:"low"|"medium"|"high"|"lethal", reason }\n' +
+            '    clear-threat → { kind:"clear-threat", threatSummary/threatId?, reason }（threatSummary 和 objectiveSummary 不同——别弄混）\n' +
+            '    set-location → { kind:"set-location", location:{region,site,detail,boundary}, reason }\n' +
+            '    set-situation → { kind:"set-situation", situation:"daily"|"investigation"|"social"|"combat"|"ritual"|"escape"|"downtime", reason }\n' +
             "  scene-presence→{ presentActorIds, allyActorIds, reason }\n" +
-            "  actor-condition→{ kind:\"add-affliction\"|\"resolve-condition\"|\"update-wound\", actorId, ... }\n" +
-            "  memory→{ kind:\"pin-fact\"|\"record-major-event\"|\"record-daily-summary\", scope, subject, text, ... }\n" +
+            '  actor-condition→{ kind:"add-affliction"|"resolve-condition"|"update-wound", actorId, ... }\n' +
+            '  memory→{ kind:"pin-fact"|"record-major-event"|"record-daily-summary", scope, subject, text, ... }\n' +
             "  economy→{ kind, amount, purseId?, ... }\n" +
-            "  tracked-item→{ kind:\"add-tracked-item\"|\"update-tracked-item\"|\"transfer-tracked-item\", ... }\n" +
+            '  tracked-item→{ kind:"add-tracked-item"|"update-tracked-item"|"transfer-tracked-item", ... }\n' +
             "  sequence→{ actorId, ... }\n" +
             "  outfit→{ actorId, outfit, ... }\n" +
-            "  acting→{ kind:\"advance-acting\", actorId, ... }\n" +
+            '  acting→{ kind:"advance-acting", actorId, ... }\n' +
             "不包含时间/移动。",
         }),
       }),
