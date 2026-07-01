@@ -10,12 +10,28 @@
       "source": "agents/gm-style-rules.md"
     },
     {
+      "id": "style-writer",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 12,
+      "header": "style_writer",
+      "source": "agents/gm-style-writer.md"
+    },
+    {
       "id": "style-blacklist",
       "enabled": true,
       "slot": "pre-history",
       "priority": 20,
       "header": "style_blacklist",
       "source": "agents/gm-style-blacklist.md"
+    },
+    {
+      "id": "story-context",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 25,
+      "header": "story_context",
+      "source": "agents/gm-story-context.md"
     },
     {
       "id": "render-protocol",
@@ -41,7 +57,6 @@
       "header": "scene_impressions",
       "source": "runtime:renderer-presence-impressions"
     },
-
     {
       "id": "output-contract",
       "enabled": true,
