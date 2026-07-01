@@ -6,10 +6,10 @@ export const DEFAULT_TIME_ZONE: TimeZoneId = "UTC";
 
 /**
  * LOTM 第五纪起始时刻的 ISO 锚点。
- * 第五纪1349年1月1日 星期一 07:00 对应这个 UTC instant。
+ * 第五纪1349年6月28日 星期四 07:00 对应这个 UTC instant。
  * 内部时间始终以 ISO 存储；显示时转换为第五纪历法。
  */
-const EPOCH_ISO = "1349-01-01T07:00:00.000Z";
+const EPOCH_ISO = "1349-06-28T07:00:00.000Z";
 const EPOCH_INSTANT = Temporal.Instant.from(EPOCH_ISO);
 
 export interface HumanTimeParts {
@@ -65,25 +65,25 @@ export function isDifferentGameDate(
  */
 export function formatHumanTime(
   isoTime: string,
-  _timezone: TimeZoneId = DEFAULT_TIME_ZONE,
+  timezone: TimeZoneId = DEFAULT_TIME_ZONE,
 ): HumanTimeParts {
   const instant = parseInstant(isoTime, "显示时间");
-  const zoned = instant.toZonedDateTimeISO("UTC");
+  
+  // 尊重传入的时区参数
+  const zoned = instant.toZonedDateTimeISO(timezone);
 
-  // 计算与第五纪纪元起点的天数差
-  const epochZoned = EPOCH_INSTANT.toZonedDateTimeISO("UTC");
-  const epochDate = epochZoned.toPlainDate();
-  const currentDate = zoned.toPlainDate();
-  const dayDiff = epochDate.until(currentDate, { largestUnit: "days" }).days;
-
-  // 第五纪1349年1月1日是星期一（dayDiff=0 → weekday index 0）
-  const weekdayIndex = ((dayDiff % 7) + 7) % 7;
-  const weekday = WEEKDAY_NAMES[weekdayIndex] ?? "星期一";
-
-  const year = 1349 + Math.floor(dayDiff / 365);
-  // 简化：直接用日历月日（LOTM 世界假设与地球日历一致）
+  // 历法和地球同步，直接提取 ISO 绝对日历信息即可
+  const year = zoned.year;
   const month = zoned.month;
   const day = zoned.day;
+  // 计算距纪元起点的天数偏移（用于 LOTM 内历星期计算）
+  const dayDiff = toEpochDayOffset(isoTime);
+  // LOTM 世界历法和地球公历在年月日上同步，但星期不同轨。
+  // 用偏移量而不是 Temporal 的 dayOfWeek 计算星期，以保证内历自洽。
+  // day 0 = 纪元起点 → 星期四（根据诡秘原著设定），偏移 3 使 WEEKDAY_NAMES 对齐
+  const weekdayIndex = ((((dayDiff % 7) + 7) % 7) + 3) % 7;
+  const weekday = WEEKDAY_NAMES[weekdayIndex] ?? "星期四";
+
   const date = `${year}年${pad2(month)}月${pad2(day)}日`;
   const time = `${pad2(zoned.hour)}:${pad2(zoned.minute)}`;
 
@@ -123,23 +123,27 @@ function pad2(value: number): string {
  * 拒绝纯自然语言时间；LLM 必须给出明确的单位和方向。
  */
 export function resolveRelativeTime(input: string, currentIso: string): string {
-  // 先试 ISO 直通
-  try {
-    return normalizeIsoInstant(input, "relative time");
-  } catch {
-    // not ISO, try relative
-  }
   const trimmed = input.trim();
+
+  // 1. 如果输入看起来像日期/ISO 字符串（包含横杠或冒号），直接强制按 ISO 解析
+  if (trimmed.includes("-") || trimmed.includes(":")) {
+    return normalizeIsoInstant(trimmed, "绝对时间(ISO)");
+  }
+
+  // 2. 否则，严格校验相对偏移的正则
   const match = /^([+-])(\d+)(min|mins|hour|hours|day|days)$/.exec(trimmed);
   if (match === null) {
     throw new Error(
-      `无法解析时间: ${trimmed}。接受 ISO 字符串或相对偏移（+30min / +2hours / +1day / -4hours）。`
+      `无法解析时间: "${trimmed}"。接受标准 ISO 字符串或相对偏移（如 +30min / +1day）。`
     );
   }
+
   const value = Number(match[2]) * (match[1] === "+" ? 1 : -1);
   const unit = match[3];
-  const instant = Temporal.Instant.from(currentIso);
+  
+  const instant = parseInstant(currentIso, "当前基准时间");
   let result: Temporal.Instant;
+  
   switch (unit) {
     case "min":
     case "mins":
@@ -151,11 +155,13 @@ export function resolveRelativeTime(input: string, currentIso: string): string {
       break;
     case "day":
     case "days":
+      // 注意：因为 instant 是基于 UTC 绝对时间推进，没有夏令时干扰，所以 1天=24小时 是绝对安全的。
       result = instant.add({ hours: value * 24 });
       break;
     default:
-      throw new Error(`不支持的时间单位: ${unit}。支持: min/mins/hour/hours/day/days。`);
+      throw new Error(`不支持的时间单位: ${unit}`);
   }
+  
   return result.toString({ smallestUnit: "millisecond" });
 }
 export const LOTM_EPOCH_ISO = EPOCH_ISO;
