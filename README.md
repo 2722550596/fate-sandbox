@@ -10,6 +10,34 @@
 - pnpm 11.3.0
 - pi coding agent
 
+## Environment
+
+项目需要 `.env` 文件才能启用完整功能。从 `.env.example` 复制并填入你的 API Key：
+
+```bash
+cp .env.example .env
+```
+
+### 必需配置
+
+| 变量                  | 用途                                                | 获取方式                                           |
+| --------------------- | --------------------------------------------------- | -------------------------------------------------- |
+| `SILICONFLOW_API_KEY` | RAG 世界设定查询（`lookup` 工具）+ 幕后信息揭秘判断 | [SiliconFlow 控制台](https://cloud.siliconflow.cn) |
+
+不配置时 `lookup` 工具和秘密揭示功能会报错。游戏主体（场景、叙事、`lookup_novel`、经济）不受影响。
+
+### 可选调优
+
+| 变量                   | 默认值                          | 用途                       |
+| ---------------------- | ------------------------------- | -------------------------- |
+| `SILICONFLOW_BASE_URL` | `https://api.siliconflow.cn/v1` | API 接入点                 |
+| `EMBEDDING_MODEL`      | `Qwen/Qwen3-Embedding-0.6B`     | RAG 嵌入模型               |
+| `RERANKER_MODEL`       | `Qwen/Qwen3-Reranker-0.6B`      | RAG 重排序模型             |
+| `LLM_JUDGE_MODEL`      | `Qwen/Qwen3-8B`                 | 秘密揭示判断模型           |
+| `RENDER_MODEL`         | 复用结算模型                    | 渲染轮（Pass B）专用模型   |
+| `RENDER_TEMPERATURE`   | 不传                            | 渲染轮温度参数             |
+| `RENDER_CACHE`         | `short`                         | 渲染轮 prompt cache 保留档 |
+
 ## Quick Start
 
 ### Linux / macOS
