@@ -2,24 +2,24 @@
   "version": 1,
   "modules": [
     {
-      "id": "settlement-principles-test",
+      "id": "settlement-principles",
       "enabled": true,
       "slot": "pre-history",
       "priority": 10,
       "header": "settlement_principles",
-      "source": "agents/gm-settlement-principles-test.md"
+      "source": "agents/gm-settlement-principles.md"
     },
     {
-      "id": "world-context-test",
+      "id": "world-context",
       "enabled": true,
       "slot": "pre-history",
       "priority": 20,
       "header": "world_context",
-      "source": "agents/gm-context-test.md"
+      "source": "agents/gm-context.md"
     },
     {
       "id": "input-guide",
-      "enabled": false,
+      "enabled": true,
       "slot": "pre-history",
       "priority": 30,
       "header": "input_guide",
@@ -27,7 +27,7 @@
     },
     {
       "id": "social-guide",
-      "enabled": false,
+      "enabled": true,
       "slot": "pre-history",
       "priority": 40,
       "header": "social_guide",
@@ -35,7 +35,7 @@
     },
     {
       "id": "tool-policy",
-      "enabled": false,
+      "enabled": true,
       "slot": "pre-history",
       "priority": 80,
       "header": "tool_policy",
@@ -43,7 +43,7 @@
     },
     {
       "id": "hard-rules",
-      "enabled": false,
+      "enabled": true,
       "slot": "pre-history",
       "priority": 90,
       "header": "hard_rules",
@@ -51,7 +51,7 @@
     },
     {
       "id": "story-driver",
-      "enabled": false,
+      "enabled": true,
       "slot": "pre-history",
       "priority": 100,
       "header": "story_driver",
@@ -90,28 +90,12 @@
       "source": "runtime:presence-impressions"
     },
     {
-      "id": "test_direction",
-      "enabled": false,
-      "slot": "pre-response",
-      "priority": 14,
-      "header": "test_direction",
-      "source": "agents/gm-test.md"
-    },
-    {
       "id": "direction-contract",
       "enabled": false,
       "slot": "final-contract",
       "priority": 10,
       "header": "direction_contract",
       "source": "agents/gm-direction.md"
-    },
-    {
-      "id": "direction-contract-test",
-      "enabled": true,
-      "slot": "final-contract",
-      "priority": 9,
-      "header": "direction_contract",
-      "source": "agents/gm-direction-test.md"
     }
   ]
 }
