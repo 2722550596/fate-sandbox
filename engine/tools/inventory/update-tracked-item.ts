@@ -46,7 +46,7 @@ export const updateTrackedItemToolDefinition: DomainToolDefinition = {
     ),
     visibility: Type.Optional(Type.String({ description: "player-known / suspected" })),
     notes: Type.Optional(Type.Array(Type.String())),
-    reason: Type.Optional(Type.String()),
+    reason: Type.String({ description: "变更理由" }),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     updateTrackedItemTool(params, ctx.sessionManager),

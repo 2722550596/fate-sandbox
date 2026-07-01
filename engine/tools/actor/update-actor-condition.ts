@@ -10,7 +10,8 @@ import { normalizeActorConditionEvent } from "./actor-condition-normalizer.ts";
 export function updateActorConditionTool(params: unknown, sessionManager: unknown): ToolResult {
   return runDomainEventTool({
     sessionManager,
-    execute: (draft) => updateActorCondition(draft, normalizeActorConditionEvent(params)),
+    execute: (draft) =>
+      updateActorCondition(draft, normalizeActorConditionEvent(params, "更新角色状态")),
     details: resultDetails,
     message: (result) => result.message,
   });
@@ -70,7 +71,9 @@ export const updateActorConditionToolDefinition: DomainToolDefinition = {
         description: "resolve-condition：recovered / stabilized",
       }),
     ),
-    reason: Type.Optional(Type.String()),
+    reason: Type.Optional(
+      Type.String({ description: "操作原因。commit_turn 中省略时由本轮摘要自动注入。" }),
+    ),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     updateActorConditionTool(params, ctx.sessionManager),

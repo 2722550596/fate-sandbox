@@ -403,21 +403,22 @@ pnpm format && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 
 ### 目录结构速查
 
-| 目录 | 职责 |
-|---|---|
-| `engine/core/` | 纯 domain 层：类型定义、schema、纯函数、state store |
-| `engine/tools/` | LLM 工具层：包装 core 函数为 GM 可调用工具；`registry.ts` 统一注册 |
-| `engine/direction/` | 双 pass 接缝：direction packet schema、渲染器、散文史管理 |
-| `engine/gm-prompt/` | 提示词组装：拼接 agents/*.md + 运行时状态 |
-| `agents/` | GM prompt 纯文本文件，被 engine/gm-prompt/ 读取 |
-| `.pi/agents/` | 项目子代理定义（novel-analyst, timeline-showrunner），与 agents/ 无关 |
-| `extensions/` | pi-coding-agent 扩展：面板、命令、渲染、回退、子代理 |
-| `data/` | 静态世界数据：campaign presets (TS)、MD 设定文件 (运行时扫描)、JSON 配置 (僵尸数据) |
-| `skills/` | GM 可调用技能（如 start-game），与 `.agents/skills/` 是两回事 |
+| 目录                | 职责                                                                                |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| `engine/core/`      | 纯 domain 层：类型定义、schema、纯函数、state store                                 |
+| `engine/tools/`     | LLM 工具层：包装 core 函数为 GM 可调用工具；`registry.ts` 统一注册                  |
+| `engine/direction/` | 双 pass 接缝：direction packet schema、渲染器、散文史管理                           |
+| `engine/gm-prompt/` | 提示词组装：拼接 agents/\*.md + 运行时状态                                          |
+| `agents/`           | GM prompt 纯文本文件，被 engine/gm-prompt/ 读取                                     |
+| `.pi/agents/`       | 项目子代理定义（novel-analyst, timeline-showrunner），与 agents/ 无关               |
+| `extensions/`       | pi-coding-agent 扩展：面板、命令、渲染、回退、子代理                                |
+| `data/`             | 静态世界数据：campaign presets (TS)、MD 设定文件 (运行时扫描)、JSON 配置 (僵尸数据) |
+| `skills/`           | GM 可调用技能（如 start-game），与 `.agents/skills/` 是两回事                       |
 
 ### tools 开发指南
 
 **新增工具步骤**：
+
 1. 在 `engine/tools/<domain>/` 下新建文件，导出 `const xxxToolDefinition: DomainToolDefinition = { ... }`
 2. 执行模式二选一：
    - **有状态变异**：使用 `runDomainEventTool({ sessionManager, execute, details, message })`
@@ -426,6 +427,7 @@ pnpm format && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 4. `execute` 回调签名：`async (_toolCallId, params, _signal, _onUpdate, ctx)`
 
 **三层参数处理**：
+
 - Layer 1: `parameters` TypeBox schema（框架级结构声明）
 - Layer 2: normalizer（参数归一化、字段名兼容）
 - Layer 3: domain engine（严格解析 + 领域逻辑）
@@ -442,16 +444,16 @@ pnpm format && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 
 ### 测试模式速查
 
-| 模式 | 适用场景 | 典型文件 |
-|---|---|---|
-| A: 纯函数测试 | createInitialState → 纯函数 → assert | acting.test.ts, lotm-rank.test.ts |
-| B: State mutation | createInitialState → mutate draft → assert draft | economy.test.ts, secrets.test.ts |
-| C: 全局 store 测试 | resetState → getState/cloneState → assert | state-store.test.ts |
-| D: 工具集成测试 | resetState → noopSessionManager → 调函数 → assert state + result.content | commit-turn.test.ts |
-| E: Lint/审核测试 | 输入 prose → 验证规则是否命中 | lint-rules.test.ts |
-| F: 验证测试 | parseTypeBoxValue 边界情况 | typebox-validation.test.ts |
-| G: Session I/O | JSONL 读写、分支裁剪 | backstage-session-read.test.ts |
-| H: 跨平台/脚本 | spawn 进程验证启动 | start-ps1.test.ts |
+| 模式               | 适用场景                                                                 | 典型文件                          |
+| ------------------ | ------------------------------------------------------------------------ | --------------------------------- |
+| A: 纯函数测试      | createInitialState → 纯函数 → assert                                     | acting.test.ts, lotm-rank.test.ts |
+| B: State mutation  | createInitialState → mutate draft → assert draft                         | economy.test.ts, secrets.test.ts  |
+| C: 全局 store 测试 | resetState → getState/cloneState → assert                                | state-store.test.ts               |
+| D: 工具集成测试    | resetState → noopSessionManager → 调函数 → assert state + result.content | commit-turn.test.ts               |
+| E: Lint/审核测试   | 输入 prose → 验证规则是否命中                                            | lint-rules.test.ts                |
+| F: 验证测试        | parseTypeBoxValue 边界情况                                               | typebox-validation.test.ts        |
+| G: Session I/O     | JSONL 读写、分支裁剪                                                     | backstage-session-read.test.ts    |
+| H: 跨平台/脚本     | spawn 进程验证启动                                                       | start-ps1.test.ts                 |
 
 所有测试使用 `node:test` + `node:assert/strict`，无 mocking 框架，纯确定性逻辑。
 
@@ -472,6 +474,7 @@ pnpm format && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 ### 已定义但未注册的工具（注意勿误改）
 
 以下 5 个工具在文件中有完整定义但未在 `registry.ts` 中注册：
+
 - `roll_dice` (`engine/tools/lotm/roll-dice.ts`)
 - `harvest_backstage_candidate` (`engine/tools/backstage/harvest-backstage-candidate.ts`)
 - `manage_faction_clock` (`engine/tools/backstage/manage-faction-clock.ts`)
@@ -482,7 +485,8 @@ pnpm format && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 
 ### 废弃/不参与运行的目录
 
-##### *`data/config/*.json` — 部分已不参与运行*
+##### _`data/config/_.json` — 部分已不参与运行\*
+
 - **active** (被 engine/tools/lookup/ 运行时加载)：`神之途径.json`（sequence-lookup）、`economy-prices.json`（economy-lookup）
 - **dead** (未被 engine 代码引用)：其余 17 个文件（序列基准、序列权重、地图数据、物品参数、产业配置等），但用户可能在其他地方手动使用
 - 改 lookup 相关代码时注意不要误删 active 的 config 文件

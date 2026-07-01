@@ -1,6 +1,7 @@
 # lotm-domain — LOTM 领域特有逻辑
 
 ## 何时使用
+
 - 设计/修改晋升（promotion）相关模块
 - 设计/修改扮演（acting）系统
 - 设计/修改秘密揭示（secrets/reveal）逻辑
@@ -10,7 +11,9 @@
 - 排查晋升/扮演/战斗相关的领域逻辑 bug
 
 ## 必须先读
+
 ### 核心引擎文件
+
 1. `engine/core/state/state-enum-schemas.ts` — **所有枚举**：PathwayId（22 标准 + 10 外神 + custom）、SequenceRank（13 级）等
 2. `engine/core/state/pathway-names.ts` — 中文名映射 + abilityLookupKey 格式
 3. `engine/core/actor/acting.ts` — 扮演系统核心算法：
@@ -30,6 +33,7 @@
    - LLM 推理 + 关键词回退
 
 ### 数据文件
+
 8. `data/mechanics/` 全部 MD 文件 — LOTM 设定知识核心
 9. `data/config/神之途径.json` — 序列名 ↔ 途径映射（一切途径数据的源头）
 10. `data/pathways/pathways_promotion.json` — 晋升材料数据
@@ -41,31 +45,33 @@
 
 ### 序列等级体系
 
-| Power | 等级 | 层次 |
-|---|---|---|
-| 0 | ordinary | 普通人 |
-| 0.5 | seq-9 | 低序列底 |
-| 1 | seq-8 | 低序列顶 |
-| 4 | seq-7 | 中序列底 |
-| 4.5 | seq-6 | 中序列 |
-| 5 | seq-5 | 中序列顶 |
-| 8 | seq-4 | 圣者底 |
-| 8.5 | seq-3 | 圣者顶 |
-| 12 | seq-2 | 天使底 |
-| 12.5 | seq-1 | 天使顶 |
-| 16 | seq-0 | 真神 |
-| 20 | old-one | 旧日 |
-| 24 | pillar | 支柱 |
+| Power | 等级     | 层次     |
+| ----- | -------- | -------- |
+| 0     | ordinary | 普通人   |
+| 0.5   | seq-9    | 低序列底 |
+| 1     | seq-8    | 低序列顶 |
+| 4     | seq-7    | 中序列底 |
+| 4.5   | seq-6    | 中序列   |
+| 5     | seq-5    | 中序列顶 |
+| 8     | seq-4    | 圣者底   |
+| 8.5   | seq-3    | 圣者顶   |
+| 12    | seq-2    | 天使底   |
+| 12.5  | seq-1    | 天使顶   |
+| 16    | seq-0    | 真神     |
+| 20    | old-one  | 旧日     |
+| 24    | pillar   | 支柱     |
 
 层内差 0.5~1，层间差 3~3.5，反映巨大实力鸿沟。
 
 ### 扮演系统流程
+
 1. GM 记录扮演行为 → `record_acting_feedback`（intensity + narrativeWeight）
 2. 引擎计算加权总分（简单求和）→ 判断消化准备度
 3. 检查时间闸（最早记录距今 ≥ 1 个月）
 4. 晋升时调用 `resolveLOTMPromotion` → 自动考虑扮演准备度
 
 ### 晋升裁决流程
+
 1. 检查 actor 存在性、序列状态（首次晋升需 pathway）
 2. 加载 `LOTMPromotionInput` 9 个输入字段
 3. 计算 `total = rankDelta + modifier`（整合 ritual、environment、acting、materials）
@@ -73,6 +79,7 @@
 5. 生成 stateLandings（6 种）、consequenceGuidance、narrativeConstraints
 
 ### 战斗裁决流程
+
 1. `compareLOTMRanks` 计算等级差 baselineTierDelta
 2. `resolveEquipmentComparison` 设备补正（±0.5 per 级）
 3. `combinedDelta = baselineTierDelta + equipmentComparison`
@@ -80,6 +87,7 @@
 5. 生成 stateLandings、consequenceGuidance、narrativeConstraints
 
 ### 秘密揭示流程
+
 1. 收集候选秘密（actor 的未揭示 + world 的 hiddenWorldFacts）
 2. 无候选 → `insufficient-evidence`
 3. 调用 `judgeSecrets`（LLM）判断每条候选秘密
@@ -89,6 +97,7 @@
 7. 否则 → `insufficient-evidence`
 
 ### 能力索引
+
 - 数据源：`data/abilities/pathway_abilities.json`（354 条目）
 - 索引 key 格式：`"{中文途径名}途径-{序列标签}"`（如 `"占卜家途径-序列9"`）
 - 3 种查询方式：途径-序列查询、序列名称查询、能力名称搜索
@@ -96,6 +105,7 @@
 ## 枚举键与中文名对照表
 
 数据映射路径：
+
 ```
 PATHWAY_DISPLAY_NAMES[pathwayId] + "途径-" + RANK_DISPLAY_NAMES[rank]
 → "占卜家途径-序列9"

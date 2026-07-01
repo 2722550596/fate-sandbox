@@ -87,7 +87,10 @@ export const recordRelationshipSignalToolDefinition: DomainToolDefinition = {
       description:
         "信号指向的 actor id；必须已存在于 public actors；通常是 protagonist，也可以是 NPC",
     }),
-    signal: Type.String({ description: "行为证据：动作、称呼、距离、停顿、回避、照料或选择" }),
+    signal: Type.String({
+      description:
+        "行为证据：动作、称呼、距离、停顿、回避、照料或选择。支持多行/分段，一条信号可以包含连续的小动作链（如「邓恩退后半步+侧向书桌+视线落在文件上」）。不需要拆成多条。",
+    }),
     interpretation: Type.String({ description: "当前解读：为什么这条行为改变关系读法" }),
     boundary: Type.String({ description: "边界：这条信号不能被过度解读成什么" }),
     sourceEventId: Type.Optional(

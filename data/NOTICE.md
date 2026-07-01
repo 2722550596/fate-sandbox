@@ -48,4 +48,4 @@ If you are a contributor and your name is missing from this list, please open an
 
 ---
 
-*Last updated: 2026-06-30*
+_Last updated: 2026-06-30_

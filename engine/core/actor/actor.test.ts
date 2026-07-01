@@ -123,7 +123,7 @@ void test("setScenePresence rejects allies who are not present", () => {
         presentActorIds: ["protagonist"],
         allyActorIds: ["leonard"], // leonard is not present
       }),
-    /allyActorIds 必须都是 presentActorIds 的子集/,
+    /allyActorIds 中的每个 actor 也必须在 presentActorIds 中/,
   );
 });
 

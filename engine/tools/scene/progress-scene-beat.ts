@@ -20,6 +20,11 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
   return runDomainEventTool({
     sessionManager,
     execute: (draft) => {
+      if (draft.public.pendingDirectionPacket) {
+        throw new Error(
+          "上一轮进度已完成但尚未调用 submit_direction_packet 输出叙事。请先调 submit_direction_packet，再开启新一轮。",
+        );
+      }
       // 延迟硬阻断：上一轮触发的后台推进义务未清账则拒绝本次 canonical turn。
       assertNoOpenBackstageObligation(draft);
       const result = progressSceneBeat(draft, input);
@@ -31,6 +36,7 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
         hasCost: true,
         beatBoundary: input.kind === "complete" && draft.public.scene.threats.length > 0,
       });
+      draft.public.pendingDirectionPacket = true;
       // 幕后催账：到期义务/填满时钟 + 待 harvest 的后台 run 随返回值提醒（backlog #3）
       return {
         result,
@@ -52,7 +58,7 @@ export function progressSceneBeatTool(params: unknown, sessionManager: unknown):
 export const progressSceneBeatToolDefinition: DomainToolDefinition = {
   name: "progress_scene_beat",
   description:
-    "开启或收口一个 Scene Beat（叙事段落）。\n\nScene Beat 是「有明确目标和边界的叙事单元」——比如一场对峙、一次潜入、一场谈判、一段调查。\n用 begin 开启一段新的叙事段落，设定目标与局势；用 complete 收口它，记录结果与后续走向。\n\n【begin vs complete 字段速查】\n  kind=begin 必填：title（标题）, objectives（目标列表）, purpose（为什么进入这个 Beat）, time（时间推进）, situation（局势类型）\n  kind=complete 必填：outcome（收口结果）, time（时间推进）\n  kind=begin 可选：beatId, actionPolicy, threats, presence\n  kind=complete 可选：nextBeat（下一段叙事）, memory（战役记忆）, presence, situation\n\n【什么时候用】\n- begin：调查现场、潜入据点、与关键 NPC 对峙、撤退、准备战斗——总之需要明确目标的场景段落\n- complete：当前 Beat 的目标已经解决或不可达了，收口并记录结果；可以选传入 nextBeat 顺滑过渡到下一段\n- begin 和 complete 都必须携带 time，elapsedMinutes >= 1（即使感觉很短的互动也至少 1 分钟）\n\n【不要这样做】\n- 不要用它记录长期目标或幕后真相（那属于 offscreen 事件或秘密配置）\n- 当前没有活跃 Beat 时不要强行 complete\n- complete 之后不要在同一回复里继续推进下一个前台冲突——那属于下一轮",
+    "开启或收口一个 Scene Beat（叙事段落）。\n\nScene Beat 是「有明确目标和边界的叙事单元」——比如一场对峙、一次潜入、一场谈判、一段调查。\n用 begin 开启一段新的叙事段落，设定目标与局势；用 complete 收口它，记录结果与后续走向。\n\n【begin vs complete 字段速查】\n  kind=begin 必填：title（标题）, objectives（目标列表）, purpose（为什么进入这个 Beat）, time（时间推进）, situation（局势类型）\n  kind=complete 必填：outcome（收口结果）, time（时间推进）\n  kind=begin 可选：beatId, actionPolicy, threats, presence\n  kind=complete 可选：nextBeat（下一段叙事）, memory（战役记忆）, presence, situation\n\n【目标注意】\n- progress_scene_beat complete 会自动 resolve 当前 beat 的全部目标。不需要先用 commit_turn resolve-objective 手动标记完成。\n- 如果传了 nextBeat，新目标列表是全新的，与旧目标无关。旧目标已被自动 resolve，不会延续到新 beat。\n- 如果旧 beat 有未完成的目标线，在 outcome 文本里说明走向，或在 nextBeat.objectives 里重新描述为新的目标。\n\n【什么时候用】\n- begin：调查现场、潜入据点、与关键 NPC 对峙、撤退、准备战斗——总之需要明确目标的场景段落\n- complete：当前 Beat 的目标已经解决或不可达了，收口并记录结果；可以选传入 nextBeat 顺滑过渡到下一段\n- begin 和 complete 都必须携带 time，elapsedMinutes >= 1（即使感觉很短的互动也至少 1 分钟）\n\n【不要这样做】\n- 不要用它记录长期目标或幕后真相（那属于 offscreen 事件或秘密配置）\n- 当前没有活跃 Beat 时不要强行 complete\n- complete 之后不要在同一回复里继续推进下一个前台冲突——那属于下一轮\n- 不要在 complete 之前用 commit_turn 手动 resolve 目标——complete 会自动处理，手动 resolve 反而会因为\u201c不能解决最后一个目标\u201d而报错",
   parameters: Type.Object({
     kind: Type.String({ description: "begin / complete" }),
     title: Type.Optional(Type.String({ description: "begin 必填：beat 标题" })),

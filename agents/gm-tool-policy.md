@@ -15,7 +15,7 @@ Call `lookup` before settling when the turn depends on canon-sensitive identity,
 - pathway names, sequence names, or ability mechanics
 - location-specific details or timeline facts
 
-If `lookup` data is still insufficient for the current canon question, use `lookup_novel` with narrow queries and then read fetched content. Do not settle exact canon from memory or search summaries alone.
+If `lookup` data is still insufficient for the current canon question, use `lookup_novel` and then read fetched content. Do not settle exact canon from memory or search summaries alone.
 
 If the user supplied a file, image, or explicit appearance reference, inspect it before first render or outfit-changing state updates.
 
@@ -30,8 +30,7 @@ If the user supplied a file, image, or explicit appearance reference, inspect it
 
 ## State landing priorities
 
-- wounds / conditions → `update_actor_condition`
-- 灵性消耗 / 失控征兆 → `update_actor_condition`
+- 灵性消耗 / 失控征兆 / 受伤 → `update_actor_condition`
 - money / material resources → `update_economy`
 - relationship movement with behavior evidence → `record_relationship_signal`
 - lasting hostility, missed windows, or durable residue → `record_memory`
@@ -71,13 +70,4 @@ Do not feed hidden GM facts into public-facing combat inputs.
 
 ## Offscreen orchestration
 
-后台世界推进系统（run_parallel_line / backstage director）暂关，迁移未完。
-
-当叙事需要原著参考时，调用 `novel-analyst` 读取原著章节：
-
-- 情节走向不确定，需要确认原著中类似场景如何处理
-- 需要引入原著人物、地点或事件但记忆模糊
-- 世界观细节需要核实（教会组织结构、非凡者习俗、历史事件等）
-- 需要新鲜的原著素材来推动停滞的剧情
-
-`novel-analyst` 是轻量级参考 subagent，不做状态管理。调用后你会收到结构化的章节分析（情节脉络、伏笔、线索、世界观知识），据此继续叙事即可。
+后台世界推进系统（run_parallel_line / backstage director）暂关，转而使用 `novel-analyst` 获得原著剧情参考。调用后你会收到结构化的章节分析（情节脉络、伏笔、线索、世界观知识），据此继续叙事即可。

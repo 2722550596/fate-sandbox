@@ -7,7 +7,7 @@ import {
   stringEnumSchema,
   stringEnumSchema as omissionReasonSchema,
 } from "../../core/state/state-enum-schemas.ts";
-import { getState } from "../../core/state/state-store.ts";
+import { commitState, getState } from "../../core/state/state-store.ts";
 import { scanDirectionPacket } from "../../direction/packet-firewall.ts";
 import {
   type DirectionPacket,
@@ -42,6 +42,8 @@ export function submitDirectionPacketTool(params: unknown): ToolResult & { termi
         "渲染器不得接触未揭示秘密；请改写这些字段，只描述玩家可感知的表象，或先用 reveal_secret 正式揭示。",
     );
   }
+  state.public.pendingDirectionPacket = false;
+  commitState(state);
   return { ...textResult(formatAccepted(packet), { packet }), terminate: true };
 }
 

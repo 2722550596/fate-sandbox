@@ -41,8 +41,9 @@ const TURN_TIME_VARIANT_VALIDATORS = {
 } satisfies Record<TurnTimePolicy["kind"], TypeBoxValidator<TurnTimePolicy>>;
 
 export function parseTurnTimePolicySchema(value: unknown, fieldName: string): TurnTimePolicy {
+  const normalized = normalizeToolTime(value);
   const time = parseTaggedTypeBoxUnion<TurnTimePolicy["kind"], TurnTimePolicy>(
-    value,
+    normalized,
     fieldName,
     "kind",
     TURN_TIME_KIND_VALIDATOR,
@@ -53,6 +54,34 @@ export function parseTurnTimePolicySchema(value: unknown, fieldName: string): Tu
     : normalizeTravelTime(time, fieldName);
 }
 
+/**
+ * tool 层把 elapsedMinutes 设计为 { minutes, reason } 对象以强迫 LLM 算总时间，
+ * core 层只需要数字 + 顶层 reason。这里在进入 TypeBox 校验前：
+ * 1. kind 缺省时默认为 "elapsed"（travel 是少数情况，LLM 忘了填也能走通）
+ * 2. elapsedMinutes 对象展开为数字并提升 reason
+ */
+function normalizeToolTime(value: unknown): unknown {
+  if (typeof value !== "object" || value === null) return value;
+  const record = value as Record<string, unknown>;
+  const kind = typeof record["kind"] === "string" && record["kind"] !== ""
+    ? record["kind"]
+    : "elapsed";
+  const em = record["elapsedMinutes"];
+  if (typeof em !== "object" || em === null) {
+    return { ...record, kind };
+  }
+  const emRecord = em as Record<string, unknown>;
+  if (typeof emRecord["minutes"] !== "number" && typeof emRecord["minutes"] !== "string") {
+    return { ...record, kind };
+  }
+  const innerReason = typeof emRecord["reason"] === "string" ? emRecord["reason"] : null;
+  return {
+    ...record,
+    kind,
+    elapsedMinutes: emRecord["minutes"],
+    reason: record["reason"] ?? innerReason ?? "",
+  };
+}
 function normalizeElapsedTime(
   time: Extract<TurnTimePolicy, { kind: "elapsed" }>,
   fieldName: string,

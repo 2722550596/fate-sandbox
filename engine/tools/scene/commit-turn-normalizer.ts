@@ -1,4 +1,3 @@
-import type { ScenePresenceInput } from "../../core/actor/actor.ts";
 import type { MemoryEvent } from "../../core/knowledge/memory.ts";
 import type { TurnCommitEvent, TurnCommitInput } from "../../core/turn/turn-commit.ts";
 
@@ -27,7 +26,6 @@ const OUTFIT_TURN_SCHEMA = Type.Object({
 const OUTFIT_TURN_VALIDATOR = Compile(OUTFIT_TURN_SCHEMA);
 const TURN_EVENT_KINDS = [
   "scene",
-  "scene-presence",
   "actor-condition",
   "tracked-item",
   "sequence",
@@ -55,14 +53,6 @@ function normalizeTurnCommitEvent(value: unknown, summary: string): TurnCommitEv
   switch (normalizedKind) {
     case "scene":
       return normalizeSceneTurnEvent(event, summary);
-    case "scene-presence":
-      return {
-        kind: normalizedKind,
-        event: normalizeScenePresenceInput(
-          extractDomainEvent(event, "scene-presence.event"),
-          summary,
-        ),
-      };
     case "actor-condition":
       return {
         kind: normalizedKind,
@@ -107,16 +97,17 @@ function normalizeTurnCommitEvent(value: unknown, summary: string): TurnCommitEv
         ),
       };
     case "acting":
+      // acting 只有 advance-acting 一种，工具层省略内层 kind，归一化时补回
       return {
         kind: normalizedKind,
         event: parseActingEvent(
-          withReason(extractDomainEvent(event, "acting.event"), summary),
+          { kind: "advance-acting", ...withReason(extractDomainEvent(event, "acting.event"), summary) },
           "commit_turn acting.event",
         ),
       };
     default:
       throw new Error(
-        `非法 commit_turn event.kind: ${formatUnknown(event["kind"])}。允许: scene / scene-presence / actor-condition / tracked-item / sequence / economy / memory / outfit / acting。`,
+        `非法 commit_turn event.kind: ${formatUnknown(event["kind"])}。允许: scene / actor-condition / tracked-item / sequence / economy / memory / outfit / acting。`,
       );
   }
 }
@@ -186,17 +177,6 @@ function normalizeSceneEventPayload(
   };
 }
 
-function normalizeScenePresenceInput(
-  input: Record<string, unknown>,
-  summary: string,
-): ScenePresenceInput {
-  return {
-    presentActorIds: normalizeStringArray(input["presentActorIds"], "presentActorIds", []),
-    allyActorIds: normalizeStringArray(input["allyActorIds"], "allyActorIds", []),
-    reason: normalizeReason(input["reason"], summary),
-  };
-}
-
 function normalizeSummary(value: unknown, events: readonly unknown[], timeReason: string): string {
   const explicit = normalizeOptionalString(value);
   if (explicit !== null) {
@@ -250,25 +230,7 @@ function normalizeReason(value: unknown, fallback: string): string {
   return normalizeOptionalString(value) ?? fallback;
 }
 
-function normalizeStringArray(
-  value: unknown,
-  fieldName: string,
-  fallback: string[] | undefined,
-): string[] {
-  if (value === undefined && fallback !== undefined) {
-    return fallback;
-  }
-  return assertArray(value, fieldName).map((entry) =>
-    assertNonEmptyString(entry, `${fieldName}[]`),
-  );
-}
 
-function assertNonEmptyString(value: unknown, fieldName: string): string {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`非法${fieldName}: ${formatUnknown(value)}。必须是字符串。`);
-  }
-  return value.trim();
-}
 
 function normalizeOptionalString(value: unknown): string | null {
   if (typeof value !== "string") {

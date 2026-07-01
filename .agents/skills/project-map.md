@@ -1,6 +1,7 @@
 # project-map — 目录结构与模块依赖速查
 
 ## 何时使用
+
 - 不确定某模块在哪
 - 改了 A 是否需要同步改 B
 - 新加入项目需要了解整体架构
@@ -64,6 +65,7 @@ engine/
 ```
 
 ### agents/ — GM prompt 文件（纯文本，被 engine/gm-prompt/ 读取）
+
 - `gm-system.md` — 身份与最高契约
 - `gm-context.md` — 世界边界
 - `gm-rules.md` — 硬规则
@@ -74,28 +76,30 @@ engine/
 - `gm-output-contract.md` — 输出格式
 
 ### extensions/ — pi-coding-agent extension 层
-| 扩展 | 职责 |
-|---|---|
-| `subagents/` | 子代理运行时（novel-analyst, timeline-showrunner 工具注册） |
-| `compaction/` | 接管 pi-agent compaction（确定性截断） |
-| `render/` | 渲染通道（Pass B）完整实现 |
-| `player-panel/` | TUI 面板（status, inventory, relations, recap, journal, hooks） |
-| `player-choices/` | /choice 命令 |
-| `rewind/` | 快速回退（/fuck 命令） |
-| `debug-prompt-capture/` | 调试模式提示词捕获 |
+
+| 扩展                    | 职责                                                            |
+| ----------------------- | --------------------------------------------------------------- |
+| `subagents/`            | 子代理运行时（novel-analyst, timeline-showrunner 工具注册）     |
+| `compaction/`           | 接管 pi-agent compaction（确定性截断）                          |
+| `render/`               | 渲染通道（Pass B）完整实现                                      |
+| `player-panel/`         | TUI 面板（status, inventory, relations, recap, journal, hooks） |
+| `player-choices/`       | /choice 命令                                                    |
+| `rewind/`               | 快速回退（/fuck 命令）                                          |
+| `debug-prompt-capture/` | 调试模式提示词捕获                                              |
 
 ### data/ — 静态世界数据
-| 目录 | 加载方式 | 内容 |
-|---|---|---|
-| `campaign-presets.ts` | `import`（TS 常量） | 战役预设、开局配置 |
-| `timeline-pressure-palettes.ts` | `import`（TS 常量） | 时间线压力调色板 |
-| `config/*.json` | 运行时 `readFileSync`（部分） / 未被引用（其余） | `神之途径.json`（sequence-lookup）、`economy-prices.json`（economy-lookup）被 lookup 加载；其余 17 个文件未被 engine 代码引用 |
-| `abilities/pathway_abilities.json` | 运行时 `readFileSync` | 354 个能力条目 |
-| `world/` `characters/` `locations/` 等 MD 目录 | 运行时自动扫描（`world-data.ts`） | 角色、地点、组织描述 |
-| `mechanics/` | 同上 | LOTM 设定知识 |
-| `novel/` | 按需读取（`novel-lookup.ts`） | 原著章节（按卷分目录） |
-| `pathways/` | 按需读取（`sequence-lookup.ts`） | 各途径序列描述 |
-| `wikis/lotm/` `wikis/loom/` | **空，待填充** | 日后可把 `data/` 下的内容（mechanics/、characters/、locations/ 等）挑重点放进去的 wiki 目录 |
+
+| 目录                                           | 加载方式                                         | 内容                                                                                                                          |
+| ---------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `campaign-presets.ts`                          | `import`（TS 常量）                              | 战役预设、开局配置                                                                                                            |
+| `timeline-pressure-palettes.ts`                | `import`（TS 常量）                              | 时间线压力调色板                                                                                                              |
+| `config/*.json`                                | 运行时 `readFileSync`（部分） / 未被引用（其余） | `神之途径.json`（sequence-lookup）、`economy-prices.json`（economy-lookup）被 lookup 加载；其余 17 个文件未被 engine 代码引用 |
+| `abilities/pathway_abilities.json`             | 运行时 `readFileSync`                            | 354 个能力条目                                                                                                                |
+| `world/` `characters/` `locations/` 等 MD 目录 | 运行时自动扫描（`world-data.ts`）                | 角色、地点、组织描述                                                                                                          |
+| `mechanics/`                                   | 同上                                             | LOTM 设定知识                                                                                                                 |
+| `novel/`                                       | 按需读取（`novel-lookup.ts`）                    | 原著章节（按卷分目录）                                                                                                        |
+| `pathways/`                                    | 按需读取（`sequence-lookup.ts`）                 | 各途径序列描述                                                                                                                |
+| `wikis/lotm/` `wikis/loom/`                    | **空，待填充**                                   | 日后可把 `data/` 下的内容（mechanics/、characters/、locations/ 等）挑重点放进去的 wiki 目录                                   |
 
 ## 数据流概览
 
@@ -109,21 +113,23 @@ engine/
 
 ## 改模块波及范围
 
-| 改这里 | 需要同步改 |
-|---|---|
-| **state-schema.ts** | state.ts, state-enum-schemas.ts, initial-state.ts, 投影文件, 所有引用的 core/*, 引用的 tools/*, direction/packet-schema.ts（如果涉及渲染） |
-| **state-store.ts** | extensions/player-panel, extensions/render, tools/lookup 直接调用 |
-| **public-projection.ts** | gm-prompt/injection.ts, extensions/player-panel |
-| **core/actor/** | tools/actor/*, gm-prompt/injection.ts, direction/packet-schema.ts, core/knowledge/, core/backstage/ |
-| **direction/packet-schema.ts** | direction/render-turn.ts, extensions/render/index.ts, gm-prompt/packet-contract.ts, tools/scene/submit-direction-packet.ts, agents/gm-*.md |
-| **tools/ 中某工具** | engine/tools/registry.ts（新增/删除）, 对应的 core/ 模块（契约变更）, agents/gm-*.md（参数描述变更） |
-| **agents/*.md** | engine/gm-prompt/injection.ts（读取顺序） |
-| **extensions/ 中某个** | 一般不影响其他文件 |
+| 改这里                         | 需要同步改                                                                                                                                  |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **state-schema.ts**            | state.ts, state-enum-schemas.ts, initial-state.ts, 投影文件, 所有引用的 core/_, 引用的 tools/_, direction/packet-schema.ts（如果涉及渲染）  |
+| **state-store.ts**             | extensions/player-panel, extensions/render, tools/lookup 直接调用                                                                           |
+| **public-projection.ts**       | gm-prompt/injection.ts, extensions/player-panel                                                                                             |
+| **core/actor/**                | tools/actor/\*, gm-prompt/injection.ts, direction/packet-schema.ts, core/knowledge/, core/backstage/                                        |
+| **direction/packet-schema.ts** | direction/render-turn.ts, extensions/render/index.ts, gm-prompt/packet-contract.ts, tools/scene/submit-direction-packet.ts, agents/gm-\*.md |
+| **tools/ 中某工具**            | engine/tools/registry.ts（新增/删除）, 对应的 core/ 模块（契约变更）, agents/gm-\*.md（参数描述变更）                                       |
+| **agents/\*.md**               | engine/gm-prompt/injection.ts（读取顺序）                                                                                                   |
+| **extensions/ 中某个**         | 一般不影响其他文件                                                                                                                          |
 
 ## 废弃/不参与运行的目录
 
 - `original/` — 老旧备份代码（已标注「不要再看了」）
-##### *`data/config/*.json` — 部分已不参与运行*
+
+##### _`data/config/_.json` — 部分已不参与运行\*
+
 - **active** (被 engine/tools/lookup/ 运行时加载): `神之途径.json` (sequence-lookup), `economy-prices.json` (economy-lookup)
 - **dead** (未被 engine 代码引用): 其余 17 个文件
 
@@ -134,6 +140,7 @@ engine/
 从 fate 搬迁后未做 LOTM 化，部分功能暂不启用。
 
 **已启用（代码被 registered tool 调用）：**
+
 - `backstage-obligation.ts` — 后台推进义务记账/清账，commit_turn 硬阻断依赖它
 - `backstage-pending.ts` — pending-harvest 标记 + GM 催办提示
 - `backstage-brief.ts` — GM prompt 注入后台简报

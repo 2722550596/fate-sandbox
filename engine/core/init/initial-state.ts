@@ -86,6 +86,7 @@ export function createInitialState(protagonistActorId: string = PROTAGONIST_ACTO
       hooks: [],
       relationshipSignals: [],
       actorImpressions: {},
+      pendingDirectionPacket: false,
     },
     secrets: {
       actorStates: {},

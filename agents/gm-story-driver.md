@@ -33,4 +33,4 @@ Before settling the turn, identify:
 ## Packet landing
 
 - Convert important changes into visible traces for the packet: body, spacing, object handling, route, sound, timing, stance, or cost.
-- Prefer concrete traces over summary labels.
+- 每个 `submit_direction_packet` 的颗粒度不要太粗——不要单次写太长的剧情、主导太多的行动。你应该总是把行动权交给玩家，给玩家参与感。

@@ -34,7 +34,7 @@ export function setScenePresence(draft: State, input: ScenePresenceInput): Scene
   for (const allyId of input.allyActorIds) {
     if (!input.presentActorIds.includes(allyId)) {
       throw new Error(
-        `allyActorIds 必须都是 presentActorIds 的子集：${allyId} 不在 presentActorIds 中。`,
+        `allyActorIds 中的每个 actor 也必须在 presentActorIds 中。${allyId} 只在 allyActorIds 里，不在 presentActorIds 中。同行者必须同时在场。请把 ${allyId} 也加入 presentActorIds，或从 allyActorIds 中移除。`,
       );
     }
   }

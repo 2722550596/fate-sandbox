@@ -53,10 +53,10 @@ function executeRecordActorKnowledge(draft: State, params: unknown): RecordActor
       const input = parseTypeBoxValue(params, "upsert-lens 参数", UPSERT_VALIDATOR);
       const lens = upsertActorKnowledgeLens(draft, {
         actorId: input.actorId,
-        knows: input.knows,
-        suspects: input.suspects,
-        falseBeliefs: input.falseBeliefs,
-        forbiddenKnowledge: input.forbiddenKnowledge,
+        knows: input.knows ?? [],
+        suspects: input.suspects ?? [],
+        falseBeliefs: input.falseBeliefs ?? [],
+        forbiddenKnowledge: input.forbiddenKnowledge ?? [],
       });
       return { kind, lens, reason: input.reason };
     }
@@ -107,10 +107,10 @@ const STRING_ARRAY_SCHEMA = Type.Array(Type.String({ minLength: 1 }));
 const UPSERT_SCHEMA = Type.Object({
   kind: Type.Literal("upsert-lens"),
   actorId: Type.String({ minLength: 1 }),
-  knows: STRING_ARRAY_SCHEMA,
-  suspects: STRING_ARRAY_SCHEMA,
-  falseBeliefs: STRING_ARRAY_SCHEMA,
-  forbiddenKnowledge: STRING_ARRAY_SCHEMA,
+  knows: Type.Optional(STRING_ARRAY_SCHEMA),
+  suspects: Type.Optional(STRING_ARRAY_SCHEMA),
+  falseBeliefs: Type.Optional(STRING_ARRAY_SCHEMA),
+  forbiddenKnowledge: Type.Optional(STRING_ARRAY_SCHEMA),
   reason: Type.String({ minLength: 1 }),
 });
 
@@ -145,7 +145,7 @@ export const recordActorKnowledgeToolDefinition: DomainToolDefinition = {
     "记录 NPC 认知边界（secret state）：知道/怀疑/误信/绝不应凭空知道的事。防止 NPC 说出 GM 视角事实、隐藏真名、幕后真相。\n\n" +
     "【使用边界】\n" +
     "- NPC 获新情报/误判/被欺/被告知：add-fact\n" +
-    "- 重建整个认知边界：upsert-lens（四数组显式给出）\n" +
+    "- 重建整个认知边界或批量设置单个维度：upsert-lens（只传需要覆盖的数组，缺省维度保持原状或清空）\n" +
     "- 谣言证伪/误信纠正/信息过期：remove-fact\n" +
     "- NPC 离开本局跟踪：clear + reason\n\n" +
     "禁区：\n" +

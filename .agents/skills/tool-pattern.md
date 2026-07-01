@@ -1,12 +1,14 @@
 # tool-pattern — 工具编写标准套路
 
 ## 何时使用
+
 - 写新工具
 - 修工具 bug
 - 改工具参数
 - 理解已有工具的实现模式
 
 ## 必须先读
+
 - `engine/tools/registry.ts` — 全部 40 个工具的注册清单
 - `engine/tools/system/domain-tool-runner.ts` — `runDomainEventTool` 核心
 - `engine/tools/runtime/tool-definition.ts` — `DomainToolDefinition` 类型定义
@@ -20,14 +22,15 @@
 
 ```ts
 runDomainEventTool({
-  sessionManager,          // 从 ctx.sessionManager 获取
-  execute: (draft) => {    // draft = cloneState()，原地变异
+  sessionManager, // 从 ctx.sessionManager 获取
+  execute: (draft) => {
+    // draft = cloneState()，原地变异
     const result = domainFn(draft, parsedParams);
     return result;
   },
-  details: resultDetails,  // 或自定义 details(result) => Record<string, unknown>
-  message: (result) => result.message,  // 返回给 LLM 的文本
-})
+  details: resultDetails, // 或自定义 details(result) => Record<string, unknown>
+  message: (result) => result.message, // 返回给 LLM 的文本
+});
 ```
 
 **模式 B：直接计算（无状态副作用，仅 roll_dice）**
@@ -42,13 +45,14 @@ export function myTool(params: unknown): ToolResult {
 
 ### 三层参数处理
 
-| 层 | 职责 | 位置 |
-|---|---|---|
-| Layer 1: TypeBox Schema | 参数结构声明（框架级校验） | 每个 tool 文件的 `parameters` 字段 |
-| Layer 2: Normalizer | 参数归一化（字段互转/缺省值） | 同一 tool 文件中的独立函数，名为 `prepareXxxParams` 或 `normalizeXxxInput` |
-| Layer 3: Domain Engine | 严格解析 + 领域逻辑执行 | `core/` 下的纯函数（如 `parseActorRegistryInput`、`commitTurn`） |
+| 层                      | 职责                          | 位置                                                                       |
+| ----------------------- | ----------------------------- | -------------------------------------------------------------------------- |
+| Layer 1: TypeBox Schema | 参数结构声明（框架级校验）    | 每个 tool 文件的 `parameters` 字段                                         |
+| Layer 2: Normalizer     | 参数归一化（字段互转/缺省值） | 同一 tool 文件中的独立函数，名为 `prepareXxxParams` 或 `normalizeXxxInput` |
+| Layer 3: Domain Engine  | 严格解析 + 领域逻辑执行       | `core/` 下的纯函数（如 `parseActorRegistryInput`、`commitTurn`）           |
 
 Normalizer 示例（`upsert-actor.ts:30-46`）：
+
 - `init-npc`：接收 `id`，输出 `actorId`
 - `upsert-public-npc`：接收 `actorId`，输出 `id`
 - `setup-protagonist`：对 actor 对象做 stripUndefined + sequence 缺省
@@ -65,8 +69,9 @@ const TOOL_DEFINITIONS = [ ..., myToolDefinition, ... ];
 ## execute 回调签名
 
 所有注册工具的 `execute` 签名必须对齐：
+
 ```ts
-async (_toolCallId, params, _signal, _onUpdate, ctx) => myTool(params, ctx.sessionManager)
+async (_toolCallId, params, _signal, _onUpdate, ctx) => myTool(params, ctx.sessionManager);
 ```
 
 ## persistStateAfterCommit 规则
@@ -79,6 +84,7 @@ async (_toolCallId, params, _signal, _onUpdate, ctx) => myTool(params, ctx.sessi
 ## description 编写规则
 
 `description` 必须紧凑，包含：
+
 1. **使用边界**：什么场景用这个工具
 2. **禁区**：什么场景不要用这个工具
 3. **examples**（可选）：复杂工具可带 1-2 行 JSON 示例
@@ -87,12 +93,12 @@ async (_toolCallId, params, _signal, _onUpdate, ctx) => myTool(params, ctx.sessi
 
 ## 返回消息模式
 
-| 模式 | 示例 | 说明 |
-|---|---|---|
+| 模式               | 示例                                  | 说明                            |
+| ------------------ | ------------------------------------- | ------------------------------- |
 | 委托 domain result | `message: (result) => result.message` | domain engine 自带 message 字段 |
-| execute 自定义 | `message: (msg) => msg` | execute 返回 string |
-| 组合消息 | `message: ({ result, x }) => ...` | execute 返回复合对象 |
-| 纯工具内计算 | `textResult(...)` | 模式 B 直接构造 |
+| execute 自定义     | `message: (msg) => msg`               | execute 返回 string             |
+| 组合消息           | `message: ({ result, x }) => ...`     | execute 返回复合对象            |
+| 纯工具内计算       | `textResult(...)`                     | 模式 B 直接构造                 |
 
 ## 验证命令
 

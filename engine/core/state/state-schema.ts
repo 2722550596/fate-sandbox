@@ -408,6 +408,7 @@ export const PUBLIC_GAME_STATE_SCHEMA = Type.Object({
   hooks: Type.Array(HOOK_STATE_SCHEMA),
   relationshipSignals: Type.Array(RELATIONSHIP_SIGNAL_SCHEMA),
   actorImpressions: Type.Record(Type.String(), ACTOR_IMPRESSION_SCHEMA),
+  pendingDirectionPacket: Type.Optional(Type.Boolean()),
 });
 
 // ---------------------------------------------------------------------------

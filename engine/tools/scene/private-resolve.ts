@@ -36,17 +36,26 @@ export const privateResolveToolDefinition: DomainToolDefinition = {
   name: "private_resolve",
   description:
     "窄口私密结算：隐藏反应或隐藏相性；只返回玩家安全叙事约束。\n\n" +
+    "【各模式字段】\n" +
+    "  kind=hidden-reaction 必填：actorId, stimulus（触发事件）, publicContext（玩家可见的上下文）\n" +
+    "  kind=secret-compatibility 必填：actorId, targetActorId（互动对象）, interaction（具体互动行为）\n\n" +
     "使用边界：隐藏事实参与 NPC 反应但不能公开真相，或判断两个 actor 互动是否触发隐藏相性。\n" +
     "禁区：询问完整隐藏真相/幕后动机，或替代 reveal_secret。",
   parameters: Type.Object({
     kind: Type.String({ description: "允许: hidden-reaction / secret-compatibility" }),
     actorId: Type.String({ description: "主体 actor id；必须已存在于 public actors" }),
     targetActorId: Type.Optional(
-      Type.String({ description: "对象 actor id；必须已存在于 public actors" }),
+      Type.String({ description: "secret-compatibility 必填：对象 actor id" }),
     ),
-    stimulus: Type.Optional(Type.String()),
-    publicContext: Type.Optional(Type.String()),
-    interaction: Type.Optional(Type.String()),
+    stimulus: Type.Optional(
+      Type.String({ description: "hidden-reaction 必填：触发 NPC 隐藏反应的事件" }),
+    ),
+    publicContext: Type.Optional(
+      Type.String({ description: "hidden-reaction 必填：玩家可见的现场上下文" }),
+    ),
+    interaction: Type.Optional(
+      Type.String({ description: "secret-compatibility 必填：具体的互动行为描述" }),
+    ),
   }),
   execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
     privateResolveTool(params, ctx.sessionManager),

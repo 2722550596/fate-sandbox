@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { getState, resetState } from "../../core/state/state-store.ts";
 import { progressSceneBeatTool } from "./progress-scene-beat.ts";
+import { submitDirectionPacketTool } from "./submit-direction-packet.ts";
 
 void test("progressSceneBeatTool begins a beat from the GM-facing adapter", () => {
   resetState();
@@ -50,6 +51,8 @@ void test("progressSceneBeatTool completes current beat and opens next beat", ()
     },
     createNoopSessionManager(),
   );
+  // 模拟真实工作流：beat begin → submit_direction_packet → beat complete
+  submitDirectionPacketTool({ needsRender: false, directReply: "继续。", npcStances: [], resolvedChanges: [] });
 
   const result = progressSceneBeatTool(
     {

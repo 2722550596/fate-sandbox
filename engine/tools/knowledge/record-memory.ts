@@ -71,15 +71,29 @@ export const recordMemoryToolDefinition: DomainToolDefinition = {
       Type.Object({
         kind: Type.String({
           description:
-            "claim 类型，允许: mundane / identity / location / affiliation / motive / ability / resource / relationship / event-cause / world-fact",
+            "claim 类型。mundane=普通事实，不需要证据。非 mundane（identity/location/affiliation/motive/ability/resource/relationship/event-cause/world-fact）如果标 confirmed/observed/inferred，必须提供 evidence 或关联已揭示的 secret（relatedSecretSlotIds）",
         }),
-        statement: Type.String(),
+        statement: Type.String({
+          description: "事实陈述，如「克莱恩能逆走四步上灰雾」",
+        }),
         certainty: Type.String({
-          description: "证据确信度，允许: observed / confirmed / inferred / rumor / hypothesis",
+          description: "证据确信度。observed=亲眼所见、confirmed=已确认、inferred=推理得出、rumor=传闻、hypothesis=假设。非 mundane claim 用 rumor/hypothesis 时不需要 evidence/secret 关联，但措辞必须不确定",
         }),
         subjectId: Type.Optional(Type.String()),
-        relatedSecretSlotIds: Type.Optional(Type.Array(Type.String())),
-        evidence: Type.Optional(Type.String()),
+        relatedSecretSlotIds: Type.Optional(
+          Type.Array(
+            Type.String({
+              description:
+                "关联已揭示的 secret slot id。如果这个 claim 基于某个已揭示的秘密（如角色的非凡途径），填对应的 secret slot id。前提是该 secret 已被 reveal_secret 揭示过",
+            }),
+          ),
+        ),
+        evidence: Type.Optional(
+          Type.String({
+            description:
+              "非 mundane claim 标 confirmed/observed/inferred 时的证据描述。可以是角色的行动记录、NPC 的证词、角色的观察等可直接审计的来源。例如：\"克莱恩在灰雾之上观察罗塞尔笔记时确认了这一点\"",
+          }),
+        ),
       }),
     ),
     title: Type.Optional(Type.String()),

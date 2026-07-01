@@ -1,6 +1,7 @@
 # diagnosis — 常见问题排查
 
 ## 何时使用
+
 - 工具调用成功但状态没写
 - 状态重新加载后丢失
 - `commit_turn` 或 `progress_scene_beat` 被拒绝
@@ -10,6 +11,7 @@
 - 角色扮演消化不更新
 
 ## 必须先读
+
 - `engine/core/state/session-persistence.ts` — 持久化两种路径
 - `engine/core/state/state-store.ts` — store 操作
 - `engine/core/state/state-schema.ts` — `parseStateSchema` 和 `assertStateInvariants`
@@ -62,14 +64,14 @@
 
 ## Schema field missing vs Domain missing 区别
 
-| 维度 | parseStateSchema | execute |
-|---|---|---|
-| 时机 | hydration（加载/重置） | tool 调用时 |
-| 频率 | 每次加载一次 | 每次工具调用 |
-| 错误范围 | 全部字段 + 所有引用 | 当前操作涉及的实体和规则 |
-| 错误类型 | 格式/缺失/引用断裂 | 业务逻辑/实体不存在/资金不足 |
-| 修复难度 | 可能需要重建 state | 改参数或补偿状态即可 |
-| 典型场景 | 存档 corrupted / 手动编辑 JSON 出错 | GM 操作违反规则 |
+| 维度     | parseStateSchema                    | execute                      |
+| -------- | ----------------------------------- | ---------------------------- |
+| 时机     | hydration（加载/重置）              | tool 调用时                  |
+| 频率     | 每次加载一次                        | 每次工具调用                 |
+| 错误范围 | 全部字段 + 所有引用                 | 当前操作涉及的实体和规则     |
+| 错误类型 | 格式/缺失/引用断裂                  | 业务逻辑/实体不存在/资金不足 |
+| 修复难度 | 可能需要重建 state                  | 改参数或补偿状态即可         |
+| 典型场景 | 存档 corrupted / 手动编辑 JSON 出错 | GM 操作违反规则              |
 
 ## Tool Description 与 Schema 不同步排查
 
@@ -81,41 +83,43 @@
 ## obligations 阻塞排查
 
 Obligations 是工具间协调的关键机制：
+
 1. 裁决工具产生 obligation（如 combat exchange 的 `recordObligation`）
 2. 对应领域事件落地后调用 `settleOldestObligation`
 3. `commit_turn`/`progress_scene_beat` 开始时检查 `assertNoOpenObligations`
 
 **8 种 obligation kind 及落地方式**：
 
-| kind | 落地工具/方式 |
-|---|---|
+| kind            | 落地工具/方式                                    |
+| --------------- | ------------------------------------------------ |
 | scene-objective | commit_turn 的 add-objective / resolve-objective |
-| scene-threat | commit_turn 的 add-threat / clear-threat |
-| actor-condition | update_actor_condition 或 commit_turn |
-| equipment | combat-exchange 装备状态变化 |
-| sequence | upsert-sequence 或 commit_turn |
-| memory | record_memory 或 commit_turn |
-| reveal-secret | reveal_secret tool |
-| tracked-item | update_tracked_item 或 commit_turn |
+| scene-threat    | commit_turn 的 add-threat / clear-threat         |
+| actor-condition | update_actor_condition 或 commit_turn            |
+| equipment       | combat-exchange 装备状态变化                     |
+| sequence        | upsert-sequence 或 commit_turn                   |
+| memory          | record_memory 或 commit_turn                     |
+| reveal-secret   | reveal_secret tool                               |
+| tracked-item    | update_tracked_item 或 commit_turn               |
 
 ## 常见错误信息速查
 
-| 错误信息 | 原因 | 解决 |
-|---|---|---|
-| `本轮存在未落地的裁决义务` | obligations 未清账 | 检查 obligations 数组 → 对应的领域事件落地 |
-| `上一轮后台推进尚未 landing` | backstage obligations 未清账 | 使用 settle_backstage 工具清账 |
-| `actor 不存在: xxx` | actorId 无效或已删除 | 检查 actorId 拼写或先 upsert_actor |
-| `资金不足: 账户xxx` | 经济系统余额不够 | 检查 purse 余额或调整金额 |
-| `faction clock 不存在: xxx` | clockId 无效 | 检查已创建的 faction clocks |
-| `非法 faction clock`: filled > size | clock 数据损坏 | 修复 filled/size 值 |
-| `tracked item 不存在: xxx` | itemId 无效或已删除 | 检查 itemId |
-| `状态./fieldName: expected type` | schema 校验失败 | 检查 state JSON 对应字段的格式 |
+| 错误信息                            | 原因                         | 解决                                       |
+| ----------------------------------- | ---------------------------- | ------------------------------------------ |
+| `本轮存在未落地的裁决义务`          | obligations 未清账           | 检查 obligations 数组 → 对应的领域事件落地 |
+| `上一轮后台推进尚未 landing`        | backstage obligations 未清账 | 使用 settle_backstage 工具清账             |
+| `actor 不存在: xxx`                 | actorId 无效或已删除         | 检查 actorId 拼写或先 upsert_actor         |
+| `资金不足: 账户xxx`                 | 经济系统余额不够             | 检查 purse 余额或调整金额                  |
+| `faction clock 不存在: xxx`         | clockId 无效                 | 检查已创建的 faction clocks                |
+| `非法 faction clock`: filled > size | clock 数据损坏               | 修复 filled/size 值                        |
+| `tracked item 不存在: xxx`          | itemId 无效或已删除          | 检查 itemId                                |
+| `状态./fieldName: expected type`    | schema 校验失败              | 检查 state JSON 对应字段的格式             |
 
 ## undefined 检查须知
 
 项目未启用 `noUncheckedIndexedAccess`，但 Record 类型访问可能返回 undefined。
 
 **所有 `Record<ActorId, T>[key]` 访问前必须检查**：
+
 ```ts
 const actor = draft.public.actors[actorId];
 if (actor === undefined) throw new Error(`actor 不存在: ${actorId}`);
@@ -123,6 +127,7 @@ if (actor === undefined) throw new Error(`actor 不存在: ${actorId}`);
 ```
 
 以下 Record 类型都需要此检查：
+
 - `state.public.actors: Record<ActorId, PublicActorState>`
 - `state.secrets.actorStates: Record<ActorId, SecretActorState>`
 - `state.public.trackedItems: Record<ItemId, TrackedItemState>`

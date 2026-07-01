@@ -1,12 +1,14 @@
 # state-structure — State 结构与变更流程
 
 ## 何时使用
+
 - 改 state schema（新增/修改/删除字段）
 - 加 migration
 - 读状态 / 排查状态不一致
 - 确定某个数据放 public 还是 secrets
 
 ## 必须先读
+
 - `engine/core/state/state.ts` — `GameState`, `PublicGameState`, `SecretGameState` 类型定义
 - `engine/core/state/state-schema.ts` — `STATE_SCHEMA`, `parseStateSchema`, `assertStateInvariants`
 - `engine/core/state/state-store.ts` — `cloneState`, `commitState`, `getState`, `touchState`
@@ -27,17 +29,18 @@ State = GameState {
 
 ## public/secrets 分层判断标准
 
-| 放 public | 放 secrets |
-|---|---|
-| 剧情信息（scenario, clock, turnLog） | 演员秘密（agenda, knowledgeLens, secret slots） |
-| 演员公开属性（kind, sequence, identity, presentation） | 隐藏世界事实 |
-| 经济（funds, debts） | 幕后事件（offscreen events） |
-| 主角已知的记忆（pinnedFacts, eventLog, dailySummaries） | 派系时钟 |
-| 义务/钩子/承诺 | secret 可见性关系信号 |
-| player-known 的关系信号 | 幕后义务/评审日志/压力状态/待收获 |
-| 演员印象 | |
+| 放 public                                               | 放 secrets                                      |
+| ------------------------------------------------------- | ----------------------------------------------- |
+| 剧情信息（scenario, clock, turnLog）                    | 演员秘密（agenda, knowledgeLens, secret slots） |
+| 演员公开属性（kind, sequence, identity, presentation）  | 隐藏世界事实                                    |
+| 经济（funds, debts）                                    | 幕后事件（offscreen events）                    |
+| 主角已知的记忆（pinnedFacts, eventLog, dailySummaries） | 派系时钟                                        |
+| 义务/钩子/承诺                                          | secret 可见性关系信号                           |
+| player-known 的关系信号                                 | 幕后义务/评审日志/压力状态/待收获               |
+| 演员印象                                                |                                                 |
 
 关键原则：
+
 - 关系信号按 `visibility` 分开在两个数组写（public 中 `player-known`，secrets 中 `secret`）
 - 不要把所有数据放 public，"玩家知道" ≠ public state
 
@@ -50,6 +53,7 @@ value → trimStringsDeep → applyDeserializationDefaults
 ```
 
 关键行为：
+
 - `trimStringsDeep`: 递归 trim 所有字符串
 - `applyDeserializationDefaults`: **仅**补 `secrets.offscreenEventLog: []`（若缺失）
 - `Convert`: 类型自动转换（有严格白名单）
@@ -62,16 +66,16 @@ value → trimStringsDeep → applyDeserializationDefaults
 
 所有检查抛出 `Error`，任何不一致阻止 state 加载：
 
-| 检查 | 内容 |
-|---|---|
-| Actor registry key | 每个 `actors[key].id === key` |
-| 主角/盟友/场景引用 | protagonistActorId, allyActorIds, scene.presentActorIds 必须在 actors 中存在 |
-| TrackedItem 引用 | item key 与 id 一致；ownerActorId/holderActorId 非空时必须在 actors 中存在 |
-| Economy 引用 | 每个 purse 的 ownerActorId 和 debt 的 debtorActorId 存在 |
-| Secret state 引用 | secrets.actorStates 每个 key 与 bundle.actorId 一致；对应演员在 public.actors 中存在 |
-| Faction clock 完整性 | filled ≤ size |
-| Relationship signal | sourceActorId/targetActorId 存在；ID 唯一 |
-| Actor impression | 每个 impression 的 actorId 存在 |
+| 检查                 | 内容                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| Actor registry key   | 每个 `actors[key].id === key`                                                        |
+| 主角/盟友/场景引用   | protagonistActorId, allyActorIds, scene.presentActorIds 必须在 actors 中存在         |
+| TrackedItem 引用     | item key 与 id 一致；ownerActorId/holderActorId 非空时必须在 actors 中存在           |
+| Economy 引用         | 每个 purse 的 ownerActorId 和 debt 的 debtorActorId 存在                             |
+| Secret state 引用    | secrets.actorStates 每个 key 与 bundle.actorId 一致；对应演员在 public.actors 中存在 |
+| Faction clock 完整性 | filled ≤ size                                                                        |
+| Relationship signal  | sourceActorId/targetActorId 存在；ID 唯一                                            |
+| Actor impression     | 每个 impression 的 actorId 存在                                                      |
 
 ## 当前 Migration 状况（⚠️ 重要）
 
@@ -84,6 +88,7 @@ value → trimStringsDeep → applyDeserializationDefaults
 ## 变更 checklist
 
 ### 新增字段
+
 1. [ ] `state.ts` — 添加接口字段
 2. [ ] `state-schema.ts` — 添加 TypeBox schema 字段
 3. [ ] 若涉及枚举：`state-enum-schemas.ts` 添加枚举定义
@@ -95,14 +100,17 @@ value → trimStringsDeep → applyDeserializationDefaults
 9. [ ] `state-store.test.ts` — 添加新字段测试
 
 ### 修改/重命名字段
+
 1. [ ] 同上（initial-state.ts 可能不需要改）
 2. [ ] **必须写 migration** — `Clean()` 会丢弃旧字段名，新字段名 load 后为 undefined
 
 ### 删除字段
+
 1. [ ] 从各文件移除定义
 2. [ ] 旧 state 中的该字段被 `Clean()` 静默丢弃 — 不需要 migration
 
 ### 变更 public/secrets 边界
+
 1. [ ] 移动接口定义 + schema 定义
 2. [ ] 更新 initial-state.ts 初始化位置
 3. [ ] 更新投影函数

@@ -24,6 +24,7 @@ export const SCENE_EVENT_KINDS = [
   "resolve-objective",
   "add-threat",
   "clear-threat",
+  "scene-presence",
 ] as const;
 const SCENE_EVENT_KIND_SCHEMA = stringEnumSchema(SCENE_EVENT_KINDS);
 
@@ -81,13 +82,21 @@ export const CLEAR_THREAT_EVENT_SCHEMA = Type.Object({
   reason: Type.String({ minLength: 1 }),
 });
 
+export const SCENE_PRESENCE_EVENT_SCHEMA = Type.Object({
+  kind: Type.Literal("scene-presence"),
+  presentActorIds: Type.Array(Type.String({ minLength: 1 })),
+  allyActorIds: Type.Array(Type.String()),
+  reason: Type.String({ minLength: 1 }),
+});
+
 export type SceneEvent =
   | Static<typeof SET_LOCATION_EVENT_SCHEMA>
   | Static<typeof SET_SITUATION_EVENT_SCHEMA>
   | Static<typeof ADD_OBJECTIVE_EVENT_SCHEMA>
   | Static<typeof RESOLVE_OBJECTIVE_EVENT_SCHEMA>
   | Static<typeof ADD_THREAT_EVENT_SCHEMA>
-  | Static<typeof CLEAR_THREAT_EVENT_SCHEMA>;
+  | Static<typeof CLEAR_THREAT_EVENT_SCHEMA>
+  | Static<typeof SCENE_PRESENCE_EVENT_SCHEMA>;
 
 const SCENE_EVENT_KIND_VALIDATOR = Compile(SCENE_EVENT_KIND_SCHEMA);
 const SET_LOCATION_EVENT_VALIDATOR = Compile(SET_LOCATION_EVENT_SCHEMA);
@@ -96,6 +105,7 @@ const ADD_OBJECTIVE_EVENT_VALIDATOR = Compile(ADD_OBJECTIVE_EVENT_SCHEMA);
 const RESOLVE_OBJECTIVE_EVENT_VALIDATOR = Compile(RESOLVE_OBJECTIVE_EVENT_SCHEMA);
 const ADD_THREAT_EVENT_VALIDATOR = Compile(ADD_THREAT_EVENT_SCHEMA);
 const CLEAR_THREAT_EVENT_VALIDATOR = Compile(CLEAR_THREAT_EVENT_SCHEMA);
+const SCENE_PRESENCE_EVENT_VALIDATOR = Compile(SCENE_PRESENCE_EVENT_SCHEMA);
 
 // 注意：Compile 必须在独立常量上调用，不能内联在带 satisfies 的对象字面量里——
 // 上下文类型会干扰泛型推导，把 Validator 退化成 unknown。
@@ -106,6 +116,7 @@ const SCENE_EVENT_VARIANT_VALIDATORS = {
   "resolve-objective": RESOLVE_OBJECTIVE_EVENT_VALIDATOR,
   "add-threat": ADD_THREAT_EVENT_VALIDATOR,
   "clear-threat": CLEAR_THREAT_EVENT_VALIDATOR,
+  "scene-presence": SCENE_PRESENCE_EVENT_VALIDATOR,
 } satisfies Record<SceneEvent["kind"], TypeBoxValidator<SceneEvent>>;
 
 export function parseSceneEvent(value: unknown, fieldName: string): SceneEvent {

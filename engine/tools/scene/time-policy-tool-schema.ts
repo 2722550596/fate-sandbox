@@ -8,10 +8,19 @@ export function timePolicySchema(): ReturnType<typeof Type.Object> {
         "允许: elapsed / travel。等待、休息、睡眠、守夜、治疗、调查等非移动耗时用 elapsed；玩家在叙事中改变地点用 travel",
     }),
     elapsedMinutes: Type.Optional(
-      Type.Unknown({ description: "kind=elapsed/travel 必填；大于 0 的整数" }),
+      Type.Object({
+        minutes: Type.Integer({
+          minimum: 1,
+          description:
+            "叙事实际经过的分钟数。把正文里从上一轮到这一轮的所有事件、对话、移动、等待、休息、睡觉加起来算总时间，不要凭感觉填",
+        }),
+        reason: Type.String({
+          description:
+            "列出正文里哪些活动耗了时间，例如：\"在廷根街市调查 2 小时 + 去诊所 1 小时 + 吃晚饭 1 小时\"",
+        }),
+      }),
     ),
     location: Type.Optional(locationSchema()),
-    reason: Type.String({ description: "为什么本轮耗时、移动，或为什么没有耗时" }),
   });
 }
 

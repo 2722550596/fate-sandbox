@@ -9,6 +9,7 @@ import type {
 } from "../state/state.ts";
 import type { SceneBeatThreatInput } from "./scene-beat-schema.ts";
 import type { SceneEvent } from "./scene-schema.ts";
+import { setScenePresence } from "../actor/actor.ts";
 
 import { settleOldestObligation } from "../ledger/obligations.ts";
 import { createId } from "../utils/ids.ts";
@@ -191,6 +192,8 @@ function applySceneEvent(draft: State, event: SceneEvent): SceneEventResult {
       return addThreat(draft, event);
     case "clear-threat":
       return clearThreat(draft, event);
+    case "scene-presence":
+      return setScenePresence(draft, event);
     default:
       throw new Error("unreachable scene event kind");
   }
@@ -386,6 +389,7 @@ function formatMissingThreatSelectorError(
 ): string {
   return [
     "clear-threat 必须提供 threatId 或 threatSummary。",
+    "注意：clear-threat 用的是 threatSummary，不是 objectiveSummary（那是 resolve-objective 的字段）。",
     "优先用 threatSummary 逐字复制 GM Brief「当前威胁」里的 summary。",
     "可用 threatId / threatSummary：",
     ...renderIdSummaryList(threats),
@@ -446,7 +450,10 @@ function formatObjectiveIdNotFoundError(
 ): string {
   return [
     `目标不存在: ${objectiveId}`,
-    "可用 objectiveId / objectiveSummary：",
+    "",
+    "resolve-objective 只能操作当前 beat 的目标，不能跨 beat。",
+    "如果该目标属于下一 beat：先完成当前 beat（progress_scene_beat complete），下一 beat 的目标会在 complete+nextBeat 中设置。",
+    "可用 objectiveId / objectiveSummary（当前 beat 的）：",
     ...renderIdSummaryList(objectives),
   ].join("\n");
 }
@@ -466,9 +473,15 @@ function formatObjectiveSummaryNotFoundError(
   summary: string,
   objectives: ReadonlyArray<{ id: SceneObjectiveId; summary: string }>,
 ): string {
-  return [`目标摘要不存在: ${summary}`, "可用目标摘要：", ...renderSummaryList(objectives)].join(
-    "\n",
-  );
+  return [
+    `目标摘要不存在: ${summary}`,
+    "可用目标摘要（仅当前 beat 的目标）：",
+    ...renderSummaryList(objectives),
+    "",
+    "resolve-objective 只能解决当前 beat 的已有目标，不能跨 beat 操作。",
+    "如果该目标属于下一 beat：先等当前 beat 收口，再用 progress_scene_beat complete+nextBeat 携带目标，然后用 resolve-objective 解决。",
+    "如果当前 beat 已全部完成：不用 resolve-objective，直接用 progress_scene_beat complete 收口。",
+  ].join("\n");
 }
 
 function assertActiveStoryWindow(draft: State, action: string): void {
@@ -477,7 +490,10 @@ function assertActiveStoryWindow(draft: State, action: string): void {
       [
         `无法执行 ${action}：当前没有 active Scene Beat。`,
         "objectives/threats 是 beat-scoped 状态，只能在 active storyWindow 内增删。",
-        "复杂新场景请先用 progress_scene_beat kind=begin 锁定 beat 边界。",
+        "",
+        "如果是要解决目标：当前 beat 已结束后目标列表已清空，不需要再 resolve。",
+        "如果是要开始新场景：先用 progress_scene_beat kind=begin 锁定 beat 边界。",
+        "普通状态变化（非 scene 事件）：直接通过 commit_turn 的其他 event kind 提交。",
       ].join("\n"),
     );
   }
@@ -486,8 +502,11 @@ function assertActiveStoryWindow(draft: State, action: string): void {
 function formatLastObjectiveError(): string {
   return [
     "无法用 resolve-objective 解决本 beat 的最后一个未解决目标。",
-    "commit_turn 只能局部推进非最终目标；收口整个 beat 请用 progress_scene_beat kind=complete，",
-    "以便一并处理 memory/presence/situation/nextBeat 结尾。",
+    "",
+    "resolve-objective 只能解决非最终目标。最后一个目标必须通过 progress_scene_beat complete 收口，",
+    "因为收口同时处理 memory/presence/situation/nextBeat 结尾，resolve-objective 没有这些能力。",
+    "",
+    "做法：从 commit_turn 中移除这个 resolve-objective，另调用 progress_scene_beat kind=complete。",
   ].join("\n");
 }
 
