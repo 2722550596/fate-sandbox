@@ -41,7 +41,7 @@ Key contributors include **(in no particular order)**:
 - **Catiger**
 - **xiaoyao12241**
 - **xdhmg123**
-- **明月 (Mingyue) — this repository's maintainer**
+- **Yoshi — this repository's maintainer**
 - And other members of the High-Dimensional Theater community
 
 If you are a contributor and your name is missing from this list, please open an issue or PR to add it.
