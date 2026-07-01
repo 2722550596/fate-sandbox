@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "modules": [
+    {
+      "id": "settlement-principles-test",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 10,
+      "header": "settlement_principles",
+      "source": "agents/gm-settlement-principles-test.md"
+    },
+    {
+      "id": "world-context-test",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 20,
+      "header": "world_context",
+      "source": "agents/gm-context-test.md"
+    },
+    {
+      "id": "input-guide",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 30,
+      "header": "input_guide",
+      "source": "agents/gm-input-guide.md"
+    },
+    {
+      "id": "social-guide",
+      "enabled": false,
+      "slot": "pre-history",
+      "priority": 40,
+      "header": "social_guide",
+      "source": "agents/gm-social-guide.md"
+    },
+    {
+      "id": "tool-policy",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 80,
+      "header": "tool_policy",
+      "source": "agents/gm-tool-policy.md"
+    },
+    {
+      "id": "hard-rules",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 90,
+      "header": "hard_rules",
+      "source": "agents/gm-rules.md"
+    },
+    {
+      "id": "story-driver",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 100,
+      "header": "story_driver",
+      "source": "agents/gm-story-driver.md"
+    },
+    {
+      "id": "mechanical-state",
+      "enabled": true,
+      "slot": "pre-response",
+      "priority": 10,
+      "header": "mechanical_state",
+      "source": "runtime:state-brief"
+    },
+    {
+      "id": "backstage-ledger",
+      "enabled": false,
+      "slot": "pre-response",
+      "priority": 12,
+      "header": "backstage_ledger",
+      "source": "runtime:backstage-ledger"
+    },
+    {
+      "id": "turn-reminder",
+      "enabled": true,
+      "slot": "pre-response",
+      "priority": 20,
+      "header": "turn_reminder",
+      "source": "agents/gm-turn-reminder.md"
+    },
+    {
+      "id": "presence-impressions",
+      "enabled": true,
+      "slot": "pre-response",
+      "priority": 15,
+      "header": "presence_impressions",
+      "source": "runtime:presence-impressions"
+    },
+    {
+      "id": "test_direction",
+      "enabled": true,
+      "slot": "pre-response",
+      "priority": 14,
+      "header": "test_direction",
+      "source": "agents/gm-test.md"
+    },
+    {
+      "id": "direction-contract",
+      "enabled": false,
+      "slot": "final-contract",
+      "priority": 10,
+      "header": "direction_contract",
+      "source": "agents/gm-direction.md"
+    },
+    {
+      "id": "direction-contract-test",
+      "enabled": true,
+      "slot": "final-contract",
+      "priority": 9,
+      "header": "direction_contract",
+      "source": "agents/gm-direction-test.md"
+    }
+  ]
+}

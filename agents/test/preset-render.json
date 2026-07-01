@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "modules": [
+    {
+      "id": "style-rules",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 10,
+      "header": "style_rules",
+      "source": "agents/gm-style-rules.md"
+    },
+    {
+      "id": "style-blacklist",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 20,
+      "header": "style_blacklist",
+      "source": "agents/gm-style-blacklist.md"
+    },
+    {
+      "id": "render-protocol",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 30,
+      "header": "render_protocol",
+      "source": "agents/gm-render.md"
+    },
+    {
+      "id": "protagonist-impression",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 40,
+      "header": "protagonist_impression",
+      "source": "agents/protagonist-impression.md"
+    },
+    {
+      "id": "scene-impressions",
+      "enabled": true,
+      "slot": "pre-history",
+      "priority": 45,
+      "header": "scene_impressions",
+      "source": "runtime:renderer-presence-impressions"
+    },
+
+    {
+      "id": "output-contract",
+      "enabled": true,
+      "slot": "final-contract",
+      "priority": 10,
+      "header": "output_contract",
+      "source": "agents/gm-output-contract.md"
+    }
+  ]
+}
