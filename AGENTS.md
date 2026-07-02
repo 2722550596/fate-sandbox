@@ -437,7 +437,7 @@ pnpm format && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 ### State Schema 现状
 
 - `CURRENT_STATE_SCHEMA_VERSION = 0`（`engine/core/state/state.ts:606`，发布前已归零）
-- 迁移链在 `engine/core/state/state-migration.ts`，线性版本迁移：每个函数负责 v_n → v_{n+1}
+- 迁移链在 `engine/core/state/state-migration.ts`，线性版本迁移：每个函数负责 v*n → v*{n+1}
 - 迁移入口在 `state-store.ts` 的 `assertState()`，在加载所有持久化状态前自动执行
 - 新增/重命名字段时必须：
   1. 更新 `currentStateSchemaVersion` 版本号

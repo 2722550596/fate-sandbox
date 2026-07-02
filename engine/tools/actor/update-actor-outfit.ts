@@ -12,7 +12,10 @@ import { Type } from "typebox";
 
 import { changeActorOutfit } from "../../core/actor/actor-impression.ts";
 import { OUTFIT_STATE_SCHEMA } from "../../core/actor/actor-schema.ts";
-import { hydrateStateFromSessionManager } from "../../core/state/session-persistence.ts";
+import {
+  hydrateStateFromSessionManager,
+  persistStateAfterCommit,
+} from "../../core/state/session-persistence.ts";
 import { commitState, getState } from "../../core/state/state-store.ts";
 import { isRecord } from "../../core/utils/typebox-validation.ts";
 import { textResult } from "../runtime/tool-result.ts";
@@ -25,9 +28,9 @@ export function updateActorOutfitTool(params: unknown, sessionManager: unknown):
   const input = parseToolInput(params);
   const result = changeActorOutfit(state, input.actorId, input.outfit, input.reason);
   commitState(state);
+  persistStateAfterCommit(sessionManager, { outfit: input.outfit });
   return textResult(result.message);
 }
-
 function parseToolInput(params: unknown): {
   actorId: string;
   outfit: { label: string; details: string };

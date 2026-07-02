@@ -3,11 +3,11 @@ import type { DomainToolDefinition } from "../runtime/tool-definition.ts";
 import { Type } from "typebox";
 
 import { collectUnrevealedSecretStrings } from "../../audit/lint-rules.ts";
+import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
 import {
   stringEnumSchema,
   stringEnumSchema as omissionReasonSchema,
 } from "../../core/state/state-enum-schemas.ts";
-import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
 import { commitState, getState } from "../../core/state/state-store.ts";
 import { scanDirectionPacket } from "../../direction/packet-firewall.ts";
 import {
