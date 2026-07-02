@@ -52,12 +52,15 @@ void test("progressSceneBeatTool completes current beat and opens next beat", ()
     createNoopSessionManager(),
   );
   // 模拟真实工作流：beat begin → submit_direction_packet → beat complete
-  submitDirectionPacketTool({
-    needsRender: false,
-    directReply: "继续。",
-    npcStances: [],
-    resolvedChanges: [],
-  });
+  submitDirectionPacketTool(
+    {
+      needsRender: false,
+      directReply: "继续。",
+      npcStances: [],
+      resolvedChanges: [],
+    },
+    createNoopSessionManager(),
+  );
 
   const result = progressSceneBeatTool(
     {

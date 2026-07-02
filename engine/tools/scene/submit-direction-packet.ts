@@ -7,6 +7,7 @@ import {
   stringEnumSchema,
   stringEnumSchema as omissionReasonSchema,
 } from "../../core/state/state-enum-schemas.ts";
+import { persistStateAfterCommit } from "../../core/state/session-persistence.ts";
 import { commitState, getState } from "../../core/state/state-store.ts";
 import { scanDirectionPacket } from "../../direction/packet-firewall.ts";
 import {
@@ -26,7 +27,10 @@ import { textResult, type ToolResult } from "../runtime/tool-result.ts";
  * 双 pass 收尾工具：验证 direction packet、过 secret 防火墙，terminate 结束
  * 结算循环；渲染由 two-pass-render 扩展在 agent_end 接手。本工具不改 state。
  */
-export function submitDirectionPacketTool(params: unknown): ToolResult & { terminate: true } {
+export function submitDirectionPacketTool(
+  params: unknown,
+  sessionManager: unknown,
+): ToolResult & { terminate: true } {
   const packet = parseDirectionPacket(params, "direction packet");
   const state = getState();
   if (packet.needsRender) {
@@ -44,6 +48,7 @@ export function submitDirectionPacketTool(params: unknown): ToolResult & { termi
   }
   state.public.pendingDirectionPacket = false;
   commitState(state);
+  persistStateAfterCommit(sessionManager, { packet });
   return { ...textResult(formatAccepted(packet), { packet }), terminate: true };
 }
 
@@ -154,6 +159,6 @@ export const submitDirectionPacketToolDefinition: DomainToolDefinition = {
       Type.String({ description: "直答轮的回复内容（needsRender=false 时必填）" }),
     ),
   }),
-  execute: async (_toolCallId, params, _signal, _onUpdate, _ctx) =>
-    submitDirectionPacketTool(params),
+  execute: async (_toolCallId, params, _signal, _onUpdate, ctx) =>
+    submitDirectionPacketTool(params, ctx.sessionManager),
 };
