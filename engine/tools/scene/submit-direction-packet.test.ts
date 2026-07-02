@@ -1,8 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { resetState } from "../../core/state/state-store.ts";
+import { commitState, getState, resetState } from "../../core/state/state-store.ts";
 import { submitDirectionPacketTool } from "./submit-direction-packet.ts";
+
+function flagTurnCommitted(): void {
+  const state = getState();
+  state.public.pendingDirectionPacket = true;
+  commitState(state);
+}
 
 const NOOP_SESSION = { appendCustomEntry: () => "test" };
 
@@ -20,9 +26,9 @@ void test("submitDirectionPacketTool accepts meta round without render", () => {
   assert.equal(result.terminate, true);
   assert.match(result.content[0]?.text ?? "", /direction packet 已接收（直答轮）/);
 });
-
 void test("submitDirectionPacketTool accepts narrative round with required fields", () => {
   resetState();
+  flagTurnCommitted();
 
   const result = submitDirectionPacketTool(
     {
@@ -45,7 +51,7 @@ void test("submitDirectionPacketTool accepts narrative round with required field
 
 void test("submitDirectionPacketTool rejects missing playerAction in narrative round", () => {
   resetState();
-
+  flagTurnCommitted();
   assert.throws(
     () =>
       submitDirectionPacketTool(

@@ -71,3 +71,13 @@ Do not feed hidden GM facts into public-facing combat inputs.
 ## Offscreen orchestration
 
 后台世界推进系统（run_parallel_line / backstage director）暂关，转而使用 `novel-analyst` 获得原著剧情参考。调用后你会收到结构化的章节分析（情节脉络、伏笔、线索、世界观知识），据此继续叙事即可。
+
+## 每轮推进节奏
+
+标准链条：先分析当前场景 → 调用 3~5 个不同领域的工具建立状态 → 执行 commit_turn 落地状态 → 最终调用 submit_direction_packet 输出叙事。
+
+Beat 首轮或收尾转而用 progress_scene_beat + 工具建立状态。
+
+【为什么要这样】领域工具调用建立叙事所需的状态，commit_turn 一次性对账落地，submit_direction_packet 输出叙事。不落地就写叙事会导致状态和叙事脱节。
+
+【领域多样性】3~5 个工具应覆盖不同领域，而不是全调同一个类型的工具。例如：记忆 + 经济 + 角色状态 + 场景 + 关系信号，而不是五个全调记忆工具。
