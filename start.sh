@@ -87,6 +87,9 @@ if [ -n "${RENDER_MODEL:-}" ]; then
 else
   echo "ℹ 渲染轮复用结算模型（可用 RENDER_MODEL=provider/model-id 单独指定文笔模型）"
 fi
+if [ -n "${DIGEST_MODEL:-}" ]; then
+  echo "✓ digest writer 模型覆盖：DIGEST_MODEL=$DIGEST_MODEL（未命中会回退渲染模型）"
+fi
 
 export PI_CODING_AGENT_DIR=".pi/agent"
 export PI_CLAUDE_OAUTH_REINJECT_SCOPE=never

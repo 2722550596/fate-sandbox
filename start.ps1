@@ -176,6 +176,9 @@ if ($env:RENDER_MODEL) {
 } else {
   Write-Host "Render pass reuses the settlement model."
 }
+if ($env:DIGEST_MODEL) {
+  Write-Host "Digest writer model override: DIGEST_MODEL=$env:DIGEST_MODEL"
+}
 
 & pi `
   --no-skills `

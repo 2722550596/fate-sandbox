@@ -490,7 +490,7 @@ async function writeTurnDigest(
   prose: string,
 ): Promise<void> {
   try {
-    const model = resolveRendererModel(ctx);
+    const model = resolveDigestModel(ctx);
     if (model === undefined) {
       return;
     }
@@ -626,6 +626,28 @@ function resolveRendererModel(ctx: ExtensionContext): ExtensionContext["model"] 
   if (model === undefined) {
     notify(ctx, `RENDER_MODEL 未命中任何已注册模型：${override}，回退结算模型`, "warning");
     return ctx.model;
+  }
+  return model;
+}
+
+/**
+ * Digest writer 可以用独立于渲染模型的模型：`DIGEST_MODEL=provider/model-id`。
+ * 未设置或找不到时回退到渲染模型的规则（即 `RENDER_MODEL` → 结算模型）。
+ */
+function resolveDigestModel(ctx: ExtensionContext): ExtensionContext["model"] {
+  const override = process.env["DIGEST_MODEL"]?.trim();
+  if (override === undefined || override === "") {
+    return resolveRendererModel(ctx);
+  }
+  const slash = override.indexOf("/");
+  if (slash <= 0 || slash === override.length - 1) {
+    notify(ctx, `DIGEST_MODEL 格式应为 provider/model-id，得到：${override}`, "warning");
+    return resolveRendererModel(ctx);
+  }
+  const model = ctx.modelRegistry.find(override.slice(0, slash), override.slice(slash + 1));
+  if (model === undefined) {
+    notify(ctx, `DIGEST_MODEL 未命中任何已注册模型：${override}，回退渲染模型`, "warning");
+    return resolveRendererModel(ctx);
   }
   return model;
 }

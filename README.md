@@ -150,6 +150,7 @@ cp .env.example .env
 | `RENDER_MODEL`         | 复用结算模型                    | 渲染轮（Pass B）专用模型   |
 | `RENDER_TEMPERATURE`   | 不传                            | 渲染轮温度参数             |
 | `RENDER_CACHE`         | `short`                         | 渲染轮 prompt cache 保留档 |
+| `DIGEST_MODEL`         | 回退到 RENDER_MODEL             | Digest writer 专用模型     |
 
 ## Model Notes
 
@@ -170,7 +171,7 @@ RENDER_MODEL=provider/model-id ./start.sh
 渲染轮另有几个可选旋钮：
 
 - `RENDER_TEMPERATURE=0.9`：只作用于渲染/重写调用（结算轮不受影响）。默认不传——部分模型拒绝该参数，会导致每轮渲染回退机械摘要；确认你的渲染模型支持后再开。
-- digest writer（前情提要写手）在推理模型上自动降到 `minimal` 档思考：压缩摘要不需要推理，省 token 也更快。
+  - `DIGEST_MODEL=provider/model-id`：digest writer（前情提要写手）可用独立模型，默认回退到 `RENDER_MODEL` → 结算模型。摘要是纯压缩活，用廉价小模型即可。推理模型上自动降到 `minimal` 档思考省 token。
 - `RENDER_CACHE=long|none`：渲染轮的 prompt cache 保留档，默认 `short`（Anthropic 5m TTL，命中免费续期）。实测 Claude OAuth 渠道不 honor 1h TTL，`long` 档只多付 2× 写价不换保留；走 API key 且渠道支持时再开。
 
 ### 自定义正文 lint 规则
